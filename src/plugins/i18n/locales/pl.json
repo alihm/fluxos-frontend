@@ -1,0 +1,160 @@
+{
+  "menu": {
+    "home": {
+      "title": "Strona główna"
+    },
+    "dashboard": {
+      "title": "Panel informacyjny",
+      "overview": "Podsumowanie",
+      "resources": "Zasoby",
+      "map": "Mapa",
+      "rewards": "Nagrody",
+      "nodeList": "Lista węzłów"
+    },
+    "application": {
+      "title": "Aplikacje",
+      "management": "Zarządzanie",
+      "globalApps": "Aplikacje Globalne",
+      "localApps": "Aplikacje Lokalne",
+      "registerNewApp": "Stwórz Aplikację",
+      "marketplace": "Sklep"
+    },
+    "administration": {
+      "title": "Administracja",
+      "manageFlux": "FluxOS",
+      "manageDaemon": "Daemon",
+      "manageBenchmark": "Benchmark",
+      "manageUsers": "Użytkownicy",
+      "loggedSessions": "Sesje Użytkowników",
+      "myFluxShare": "Mój FluxShare"
+    },
+    "fluxXdao": {
+      "title": "Flux XDAO"
+    },
+    "apiReference": {
+      "title": "Dokumentacja API"
+    }
+  },
+  "login": {
+    "automatedLogin": "Szybkie logowanie",
+    "thirdPartyLogin": "Logowanie przez usługę",
+    "emailPassword": "E-mail",
+    "email": "E-mail",
+    "password": "Hasło",
+    "login": "Zaloguj się",
+    "signUp": "Zarejestruj się",
+    "createSSO": "Utwórz konto SSO",
+    "confirmPassword": "Potwierdź hasło",
+    "cancel": "Anuluj",
+    "ok": "Zatwierdź",
+    "emailRequired": "Email jest wymagany",
+    "emailInvalid": "Nieprawidłowy format adresu email",
+    "passwordRequired": "Hasło jest wymagane",
+    "passwordTooShort": "Hasło musi mieć co najmniej 8 znaków",
+    "passwordConfirmRequired": "Potwierdzenie hasła jest wymagane",
+    "passwordMismatch": "Hasła się nie zgadzają",
+    "finishingLogin": "Kończenie procesu logowania",
+    "finishingVerification": "Kończymy weryfikację.",
+    "checkEmail": "Sprawdź swoją skrzynkę e-mail, aby potwierdzić.",
+    "cancelVerification": "Anuluj weryfikację",
+    "decentralizedLogin": "Zdecentralizowane logowanie",
+    "walletLoginInfo": "Zaloguj się bezpiecznie za pomocą portfela kryptowalutowego.",
+    "manualLogin": "Logowanie przez podpis",
+    "signWithWallet": "Podpisz poniższą wiadomość używając Flux ID / SSP Wallet / Bitcoin / Ethereum",
+    "message": "Wiadomość",
+    "insertMessage": "Wpisz frazę logowania",
+    "address": "Adres",
+    "insertAddress": "Wpisz Flux ID lub adres Bitcoin",
+    "signature": "Podpis",
+    "insertSignature": "Wpisz podpis",
+    "googleLogin": "Kontynuuj z Google",
+    "appleLogin": "Kontynuuj z Apple",
+    "bySigningIn": "Kontynuując, wyrażasz zgodę na nasze",
+    "termsOfService": "Warunki korzystania",
+    "and": "i",
+    "privacyPolicy": "Politykę prywatności"
+  },
+  "sections": {
+    "dashboard": {
+      "title": "Panel informacyjny",
+      "description": "Zobacz informacje o stanie sieci Flux, dostępnych zasobach oraz mapę z lokalizacjami serwerów."
+    },
+    "application": {
+      "title": "Aplikacje",
+      "description": "Kupuj aplikacje, rejestruj własne projekty lub zarządzaj już zainstalowanymi aplikacjami."
+    },
+    "administration": {
+      "title": "Administracja",
+      "description": "Narzędzia dla administratorów i operatorów węzłów umożliwiają zarządzanie systemem FluxOS."
+    },
+    "flux_xdao": {
+      "title": "Flux XDAO",
+      "description": "Przeglądaj propozycje zmian w sieci Flux, twórz nowe pomysły i głosuj na istniejące."
+    }
+  },
+  "status": {
+    "backend": "Serwer",
+    "frontend": "Interfejs",
+    "connected": "Połączono",
+    "updateAvailable": "Dostępna aktualizacja",
+    "upToDate": "Komponent jest aktualny",
+    "statusMessage": "Status",
+    "unreachable": "Nieosiągalny",
+    "connecting": "Łączenie...",
+    "disconnected": "Brak połączenia",
+    "notSynced": "Brak synchronizacji",
+    "checkingStatus": "Sprawdzanie...",
+    "checkingStatusMessage": "Sprawdzanie statusu węzła...",
+    "notSyncedMessage": "Blockchain nie jest zsynchronizowany (blok {blocks}/{headers}, {blocksBehind} bloków w tyle)",
+    "connectedMessage": "FluxOS jest operacyjny i zsynchronizowany z siecią Flux.",
+    "connectingMessage": "Łączenie z siecią Flux. FluxOS działa z ograniczoną funkcjonalnością.",
+    "disconnectedMessage": "Brak połączenia z siecią Flux. FluxOS działa z ograniczoną funkcjonalnością."
+  },
+  "$vuetify": {
+    "badge": "Badge",
+    "noDataText": "No data available",
+    "close": "Close",
+    "open": "open",
+    "loading": "loading",
+    "carousel": {
+      "ariaLabel": {
+        "delimiter": "delimiter"
+      }
+    },
+    "dataFooter": {
+      "itemsPerPageText": "Items per page:",
+      "itemsPerPageAll": "All",
+      "pageText": "{0}-{1} of {2}",
+      "firstPage": "First Page",
+      "prevPage": "Previous Page",
+      "nextPage": "Next Page",
+      "lastPage": "Last Page"
+    },
+    "pagination": {
+      "ariaLabel": {
+        "root": "root",
+        "previous": "previous",
+        "first": "first",
+        "last": "last",
+        "next": "next",
+        "currentPage": "currentPage",
+        "page": "page"
+      }
+    },
+    "input": {
+      "clear": "clear",
+      "appendAction": "appendAction",
+      "prependAction": "prependAction",
+      "counterSize": "counterSize",
+      "otp": "otp"
+    },
+    "fileInput": {
+      "counterSize": "counterSize"
+    },
+    "rating": {
+      "ariaLabel": {
+        "item": "item"
+      }
+    }
+  }
+}

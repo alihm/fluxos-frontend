@@ -1,0 +1,404 @@
+<template>
+  <div>
+    <VRow>
+      <VCol
+        v-for="(card, index) in rewardCards"
+        :key="index"
+        cols="12"
+        :md="
+          rewardCards.length % 2 === 1 && index === rewardCards.length - 1 ? '12' : '6'
+        "
+        lg="4"
+        class="py-0 mt-2"
+      >
+        <VCard
+          :title="card.title"
+          elevation="2"
+        >
+          <VOverlay
+            v-model="isLoading"
+            contained
+            scroll-strategy="none"
+            class="align-center justify-center overlay"
+          >
+            <VProgressCircular indeterminate />
+          </VOverlay>
+          <VCardText>
+            <div class="mb-4">
+              {{ card.collateral.toLocaleString() }} FLUX Collateral
+            </div>
+
+            <VTimeline
+              side="end"
+              align="start"
+              truncate-line="both"
+              density="comfortable"
+              line-thickness="10"
+              class="mt-2"
+            >
+              <VTimelineItem
+                v-for="(period, idx) in rewardPeriods"
+                :key="idx"
+                :dot-color="card.dotColor"
+                size="x-small"
+              >
+                <div class="d-flex justify-space-between align-center gap-2 flex-wrap mb-2">
+                  <div class="d-flex flex-column">
+                    <span class="app-timeline-title">
+                      {{ beautifyValue(card.rewards[period.label]) }} FLUX
+                    </span>
+                    <VChip
+                      color="success"
+                      size="small"
+                    >
+                      ~${{
+                        beautifyValue(card.rewards[period.label] * getFiatRate("FLUX"))
+                      }}
+                      USD
+                    </VChip>
+                  </div>
+                  <span class="app-timeline-meta">{{ period.label }}</span>
+                </div>
+                <div class="mb-3" />
+              </VTimelineItem>
+            </VTimeline>
+          </VCardText>
+        </VCard>
+      </VCol>
+
+      <VCol
+        class="py-0 mt-2"
+        cols="12"
+        md="12"
+        lg="12"
+      >
+        <VCard
+          title="Historical Price Chart"
+          elevation="2"
+          height="350"
+          class="py-0"
+        >
+          <VueApexCharts
+            ref="historyPrice"
+            type="area"
+            height="300"
+            width="100%"
+            :options="lineChart.chartOptions"
+            :series="lineChart.series"
+          />
+          <VOverlay
+            :model-value="loadingPrice"
+            contained
+            class="align-center justify-center overlay"
+          >
+            <VProgressCircular indeterminate />
+          </VOverlay>
+        </VCard>
+      </VCol>
+    </VRow>
+
+    <VSnackbar
+      v-model="snackbar.show"
+      :color="snackbar.color"
+      timeout="3000"
+    >
+      {{ snackbar.message }}
+      <template #actions>
+        <VBtn
+          color="white"
+          variant="text"
+          @click="snackbar.show = false"
+        >
+          Close
+        </VBtn>
+      </template>
+    </VSnackbar>
+  </div>
+</template>
+
+<script setup>
+import { ref, reactive, onMounted, nextTick, watch } from "vue"
+import DashboardService from "@/services/DashboardService"
+import ExplorerService from "@/services/ExplorerService"
+import axios from "axios"
+import axiosRetry from "axios-retry"
+import { useConfigStore } from "@core/stores/config"
+import { storeToRefs } from "pinia"
+
+const configStore = useConfigStore()
+const { theme } = storeToRefs(configStore)
+const isLoading = ref(true)
+
+axiosRetry(axios, {
+  retries: 3,
+  retryDelay: retryCount => retryCount * 1000,
+  onRetry: retryCount => {
+    console.log(`Retry attempt #${retryCount}`)
+  },
+})
+
+const themeColors = {
+  primary: "#7367F0",
+  warning: "#FF9F43",
+  error: "#EA5455",
+}
+
+const snackbar = ref({
+  show: false,
+  message: "",
+  color: "error",
+})
+
+const loadingPrice = ref(true)
+const historicalPrices = ref([])
+
+const lineChart = ref({
+  series: [],
+  chartOptions: {
+    colors: [themeColors.primary],
+    labels: ["Price"],
+    grid: { show: false },
+    chart: { toolbar: { show: false }, sparkline: { enabled: true }, stacked: true },
+    dataLabels: { enabled: false },
+    stroke: { curve: "smooth", width: 2.5 },
+    fill: {
+      type: "gradient",
+      gradient: { shadeIntensity: 0.9, opacityFrom: 0.7, opacityTo: 0.0 },
+    },
+    xaxis: {
+      type: "numeric",
+      lines: { show: false },
+      axisBorder: { show: false },
+      labels: { show: false },
+    },
+    yaxis: [{ y: 0 }],
+    tooltip: {
+      x: { formatter: value => new Date(value).toLocaleString("en-GB") },
+      y: { formatter: value => `$${beautifyValue(value, 2)} USD` },
+      theme: theme.value,
+    },
+  },
+})
+
+const cumulusWeek = ref(0)
+const nimbusWeek = ref(0)
+const stratusWeek = ref(0)
+const cumulusCollateral = ref(0)
+const nimbusCollateral = ref(0)
+const stratusCollateral = ref(0)
+const rates = ref([])
+const historyPrice = ref(null)
+
+const rewardCards = reactive([
+  {
+    title: "Cumulus Total Rewards",
+    collateral: 0,
+    type: "cumulus",
+    dotColor: "primary",
+    rewards: {},
+  },
+  {
+    title: "Nimbus Total Rewards",
+    collateral: 0,
+    type: "nimbus",
+    dotColor: "warning",
+    rewards: {},
+  },
+  {
+    title: "Stratus Total Rewards",
+    collateral: 0,
+    type: "stratus",
+    dotColor: "error",
+    rewards: {},
+  },
+])
+
+const rewardPeriods = [
+  { label: "Per Day", factor: 0.14285714 },
+  { label: "Per Week", factor: 1 },
+  { label: "Per Month", factor: 4.34812141 },
+]
+
+watch(theme, newTheme => {
+  if (historyPrice.value) {
+    historyPrice.value.updateOptions({ tooltip: { theme: newTheme } }, false, false)
+  }
+})
+
+const beautifyValue = (value, decimals = 2) => {
+  const numericValue = typeof value === "number" && !isNaN(value) ? value : 0
+  const fixedValue = numericValue.toFixed(decimals)
+
+  return fixedValue.replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1,")
+}
+
+function getFiatRate(coin) {
+  const coinRateToUse = "USD"
+  let rateObj = rates.value[0]?.find(rate => rate.code === coinRateToUse)
+  if (!rateObj) rateObj = { rate: 0 }
+
+  let btcRateForCoin = rates.value[1]?.[coin]
+  if (btcRateForCoin === undefined) btcRateForCoin = 0
+
+  return rateObj.rate * btcRateForCoin
+}
+
+const calculateReward = (period, weekValue) => weekValue * period.factor
+
+const showError = message => {
+  snackbar.value.message = message
+  snackbar.value.color = "error"
+  snackbar.value.show = true
+}
+
+const updateRewardCards = () => {
+  rewardCards[0].collateral = cumulusCollateral.value
+  rewardCards[1].collateral = nimbusCollateral.value
+  rewardCards[2].collateral = stratusCollateral.value
+}
+
+const calculateAllRewards = () => {
+  rewardCards.forEach(card => {
+    const weekValue =
+      card.type === "cumulus"
+        ? cumulusWeek.value
+        : card.type === "nimbus"
+          ? nimbusWeek.value
+          : stratusWeek.value
+
+    rewardPeriods.forEach(period => {
+      card.rewards[period.label] = calculateReward(period, weekValue)
+    })
+  })
+}
+
+onMounted(() => {
+  getData()
+  setInterval(() => getData(), 1000 * 60 * 10)
+})
+
+const getData = async () => {
+  try {
+    const result = await ExplorerService.getScannedHeight()
+    if (result.data.status === "success") {
+      const blockHeight = result.data.data.generalScannedHeight
+
+      cumulusCollateral.value = blockHeight < 1076532 ? 10000 : 1000
+      nimbusCollateral.value = blockHeight < 1081572 ? 25000 : 12500
+      stratusCollateral.value = blockHeight < 1087332 ? 100000 : 40000
+    }
+    updateRewardCards()
+    await Promise.all([getRates(), getPriceData(), getFluxNodeCount()])
+    calculateAllRewards()
+    isLoading.value = false
+    nextTick(() => console.log("UI has been updated after calculations."))
+  } catch (error) {
+    isLoading.value = false
+    console.error("Error fetching data:", error)
+    showError("Failed to fetch data")
+  }
+}
+
+const getRates = async () => {
+  try {
+    const result = await axios.get("https://vipdrates.zelcore.io/rates")
+
+    rates.value = result.data
+  } catch (error) {
+    console.error("Error fetching rates:", error)
+    showError("Failed to fetch rates")
+  }
+}
+
+const getPriceData = async () => {
+  loadingPrice.value = true
+  try {
+    const res = await axios.get(
+      "https://api.coingecko.com/api/v3/coins/zelcash/market_chart?vs_currency=USD&days=30",
+    )
+
+    historicalPrices.value = res.data.prices.filter(a => a[0] > 1483232400000)
+
+    const priceData = historicalPrices.value.filter((_, i) => i % 3 === 0)
+
+    lineChart.value.series = [{ name: "Price", data: priceData }]
+  } catch (error) {
+    console.error("Error fetching price data:", error)
+    showError("Failed to fetch price data")
+  } finally {
+    loadingPrice.value = false
+  }
+}
+
+const getFluxNodeCount = async () => {
+  try {
+    const response = await DashboardService.fluxnodeCount()
+    if (response.data.status === "error") {
+      showError(response.data.data.message || response.data.data)
+
+      return
+    }
+
+    const fluxNodesData = response.data.data
+
+    const counts = {
+      "stratus-enabled": fluxNodesData["stratus-enabled"],
+      "nimbus-enabled": fluxNodesData["nimbus-enabled"],
+      "cumulus-enabled": fluxNodesData["cumulus-enabled"],
+    }
+
+    await generateEconomics(counts)
+  } catch (error) {
+    console.error("Error fetching node count:", error)
+    showError("Failed to fetch node count")
+  }
+}
+
+const generateEconomics = async fluxnodecounts => {
+  let perCumulusNode = 2.8125
+  let perNimbusNode = 4.6875
+  let perStratusNode = 11.25
+
+  try {
+    const response = await DashboardService.blockReward()
+    if (response.data.status !== "error") {
+      perCumulusNode = (response.data.data.miner * 0.075).toFixed(4)
+      perNimbusNode = (response.data.data.miner * 0.125).toFixed(4)
+      perStratusNode = (response.data.data.miner * 0.3).toFixed(4)
+    } else {
+      showError(response.data.data.message || response.data.data)
+    }
+  } catch (error) {
+    console.error("Error fetching block reward:", error)
+    showError("Failed to fetch block reward")
+  }
+
+  const stratuses = fluxnodecounts["stratus-enabled"]
+  const nimbuses = fluxnodecounts["nimbus-enabled"]
+  const cumuluses = fluxnodecounts["cumulus-enabled"]
+  const blocksPerWeek = 720 * 7
+
+  cumulusWeek.value = ((perCumulusNode * blocksPerWeek) / cumuluses) * 2
+  nimbusWeek.value = ((perNimbusNode * blocksPerWeek) / nimbuses) * 2
+  stratusWeek.value = ((perStratusNode * blocksPerWeek) / stratuses) * 2
+}
+</script>
+
+<style scoped>
+.v-card {
+  margin-bottom: 1rem;
+}
+.v-timeline {
+  padding-left: 0;
+}
+.text-muted {
+  color: rgba(0, 0, 0, 0.6);
+}
+.font-weight-bolder {
+  font-weight: 700;
+}
+.overlay {
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+}
+</style>

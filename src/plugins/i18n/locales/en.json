@@ -1,0 +1,160 @@
+{
+  "menu": {
+    "home": {
+      "title": "Home"
+    },
+    "dashboard": {
+      "title": "Dashboard",
+      "overview": "Overview",
+      "resources": "Resources",
+      "map": "Map",
+      "rewards": "Rewards",
+      "nodeList": "Node List"
+    },
+    "application": {
+      "title": "Applications",
+      "management": "Management",
+      "globalApps": "Global Apps",
+      "localApps": "Local Apps",
+      "registerNewApp": "Register New App",
+      "marketplace": "Marketplace"
+    },
+    "administration": {
+      "title": "Administration",
+      "manageFlux": "Manage Flux",
+      "manageDaemon": "Manage Daemon",
+      "manageBenchmark": "Manage Benchmark",
+      "manageUsers": "Manage Users",
+      "loggedSessions": "Logged Sessions",
+      "myFluxShare": "My FluxShare"
+    },
+    "fluxXdao": {
+      "title": "Flux XDAO"
+    },
+    "apiReference": {
+      "title": "API Reference"
+    }
+  },
+  "login": {
+    "automatedLogin": "Automated Login",
+    "thirdPartyLogin": "3rd Party Login",
+    "emailPassword": "Email / Password",
+    "email": "Email",
+    "password": "Password",
+    "login": "Login",
+    "signUp": "Sign Up",
+    "createSSO": "Create SSO Account",
+    "confirmPassword": "Confirm Password",
+    "cancel": "Cancel",
+    "ok": "OK",
+    "emailRequired": "Email is required",
+    "passwordRequired": "Password is required",
+    "emailInvalid": "Invalid email format",
+    "passwordTooShort": "Password must be at least 8 characters",
+    "passwordConfirmRequired": "Password confirmation is required",
+    "passwordMismatch": "Passwords do not match",
+    "finishingLogin": "Finishing Login Process",
+    "finishingVerification": "We're finalizing your verification.",
+    "checkEmail": "Please check your email for the confirmation link.",
+    "cancelVerification": "Cancel Verification",
+    "decentralizedLogin": "Decentralized Login",
+    "walletLoginInfo": "Login securely with your crypto wallet.",
+    "manualLogin": "Manual Login",
+    "signWithWallet": "Sign the following message with any Flux ID / SSP Wallet ID / Bitcoin / Ethereum address",
+    "message": "Message",
+    "insertMessage": "Insert Login Phrase",
+    "address": "Address",
+    "insertAddress": "Insert Flux ID or Bitcoin address",
+    "signature": "Signature",
+    "insertSignature": "Insert Signature",
+    "googleLogin": "Sign in with Google",
+    "appleLogin": "Sign in with Apple",
+    "bySigningIn": "By continuing, you are indicating that you accept our",
+    "termsOfService": "Terms of Service",
+    "and": "and",
+    "privacyPolicy": "Privacy Policy"
+  },
+  "sections": {
+    "dashboard": {
+      "title": "Dashboard",
+      "description": "Check Flux network information, resources available, or a map with server locations."
+    },
+    "application": {
+      "title": "Applications",
+      "description": "Buy on marketplace, register your own app, manage your active apps."
+    },
+    "administration": {
+      "title": "Administration",
+      "description": "Tools for infrastructure administrators and node operators allow for managing FluxOS."
+    },
+    "flux_xdao": {
+      "title": "Flux XDAO",
+      "description": "See the list of changes proposed to Flux network, create new ones and vote."
+    }
+  },
+  "status": {
+    "backend": "Backend",
+    "frontend": "Frontend",
+    "connected": "Connected",
+    "updateAvailable": "Update Available",
+    "upToDate": "Up to date",
+    "statusMessage": "Status",
+    "unreachable": "Unreachable",
+    "connecting": "Connecting...",
+    "disconnected": "Disconnected",
+    "notSynced": "Not Synced",
+    "checkingStatus" : "Checking...",
+    "checkingStatusMessage": "Checking node status...",
+    "notSyncedMessage": "Blockchain not synced (block {blocks}/{headers}, {blocksBehind} behind)",
+    "connectedMessage": "FluxOS is operational and synced with the Flux network.",
+    "connectingMessage": "Connecting to the Flux network. FluxOS is running with limited capabilities.",
+    "disconnectedMessage": "Not connected to the Flux network. FluxOS is running with limited capabilities."
+  },
+  "$vuetify": {
+    "badge": "Badge",
+    "noDataText": "No data available",
+    "close": "Close",
+    "open": "open",
+    "loading": "loading",
+    "carousel": {
+      "ariaLabel": {
+        "delimiter": "delimiter"
+      }
+    },
+    "dataFooter": {
+      "itemsPerPageText": "Items per page:",
+      "itemsPerPageAll": "All",
+      "pageText": "{0}-{1} of {2}",
+      "firstPage": "First Page",
+      "prevPage": "Previous Page",
+      "nextPage": "Next Page",
+      "lastPage": "Last Page"
+    },
+    "pagination": {
+      "ariaLabel": {
+        "root": "root",
+        "previous": "previous",
+        "first": "first",
+        "last": "last",
+        "next": "next",
+        "currentPage": "currentPage",
+        "page": "page"
+      }
+    },
+    "input": {
+      "clear": "clear",
+      "appendAction": "appendAction",
+      "prependAction": "prependAction",
+      "counterSize": "counterSize",
+      "otp": "otp"
+    },
+    "fileInput": {
+      "counterSize": "counterSize"
+    },
+    "rating": {
+      "ariaLabel": {
+        "item": "item"
+      }
+    }
+  }
+}
