@@ -44,7 +44,7 @@
       class="mt-4"
       :touch="false"
     >
-      <VWindowItem value="0">
+      <VWindowItem>
         <div>
           <MyAppsTab
             :apps="activeApps"
@@ -58,7 +58,7 @@
         </div>
       </VWindowItem>
   
-      <VWindowItem value="1">
+      <VWindowItem>
         <div>
           <MyAppsTab
             :apps="marketplaceApps"
@@ -76,7 +76,7 @@
 </template>
   
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import MyAppsTab from "@/views/apps/management/tabView.vue"
 import AppsService from "@/services/AppsService"
 import DaemonService from "@/services/DaemonService"

@@ -43,7 +43,7 @@
 
     <div v-if="!managedApplication">
       <VWindow v-model="tabIndex">
-        <VWindowItem value="0">
+        <VWindowItem>
           <div v-if="!loading.blockCount">
             <MyAppsTab
               ref="activeAppsRef"
@@ -59,7 +59,7 @@
           </div>
         </VWindowItem>
 
-        <VWindowItem value="1">
+        <VWindowItem>
           <div v-if="!loading.blockCount">
             <MyAppsTab
               ref="expiredAppsRef"
@@ -256,7 +256,7 @@ async function getActiveApps() {
     const auth = qs.parse(zelidauth || "")
     if (!auth?.zelid) {
       activeApps.value = []
-      
+      loading.value.active = false
       return
     }
     const response = await AppsService.myGlobalAppSpecifications(auth.zelid)
@@ -279,7 +279,7 @@ async function getExpiredApps() {
     const auth = qs.parse(zelidauth || "")
     if (!auth?.zelid) {
       expiredApps.value = []
-      
+      loading.value.expired = false
       return
     }
 
@@ -355,6 +355,8 @@ watch(loggedIn, newValue => {
 onMounted(async () => {
   setLoginStatus()
   await getDaemonBlockCount()
+  // Load apps on mount to ensure loading states are properly set
+  await getApps()
 })
 </script>
 

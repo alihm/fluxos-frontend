@@ -17,14 +17,10 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useFluxStore } from '@/stores/flux'
+import axios from 'axios'
 
 // Initialize flux store
 const fluxStore = useFluxStore()
-
-// Generate a random port between min and max
-function generateRandomPort(min = 30000, max = 39999) {
-  return Math.floor(Math.random() * (max - min + 1)) + min
-}
 
 // Create a new app specification with default values
 const newAppSpec = ref({
@@ -44,7 +40,8 @@ const newAppSpec = ref({
       name: '',
       description: '',
       repotag: '',
-      ports: [generateRandomPort()], // Start with one random port
+      ports: [], // Empty ports array
+      containerPorts: [], // Add containerPorts array
       domains: [],
       environmentParameters: '',
       commands: [],
@@ -61,11 +58,30 @@ const newAppSpec = ref({
 })
 
 // Execute local command function
-async function executeLocalCommand(endpoint, data = null, headers = null, isPost = false) {
+async function executeLocalCommand(
+  command,
+  postObject = null,
+  axiosConfigAux = null,
+  skipCache = false,
+) {
   try {
-    const result = await fluxStore.executeCommand(endpoint, data, headers, isPost)
-    
-    return result
+    const zelidauth = localStorage.getItem("zelidauth")
+
+    const axiosConfig = axiosConfigAux || {
+      headers: {
+        zelidauth,
+        ...(skipCache && { "x-apicache-bypass": "true" }),
+      },
+      timeout: 60000,
+    }
+
+    // For register page, we use the local API endpoint
+    const baseUrl = window.location.origin
+    const queryUrl = `${baseUrl}${command}`
+
+    return postObject
+      ? await axios.post(queryUrl, postObject, axiosConfig)
+      : await axios.get(queryUrl, axiosConfig)
   } catch (error) {
     console.error('Command execution failed:', error)
     throw error

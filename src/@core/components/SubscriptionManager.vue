@@ -201,6 +201,7 @@
                   </VChip>
                 </div>
                 <VSwitch
+                  v-if="!newApp"
                   v-model="renewalEnabled"
                   inset
                   hide-details
@@ -218,21 +219,26 @@
                 hide-details
                 :thumb-label="false"
                 track-size="4"
-                :disabled="!renewalEnabled"
+                :disabled="!renewalEnabled && !newApp"
               />
               <span class="mb-5">
                 <div class="d-flex justify-space-between align-center px-3">
                   <!-- left -->
                   <span style="line-height: 1.25;">
-                    Currently your application is subscribed until
-                    <b>{{ new Date(appRunningTill.current).toLocaleString('en-GB', timeOptions.shortDate) }}</b>.
+                    <template v-if="newApp">
+                      Subscription period:
+                    </template>
+                    <template v-else>
+                      Currently your application is subscribed until
+                      <b>{{ new Date(appRunningTill.current).toLocaleString('en-GB', timeOptions.shortDate) }}</b>.
+                    </template>
                   </span>
                   <!-- right -->
                   <span class="text-caption grey--text" style="line-height: 1.25; white-space: nowrap;">
                     {{ renewalLabels[appDetails.renewalIndex] }}
                   </span>
                 </div>
-                <span v-if="renewalEnabled" class="px-3">
+                <span v-if="renewalEnabled && !newApp" class="px-3">
                   Your new adjusted subscription ends on
                   <b>{{ new Date(appRunningTill.new).toLocaleString('en-GB', timeOptions.shortDate) }}</b>.
                 </span>
@@ -2047,6 +2053,11 @@ const originalExpireSnapshot = ref(null)
 
 onMounted(() => {
   originalExpireSnapshot.value = props.appSpec?.expire ?? 22000
+  
+  // For new apps, enable renewal by default (which means setting the period)
+  if (props.newApp) {
+    renewalEnabled.value = true
+  }
 })
 
 // 2️⃣  current remaining blocks based on the *original* value
@@ -2088,7 +2099,7 @@ watch(appDetails, val => {
 
   // Note: repoauth is handled per component, not globally
 
-  if (renewalEnabled.value) {
+  if (renewalEnabled.value || props.newApp) {
     props.appSpec.expire = renewalOptions[val.renewalIndex]?.value
   } else {
     props.appSpec.expire = originalExpireSnapshot.value
@@ -2916,9 +2927,24 @@ onUnmounted(() => {
   document.removeEventListener('click', handleOutsideClick)
 })
 
+// Generate a random port between min and max
+function generateRandomPort(min = 30000, max = 39999) {
+  return Math.floor(Math.random() * (max - min + 1)) + min
+}
+
 // Watch for compose length changes
 watch(() => props.appSpec?.compose?.length, newLength => {
-  newPorts.value = Array.from({ length: newLength }, () => ({ exposed: null, container: null }))
+  // For new apps, generate a random port for the first component
+  if (props.newApp && newLength > 0) {
+    newPorts.value = Array.from({ length: newLength }, (_, index) => {
+      if (index === 0) {
+        return { exposed: generateRandomPort(), container: null }
+      }
+      return { exposed: null, container: null }
+    })
+  } else {
+    newPorts.value = Array.from({ length: newLength }, () => ({ exposed: null, container: null }))
+  }
 }, { immediate: true })
 
 // Reset editIndex and focusState when removing a component
@@ -3009,6 +3035,7 @@ watch(
 
     compose.forEach(component => {
       if (!Array.isArray(component.ports)) component.ports = []
+      if (!Array.isArray(component.containerPorts)) component.containerPorts = []
       if (!Array.isArray(component.domains)) component.domains = []
 
       // Ensure one domain entry per port
@@ -3016,11 +3043,19 @@ watch(
         if (typeof component.domains[index] !== 'string') {
           component.domains[index] = ''
         }
+        // Ensure containerPorts has matching entries
+        if (typeof component.containerPorts[index] === 'undefined') {
+          component.containerPorts[index] = null
+        }
       })
 
       // Optional: remove extra domains if ports were removed
       if (component.domains.length > component.ports.length) {
         component.domains.length = component.ports.length
+      }
+      // Also sync containerPorts length
+      if (component.containerPorts.length > component.ports.length) {
+        component.containerPorts.length = component.ports.length
       }
     })
   },
@@ -3037,16 +3072,25 @@ watch(
 
     compose.forEach(component => {
       if (!Array.isArray(component.ports)) component.ports = []
+      if (!Array.isArray(component.containerPorts)) component.containerPorts = []
       if (!Array.isArray(component.domains)) component.domains = []
 
       component.ports.forEach((_, index) => {
         if (typeof component.domains[index] !== 'string') {
           component.domains[index] = ''
         }
+        // Ensure containerPorts has matching entries
+        if (typeof component.containerPorts[index] === 'undefined') {
+          component.containerPorts[index] = null
+        }
       })
 
       if (component.domains.length > component.ports.length) {
         component.domains.length = component.ports.length
+      }
+      // Also sync containerPorts length
+      if (component.containerPorts.length > component.ports.length) {
+        component.containerPorts.length = component.ports.length
       }
     })
   },
@@ -3055,6 +3099,23 @@ watch(
 
 const expiryLabel = computed(() => {
   const expire = props.appSpec?.expire ?? 22000
+  
+  // For new apps, just show the selected period duration
+  if (props.newApp) {
+    const totalMinutes = expire * 2
+    const days = Math.floor(totalMinutes / 1440)
+    const hours = Math.floor((totalMinutes % 1440) / 60)
+    const minutes = totalMinutes % 60
+
+    const parts = []
+    if (days > 0) parts.push(`${days} day${days > 1 ? 's' : ''}`)
+    if (hours > 0) parts.push(`${hours} hour${hours > 1 ? 's' : ''}`)
+    if (minutes > 0) parts.push(`${minutes} minute${minutes !== 1 ? 's' : ''}`)
+
+    return parts.join(', ')
+  }
+  
+  // For existing apps
   const height = renewalEnabled.value ? blockHeight.value : props.appSpec.height
   const current = blockHeight.value
 
@@ -3446,14 +3507,22 @@ async function fetchBlockHeight() {
       blockHeight.value = res.data.data
 
       const expireBlocks = props.appSpec?.expire ?? 22000
-      const height = renewalEnabled.value ? blockHeight.value : props.appSpec.height
+      // For new apps or renewal, use current block height
+      // For updates without renewal, use the app's original height
+      const height = (renewalEnabled.value || props.newApp) ? blockHeight.value : props.appSpec.height
 
       console.log(expireBlocks)
 
       if (typeof height === 'number') {
         blocksToExpire.value = height + expireBlocks - blockHeight.value
         console.log(blocksToExpire.value)
-        isExpiryValid.value = blocksToExpire.value >= 5000
+        // For new apps, blocksToExpire equals expireBlocks since we start from current height
+        if (props.newApp) {
+          blocksToExpire.value = expireBlocks
+          isExpiryValid.value = expireBlocks >= 5000
+        } else {
+          isExpiryValid.value = blocksToExpire.value >= 5000
+        }
       } else {
         isExpiryValid.value = false
       }

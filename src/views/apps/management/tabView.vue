@@ -214,7 +214,7 @@
           <template #no-data>
             <div class="text-center py-10 fade-in">
               <div
-                v-if="loading && loggedIn"
+                v-if="loading"
                 class="d-flex align-center justify-center"
               >
                 <VProgressCircular

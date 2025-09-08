@@ -44,7 +44,7 @@
       class="mt-4"
       :touch="false"
     >
-      <VWindowItem value="0">
+      <VWindowItem>
         <div>
           <MyAppsTab
             :apps="installedApps"
@@ -60,7 +60,7 @@
         </div>
       </VWindowItem>
   
-      <VWindowItem value="1">
+      <VWindowItem>
         <div>
           <MyAppsTab
             :apps="availableApps"
@@ -79,7 +79,7 @@
 </template>
   
 <script setup>
-import { ref, watch } from 'vue'
+import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import MyAppsTab from "@/views/apps/management/tabView.vue"
 import AppsService from "@/services/AppsService"
 import DaemonService from "@/services/DaemonService"
@@ -94,7 +94,12 @@ const { privilege } = storeToRefs(fluxStore)
 const activeTab = ref(0)
 const apiError = ref(false)
 const loading = ref(true)
-const loggedIn = ref(true) // or get from store
+
+// Initialize loggedIn with actual status to prevent flash
+const zelidauth = localStorage.getItem("zelidauth")
+const auth = qs.parse(zelidauth || "")
+const loggedIn = ref(Boolean(auth.zelid))
+
 const daemonBlockCount = ref(-1)
   
 const availableApps = ref([])
@@ -159,6 +164,7 @@ function updateInstalledApp() {
   loadInstalledApps()
 }
 
+
 onMounted(async () => {
   eventBus.on('updateInstalledApp', updateInstalledApp)
   eventBus.on('backendURLChanged', () => {
@@ -167,7 +173,6 @@ onMounted(async () => {
     console.log(backendURL)
     loadInstalledApps()
   })
-  setLoginStatus()
   await getDaemonBlockCount()
   await loadInstalledApps()
   await loadApps()
