@@ -67,6 +67,24 @@
                 </VSelect>
               </VListItem>
 
+              <!-- Version Filter -->
+              <VListItem>
+                <VSelect
+                  v-model="tableOptions.version"
+                  :items="versionOptions"
+                  item-title="text"
+                  item-value="value"
+                  label="Version"
+                  density="compact"
+                  hide-details
+                  class="mt-1"
+                >
+                  <template #prepend-inner>
+                    <VIcon class="mr-1" size="18">mdi-tag</VIcon>
+                  </template>
+                </VSelect>
+              </VListItem>
+
               <!-- Min HDD -->
               <VListItem>
                 <VTextField
@@ -226,16 +244,33 @@
               </div>
               <div
                 v-else-if="!loggedIn"
-                class="d-flex align-center justify-center"
+                class="d-flex flex-column align-center justify-center py-8"
               >
-                <VIcon
-                  icon="mdi-login"
-                  class="mr-2"
+                <VCard
+                  class="pa-6 text-center"
+                  variant="tonal"
                   color="warning"
-                />
-                <div class="text-warning">
-                  Please log in to view your apps.
-                </div>
+                  style="max-width: 400px;"
+                >
+                  <VIcon
+                    icon="mdi-account-lock-outline"
+                    color="warning"
+                    size="48"
+                    class="mb-3"
+                  />
+                  <div class="text-warning mb-4">
+                    Please log in to view your apps.
+                  </div>
+                  <VBtn
+                    color="primary"
+                    variant="flat"
+                    to="/dashboards/home"
+                    size="small"
+                  >
+                    <VIcon size="18" class="mr-2">mdi-login</VIcon>
+                    Go to Home & Sign In
+                  </VBtn>
+                </VCard>
               </div>
               <div
                 v-else-if="appsDataRaw.length > 0 && filteredApps.length === 0"
@@ -499,7 +534,7 @@
 </template>
 
 <script setup>
-import { ref, computed, nextTick } from "vue"
+import { ref, computed, nextTick, onMounted, watch } from "vue"
 import Manage from "@/views/apps/management/manage.vue"
 import Redeploy from "@/views/apps/management/redeploy.vue"
 import AppsService from "@/services/AppsService"
@@ -547,6 +582,7 @@ const tableOptions = ref({
   filter: "",
   repotags: [],
   matchAllRepotags: false,
+  version: 'all',
 })
 
 const inputTag = ref('')
@@ -555,6 +591,16 @@ const modeOptions = [
   { text: 'All', value: 'all', icon: 'mdi-apps-box' },
   { text: 'Marketplace', value: 'marketplace', icon: 'mdi-basket' },
   { text: 'Marketplace Excluded', value: 'marketplaceExcluded', icon: 'mdi-basket-off' },
+]
+
+const versionOptions = [
+  { text: 'All Versions', value: 'all', icon: 'mdi-tag-multiple' },
+  { text: 'Version 3', value: 3, icon: 'mdi-numeric-3-circle' },
+  { text: 'Version 4', value: 4, icon: 'mdi-numeric-4-circle' },
+  { text: 'Version 5', value: 5, icon: 'mdi-numeric-5-circle' },
+  { text: 'Version 6', value: 6, icon: 'mdi-numeric-6-circle' },
+  { text: 'Version 7', value: 7, icon: 'mdi-numeric-7-circle' },
+  { text: 'Version 8', value: 8, icon: 'mdi-numeric-8-circle' },
 ]
 
 function isMarketplaceApp(name) {
@@ -591,7 +637,12 @@ const filteredApps = computed(() => {
     filtered = filtered.filter(app => !isMarketplaceApp(app.name))
   }
 
-  // 2. Filter by search keyword
+  // 2. Filter by version
+  if (tableOptions.value.version && tableOptions.value.version !== 'all') {
+    filtered = filtered.filter(app => app.version === tableOptions.value.version)
+  }
+
+  // 3. Filter by search keyword
   const keyword = tableOptions.value.filter?.toLowerCase()
   if (keyword) {
     filtered = filtered.filter(app =>
@@ -600,6 +651,7 @@ const filteredApps = computed(() => {
     )
   }
 
+  // 4. Filter by repotags
   const inputTags = (tableOptions.value.repotags || []).map(tag => tag.toLowerCase().trim())
 
   if (inputTags.length > 0) {
@@ -616,7 +668,7 @@ const filteredApps = computed(() => {
     })
   }
 
-  // 4. Filter by minimum HDD
+  // 5. Filter by minimum HDD
   if (tableOptions.value.minHdd > 0) {
     filtered = filtered.filter(app => {
       const hdd = Array.isArray(app.compose)
@@ -627,7 +679,7 @@ const filteredApps = computed(() => {
     })
   }
 
-  // 5. Filter by minimum RAM
+  // 6. Filter by minimum RAM
   if (tableOptions.value.minRam > 0) {
     filtered = filtered.filter(app => {
       const ram = Array.isArray(app.compose)
@@ -638,7 +690,7 @@ const filteredApps = computed(() => {
     })
   }
 
-  // 6. Filter by minimum CPU
+  // 7. Filter by minimum CPU
   if (tableOptions.value.minCpu > 0) {
     filtered = filtered.filter(app => {
       const cpu = Array.isArray(app.compose)
@@ -649,7 +701,7 @@ const filteredApps = computed(() => {
     })
   }
 
-  // 7. Filter by minimum instances
+  // 8. Filter by minimum instances
   if (tableOptions.value.minInstances > 0) {
     filtered = filtered.filter(app => {
       const instanceCount = typeof app.instances === 'number' ? app.instances : 3
@@ -853,6 +905,7 @@ function removeRepotag(index) {
 
 function resetFilters() {
   tableOptions.value.filter = ''
+  tableOptions.value.version = 'all'
   tableOptions.value.minHdd = null
   tableOptions.value.minRam = null
   tableOptions.value.minCpu = null
@@ -864,6 +917,7 @@ function resetFilters() {
 const hasActiveFilters = computed(() => {
   return (
     tableOptions.value.filter?.trim() ||
+    (tableOptions.value.version && tableOptions.value.version !== 'all') ||
     (Array.isArray(tableOptions.value.repotags) && tableOptions.value.repotags.length > 0) ||
     (tableOptions.value.minRam ?? 0) > 0 ||
     (tableOptions.value.minCpu ?? 0) > 0 ||

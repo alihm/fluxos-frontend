@@ -200,7 +200,6 @@
               rounded="md"
               :icon-state="isSynced"
             />
-            {{ isOwnerZelidauth }}
             <AppDetailsCard
               :app="appSpecification"
               :get-new-expire-label="labelForExpire(appSpecification.expire, appSpecification.height)"
@@ -1007,7 +1006,7 @@ const tabs = computed(() => [
     value: "8",
   },
   { label: "Instances", value: "9" },
-  { label: "Subscription", value: "10" },
+   isOwnerZelidauth.value && { label: "Subscription", value: "10" },
 ].filter(Boolean)) // removes `false` if condition fails
 
 const callResponse = ref({ status: null, data: null })
@@ -1521,7 +1520,7 @@ async function getInstalledApplicationSpecifics(silent = false) {
 
     let spec = { ...appSpecs[0] } // clone so we can mutate safely
 
-    const isEnterprise = spec.version >= 8 && spec.enterprise
+    const isEnterprise = spec.version >= 8 && spec.enterprise && spec.enterprise !== ''
 
     // same comparison as original
     const sameEnterpriseSpec =
@@ -1644,7 +1643,7 @@ async function getGlobalApplicationSpecifics(silent = false) {
     return
   }
 
-  const isEnterprise = appSpec.version >= 8 && appSpec.enterprise
+  const isEnterprise = appSpec.version >= 8 && appSpec.enterprise && appSpec.enterprise !== ''
   if (isEnterprise && typeof getDecryptedEnterpriseFields === 'function') {
     const decrypted = await getDecryptedEnterpriseFields()
     if (!decrypted) return

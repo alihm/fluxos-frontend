@@ -56,8 +56,9 @@
         @click="tab = 99"
       >
         <VIcon size="24" class="mr-1">mdi-check-decagram</VIcon>
-        <span class="d-none d-sm-inline">Validate & Pay</span>
+        <span class="d-none d-sm-inline">Validate & Register</span>
       </VBtn>
+      
     </div>
 
     <!-- Shared VWindow Content -->
@@ -226,7 +227,7 @@
                   <!-- left -->
                   <span style="line-height: 1.25;">
                     <template v-if="newApp">
-                      Subscription period:
+
                     </template>
                     <template v-else>
                       Currently your application is subscribed until
@@ -1367,10 +1368,24 @@
               </div>
             </div>
           </div>
+          
+          <!-- Show error message if validation failed -->
+          <div v-if="hasValidatedSpec && verifyAppSpecResponse === false && verifyAppSpecError" class="mt-3">
+            <VAlert
+              type="error"
+              variant="tonal"
+              density="compact"
+              class="mx-3"
+            >
+              <strong>Validation Error:</strong> {{ verifyAppSpecError }}
+            </VAlert>
+          </div>
 
-          <!-- Total Cost -->
-          <div class="spec-row mt-2">
-            <div class="label-cell">Total Cost</div>
+          <!-- Only show other sections if spec is valid -->
+          <template v-if="!hasValidatedSpec || verifyAppSpecResponse === true">
+            <!-- Total Cost -->
+            <div class="spec-row mt-2">
+              <div class="label-cell">Total Cost</div>
             <div class="value-cell d-flex align-center justify-end pr-4">
               <template v-if="hasCalculatedPrice && appSpecPrice?.flux === 0">
                 <span class="mr-1">Free update</span>
@@ -1397,7 +1412,17 @@
             <div class="value-cell d-flex align-center justify-end pr-4">
               <span class="mr-1">
                 <template v-if="hasCheckedExpiry">
-                  <template v-if="blockHeight && props.appSpec?.height">
+                  <template v-if="props.newApp">
+                    <!-- For new apps, show subscription period -->
+                    <template v-if="blockHeight">
+                      Subscription: {{ expiryLabel }}
+                    </template>
+                    <template v-else>
+                      Subscription: {{ expiryLabel }}
+                    </template>
+                  </template>
+                  <template v-else-if="blockHeight && props.appSpec?.height">
+                    <!-- For existing apps, show validation status -->
                     <template v-if="isExpiryValid">
                       Validated ({{ expiryLabel }})
                     </template>
@@ -1411,7 +1436,7 @@
                 </template>
               </span>
               <VIcon
-                v-if="hasCheckedExpiry && blockHeight && props.appSpec?.height"
+                v-if="hasCheckedExpiry && (props.newApp || (blockHeight && props.appSpec?.height))"
                 size="22"
                 :color="isExpiryValid ? 'success' : 'error'"
               >
@@ -1420,9 +1445,9 @@
             </div>
           </div>
 
-          <!-- Signature -->
-          <div class="spec-row mt-2">
-            <div class="label-cell">Signature</div>
+            <!-- Signature -->
+            <div class="spec-row mt-2">
+              <div class="label-cell">Signature</div>
             <div class="value-cell d-flex align-center justify-end pr-4">
 
               <VIcon
@@ -1435,17 +1460,508 @@
             </div>
           </div>
 
-          <!-- Registered -->
-          <div class="spec-row mt-2">
-            <div class="label-cell">Registered</div>
-            <div class="value-cell d-flex align-center justify-end pr-4">
-
+            <!-- Registered -->
+            <div class="spec-row mt-2">
+              <div class="label-cell">Registered</div>
+              <div class="value-cell d-flex align-center justify-end pr-4">
+                <div v-if="isPropagating" class="d-flex justify-center">
+                  <VProgressCircular indeterminate color="primary" size="24" />
+                </div>
+                <div v-else-if="registrationHash" class="d-flex justify-center">
+                  <VIcon color="success" size="24">mdi-check-circle</VIcon>
+                </div>
+              </div>
             </div>
-          </div>
-          <div class="d-flex justify-center align-center mt-4">
-            <VBtn v-if="hasCalculatedPrice" variant="flat"  style="width: 100%" @click="dataSign()">
-              <VIcon start size="24">mdi-file-sign</VIcon> Sign Message
-            </VBtn>
+            
+            <div class="d-flex justify-center align-center mt-4">
+              <!-- Sign Message Button -->
+              <VBtn v-if="hasCalculatedPrice && !signature" variant="flat" style="width: 100%" @click="dataSign()">
+                <VIcon start size="24">mdi-file-sign</VIcon> Sign Message
+              </VBtn>
+              
+              <!-- Register Application Button -->
+              <VBtn v-else-if="signature && !registrationHash" variant="flat" color="success" style="width: 100%" :loading="isPropagating" @click="propagateSignedMessage()">
+                <VIcon start size="24">mdi-send</VIcon> Register Application
+              </VBtn>
+              
+              <!-- Registration Success - Go to Test & Pay -->
+              <div v-else-if="registrationHash" class="w-100">
+                <VAlert 
+                  type="success" 
+                  variant="tonal" 
+                  class="mb-4 registration-success-alert" 
+                  icon="mdi-check-circle"
+                  :style="{
+                    backgroundColor: theme.global.name.value === 'dark' ? 'rgba(76, 175, 80, 0.12)' : 'rgba(76, 175, 80, 0.08)',
+                    borderColor: theme.global.name.value === 'dark' ? 'rgba(76, 175, 80, 0.4)' : 'rgba(76, 175, 80, 0.6)',
+                    color: theme.global.name.value === 'dark' ? 'rgba(129, 199, 132, 1)' : 'rgba(46, 125, 50, 1)'
+                  }"
+                >
+                  <div class="text-center">
+                    <div class="font-weight-bold mb-2" :style="{
+                      color: theme.global.name.value === 'dark' ? 'rgba(165, 214, 167, 1)' : 'rgba(27, 94, 32, 1)'
+                    }">🎉 Registration Successful!</div>
+                    <div class="text-body-2 mb-3" :style="{
+                      color: theme.global.name.value === 'dark' ? 'rgba(129, 199, 132, 0.8)' : 'rgba(46, 125, 50, 0.8)'
+                    }">Your app has been registered to the Flux network.</div>
+                    <VBtn 
+                      variant="flat" 
+                      color="primary" 
+                      @click="tab = 100"
+                    >
+                      <VIcon start size="20">mdi-test-tube</VIcon> 
+                      Proceed to Test & Payment
+                      <VIcon end size="16">mdi-arrow-right</VIcon>
+                    </VBtn>
+                  </div>
+                </VAlert>
+
+                <!-- Payment Status Alert -->
+                <VAlert 
+                  v-if="paymentCompleted" 
+                  type="success" 
+                  variant="tonal" 
+                  class="mb-4 payment-success-alert" 
+                  :icon="isCryptoPayment(paymentMethod) ? 'mdi-check-circle' : 'mdi-credit-card-check'"
+                  :style="{
+                    backgroundColor: theme.global.name.value === 'dark' ? 'rgba(76, 175, 80, 0.12)' : 'rgba(76, 175, 80, 0.08)',
+                    borderColor: theme.global.name.value === 'dark' ? 'rgba(76, 175, 80, 0.4)' : 'rgba(76, 175, 80, 0.6)'
+                  }"
+                >
+                  <div class="text-center">
+                    <div class="font-weight-bold mb-2" :style="{
+                      color: theme.global.name.value === 'dark' ? 'rgba(165, 214, 167, 1)' : 'rgba(27, 94, 32, 1)'
+                    }">
+                      <span v-if="isCryptoPayment(paymentMethod)">₿ Crypto Payment Completed!</span>
+                      <span v-else>💳 Payment Completed!</span>
+                    </div>
+                    <div class="text-body-2" :style="{
+                      color: theme.global.name.value === 'dark' ? 'rgba(129, 199, 132, 0.9)' : 'rgba(46, 125, 50, 0.9)'
+                    }">
+                      <span v-if="isCryptoPayment(paymentMethod)">
+                        Successfully paid {{ paymentAmount }} FLUX via {{ paymentMethod }}
+                      </span>
+                      <span v-else>
+                        Successfully paid ${{ paymentAmount }} USD via {{ paymentMethod }}
+                      </span>
+                    </div>
+                  </div>
+                </VAlert>
+
+                <!-- Payment Pending Alert -->
+                <VAlert 
+                  v-else-if="paymentMethod && !paymentCompleted" 
+                  type="info" 
+                  variant="tonal" 
+                  class="mb-4 payment-pending-alert" 
+                  :icon="isCryptoPayment(paymentMethod) ? 'mdi-currency-usd' : 'mdi-credit-card-clock'"
+                  :style="{
+                    backgroundColor: theme.global.name.value === 'dark' ? 'rgba(33, 150, 243, 0.12)' : 'rgba(33, 150, 243, 0.08)',
+                    borderColor: theme.global.name.value === 'dark' ? 'rgba(33, 150, 243, 0.4)' : 'rgba(33, 150, 243, 0.6)'
+                  }"
+                >
+                  <div class="text-center">
+                    <div class="font-weight-bold mb-2" :style="{
+                      color: theme.global.name.value === 'dark' ? 'rgba(144, 202, 249, 1)' : 'rgba(13, 71, 161, 1)'
+                    }">
+                      <span v-if="isCryptoPayment(paymentMethod)">₿ Crypto Payment Initiated</span>
+                      <span v-else>⏳ Payment Processing</span>
+                    </div>
+                    <div class="text-body-2" :style="{
+                      color: theme.global.name.value === 'dark' ? 'rgba(100, 181, 246, 0.9)' : 'rgba(25, 118, 210, 0.9)'
+                    }">
+                      <span v-if="isCryptoPayment(paymentMethod)">
+                        {{ paymentMethod }} payment initiated for {{ paymentAmount }} FLUX. Complete payment in your wallet.
+                      </span>
+                      <span v-else>
+                        Waiting for {{ paymentMethod }} payment confirmation (${{ paymentAmount }} USD)
+                      </span>
+                    </div>
+                    <div v-if="!isCryptoPayment(paymentMethod)" class="mt-3">
+                      <VBtn 
+                        size="small" 
+                        variant="outlined" 
+                        @click="paymentCompleted = true"
+                      >
+                        Mark as Paid (Test)
+                      </VBtn>
+                    </div>
+                  </div>
+                </VAlert>
+              </div>
+            </div>
+          </template>
+        </div>
+      </VWindowItem>
+      
+      <!-- Test & Pay Tab -->
+      <VWindowItem :value="100">
+        <div 
+          class="pa-4" 
+          :style="{
+            backgroundColor: theme.global.name.value === 'dark' ? 'rgba(76, 175, 80, 0.05)' : 'rgba(76, 175, 80, 0.03)',
+            borderRadius: '8px',
+            border: theme.global.name.value === 'dark' ? '1px solid rgba(76, 175, 80, 0.1)' : '1px solid rgba(76, 175, 80, 0.08)'
+          }"
+        >
+          <!-- Test Installation Section -->
+          <VCard class="mb-4" v-if="!testFinished">
+            <VCardTitle class="bg-primary text-white">
+              <VIcon class="mr-2">mdi-test-tube</VIcon>
+              Test Application Installation
+            </VCardTitle>
+            <VCardText class="mt-4">
+              <p class="mb-4">
+                Test your application install/launch to ensure your specifications work correctly.
+                The installation log will appear below once completed.
+              </p>
+              
+              <VAlert v-if="testError" type="error" variant="tonal" class="mb-4">
+            <div class="d-flex align-center justify-space-between">
+              <div>
+                <strong>WARNING:</strong> Test failed! Check logs below and fix your specifications before paying.
+              </div>
+              <VBtn 
+                size="small" 
+                color="warning" 
+                variant="outlined"
+                @click="forceEnablePayment"
+              >
+                Enable Payment Anyway
+              </VBtn>
+            </div>
+          </VAlert>
+
+              <VBtn
+                color="success"
+                variant="flat"
+                :loading="testRunning"
+                @click="testAppInstall"
+                :disabled="testFinished"
+              >
+                <VIcon class="mr-2">mdi-play</VIcon>
+                Test Installation
+              </VBtn>
+            </VCardText>
+          </VCard>
+
+          <!-- Test Output -->
+          <VCard v-if="testOutput.length > 0" class="mb-4">
+            <VCardTitle 
+              class="bg-secondary text-white d-flex align-center justify-space-between"
+              style="cursor: pointer;"
+              @click="logsExpanded = !logsExpanded"
+            >
+              <div class="d-flex align-center">
+                <VIcon class="mr-2">mdi-console</VIcon>
+                <span v-if="testFinished && !testError">Test Completed Successfully</span>
+                <span v-else-if="testFinished && testError">Test Failed - Check Logs</span>
+                <span v-else-if="testRunning">Installation Progress</span>
+                <span v-else>Installation Progress</span>
+              </div>
+              <VBtn
+                icon
+                variant="text"
+                size="small"
+                class="text-white"
+                @click.stop="logsExpanded = !logsExpanded"
+              >
+                <VIcon>{{ logsExpanded ? 'mdi-chevron-up' : 'mdi-chevron-down' }}</VIcon>
+              </VBtn>
+            </VCardTitle>
+            
+            <VExpandTransition>
+              <VCardText v-show="logsExpanded" class="mt-3">
+                <VList class="pa-0">
+                  <VListItem 
+                    v-for="(output, index) in testOutput" 
+                    :key="index"
+                    class="installation-step"
+                    :class="{
+                      'text-success': output.status === 'success',
+                      'text-error': output.status === 'error',
+                      'text-warning': output.status === 'warning',
+                      'text-info': output.status === 'info'
+                    }"
+                  >
+                    <template #prepend>
+                      <VIcon 
+                        :color="getStatusColor(output.status)"
+                        :icon="getStatusIcon(output.status)"
+                        class="mr-2"
+                      />
+                    </template>
+                    <VListItemTitle>
+                      <pre class="installation-output">{{ formatOutput(output) }}</pre>
+                    </VListItemTitle>
+                  </VListItem>
+                </VList>
+              </VCardText>
+            </VExpandTransition>
+          </VCard>
+
+          <!-- Payment Section -->
+          <div v-if="testFinished && !testError">
+            <!-- Warning Alert if test had warnings -->
+            <VAlert 
+              v-if="hasTestWarnings" 
+              type="warning" 
+              variant="tonal" 
+              class="mb-4"
+              icon="mdi-alert-triangle"
+            >
+              <strong>Test Warnings:</strong> Your app test completed with some warnings. 
+              Please review the installation logs above. You can still proceed with payment, 
+              but consider addressing these warnings for optimal performance.
+            </VAlert>
+            <VRow class="mb-4">
+              <VCol cols="12">
+                <VCard class="payment-info-card" elevation="2">
+                  <VCardTitle 
+                    class="d-flex align-center"
+                    :style="{
+                      backgroundColor: theme.global.name.value === 'dark' ? 'rgba(76, 175, 80, 0.15)' : 'rgba(76, 175, 80, 0.1)',
+                      color: theme.global.name.value === 'dark' ? 'rgba(165, 214, 167, 1)' : 'rgba(27, 94, 32, 1)',
+                      borderBottom: theme.global.name.value === 'dark' ? '2px solid rgba(76, 175, 80, 0.3)' : '2px solid rgba(76, 175, 80, 0.4)'
+                    }"
+                  >
+                    <VIcon 
+                      class="mr-3" 
+                      size="24" 
+                      :style="{
+                        color: theme.global.name.value === 'dark' ? 'rgba(165, 214, 167, 1)' : 'rgba(27, 94, 32, 1)'
+                      }"
+                    >mdi-check-circle</VIcon>
+                    <div>
+                      <div class="text-h6" :style="{
+                        color: theme.global.name.value === 'dark' ? 'rgba(165, 214, 167, 1)' : 'rgba(27, 94, 32, 1)'
+                      }">Registration Successful!</div>
+                      <div 
+                        class="text-subtitle-2" 
+                        :style="{
+                          color: theme.global.name.value === 'dark' ? 'rgba(129, 199, 132, 0.9)' : 'rgba(46, 125, 50, 0.9)',
+                          opacity: 0.9
+                        }"
+                      >Your app is ready for deployment</div>
+                    </div>
+                  </VCardTitle>
+                  <VCardText class="pa-6">
+                    <VList class="bg-transparent">
+                      <VListItem class="px-0">
+                        <template #prepend>
+                          <VIcon color="success" class="mr-3">mdi-clock-check</VIcon>
+                        </template>
+                        <VListItemTitle class="text-body-1">
+                          <strong>Payment window:</strong> 30 minutes remaining
+                        </VListItemTitle>
+                      </VListItem>
+                      
+                      <VListItem class="px-0">
+                        <template #prepend>
+                          <VIcon color="primary" class="mr-3">mdi-calendar-end</VIcon>
+                        </template>
+                        <VListItemTitle class="text-body-1">
+                          <strong>Subscription until:</strong> {{ subscribedTill }}
+                        </VListItemTitle>
+                      </VListItem>
+                      
+                      <VListItem class="px-0">
+                        <template #prepend>
+                          <VIcon color="info" class="mr-3">mdi-information</VIcon>
+                        </template>
+                        <VListItemTitle class="text-body-1">
+                          Choose your preferred payment method below
+                        </VListItemTitle>
+                      </VListItem>
+                    </VList>
+                  </VCardText>
+                </VCard>
+              </VCol>
+            </VRow>
+
+            <!-- Payment Methods -->
+            <div class="payment-methods-container">
+              <VRow no-gutters class="justify-center">
+                <!-- Fiat Payment -->
+                <VCol cols="12" md="6" lg="5" xl="4" class="pa-3">
+                  <VCard 
+                    class="payment-method-card h-100" 
+                    elevation="0"
+                    variant="outlined"
+                    :class="{ 'card-disabled': !stripeEnabled && !paypalEnabled }"
+                  >
+                    <VCardTitle class="payment-header bg-gradient-primary">
+                      <div class="d-flex align-center">
+                        <VAvatar size="40" color="white" variant="tonal" class="me-3">
+                          <VIcon color="primary" size="24">mdi-credit-card</VIcon>
+                        </VAvatar>
+                        <div class="text-white">
+                          <div class="text-h6 font-weight-bold">Pay with Card</div>
+                          <div class="text-subtitle-2 opacity-90">Secure & instant payment</div>
+                        </div>
+                      </div>
+                    </VCardTitle>
+                    
+                    <VCardText class="pa-6">
+                      <div class="text-center">
+                        <!-- Payment Icons -->
+                        <div class="payment-icons-grid mb-4">
+                          <VCard 
+                            v-if="stripeEnabled"
+                            variant="outlined" 
+                            class="payment-icon-card"
+                            @click="() => initStripePay(registrationHash, appDetails.name, appSpecPrice?.usd, appDetails.description)"
+                            hover
+                            :style="{
+                              border: theme.global.name.value === 'dark' ? '2px solid rgba(144, 202, 249, 0.3)' : '2px solid rgba(25, 118, 210, 0.3)',
+                              backgroundColor: theme.global.name.value === 'dark' ? 'rgba(33, 150, 243, 0.05)' : 'rgba(33, 150, 243, 0.02)'
+                            }"
+                          >
+                            <VCardText class="d-flex align-center justify-center pa-6">
+                              <img
+                                class="payment-brand-icon"
+                                :src="StripeImg"
+                                alt="Stripe"
+                              />
+                            </VCardText>
+                          </VCard>
+                          
+                          <VCard 
+                            v-if="paypalEnabled"
+                            variant="outlined" 
+                            class="payment-icon-card"
+                            @click="() => initPaypalPay(registrationHash, appDetails.name, appSpecPrice?.usd, appDetails.description)"
+                            hover
+                            :style="{
+                              border: theme.global.name.value === 'dark' ? '2px solid rgba(144, 202, 249, 0.3)' : '2px solid rgba(25, 118, 210, 0.3)',
+                              backgroundColor: theme.global.name.value === 'dark' ? 'rgba(33, 150, 243, 0.05)' : 'rgba(33, 150, 243, 0.02)'
+                            }"
+                          >
+                            <VCardText class="d-flex align-center justify-center pa-6">
+                              <img
+                                class="payment-brand-icon"
+                                :src="PayPalThemeImg"
+                                alt="PayPal"
+                              />
+                            </VCardText>
+                          </VCard>
+                        </div>
+                        
+                        <!-- USD Price Display -->
+                        <div v-if="stripeEnabled || paypalEnabled" class="mt-4">
+                          <VChip color="success" variant="flat" size="large">
+                            ${{ appSpecPrice?.usd || 0 }} USD
+                          </VChip>
+                        </div>
+                        
+                        <!-- Warning -->
+                        <VAlert 
+                          v-if="!stripeEnabled && !paypalEnabled" 
+                          type="warning" 
+                          variant="tonal"
+                          class="mb-0"
+                          icon="mdi-alert-circle"
+                        >
+                          Fiat payment gateways are temporarily unavailable
+                        </VAlert>
+                      </div>
+                    </VCardText>
+                  </VCard>
+                </VCol>
+
+                <!-- Crypto Payment -->
+                <VCol cols="12" md="6" lg="5" xl="4" class="pa-3">
+                  <VCard 
+                    class="payment-method-card h-100" 
+                    elevation="0"
+                    variant="outlined"
+                  >
+                    <VCardTitle class="payment-header bg-gradient-warning">
+                      <div class="d-flex align-center">
+                        <VAvatar size="40" color="white" variant="tonal" class="me-3">
+                          <VIcon color="warning" size="24">mdi-lightning-bolt</VIcon>
+                        </VAvatar>
+                        <div class="text-white">
+                          <div class="text-h6 font-weight-bold">Pay with FLUX</div>
+                          <div class="text-subtitle-2 opacity-90">Cryptocurrency payment</div>
+                        </div>
+                      </div>
+                    </VCardTitle>
+                    
+                    <VCardText class="pa-6">
+                      <!-- Wallet Options -->
+                      <div class="text-center">
+                        <div class="wallet-icons-grid mb-4">
+                          <VCard 
+                            variant="outlined" 
+                            class="wallet-icon-card"
+                            @click="initZelcorePay"
+                            hover
+                          >
+                            <VCardText class="d-flex flex-column align-center justify-center pa-6">
+                              <img
+                                class="wallet-brand-icon mb-3"
+                                :src="FluxIDImg"
+                                alt="Zelcore"
+                              />
+                              <span class="text-body-2 font-weight-medium">Zelcore</span>
+                            </VCardText>
+                          </VCard>
+                          
+                          <VCard 
+                            variant="outlined" 
+                            class="wallet-icon-card"
+                            @click="initSSPPay"
+                            hover
+                          >
+                            <VCardText class="d-flex flex-column align-center justify-center pa-6">
+                              <img
+                                class="wallet-brand-icon mb-3"
+                                :src="SSPLogoThemeImg"
+                                alt="SSP"
+                              />
+                              <span class="text-body-2 font-weight-medium">SSP</span>
+                            </VCardText>
+                          </VCard>
+                        </div>
+                        
+                        <!-- Payment Details -->
+                        <VCard variant="tonal" color="surface" class="mt-4">
+                          <VCardText class="pa-4">
+                            <div class="text-center mb-3">
+                              <VChip color="primary" variant="flat" size="large">
+                                <VIcon start size="16">mdi-lightning-bolt</VIcon>
+                                {{ appSpecPrice?.flux || 0 }} FLUX
+                                <VChip 
+                                  v-if="appSpecPrice?.fluxDiscount > 0"
+                                  color="success" 
+                                  variant="flat"
+                                  size="x-small"
+                                  class="ml-2"
+                                >
+                                  -{{ appSpecPrice.fluxDiscount }}%
+                                </VChip>
+                              </VChip>
+                            </div>
+                            
+                            <div class="text-caption text-medium-emphasis">
+                              <div class="mb-2 text-center">
+                                <strong>Send to:</strong><br>
+                                <code class="text-caption">{{ deploymentAddress || 'Loading...' }}</code>
+                              </div>
+                              <div class="text-center">
+                                <strong>Message:</strong><br>
+                                <code class="text-caption">{{ registrationHash }}</code>
+                              </div>
+                            </div>
+                          </VCardText>
+                        </VCard>
+                      </div>
+                    </VCardText>
+                  </VCard>
+                </VCol>
+              </VRow>
+            </div>
           </div>
         </div>
       </VWindowItem>
@@ -1720,9 +2236,11 @@ import qs from 'qs'
 import { SignClient } from '@walletconnect/sign-client'
 import { getUser } from '@/utils/firebase'
 import { getDetectedBackendURL } from "@/utils/backend"
+import { paymentBridge } from '@/utils/fiatGateways'
 import AppsService from "@/services/AppsService"
 import { storeToRefs } from "pinia"
 import { useFluxStore } from "@/stores/flux"
+import { useTheme } from 'vuetify'
 import { 
   importRsaPublicKey, 
   encryptAesKeyWithRsaKey, 
@@ -1730,6 +2248,13 @@ import {
   encryptMessage,
   getEnterprisePGPKeys,
 } from '@/utils/enterpriseCrypto'
+
+// Import payment images
+import StripeImg from '@/assets/images/Stripe.svg?url'
+import PayPalImg from '@/assets/images/PayPal.png?url'
+import FluxIDImg from '@/assets/images/FluxID.svg?url'
+import SSPLogoBlackImg from '@/assets/images/ssp-logo-black.svg?url'
+import SSPLogoWhiteImg from '@/assets/images/ssp-logo-white.svg?url'
 
 const props = defineProps({
   appSpec: Object,
@@ -1739,7 +2264,7 @@ const props = defineProps({
 
 const signature = ref('')
 const timestamp = ref(Date.now())
-const updatetype = 'fluxappupdate'
+const updatetype = computed(() => props.newApp ? 'fluxappregister' : 'fluxappupdate')
 const version = 1
 const signClient = ref(null)
 const websocket = ref(null)
@@ -1750,6 +2275,49 @@ const isNameLocked = ref(false)
 const isUploadingCmd = ref(false)
 const isUploadingEnv = ref(false)
 const isUploadingContacts = ref(false)
+const fiatCheckoutURL = ref('')
+const checkoutLoading = ref(false)
+const logsExpanded = ref(true)
+const paymentCompleted = ref(false)
+const paymentMethod = ref('')
+const paymentAmount = ref(0)
+
+// Helper function to check if payment method is crypto
+function isCryptoPayment(method) {
+  return ['Zelcore', 'SSP'].includes(method)
+}
+
+// Check for payment success on page load
+onMounted(() => {
+  const urlParams = new URLSearchParams(window.location.search)
+  const paymentSuccess = urlParams.get('payment_success')
+  const paymentMethod = urlParams.get('payment_method')
+  const amount = urlParams.get('amount')
+  
+  if (paymentSuccess === 'true') {
+    // Only handle URL parameter success for card payments (Stripe/PayPal)
+    const methodFromUrl = urlParams.get('payment_method')
+    if (methodFromUrl && !isCryptoPayment(methodFromUrl)) {
+      paymentCompleted.value = true
+      paymentMethod.value = methodFromUrl
+      if (amount) paymentAmount.value = parseFloat(amount)
+      showToast('success', 'Card payment completed successfully!')
+      
+      // Clean up URL parameters
+      const newUrl = window.location.pathname
+      window.history.replaceState(null, '', newUrl)
+    }
+  }
+})
+
+// Theme-aware images
+const theme = useTheme()
+const PayPalThemeImg = computed(() => {
+  return PayPalImg // Use the main PayPal.png file for both themes
+})
+const SSPLogoThemeImg = computed(() => {
+  return theme.global.name.value === 'dark' ? SSPLogoWhiteImg : SSPLogoBlackImg
+})
 
 const allowedGeolocations = ref([])
 const forbiddenGeolocations = ref([])
@@ -1884,11 +2452,29 @@ const timeOptions = { shortDate: { year: 'numeric', month: '2-digit', day: '2-di
 // State
 const isVeryfitying = ref(false)
 const verifyAppSpecResponse = ref(null)
+const verifyAppSpecError = ref(null)
 const appSpecPrice = ref(null)
 const blockHeight = ref(null)
 const isExpiryValid = ref(false)
 const appSpecFormated = ref(null)
 const blocksToExpire = ref(null)
+const registrationHash = ref(null)
+const isPropagating = ref(false)
+const testError = ref(false)
+const testFinished = ref(false)
+const testRunning = ref(false)
+const testOutput = ref([])
+const showTestLogs = ref(false)
+const deploymentAddress = ref(null)
+const applicationPrice = ref(null)
+const applicationPriceFluxDiscount = ref(0)
+const stripeEnabled = ref(true)
+const paypalEnabled = ref(true)
+const subscribedTill = computed(() => {
+  const now = new Date()
+  now.setDate(now.getDate() + 30) // Default 30 days
+  return now.toLocaleString('en-GB', timeOptions.shortDate)
+})
 
 // Section visibility flags
 const hasValidatedSpec = ref(false)
@@ -1896,6 +2482,11 @@ const hasCalculatedPrice = ref(false)
 const hasCheckedExpiry = ref(false)
 
 const renewalLabels = computed(() => renewalOptions.map(opt => opt.label))
+
+// Check if test output contains warnings
+const hasTestWarnings = computed(() => {
+  return testOutput.value.some(output => output.status === 'warning')
+})
 
 const snackbar = ref({
   model: false,
@@ -1930,7 +2521,102 @@ function showToast(type, message, icon = null, timeout = 4000) {
   }, timeout)
 }
 
+// Watch for changes in appSpec to update appDetails
+watch(() => props.appSpec, (newSpec, oldSpec) => {
+  console.log('SubscriptionManager: appSpec changed:', newSpec)
+  
+  // Guard against unnecessary updates by checking if the spec actually changed
+  if (newSpec && newSpec !== oldSpec) {
+    console.log('SubscriptionManager: updating appDetails with owner:', newSpec.owner)
+    
+    // Only update if values are actually different to prevent circular updates
+    if (newSpec.name !== appDetails.value.name) {
+      appDetails.value.name = newSpec.name || ''
+    }
+    if (newSpec.description !== appDetails.value.description) {
+      appDetails.value.description = newSpec.description || ''
+    }
+    // Always set owner if it exists in the spec or if current is empty
+    if (newSpec.owner && newSpec.owner !== appDetails.value.owner) {
+      appDetails.value.owner = newSpec.owner
+    } else if (!appDetails.value.owner && newSpec.owner) {
+      appDetails.value.owner = newSpec.owner
+    }
+    if (newSpec.contacts !== appDetails.value.contacts) {
+      appDetails.value.contacts = newSpec.contacts || ''
+    }
+    if (newSpec.instances !== appDetails.value.instances) {
+      appDetails.value.instances = newSpec.instances ?? 3
+    }
+    if (newSpec.staticip !== appDetails.value.staticip) {
+      appDetails.value.staticip = newSpec.staticip ?? false
+    }
+    
+    console.log('SubscriptionManager: appDetails.owner after update:', appDetails.value.owner)
+    
+    // Determine if this is a private app based on existing data
+    // For v7: check if nodes exist
+    // For v8+: check if enterprise field has encrypted content
+    if (newSpec.version === 7 && newSpec.nodes && newSpec.nodes.length > 0) {
+      isPrivateApp.value = true
+    } else if (newSpec.version >= 8 && newSpec.enterprise && newSpec.enterprise !== '') {
+      isPrivateApp.value = true
+    } else {
+      isPrivateApp.value = false
+    }
+    
+    appDetails.value.nodes = newSpec.nodes ? newSpec.nodes.join(', ') : ''
+
+    // Initialize selected nodes from appSpec
+    if (newSpec.nodes && Array.isArray(newSpec.nodes)) {
+      selectedNodes.value = newSpec.nodes.map(nodeIp => ({
+        ip: nodeIp,
+        // eslint-disable-next-line camelcase
+        payment_address: 'Loading...',
+        tier: 'Loading...',
+        score: 0
+      }))
+    }
+
+    // Set up renewal settings
+    const expire = newSpec.expire ?? 22000
+    const foundIndex = renewalOptions.findIndex(opt => opt.value === expire)
+    appDetails.value.renewalIndex = foundIndex !== -1 ? foundIndex : 2
+    
+    // Handle enterprise nodes if applicable
+    if (newSpec.nodes && Array.isArray(newSpec.nodes) && newSpec.nodes.length > 0) {
+      // Try to get enterprise nodes to populate with real data
+      getEnterpriseNodes()
+    } else if (isPrivateApp.value && newSpec.version >= 7) {
+      // Enterprise is enabled but no nodes yet - auto fetch nodes
+      getEnterpriseNodes()
+    }
+  }
+}, { immediate: true })
+
+// Owner changes are already handled in the main appSpec watcher above
+// No need for a separate owner watcher
+
 onMounted(() => {
+  console.log('SubscriptionManager onMounted - props.appSpec:', props.appSpec)
+  console.log('SubscriptionManager onMounted - props.appSpec.owner:', props.appSpec?.owner)
+  
+  // Set default owner from logged-in user's zelid if not already set
+  if (!appDetails.value.owner) {
+    const zelidauth = localStorage.getItem('zelidauth')
+    if (zelidauth) {
+      try {
+        const auth = qs.parse(zelidauth)
+        if (auth.zelid) {
+          appDetails.value.owner = auth.zelid
+          console.log('SubscriptionManager: Set default owner to:', auth.zelid)
+        }
+      } catch (error) {
+        console.error('Failed to parse zelidauth for default owner:', error)
+      }
+    }
+  }
+  
   getGeolocationData()
 
   if (!props.appSpec?.compose) {
@@ -1946,57 +2632,15 @@ onMounted(() => {
       }
     })
   }
-
-  if (props.appSpec) {
-    appDetails.value.name = props.appSpec.name || ''
-    appDetails.value.description = props.appSpec.description || ''
-    appDetails.value.owner = props.appSpec.owner || ''
-    appDetails.value.contacts = props.appSpec.contacts || ''
-    appDetails.value.instances = props.appSpec.instances ?? 3
-    appDetails.value.staticip = props.appSpec.staticip ?? false
-    
-    // Determine if this is a private app based on existing data
-    // For v7: check if nodes exist
-    // For v8+: check if enterprise field has encrypted content
-    if (props.appSpec.version === 7 && props.appSpec.nodes && props.appSpec.nodes.length > 0) {
-      isPrivateApp.value = true
-    } else if (props.appSpec.version >= 8 && props.appSpec.enterprise && props.appSpec.enterprise !== '') {
-      isPrivateApp.value = true
-    } else {
-      isPrivateApp.value = false
-    }
-    
-    appDetails.value.nodes = props.appSpec.nodes ? props.appSpec.nodes.join(', ') : ''
-
-    // Note: repoauth is stored per component, not globally
-    
-    // Initialize selected nodes from appSpec
-    if (props.appSpec.nodes && Array.isArray(props.appSpec.nodes)) {
-      selectedNodes.value = props.appSpec.nodes.map(nodeIp => ({
-        ip: nodeIp,
-        // eslint-disable-next-line camelcase
-        payment_address: 'Loading...',
-        tier: 'Loading...',
-        score: 'Loading...',
-      }))
-
-      // Try to get enterprise nodes to populate with real data
-      getEnterpriseNodes()
-    } else if (appDetails.value.enterprise && props.appSpec.version >= 7) {
-      // Enterprise is enabled but no nodes yet - auto fetch nodes
-      getEnterpriseNodes()
-    }
-
-    if (props.appSpec.name) {
-      isNameLocked.value = true
-    }
-
-    const expire = props.appSpec.expire ?? 22000
-    const foundIndex = renewalOptions.findIndex(opt => opt.value === expire)
-    appDetails.value.renewalIndex = foundIndex !== -1 ? foundIndex : 2
-    if (props.appSpec.expire === undefined) {
-      props.appSpec.expire = 22000
-    }
+  
+  // Set default expire if not set
+  if (props.appSpec && props.appSpec.expire === undefined) {
+    props.appSpec.expire = 22000
+  }
+  
+  // Lock name if it already exists (for updates)
+  if (props.appSpec?.name) {
+    isNameLocked.value = true
   }
 })
 
@@ -2727,7 +3371,7 @@ function addComposeComponent() {
     secrets: '',
   }) - 1
 
-  newPorts.value[index] = { exposed: null, container: null }
+  // The watch function will automatically generate the random port
   componentTab.value = `component-${index}`
 }
 
@@ -2934,14 +3578,23 @@ function generateRandomPort(min = 30000, max = 39999) {
 
 // Watch for compose length changes
 watch(() => props.appSpec?.compose?.length, newLength => {
-  // For new apps, generate a random port for the first component
+  // For new apps, generate a random port for each component
   if (props.newApp && newLength > 0) {
-    newPorts.value = Array.from({ length: newLength }, (_, index) => {
-      if (index === 0) {
-        return { exposed: generateRandomPort(), container: null }
-      }
-      return { exposed: null, container: null }
-    })
+    // Only initialize ports for new components that don't have ports yet
+    if (!newPorts.value) {
+      newPorts.value = []
+    }
+    
+    // Ensure the array has the right length and preserve existing values
+    while (newPorts.value.length < newLength) {
+      // Generate random port for each new component
+      newPorts.value.push({ exposed: generateRandomPort(), container: null })
+    }
+    
+    // Trim if needed (in case components were removed)
+    if (newPorts.value.length > newLength) {
+      newPorts.value = newPorts.value.slice(0, newLength)
+    }
   } else {
     newPorts.value = Array.from({ length: newLength }, () => ({ exposed: null, container: null }))
   }
@@ -3147,6 +3800,7 @@ watch(tab, async newVal => {
 
     // Reset all public state
     verifyAppSpecResponse.value = null
+    verifyAppSpecError.value = null
     appSpecPrice.value = null
     blockHeight.value = null
     isExpiryValid.value = false
@@ -3163,14 +3817,6 @@ watch(tab, async newVal => {
 
     await fetchBlockHeight()
     checkedExpiry = true
-
-    if (!isExpiryValid.value) {
-      isVeryfitying.value = false
-      hasValidatedSpec.value = validated
-      hasCheckedExpiry.value = checkedExpiry
-      
-      return
-    }
 
     // --- STEP 1: Validate Spec ---
     const specOK = await verifyAppSpec()
@@ -3367,29 +4013,42 @@ async function verifyAppSpec() {
       appSpecTemp.expire = blocksToExpire.value
     }
     if (appSpecTemp.version >= 8) {
+      console.log('Version 8+ app - checking enterprise mode')
+      console.log('UI isPrivateApp state:', isPrivateApp.value)
+      console.log('AppSpec enterprise field:', appSpecTemp.enterprise)
 
-      if (appSpecTemp.enterprise.length > 0) {
-        isPrivateApp.value = true
-      }
-
-      // construct nodes
+      // For v8+: Use UI state (isPrivateApp.value) to determine if encryption should happen
+      // The UI state is set based on the enterprise checkbox or existing enterprise data
       if (isPrivateApp.value) {
-        const responseGetOriginalOwner = await AppsService.getAppOriginalOwner(appSpecTemp.name)
-        if (responseGetOriginalOwner.data.status === 'error') {
-          throw new Error(responseGetOriginalOwner.data.data.message || responseGetOriginalOwner.data.data)
-        }
+        console.log('Enterprise v8+ encryption process starting...')
+        console.log('Original appSpecTemp before encryption:', JSON.stringify(appSpecTemp, null, 2))
+        
         const zelidauth = localStorage.getItem('zelidauth')
+        console.log('Using current owner for encryption:', appSpecTemp.owner)
 
         // call api to get RSA public key
         const appPubKeyData = {
           name: appSpecTemp.name,
-          owner: responseGetOriginalOwner.data.data,
+          owner: appSpecTemp.owner,
         }
         const responseGetPublicKey = await AppsService.getAppPublicKey(zelidauth, appPubKeyData)
+        console.log('getAppPublicKey response:', responseGetPublicKey.data)
         if (responseGetPublicKey.data.status === 'error') {
-          throw new Error(responseGetPublicKey.data.data.message || responseGetPublicKey.data.data)
+          const errorData = responseGetPublicKey.data.data
+          let errorMsg = 'Failed to get app public key'
+          if (errorData) {
+            if (typeof errorData === 'string') {
+              errorMsg = errorData
+            } else if (errorData.message) {
+              errorMsg = errorData.message
+            } else {
+              errorMsg = JSON.stringify(errorData)
+            }
+          }
+          throw new Error(errorMsg)
         }
         const pubkey = responseGetPublicKey.data.data
+        console.log('Retrieved public key length:', pubkey.length)
 
         const rsaPubKey = await importRsaPublicKey(pubkey)
         const aesKey = crypto.getRandomValues(new Uint8Array(32))
@@ -3402,14 +4061,20 @@ async function verifyAppSpec() {
           contacts: appSpecTemp.contacts,
           compose: appSpecTemp.compose,
         }
+        console.log('Enterprise specs to encrypt:', JSON.stringify(enterpriseSpecs, null, 2))
+        
         const encryptedEnterprise = await encryptEnterpriseWithAes(
           JSON.stringify(enterpriseSpecs),
           aesKey,
           encryptedEnterpriseKey,
         )
+        console.log('Encrypted enterprise data length:', encryptedEnterprise.length)
+        
         appSpecTemp.enterprise = encryptedEnterprise
         appSpecTemp.contacts = []
         appSpecTemp.compose = []
+        
+        console.log('AppSpecTemp after encryption:', JSON.stringify(appSpecTemp, null, 2))
       }
     } else if (appSpecTemp.version === 7) {
       // Handle v7 encryption
@@ -3450,16 +4115,67 @@ async function verifyAppSpec() {
       }
     }
 
-    console.log(appSpecTemp)
+    console.log('Sending appSpec for validation:', appSpecTemp)
+    
+    // Additional validation before sending to API
+    if (isPrivateApp.value && appSpecTemp.version === 7 && (!appSpecTemp.nodes || appSpecTemp.nodes.length === 0)) {
+      throw new Error('Enterprise app requires selected nodes')
+    }
+    
+    // For version 8+ enterprise apps, ensure all required fields are present
+    if (appSpecTemp.version >= 8 && isPrivateApp.value) {
+      console.log('Enterprise app validation - checking required fields')
+      if (!appSpecTemp.enterprise || appSpecTemp.enterprise.length === 0) {
+        throw new Error('Enterprise encryption failed - no encrypted data')
+      }
+      if (!appSpecTemp.name || !appSpecTemp.owner) {
+        throw new Error('Enterprise app missing required fields: name or owner')
+      }
+      // Ensure contacts and compose are arrays (even if empty for encrypted apps)
+      if (!Array.isArray(appSpecTemp.contacts)) {
+        appSpecTemp.contacts = []
+      }
+      if (!Array.isArray(appSpecTemp.compose)) {
+        appSpecTemp.compose = []
+      }
+    }
+    
+    // Use appropriate endpoint based on whether it's a new app or update
+    const verifyEndpoint = props.newApp 
+      ? '/apps/verifyappregistrationspecifications'
+      : '/apps/verifyappupdatespecifications'
+    
     const response = await props.executeLocalCommand(
-      '/apps/verifyappupdatespecifications',
+      verifyEndpoint,
       JSON.stringify(appSpecTemp),
       null,
       true,
     )
 
     if (response.data?.status !== 'success') {
-      showToast('error', response.data?.message || response.data)
+      console.error('Validation failed. Full response:', response.data)
+      console.error('Request that failed:', JSON.stringify(appSpecTemp, null, 2))
+      
+      let errorMsg = 'Validation failed'
+      if (response.data?.data) {
+        if (typeof response.data.data === 'string') {
+          errorMsg = response.data.data
+        } else if (response.data.data.message) {
+          errorMsg = response.data.data.message
+        } else {
+          errorMsg = JSON.stringify(response.data.data)
+        }
+        
+        // Handle specific enterprise-related errors
+        if (errorMsg.includes('appSpecifications')) {
+          errorMsg = 'Enterprise validation error: Backend expects different data format. Please check that all required fields are present.'
+        }
+      } else if (response.data?.message) {
+        errorMsg = response.data.message
+      }
+      
+      verifyAppSpecError.value = errorMsg
+      showToast('error', errorMsg)
       
       return false
     }
@@ -3467,7 +4183,24 @@ async function verifyAppSpec() {
 
     return true
   } catch (error) {
-    showToast('error', error)
+    console.error('Validation error caught:', error)
+    console.error('Error response:', error.response?.data)
+    
+    let errorMsg = error.message || error.toString() || 'Unknown error'
+    
+    // Handle specific enterprise encryption errors
+    if (errorMsg.includes('appSpecifications') || 
+        (error.response?.data && JSON.stringify(error.response.data).includes('appSpecifications'))) {
+      errorMsg = 'Enterprise validation failed: Data structure mismatch. This may be due to encryption process issues.'
+    }
+    
+    // Handle missing enterprise nodes
+    if (errorMsg.includes('select enterprise nodes')) {
+      errorMsg = 'Enterprise app requires selected priority nodes. Please go to the Priority Nodes tab and select nodes.'
+    }
+    
+    verifyAppSpecError.value = errorMsg
+    showToast('error', errorMsg)
     
     return false
   }
@@ -3511,28 +4244,40 @@ async function fetchBlockHeight() {
       // For updates without renewal, use the app's original height
       const height = (renewalEnabled.value || props.newApp) ? blockHeight.value : props.appSpec.height
 
-      console.log(expireBlocks)
+      console.log('Expire blocks:', expireBlocks)
+      console.log('Block height:', blockHeight.value)
+      console.log('Is new app:', props.newApp)
 
       if (typeof height === 'number') {
         blocksToExpire.value = height + expireBlocks - blockHeight.value
-        console.log(blocksToExpire.value)
+        console.log('Blocks to expire (initial):', blocksToExpire.value)
         // For new apps, blocksToExpire equals expireBlocks since we start from current height
         if (props.newApp) {
           blocksToExpire.value = expireBlocks
-          isExpiryValid.value = expireBlocks >= 5000
+          // For new apps, always set isExpiryValid to true since they're not expired
+          // We just need a valid subscription period (expireBlocks > 0)
+          isExpiryValid.value = true
+          console.log('New app - blocks to expire:', blocksToExpire.value, 'isExpiryValid:', isExpiryValid.value)
         } else {
+          // For existing apps, check if they have at least 5000 blocks (~1 week) remaining
           isExpiryValid.value = blocksToExpire.value >= 5000
         }
       } else {
-        isExpiryValid.value = false
+        // For new apps, we still want to proceed even without height
+        isExpiryValid.value = props.newApp ? true : false
+        console.log('Height is not a number, isExpiryValid:', isExpiryValid.value)
       }
     } else {
+      console.log('Failed to get block count, response:', res?.data)
       blockHeight.value = null
-      isExpiryValid.value = false
+      // For new apps, we can proceed without block height
+      isExpiryValid.value = props.newApp ? true : false
     }
   } catch (err) {
+    console.error('Error fetching block height:', err)
     blockHeight.value = null
-    isExpiryValid.value = false
+    // For new apps, we can proceed without block height
+    isExpiryValid.value = props.newApp ? true : false
   }
 }
 
@@ -3552,8 +4297,661 @@ async function dataSign() {
     isMarketplaceApp.value = true
   }
   timestamp.value = Date.now()
-  dataToSign.value = `${updatetype}${version}${JSON.stringify(appSpecFormated.value)}${timestamp.value}`
+  dataToSign.value = `${updatetype.value}${version}${JSON.stringify(appSpecFormated.value)}${timestamp.value}`
   await signMethod()
+}
+
+// Propagate signed message
+async function propagateSignedMessage() {
+  if (!signature.value) {
+    showToast('error', 'No signature found. Please sign the message first.')
+    return
+  }
+
+  isPropagating.value = true
+  
+  try {
+    const data = {
+      type: updatetype.value,
+      version: 1,
+      appSpecification: appSpecFormated.value,
+      timestamp: timestamp.value,
+      signature: signature.value,
+    }
+
+    // Log the data being sent for debugging
+    console.log('Registration data:', data)
+    console.log('Signature present:', !!signature.value)
+    console.log('Timestamp:', timestamp.value)
+    
+    const zelidauth = localStorage.getItem('zelidauth')
+    const response = props.newApp 
+      ? await AppsService.registerApp(zelidauth, data)
+      : await AppsService.updateApp(zelidauth, data)
+
+    if (response.data?.status === 'success') {
+      registrationHash.value = response.data.data
+      showToast('success', 'Application registered successfully! You can now test and pay for your app.')
+      
+      // Fetch deployment information
+      await getDeploymentInfo()
+    } else {
+      throw new Error(response.data?.data?.message || response.data?.data || 'Registration failed')
+    }
+  } catch (error) {
+    console.error('Registration error:', error)
+    console.error('Error response:', error.response?.data)
+    
+    let errorMessage = 'Failed to register application'
+    
+    if (error.response?.data?.data?.message) {
+      errorMessage = error.response.data.data.message
+    } else if (error.response?.data?.data) {
+      errorMessage = error.response.data.data
+    } else if (error.message) {
+      errorMessage = error.message
+    }
+    
+    showToast('error', errorMessage)
+  } finally {
+    isPropagating.value = false
+  }
+}
+
+// Get deployment information for payment
+async function getDeploymentInfo() {
+  try {
+    const response = await props.executeLocalCommand('/apps/deploymentinformation')
+    
+    if (response.data?.status === 'success') {
+      deploymentAddress.value = response.data.data.address
+    }
+  } catch (error) {
+    console.error('Failed to get deployment info:', error)
+  }
+}
+
+// Test app installation with live streaming
+async function testAppInstall() {
+  if (!registrationHash.value) {
+    showToast('error', 'Please propagate the signed message first')
+    return
+  }
+
+  testOutput.value = []
+  testError.value = false
+  testFinished.value = false
+  testRunning.value = true
+  
+  showToast('info', 'Starting application test installation...')
+
+  // Add initial status message
+  testOutput.value.push({
+    status: 'info',
+    message: 'Initializing test installation...',
+    timestamp: new Date().toISOString(),
+    step: 'init'
+  })
+
+  try {
+    const zelidauth = localStorage.getItem('zelidauth')
+    
+    // Simulate streaming by breaking the test into phases
+    await streamTestPhase('Preparing test environment...', 'info', 500)
+    await streamTestPhase('Downloading application specification...', 'info', 800)
+    await streamTestPhase('Validating Docker image...', 'info', 1000)
+    
+    const response = await props.executeLocalCommand(
+      `/apps/testappinstall/${registrationHash.value}`,
+      null,
+      {
+        headers: {
+          zelidauth,
+        },
+      },
+      true
+    )
+
+    await streamTestPhase('Processing test results...', 'info', 300)
+
+    // Check the response status first
+    console.log('Test response:', response.data)
+    
+    if (response.data?.status === 'error') {
+      await streamTestPhase(`Test failed: ${response.data.data?.message || response.data.data || 'Unknown error'}`, 'error', 200)
+      testError.value = true
+      showToast('error', 'Test installation failed')
+      return
+    }
+    
+    // Process the actual test results
+    if (response.data?.status === 'success' && response.data?.data) {
+      await streamTestPhase('Analyzing installation results...', 'info', 400)
+      
+      const rawData = response.data.data
+      let parsedResults = []
+      
+      if (typeof rawData === 'string' && rawData.trim().length > 0) {
+        try {
+          const outputText = rawData.includes('}{') ? rawData.replace(/}{/g, '},{') : rawData
+          if (outputText.trim().startsWith('{') || outputText.trim().startsWith('[')) {
+            parsedResults = JSON.parse(outputText.startsWith('[') ? outputText : `[${outputText}]`)
+          } else {
+            parsedResults = [{ status: 'info', message: rawData }]
+          }
+        } catch (jsonError) {
+          console.warn('Failed to parse JSON output:', jsonError)
+          parsedResults = [{ status: 'info', message: rawData }]
+        }
+      }
+      
+      // Stream the parsed results
+      for (const result of parsedResults) {
+        await streamTestPhase(
+          result.message || 'Processing step completed',
+          result.status || 'info',
+          200,
+          result
+        )
+      }
+      
+      // Helper function to detect errors in message content
+      const containsError = (message) => {
+        if (!message || typeof message !== 'string') return false
+        const errorPatterns = /ERROR|FAILED|FATAL|Exception|CRASH|ABORT|terminated|exit code [1-9]/i
+        return errorPatterns.test(message)
+      }
+
+      // Helper function to detect warnings in message content
+      const containsWarning = (message) => {
+        if (!message || typeof message !== 'string') return false
+        const warningPatterns = /WARNING|WARN|deprecated/i
+        return warningPatterns.test(message)
+      }
+      
+      // Determine final status - check both status field AND message content
+      const hasErrors = parsedResults.some(r => 
+        r.status === 'error' || containsError(r.message)
+      )
+      const hasWarnings = parsedResults.some(r => 
+        r.status === 'warning' || containsWarning(r.message)
+      )
+      
+      if (hasErrors) {
+        await streamTestPhase('Test completed with errors', 'error', 300)
+        testError.value = true
+        showToast('error', 'Test failed - check installation logs')
+      } else if (hasWarnings) {
+        await streamTestPhase('Test completed with warnings', 'warning', 300)
+        testError.value = false
+        logsExpanded.value = false
+        showToast('warning', 'Test completed with warnings - review logs but payment is available')
+      } else {
+        await streamTestPhase('Test installation successful!', 'success', 300)
+        testError.value = false
+        logsExpanded.value = false
+        showToast('success', 'Test passed! Application is ready for deployment.')
+      }
+    } else {
+      // Handle other success cases
+      await streamTestPhase('Test installation completed successfully', 'success', 300)
+      testError.value = false
+      logsExpanded.value = false
+      showToast('success', 'Test completed! Application is ready for deployment.')
+    }
+    
+  } catch (error) {
+    await streamTestPhase(`Test failed: ${error.message || 'Unknown error'}`, 'error', 200)
+    testError.value = true
+    showToast('error', 'Test installation failed')
+    console.error('Test error:', error)
+  } finally {
+    testRunning.value = false
+    testFinished.value = true
+    
+    await streamTestPhase('Test process completed', 'info', 200)
+    
+    console.log('Test completed:', {
+      testFinished: testFinished.value,
+      testError: testError.value,
+      testOutput: testOutput.value.length,
+      shouldShowPayment: testFinished.value && !testError.value
+    })
+  }
+}
+
+// Helper function to stream test phases with realistic timing
+async function streamTestPhase(message, status, delay, additionalData = {}) {
+  // Add the message immediately
+  testOutput.value.push({
+    status,
+    message,
+    timestamp: new Date().toISOString(),
+    step: additionalData.step || `step-${testOutput.value.length}`,
+    ...additionalData
+  })
+  
+  // Wait for the delay to simulate processing time
+  if (delay > 0) {
+    await new Promise(resolve => setTimeout(resolve, delay))
+  }
+}
+
+// Force enable payment (fallback for edge cases)
+function forceEnablePayment() {
+  testError.value = false
+  if (!testFinished.value) {
+    testFinished.value = true
+  }
+  showToast('warning', 'Payment manually enabled. Please proceed with caution and ensure your app specifications are correct.')
+  console.log('Payment manually enabled by user')
+}
+
+// Format output for display like local app install format
+function formatOutput(output) {
+  if (!output) return ''
+  
+  // Format like local app install output (similar to the management tab view)
+  let formattedOutput = ''
+  
+  // Add timestamp (like local install logs)
+  if (output.timestamp) {
+    const timestamp = new Date(output.timestamp)
+    formattedOutput += `[${timestamp.toLocaleTimeString()}] `
+  }
+  
+  // Add status indicator (like local install)
+  const status = output.status?.toUpperCase() || 'INFO'
+  const statusSymbol = {
+    'SUCCESS': '✓',
+    'ERROR': '✗', 
+    'WARNING': '⚠',
+    'INFO': 'ℹ'
+  }[status] || 'ℹ'
+  
+  formattedOutput += `${statusSymbol} ${status}: `
+  
+  // Add the main message
+  if (output.message) {
+    formattedOutput += output.message
+  }
+  
+  // Add step information if available
+  if (output.step && output.step !== 'init') {
+    formattedOutput += ` (${output.step})`
+  }
+  
+  // Add container/app information (like local install shows)
+  if (output.containerName || output.appName) {
+    formattedOutput += `\n    App: ${output.containerName || output.appName}`
+  }
+  
+  // Add node information (like local install shows)
+  if (output.node) {
+    formattedOutput += `\n    Node: ${output.node}`
+  }
+  
+  // Add progress if available
+  if (output.progress !== undefined) {
+    formattedOutput += `\n    Progress: ${output.progress}%`
+  }
+  
+  // Add any additional details from nested data
+  if (output.data && typeof output.data === 'object' && output.data !== output) {
+    if (output.data.details) {
+      formattedOutput += `\n    Details: ${output.data.details}`
+    }
+    if (output.data.port) {
+      formattedOutput += `\n    Port: ${output.data.port}`
+    }
+    if (output.data.image) {
+      formattedOutput += `\n    Image: ${output.data.image}`
+    }
+  }
+  
+  return formattedOutput
+}
+
+// Get status color for icons
+function getStatusColor(status) {
+  switch (status) {
+    case 'success': return 'success'
+    case 'error': return 'error'
+    case 'warning': return 'warning'
+    case 'info': return 'info'
+    default: return 'primary'
+  }
+}
+
+// Get status icon
+function getStatusIcon(status) {
+  switch (status) {
+    case 'success': return 'mdi-check-circle'
+    case 'error': return 'mdi-alert-circle'
+    case 'warning': return 'mdi-alert-triangle'
+    case 'info': return 'mdi-information'
+    default: return 'mdi-circle-outline'
+  }
+}
+
+// Payment methods
+async function initStripePay(hash = null, name = null, price = null, description = null) {
+  try {
+    fiatCheckoutURL.value = ''
+    checkoutLoading.value = true
+    const zelidauth = localStorage.getItem('zelidauth')
+    console.log('Stripe - Raw zelidauth:', zelidauth)
+    
+    if (!zelidauth) {
+      showToast('error', 'Authentication required - please login first')
+      checkoutLoading.value = false
+      return
+    }
+    
+    const auth = qs.parse(zelidauth)
+    console.log('Stripe - Parsed auth:', auth)
+    
+    if (!auth.zelid || !auth.signature || !auth.loginPhrase) {
+      showToast('error', 'Invalid authentication data - please login again')
+      checkoutLoading.value = false
+      return
+    }
+    
+    const data = {
+      zelid: auth.zelid,
+      signature: auth.signature,
+      loginPhrase: auth.loginPhrase,
+      details: {
+        name: name || appDetails.name,
+        description: description || appDetails.description,
+        hash: hash || registrationHash.value,
+        price: price || appSpecPrice.value?.usd || 0,
+        productName: name || appDetails.name,
+        success_url: `${window.location.origin}/successcheckout`,
+        cancel_url: window.location.origin,
+        kpi: {
+          origin: 'FluxOS',
+          marketplace: false,
+          registration: true
+        }
+      }
+    }
+    
+    // Get final values to use
+    const finalHash = hash || registrationHash.value
+    const finalName = name || appDetails.name
+    const finalDescription = description || appDetails.description  
+    const finalPrice = price || appSpecPrice.value?.usd || 0
+    
+    // Validate required fields
+    if (!finalHash) {
+      showToast('error', 'Registration hash required - please register application first')
+      checkoutLoading.value = false
+      return
+    }
+    
+    if (!finalPrice || finalPrice <= 0) {
+      showToast('error', 'Invalid price - please calculate price first')
+      checkoutLoading.value = false
+      return
+    }
+    
+    if (!finalName) {
+      showToast('error', 'Application name required')
+      checkoutLoading.value = false
+      return
+    }
+    
+    console.log('Stripe checkout request data:', JSON.stringify(data, null, 2))
+    console.log('Stripe - appDetails:', appDetails)
+    console.log('Stripe - registrationHash:', registrationHash.value)
+    console.log('Stripe - appSpecPrice:', appSpecPrice.value)
+    const checkoutURL = await axios.post(`${paymentBridge}/api/v1/stripe/checkout/create`, data)
+    console.log('Stripe checkout response:', checkoutURL.data)
+    if (checkoutURL.data.status === 'error') {
+      console.error('Stripe checkout error:', checkoutURL.data)
+      showToast('error', `Stripe checkout failed: ${checkoutURL.data.message || checkoutURL.data.data || 'Unknown error'}`)
+      checkoutLoading.value = false
+      return
+    }
+    fiatCheckoutURL.value = checkoutURL.data.data
+    checkoutLoading.value = false
+    
+    // Track payment attempt
+    paymentMethod.value = 'Stripe'
+    paymentAmount.value = finalPrice
+    
+    try {
+      window.open(checkoutURL.data.data, '_blank', 'width=800,height=600,scrollbars=yes,resizable=yes')
+    } catch (error) {
+      console.log(error)
+      showToast('error', 'Failed to open Stripe checkout, pop-up blocked?')
+    }
+  } catch (error) {
+    console.error('Stripe checkout network error:', error)
+    console.error('Stripe error response:', error.response?.data)
+    const errorMessage = error.response?.data?.message || error.response?.data?.data || error.message || 'Connection failed'
+    showToast('error', `Stripe checkout error: ${errorMessage}`)
+    checkoutLoading.value = false
+  }
+}
+
+async function initPaypalPay(hash = null, name = null, price = null, description = null) {
+  try {
+    fiatCheckoutURL.value = ''
+    checkoutLoading.value = true
+    let clientIP = null
+    let clientIPResponse = await axios.get('https://api.ipify.org?format=json').catch(() => {
+      console.log('Error geting clientIp from api.ipify.org from')
+    })
+    if (clientIPResponse && clientIPResponse.data && clientIPResponse.data.ip) {
+      clientIP = clientIPResponse.data.ip
+    } else {
+      clientIPResponse = await axios.get('https://ipinfo.io').catch(() => {
+        console.log('Error geting clientIp from ipinfo.io from')
+      })
+      if (clientIPResponse && clientIPResponse.data && clientIPResponse.data.ip) {
+        clientIP = clientIPResponse.data.ip
+      } else {
+        clientIPResponse = await axios.get('https://api.ip2location.io').catch(() => {
+          console.log('Error geting clientIp from api.ip2location.io from')
+        })
+        if (clientIPResponse && clientIPResponse.data && clientIPResponse.data.ip) {
+          clientIP = clientIPResponse.data.ip
+        }
+      }
+    }
+    const zelidauth = localStorage.getItem('zelidauth')
+    console.log('PayPal - Raw zelidauth:', zelidauth)
+    
+    if (!zelidauth) {
+      showToast('error', 'Authentication required - please login first')
+      checkoutLoading.value = false
+      return
+    }
+    
+    const auth = qs.parse(zelidauth)
+    console.log('PayPal - Parsed auth:', auth)
+    
+    if (!auth.zelid || !auth.signature || !auth.loginPhrase) {
+      showToast('error', 'Invalid authentication data - please login again')
+      checkoutLoading.value = false
+      return
+    }
+    
+    const data = {
+      zelid: auth.zelid,
+      signature: auth.signature,
+      loginPhrase: auth.loginPhrase,
+      details: {
+        clientIP,
+        name: name || appDetails.name,
+        description: description || appDetails.description,
+        hash: hash || registrationHash.value,
+        price: price || appSpecPrice.value?.usd || 0,
+        productName: name || appDetails.name,
+        return_url: `${window.location.host}/successcheckout`,
+        cancel_url: window.location.host,
+        kpi: {
+          origin: 'FluxOS',
+          marketplace: false,
+          registration: true
+        }
+      }
+    }
+    
+    // Get final values to use
+    const finalHash = hash || registrationHash.value
+    const finalName = name || appDetails.name
+    const finalDescription = description || appDetails.description  
+    const finalPrice = price || appSpecPrice.value?.usd || 0
+    
+    // Validate required fields
+    if (!finalHash) {
+      showToast('error', 'Registration hash required - please register application first')
+      checkoutLoading.value = false
+      return
+    }
+    
+    if (!finalPrice || finalPrice <= 0) {
+      showToast('error', 'Invalid price - please calculate price first')
+      checkoutLoading.value = false
+      return
+    }
+    
+    if (!finalName) {
+      showToast('error', 'Application name required')
+      checkoutLoading.value = false
+      return
+    }
+    
+    console.log('PayPal checkout request data:', JSON.stringify(data, null, 2))
+    console.log('PayPal - appDetails:', appDetails)
+    console.log('PayPal - registrationHash:', registrationHash.value)
+    console.log('PayPal - appSpecPrice:', appSpecPrice.value)
+    const checkoutURL = await axios.post(`${paymentBridge}/api/v1/paypal/checkout/create`, data)
+    console.log('PayPal checkout response:', checkoutURL.data)
+    if (checkoutURL.data.status === 'error') {
+      console.error('PayPal checkout error:', checkoutURL.data)
+      showToast('error', `PayPal checkout failed: ${checkoutURL.data.message || checkoutURL.data.data || 'Unknown error'}`)
+      checkoutLoading.value = false
+      return
+    }
+    fiatCheckoutURL.value = checkoutURL.data.data
+    checkoutLoading.value = false
+    
+    // Track payment attempt  
+    paymentMethod.value = 'PayPal'
+    paymentAmount.value = finalPrice
+    
+    try {
+      window.open(checkoutURL.data.data, '_blank', 'width=800,height=600,scrollbars=yes,resizable=yes')
+    } catch (error) {
+      console.log(error)
+      showToast('error', 'Failed to open PayPal checkout, pop-up blocked?')
+    }
+  } catch (error) {
+    console.error('PayPal checkout network error:', error)
+    console.error('PayPal error response:', error.response?.data)
+    const errorMessage = error.response?.data?.message || error.response?.data?.data || error.message || 'Connection failed'
+    showToast('error', `PayPal checkout error: ${errorMessage}`)
+    checkoutLoading.value = false
+  }
+}
+
+async function initZelcorePay() {
+  try {
+    const protocol = `zel:?action=pay&coin=zelcash&address=${deploymentAddress.value}&amount=${appSpecPrice.value?.flux || 0}&message=${registrationHash.value}`
+    
+    // Track payment attempt
+    paymentMethod.value = 'Zelcore'
+    paymentAmount.value = appSpecPrice.value?.flux || 0
+    
+    const a = document.createElement('a')
+    a.href = protocol
+    a.style.display = 'none'
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    
+    showToast('info', 'Zelcore payment initiated - please complete payment in Zelcore wallet')
+  } catch (error) {
+    showToast('error', 'Failed to open Zelcore')
+  }
+}
+
+async function initSSPPay() {
+  try {
+    if (!window.ssp) {
+      showToast('error', 'SSP Wallet not installed')
+      return
+    }
+    
+    // Track payment attempt
+    paymentMethod.value = 'SSP'
+    paymentAmount.value = appSpecPrice.value?.flux || 0
+    
+    const data = {
+      message: registrationHash.value,
+      amount: (appSpecPrice.value?.flux || 0).toString(),
+      address: deploymentAddress.value,
+      chain: 'flux',
+    }
+    
+    const response = await window.ssp.request('pay', data)
+    if (response.status === 'ERROR') {
+      throw new Error(response.data || response.result)
+    } else {
+      showToast('success', `SSP payment initiated: ${response.txid}`)
+      // Note: For crypto payments, we show as "processing" since we need to wait for blockchain confirmation
+    }
+  } catch (error) {
+    showToast('error', error.message)
+    // Reset payment tracking if payment failed
+    paymentMethod.value = ''
+    paymentAmount.value = 0
+  }
+}
+
+async function initWalletConnect() {
+  try {
+    if (!signClient.value) {
+      showToast('error', 'WalletConnect not initialized. Please connect using the Sign tab first.')
+      return
+    }
+    const sessions = signClient.value.session.getAll()
+    const lastKeyIndex = sessions.length - 1
+    const lastSession = sessions[lastKeyIndex]
+    if (lastSession) {
+      showToast('success', 'Using existing WalletConnect session for signing')
+      // This would be for signing, not payment - WalletConnect in RegisterFluxApp is used for signing
+    } else {
+      showToast('error', 'WalletConnect session expired. Please log into FluxOS again')
+    }
+  } catch (error) {
+    console.error(error)
+    showToast('error', error.message)
+  }
+}
+
+async function initMetamask() {
+  try {
+    if (!window.ethereum) {
+      showToast('error', 'Metamask not detected')
+      return
+    }
+    const account = await window.ethereum.request({
+      method: 'eth_requestAccounts'
+    })
+    if (account.length === 0) {
+      showToast('error', 'No account selected')
+      return
+    }
+    // This would be for signing the message
+    await siwe(dataToSign.value, account[0])
+  } catch (error) {
+    showToast('error', error.message)
+  }
 }
 
 // === Sign with FluxSSO ===
@@ -3743,6 +5141,221 @@ async function signMethod() {
 
 
 <style scoped>
+/* Installation output styling */
+.installation-step {
+  border-bottom: 1px solid rgba(var(--v-border-color), 0.12);
+}
+
+.installation-step:last-child {
+  border-bottom: none;
+}
+
+.installation-output {
+  font-family: 'Roboto Mono', monospace;
+  font-size: 13px;
+  line-height: 1.4;
+  white-space: pre-wrap;
+  margin: 0;
+  padding: 8px 0;
+}
+
+/* Payment section styling */
+.payment-info-card, .price-card, .payment-method-card {
+  border-radius: 12px;
+  overflow: hidden;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.payment-method-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
+}
+
+.bg-gradient-info {
+  background: linear-gradient(135deg, #17a2b8 0%, #20c997 100%);
+}
+
+.bg-gradient-primary {
+  background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+}
+
+.bg-gradient-success {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+}
+
+.bg-gradient-warning {
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+}
+
+.price-display {
+  padding: 16px 0;
+}
+
+.price-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.price-amount {
+  line-height: 1.2;
+}
+
+.price-label {
+  font-weight: 500;
+  letter-spacing: 0.5px;
+}
+
+.payment-btn {
+  width: 100%;
+  justify-content: space-between;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+  transition: all 0.2s ease;
+}
+
+.payment-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.payment-details {
+  background: rgba(var(--v-theme-surface), 0.5);
+  border-radius: 8px;
+}
+
+.card-disabled {
+  opacity: 0.7;
+  pointer-events: none;
+}
+
+.payment-methods {
+  gap: 24px;
+}
+
+/* Payment brand logos */
+.payment-logo {
+  height: 20px;
+  width: auto;
+  max-width: 24px;
+  object-fit: contain;
+}
+
+/* Specific button styling for brands */
+.paypal-btn {
+  background: linear-gradient(135deg, #0070ba 0%, #003087 100%) !important;
+  color: white !important;
+}
+
+.stripe-btn {
+  background: linear-gradient(135deg, #635bff 0%, #5469d4 100%) !important;
+  color: white !important;
+}
+
+.zelcore-btn {
+  background: linear-gradient(135deg, #1e88e5 0%, #1565c0 100%) !important;
+  color: white !important;
+}
+
+.ssp-btn {
+  background: linear-gradient(135deg, #9c27b0 0%, #7b1fa2 100%) !important;
+  color: white !important;
+}
+
+.metamask-btn {
+  background: linear-gradient(135deg, #f6851b 0%, #e2761b 100%) !important;
+  color: white !important;
+}
+
+.walletconnect-btn {
+  background: linear-gradient(135deg, #3b99fc 0%, #1a73e8 100%) !important;
+  color: white !important;
+}
+
+/* Button hover effects with brand colors */
+.paypal-btn:hover {
+  background: linear-gradient(135deg, #005ea6 0%, #002c5f 100%) !important;
+}
+
+.stripe-btn:hover {
+  background: linear-gradient(135deg, #5a52ff 0%, #4c63d2 100%) !important;
+}
+
+.zelcore-btn:hover {
+  background: linear-gradient(135deg, #1976d2 0%, #1565c0 100%) !important;
+}
+
+.ssp-btn:hover {
+  background: linear-gradient(135deg, #8e24aa 0%, #6a1b9a 100%) !important;
+}
+
+.metamask-btn:hover {
+  background: linear-gradient(135deg, #e2761b 0%, #cd6116 100%) !important;
+}
+
+.walletconnect-btn:hover {
+  background: linear-gradient(135deg, #1a73e8 0%, #1565c0 100%) !important;
+}
+
+/* Discount section styling */
+.discount-section {
+  animation: discountPulse 2s ease-in-out infinite;
+}
+
+/* Payment option styling */
+.payment-option {
+  display: inline-block;
+  margin: 5px;
+}
+
+.payment-link {
+  cursor: pointer;
+  display: block;
+  transition: transform 0.2s ease;
+}
+
+.payment-link:hover {
+  transform: scale(1.05);
+}
+
+/* Wallet and payment icon styling matching reference */
+.wallet-icon {
+  height: 90px;
+  width: 90px;
+  padding: 10px;
+  transition: 0.1s;
+}
+
+.payment-icon.stripe-pay {
+  margin-left: 5px;
+  height: 90px;
+  padding: 10px;
+  transition: 0.1s;
+}
+
+.payment-icon.paypal-pay {
+  margin-left: 5px;
+  height: 90px;
+  padding: 10px;
+  transition: 0.1s;
+}
+
+.discount-chip {
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+@keyframes discountPulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.02);
+  }
+}
+
 .border-frame {
   border: 1px solid #ccc;
   border-radius: 8px;
@@ -3805,6 +5418,29 @@ async function signMethod() {
   color: white !important;
 }
 
+.test-output {
+  background-color: #1e1e1e;
+  color: #d4d4d4;
+  padding: 1rem;
+  border-radius: 4px;
+  max-height: 400px;
+  overflow-y: auto;
+  font-family: 'Courier New', monospace;
+  font-size: 0.875rem;
+}
+
+.output-error {
+  color: #f48771;
+}
+
+.output-warning {
+  color: #ffcc00;
+}
+
+.output-success {
+  color: #89d185;
+}
+
 .review-header {
   border: 1px solid #ccc;
   border-radius: 8px;
@@ -3833,5 +5469,201 @@ async function signMethod() {
   align-items: center;
   gap: 4px; /* space between buttons */
   white-space: nowrap; /* prevent wrapping */
+}
+
+/* Modern Payment Methods Styling */
+.payment-methods-container {
+  margin-top: 2rem;
+  padding: 0 1rem;
+}
+
+.payment-method-card {
+  border-radius: 16px !important;
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border: 2px solid #e5e7eb !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.v-theme--dark .payment-method-card {
+  border-color: #4b5563 !important;
+}
+
+.payment-method-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.1);
+  border-color: rgba(var(--v-theme-primary), 0.2);
+}
+
+.payment-header {
+  padding: 1.5rem !important;
+  border-radius: 16px 16px 0 0 !important;
+  background: linear-gradient(135deg, var(--v-theme-primary) 0%, var(--v-theme-primary-darken-1) 100%) !important;
+}
+
+.payment-header.bg-gradient-warning {
+  background: linear-gradient(135deg, var(--v-theme-warning) 0%, var(--v-theme-warning-darken-1) 100%) !important;
+}
+
+/* Payment Icons Grid */
+.payment-icons-grid {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.payment-icon-card {
+  border-radius: 16px !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+  width: 180px;
+  height: 120px;
+  flex: 0 0 180px;
+  position: relative;
+  overflow: hidden;
+}
+
+.payment-icon-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+  transition: left 0.6s ease;
+}
+
+.payment-icon-card:hover {
+  transform: translateY(-4px) scale(1.02);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.15);
+  border-width: 3px !important;
+}
+
+.payment-icon-card:hover::before {
+  left: 100%;
+}
+
+.payment-icon-card:active {
+  transform: translateY(-2px) scale(1.01);
+}
+
+.payment-brand-icon {
+  height: 80px;
+  width: auto;
+  max-width: 180px;
+  object-fit: contain;
+  transition: all 0.3s ease;
+  filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.1));
+  display: block;
+  margin: 0 auto;
+  transform: translateY(-2px);
+}
+
+.payment-icon-card:hover .payment-brand-icon {
+  transform: translateY(-2px) scale(1.1);
+  filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.2));
+}
+
+/* Wallet Icons Grid */
+.wallet-icons-grid {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.wallet-icon-card {
+  border-radius: 12px !important;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  min-width: 140px;
+  min-height: 140px;
+  border: 2px solid rgba(var(--v-theme-outline), 0.2);
+}
+
+.wallet-icon-card:hover {
+  transform: scale(1.05);
+  border-color: rgba(var(--v-theme-warning), 0.5);
+  box-shadow: 0 8px 24px rgba(var(--v-theme-warning), 0.15);
+}
+
+.wallet-brand-icon {
+  height: 72px;
+  width: 72px;
+  object-fit: contain;
+}
+
+/* Responsive Design */
+@media (max-width: 960px) {
+  .payment-methods-container {
+    padding: 0 0.5rem;
+  }
+  
+  .payment-method-card {
+    margin-bottom: 1rem;
+  }
+  
+  .payment-icons-grid,
+  .wallet-icons-grid {
+    gap: 0.75rem;
+  }
+  
+  .payment-icon-card {
+    width: 160px;
+    height: 110px;
+    flex: 0 0 160px;
+  }
+  
+  .wallet-icon-card {
+    min-width: 120px;
+  }
+}
+
+@media (max-width: 600px) {
+  .payment-header {
+    padding: 1rem !important;
+  }
+  
+  .payment-icons-grid,
+  .wallet-icons-grid {
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  
+  .payment-icon-card {
+    width: 100%;
+    max-width: 280px;
+    height: 100px;
+    flex: none;
+  }
+  
+  .payment-icon-card .v-card-text {
+    padding: 0.75rem !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    height: 100% !important;
+    box-sizing: border-box !important;
+  }
+  
+  .payment-icon-card .payment-brand-icon {
+    height: 60px !important;
+    max-width: 150px !important;
+    transform: translateY(2px) !important;
+  }
+  
+  .wallet-icon-card {
+    width: 100%;
+    max-width: 200px;
+  }
+}
+
+/* Card disabled state */
+.card-disabled {
+  opacity: 0.6;
+  pointer-events: none;
 }
 </style>

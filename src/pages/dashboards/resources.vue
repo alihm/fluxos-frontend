@@ -27,8 +27,8 @@
                 mdi-memory
               </VIcon>
             </VAvatar>
-            <h2 class="mt-2 text-h4">
-              Total Cores: {{ beautifyValue(totalCores, 0) }}
+            <h2 class="mt-2 text-h5 d-inline-block ml-2">
+              Cores: {{ beautifyValue(totalCores, 0) }}
             </h2>
             <VueApexCharts
               ref="chart1"
@@ -66,8 +66,8 @@
                 mdi-database-outline
               </VIcon>
             </VAvatar>
-            <h2 class="mt-2 text-h4">
-              Total RAM: {{ beautifyValue(totalRAM / 1024, 2) }} TB
+            <h2 class="mt-2 text-h5 d-inline-block ml-2">
+              RAM: {{ beautifyValue(totalRAM / 1024, 2) }} TB
             </h2>
             <VueApexCharts
               ref="chart2"
@@ -105,8 +105,8 @@
                 tabler-server
               </VIcon>
             </VAvatar>
-            <h2 class="mt-2 text-h4">
-              Total SSD: {{ beautifyValue(totalSSD / 1000000, 2) }} PB
+            <h2 class="mt-2 text-h5 d-inline-block ml-2">
+              SSD: {{ beautifyValue(totalSSD / 1000000, 2) }} PB
             </h2>
             <VueApexCharts
               ref="chart3"
@@ -144,8 +144,8 @@
                 mdi-harddisk
               </VIcon>
             </VAvatar>
-            <h2 class="mt-2 text-h4">
-              Total HDD: {{ beautifyValue(totalHDD / 1000, 2) }} TB
+            <h2 class="mt-2 text-h5 d-inline-block ml-2">
+              HDD: {{ beautifyValue(totalHDD / 1000, 2) }} TB
             </h2>
             <VueApexCharts
               ref="chart4"
@@ -185,7 +185,7 @@
                 mdi-memory
               </VIcon>
             </VAvatar>
-            <h2 class="mt-2 text-h4">
+            <h2 class="mt-2 text-h5 d-inline-block ml-2">
               CPU History
             </h2>
           </VCardText>
@@ -225,7 +225,7 @@
                 mdi-database-outline
               </VIcon>
             </VAvatar>
-            <h2 class="mt-2 text-h4">
+            <h2 class="mt-2 text-h5 d-inline-block ml-2">
               RAM History
             </h2>
           </VCardText>
@@ -265,7 +265,7 @@
                 mdi-harddisk
               </VIcon>
             </VAvatar>
-            <h2 class="mt-2 text-h4">
+            <h2 class="mt-2 text-h5 d-inline-block ml-2">
               Storage History
             </h2>
           </VCardText>
@@ -571,7 +571,6 @@ const ramHistoryData = ref({
       },
     ],
     tooltip: {
-      followCursor: true,
       custom: undefined,
       x: {
         formatter: value => new Date(value).toLocaleString("en-GB", timeoptions),
@@ -970,5 +969,30 @@ onMounted(async () => {
 .overlay {
   backdrop-filter: blur(5px);
   -webkit-backdrop-filter: blur(5px);
+}
+
+/* Allow ApexCharts tooltip to overflow container */
+:deep(.apexcharts-tooltip) {
+  position: absolute !important;
+  pointer-events: none !important;
+  white-space: nowrap !important;
+}
+
+/* Ensure chart containers don't clip tooltips */
+:deep(.v-card) {
+  overflow: unset !important;
+}
+
+:deep(.v-card__text) {
+  overflow: unset !important;
+}
+
+/* Ensure the chart wrapper doesn't clip */
+:deep(.vue-apexcharts) {
+  overflow: unset !important;
+}
+
+:deep(.apexcharts-canvas) {
+  overflow: unset !important;
 }
 </style>
