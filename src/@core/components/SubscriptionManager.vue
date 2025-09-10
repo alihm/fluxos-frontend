@@ -3805,6 +3805,12 @@ watch(tab, async newVal => {
     blockHeight.value = null
     isExpiryValid.value = false
     blocksToExpire.value = null
+    registrationHash.value = null
+    isPropagating.value = false
+    testError.value = false
+    testFinished.value = false
+    testRunning.value = false
+    testOutput.value = []
 
     hasValidatedSpec.value = false
     hasCheckedExpiry.value = false
