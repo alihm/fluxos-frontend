@@ -576,6 +576,7 @@
 
                 <VolumePathBuilder
                   :componentIndex="componentIndex"
+                  :newApp="props.newApp"
                   v-model="appSpec.compose[componentIndex].containerData"
                 />
 

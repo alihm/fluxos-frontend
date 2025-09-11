@@ -205,11 +205,11 @@
               <div class="mb-4">
                 <VCheckbox
                   v-model="syncEnabled"
-                  label="Synchronize data across components"
+                  label="Synchronize data across instances"
                   @change="calculateCost"
                 />
                 <p class="text-body-2 text-medium-emphasis ml-8">
-                  Keep resource specifications synchronized across all components
+                  Enable data sync using Phased Master-Master (r) or Master-Slave (g) modes with shared storage (g:/data). When disabled, each instance uses its own isolated persistent storage (/tmp)
                 </p>
               </div>
             </div>
@@ -346,7 +346,7 @@
               v-if="fluxUsdRate"
               class="mt-4 text-caption text-medium-emphasis"
             >
-              *USD prices are calculated by the API and may vary slightly from estimated 1 Flux = ${{ fluxUsdRate.toFixed(2) }} USD
+              *Estimated 1 Flux = ${{ fluxUsdRate.toFixed(2) }} USD
             </div>
           </VCardText>
         </VCard>
@@ -571,6 +571,25 @@ const helpItems = [
       for example, a front end (node.js, html, css) and a backend (mongodb) that is classed as two components.</p>
       <p>Therefore the estimated component cost should be multiplied by how many docker images your project uses.</p>`,
   },
+  {
+    question: 'What does "Synchronize data across instances" mean?',
+    answer: `<p><strong>"Synchronize data across instances"</strong> enables data synchronization across all instances of your application using either Phased Master-Master (r) or Master-Slave (g) mode.</p>
+      <p><strong>When enabled (g:/data):</strong></p>
+      <ul>
+        <li><strong>Phased Master-Master (r):</strong> Controlled two-way sync that prevents data overwrites during startup</li>
+        <li><strong>Master-Slave (g):</strong> One-way sync from master instance to others for consistent read-only data</li>
+        <li>Shared persistent storage that survives instance restarts</li>
+        <li>Perfect for applications that need shared state, configuration, or file storage</li>
+      </ul>
+      <br>
+      <p><strong>When disabled (/tmp):</strong></p>
+      <ul>
+        <li>Each instance has its own isolated persistent storage</li>
+        <li>No data sharing between instances</li>
+        <li>Each node maintains its own independent data that persists across restarts</li>
+        <li>Better for applications where instances should operate independently</li>
+      </ul>`,
+  },
 ]
 
 // Methods
@@ -742,6 +761,7 @@ const openHelpDialog = item => {
   helpDialog.item = item
   helpDialog.show = true
 }
+
 
 const fetchFluxPrice = async () => {
   try {

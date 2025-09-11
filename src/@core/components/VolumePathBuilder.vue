@@ -5,18 +5,29 @@ import { v4 as uuid } from 'uuid'
 const props = defineProps({
   modelValue: String,
   componentIndex: Number,
+  newApp: Boolean,
 })
 
 const emit = defineEmits(['update:modelValue'])
 
 const expandedPanels = ref([])
 
-const baseSyncModes = [
-  { value: '', label: 'None' },
-  { value: 's', label: 'Master-Master (s)' },
-  { value: 'r', label: 'Phased Master-Master (r)' },
-  { value: 'g', label: 'Master-Slave (g)' },
-]
+const getBaseSyncModes = () => {
+  const modes = [
+    { value: '', label: 'None' },
+    { value: 'r', label: 'Phased Master-Master (r)' },
+    { value: 'g', label: 'Master-Slave (g)' },
+  ]
+  
+  // Only include 's' mode if it's already being used in the existing data
+  if (!props.newApp && props.modelValue && props.modelValue.includes('s:')) {
+    modes.splice(1, 0, { value: 's', label: 'Master-Master (s)' })
+  }
+  
+  return modes
+}
+
+const baseSyncModes = computed(() => getBaseSyncModes())
 
 const normalize = p =>
   '/' + p.replace(/^\/+/, '').replace(/\/+$/, '').replace(/\/+/g, '/')
@@ -36,7 +47,7 @@ function getAllowedMountModes() {
 }
 
 function getAllModes() {
-  return [...baseSyncModes, ...getAllowedMountModes()]
+  return [...baseSyncModes.value, ...getAllowedMountModes()]
 }
 
 const entries = ref([])
@@ -60,7 +71,7 @@ function parseInitialValue(containerData) {
 onMounted(() => {
   entries.value = parseInitialValue(props.modelValue)
   if (entries.value.length === 0) {
-    entries.value.push({ id: uuid(), mode: baseSyncModes[0], path: '' })
+    entries.value.push({ id: uuid(), mode: baseSyncModes.value[0], path: '' })
   } else {
     entries.value.forEach(e => {
       e.path = normalize(e.path || '')
@@ -82,10 +93,10 @@ function normalizePath(index) {
 function getAvailableModes(index) {
   const mountModes = getAllowedMountModes()
   const firstModeVal = entries.value[0]?.mode?.value || entries.value[0]?.mode || ''
-  if (index === 0) return [...baseSyncModes, ...mountModes]
+  if (index === 0) return [...baseSyncModes.value, ...mountModes]
   if (['s', 'r', 'g'].includes(firstModeVal)) return mountModes
   
-  return [...baseSyncModes.filter(m => m.value !== ''), ...mountModes]
+  return [...baseSyncModes.value.filter(m => m.value !== ''), ...mountModes]
 }
 
 const baseIsMount = computed(() => {
@@ -205,7 +216,7 @@ function addEntry() {
     ? entries.value[0]?.mode?.value
     : entries.value[0]?.mode
   const isLocked = ['s', 'r', 'g'].includes(firstMode)
-  const defaultMode = getAvailableModes(entries.value.length).find(m => m.value === (isLocked ? '0' : '')) || baseSyncModes[1]
+  const defaultMode = getAvailableModes(entries.value.length).find(m => m.value === (isLocked ? '0' : '')) || baseSyncModes.value[1]
   entries.value.push({ id: uuid(), mode: defaultMode, path: '' })
 }
 
