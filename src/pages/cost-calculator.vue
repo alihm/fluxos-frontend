@@ -39,16 +39,21 @@
         md="6"
       >
         <VCard>
-          <VCardTitle>Configuration</VCardTitle>
-          <VCardText>
+          <VCardTitle class="bg-primary text-white">Configuration</VCardTitle>
+          <VCardText class="pt-6">
             <!-- Instances -->
             <div class="mb-6">
-              <label class="text-body-1 font-weight-medium mb-2 d-block">
-                How many instances will you be running?
-              </label>
-              <p class="text-body-2 text-medium-emphasis mb-3">
-                (min 3 / max 100) 1 Instance = 1 Node
-              </p>
+              <div class="d-flex align-start mb-2">
+                <VIcon icon="mdi-server-network" color="primary" size="28" class="mr-3" />
+                <div>
+                  <div class="text-h6 font-weight-bold">
+                    How many instances will you be running?
+                  </div>
+                  <p class="text-body-2 text-medium-emphasis mb-0 mt-1">
+                    (min 3 / max 100) 1 Instance = 1 Node
+                  </p>
+                </div>
+              </div>
               <VTextField
                 v-model.number="formData.instances"
                 type="number"
@@ -66,12 +71,17 @@
 
             <!-- Renewal Period -->
             <div class="mb-6">
-              <label class="text-body-1 font-weight-medium mb-2 d-block">
-                Renewal period
-              </label>
-              <p class="text-body-2 text-medium-emphasis mb-3">
-                (Manual renewal required)
-              </p>
+              <div class="d-flex align-start mb-2">
+                <VIcon icon="mdi-calendar-clock" color="primary" size="28" class="mr-3" />
+                <div>
+                  <div class="text-h6 font-weight-bold">
+                    Renewal period
+                  </div>
+                  <p class="text-body-2 text-medium-emphasis mb-0 mt-1">
+                    (Manual renewal required)
+                  </p>
+                </div>
+              </div>
               <VSelect
                 v-model="formData.expire"
                 :items="renewalOptions"
@@ -81,14 +91,23 @@
 
             <VDivider class="my-6" />
 
-            <!-- CPU Cores -->
-            <div class="mb-4">
-              <div class="text-body-1 font-weight-medium">
-                How many cores do you require?
+            <!-- Hardware Resources Section -->
+            <div class="mb-6">
+              <div class="d-flex align-center mb-4">
+                <VIcon icon="mdi-memory" color="primary" size="32" class="mr-3" />
+                <h4 class="text-h5 font-weight-bold mb-0">
+                  Hardware Resources
+                </h4>
               </div>
-              <div class="text-body-2 text-medium-emphasis">
-                (min 0.1 / max 15.0)
-              </div>
+              
+              <!-- CPU Cores -->
+              <div class="mb-4 ml-2">
+                  <div class="text-h6 font-weight-bold">
+                    How many cores do you require?
+                  </div>
+                <div class="text-body-2 text-medium-emphasis">
+                  (min 0.1 / max 15.0)
+                </div>
               <div class="d-flex justify-end" style="transform: translateY(-8px);">
                 <VChip
                   color="success"
@@ -112,8 +131,8 @@
             </div>
 
             <!-- Memory -->
-            <div class="mb-4">
-              <div class="text-body-1 font-weight-medium">
+            <div class="mb-4 ml-2">
+              <div class="text-h6 font-weight-bold">
                 How much memory will your app need?
               </div>
               <div class="text-body-2 text-medium-emphasis">
@@ -142,8 +161,8 @@
             </div>
 
             <!-- Storage -->
-            <div class="mb-4">
-              <div class="text-body-1 font-weight-medium">
+            <div class="mb-4 ml-2">
+              <div class="text-h6 font-weight-bold">
                 How much storage would you like?
               </div>
               <div class="text-body-2 text-medium-emphasis">
@@ -170,13 +189,18 @@
                 @update:model-value="calculateCost"
               />
             </div>
-
+            </div>
 
             <VDivider class="my-6" />
 
             <!-- Enterprise Options -->
             <div class="mb-6">
-              <h4 class="text-h6 font-weight-bold mb-4">Additional Options</h4>
+              <div class="d-flex align-center mb-4">
+                <VIcon icon="mdi-tune-variant" color="primary" size="32" class="mr-3" />
+                <h4 class="text-h5 font-weight-bold mb-0">
+                  Additional Options
+                </h4>
+              </div>
               
               <!-- Enterprise App -->
               <div class="mb-4">
@@ -215,7 +239,7 @@
                   @change="calculateCost"
                 />
                 <p class="text-body-2 text-medium-emphasis ml-8">
-                  Enable data sync using Phased Master-Master (r) or Master-Slave (g) modes with shared storage (g:/data). When disabled, each instance uses its own isolated persistent storage (/tmp)
+                  Enable data sync using Phased Master-Master (r) or Master-Slave (g) modes with shared storage. When disabled, each instance uses its own isolated persistent storage
                 </p>
               </div>
             </div>
@@ -308,10 +332,10 @@
         md="6"
       >
         <VCard>
-          <VCardTitle>Preset Configurations</VCardTitle>
-          <VCardText>
+          <VCardTitle class="bg-primary text-white">Preset Configurations</VCardTitle>
+          <VCardText class="pt-6">
             <VTable 
-              class="preset-table"
+              class="preset-table border"
               density="compact"
               hover
             >
@@ -335,7 +359,10 @@
                   <td class="text-no-wrap">{{ preset.ram }}GB</td>
                   <td class="text-no-wrap">{{ preset.ssd }}GB</td>
                   <td class="text-no-wrap">
-                    <div class="text-body-2 text-primary">{{ preset.flux }} FLUX</div>
+                    <div class="text-body-2 text-primary">
+                      <template v-if="preset.flux === '...'">...</template>
+                      <template v-else>{{ preset.flux }} FLUX</template>
+                    </div>
                     <div 
                       v-if="preset.usd && typeof preset.usd === 'number'"
                       class="text-caption text-medium-emphasis text-success"
@@ -539,7 +566,7 @@ const presets = ref([
     cpu: 0.1,
     ram: 0.1,
     ssd: 1,
-    flux: 'Calculating...',
+    flux: '...',
   },
   {
     id: 3,
@@ -547,7 +574,7 @@ const presets = ref([
     cpu: 5,
     ram: 5,
     ssd: 50,
-    flux: 'Calculating...',
+    flux: '...',
   },
   {
     id: 5,
@@ -555,7 +582,7 @@ const presets = ref([
     cpu: 15,
     ram: 59,
     ssd: 840,
-    flux: 'Calculating...',
+    flux: '...',
   },
   {
     id: 6,
@@ -563,7 +590,7 @@ const presets = ref([
     cpu: 10,
     ram: 10,
     ssd: 100,
-    flux: 'Calculating...',
+    flux: '...',
   },
   {
     id: 7,
@@ -571,7 +598,7 @@ const presets = ref([
     cpu: 5,
     ram: 10,
     ssd: 100,
-    flux: 'Calculating...',
+    flux: '...',
   },
   {
     id: 10,
@@ -579,7 +606,7 @@ const presets = ref([
     cpu: 10,
     ram: 40,
     ssd: 500,
-    flux: 'Calculating...',
+    flux: '...',
   },
   {
     id: 11,
@@ -587,7 +614,7 @@ const presets = ref([
     cpu: 15,
     ram: 59,
     ssd: 840,
-    flux: 'Calculating...',
+    flux: '...',
   },
 ])
 
@@ -961,6 +988,42 @@ definePage({
 </script>
 
 <style scoped>
+/* Force white text on primary background for both themes */
+.bg-primary.text-white {
+  color: white !important;
+}
+
+.v-theme--dark .bg-primary.text-white,
+.v-theme--light .bg-primary.text-white {
+  color: white !important;
+}
+
+/* Rounded table with borders */
+.preset-table {
+  border-radius: 8px !important;
+  overflow: hidden;
+  width: 100%;
+  table-layout: fixed;
+}
+
+.preset-table td,
+.preset-table th {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.preset-table th:nth-child(5),
+.preset-table td:nth-child(5) {
+  min-width: 70px;
+  max-width: 90px;
+}
+
+.preset-table.border {
+  border: 1px solid rgba(var(--v-border-color), var(--v-border-opacity));
+  border-radius: 8px !important;
+}
+
 .cost-calculator-page {
   padding: 5px 24px 24px 24px;
 }
