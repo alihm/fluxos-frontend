@@ -205,13 +205,16 @@
               
               <div class="mb-4 ml-2">
                 <VTextField
-                  v-model="formData.ports"
-                  label="Exposed Ports (comma-separated)"
-                  placeholder="80, 443, 3000"
-                  @input="calculateCost"
+                  v-model="newPortInput"
+                  label="Add Exposed Port"
+                  placeholder="Enter port number and press Enter"
+                  @keypress="handlePortInputKeypress"
+                  clearable
+                  class="mb-3 no-spinners"
                 />
-                <div class="mt-2">
-                  <div v-if="parsedPorts.length > 0" class="d-flex flex-wrap gap-2 mb-2">
+                
+                <div v-if="parsedPorts.length > 0" class="mb-3">
+                  <div class="d-flex flex-wrap gap-2">
                     <VChip
                       v-for="port in parsedPorts"
                       :key="port"
@@ -219,6 +222,8 @@
                       :variant="isPortEnterprise(port) ? 'elevated' : 'tonal'"
                       size="small"
                       rounded
+                      closable
+                      @click:close="removePort(port)"
                     >
                       <VIcon 
                         v-if="isPortEnterprise(port)" 
@@ -230,16 +235,20 @@
                       <span v-if="isPortEnterprise(port)" class="ml-1 text-caption">+fee</span>
                     </VChip>
                   </div>
-                  <p class="text-body-2 text-medium-emphasis">
-                    <template v-if="enterprisePortCount > 0">
-                      <span class="text-warning font-weight-medium">{{ enterprisePortCount }} enterprise port{{ enterprisePortCount > 1 ? 's' : '' }}</span> detected<br>
-                      Additional fees apply for ports 0-1023, 8080, 8081, 8443, 6667
-                    </template>
-                    <template v-else>
-                      Standard ports - no additional fees
-                    </template>
-                  </p>
                 </div>
+                
+                <p class="text-body-2 text-medium-emphasis">
+                  <template v-if="enterprisePortCount > 0">
+                    <span class="text-warning font-weight-medium">{{ enterprisePortCount }} enterprise port{{ enterprisePortCount > 1 ? 's' : '' }}</span> detected<br>
+                    Additional fees apply for ports 0-1023, 8080, 8081, 8443, 6667
+                  </template>
+                  <template v-else-if="parsedPorts.length > 0">
+                    Standard ports - no additional fees
+                  </template>
+                  <template v-else>
+                    Add ports your application will expose to the public
+                  </template>
+                </p>
               </div>
             </div>
 
@@ -555,11 +564,14 @@ const formData = reactive({
   storage: 1,
   enterprise: '',
   staticip: false,
-  ports: '80', // Default HTTP port
+  ports: [80], // Default HTTP port as array
 })
 
 // Synchronization switch
 const syncEnabled = ref(false)
+
+// Port input for adding new ports
+const newPortInput = ref('')
 
 
 // Generate compose array with single component using formData
@@ -627,12 +639,8 @@ const isPortEnterprise = (port) => {
 }
 
 const parsedPorts = computed(() => {
-  if (!formData.ports) return []
-  return formData.ports.split(',')
-    .map(p => p.trim())
-    .filter(p => p && /^\d+$/.test(p))
-    .map(p => parseInt(p))
-    .filter(p => p > 0 && p <= 65535)
+  if (!Array.isArray(formData.ports)) return []
+  return formData.ports.filter(p => p > 0 && p <= 65535)
 })
 
 const enterprisePorts = computed(() => {
@@ -640,6 +648,47 @@ const enterprisePorts = computed(() => {
 })
 
 const enterprisePortCount = computed(() => enterprisePorts.value.length)
+
+// Port management functions
+const addPort = () => {
+  const portValue = newPortInput.value.trim()
+  if (!portValue) return
+  
+  const port = parseInt(portValue)
+  if (isNaN(port) || port <= 0 || port > 65535) {
+    newPortInput.value = ''
+    return
+  }
+  
+  // Prevent duplicates
+  if (formData.ports.includes(port)) {
+    newPortInput.value = ''
+    return
+  }
+  
+  formData.ports.push(port)
+  formData.ports.sort((a, b) => a - b) // Keep ports sorted
+  newPortInput.value = ''
+  calculateCost()
+}
+
+const removePort = (port) => {
+  const index = formData.ports.indexOf(port)
+  if (index > -1) {
+    formData.ports.splice(index, 1)
+    calculateCost()
+  }
+}
+
+const handlePortInputKeypress = (event) => {
+  // Only allow numbers and Enter key
+  if (event.key === 'Enter') {
+    event.preventDefault()
+    addPort()
+  } else if (!/^\d$/.test(event.key) && !['Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'Tab'].includes(event.key)) {
+    event.preventDefault()
+  }
+}
 
 // Renewal period options
 const renewalOptions = [
@@ -980,6 +1029,8 @@ const selectPreset = preset => {
   // Reset enterprise options when selecting preset
   formData.enterprise = ''
   formData.staticip = false
+  // Reset ports to default HTTP port
+  formData.ports = [80]
   // Reset synchronization to disabled when selecting preset
   syncEnabled.value = false
   calculateCost()
@@ -1107,6 +1158,17 @@ definePage({
 </script>
 
 <style scoped>
+/* Hide number input spinners */
+.no-spinners :deep(input[type="number"]::-webkit-inner-spin-button),
+.no-spinners :deep(input[type="number"]::-webkit-outer-spin-button) {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.no-spinners :deep(input[type="number"]) {
+  -moz-appearance: textfield;
+}
+
 /* Force white text on primary background for both themes */
 .bg-primary.text-white {
   color: white !important;
