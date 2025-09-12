@@ -191,9 +191,61 @@
             </div>
             </div>
 
+
             <VDivider class="my-6" />
 
-            <!-- Enterprise Options -->
+            <!-- Application Ports Section -->
+            <div class="mb-6">
+              <div class="d-flex align-center mb-4">
+                <VIcon icon="mdi-ethernet" color="primary" size="32" class="mr-3" />
+                <h4 class="text-h5 font-weight-bold mb-0">
+                  Exposed Ports
+                </h4>
+              </div>
+              
+              <div class="mb-4 ml-2">
+                <VTextField
+                  v-model="formData.ports"
+                  label="Exposed Ports (comma-separated)"
+                  placeholder="80, 443, 3000"
+                  @input="calculateCost"
+                />
+                <div class="mt-2">
+                  <div v-if="parsedPorts.length > 0" class="d-flex flex-wrap gap-2 mb-2">
+                    <VChip
+                      v-for="port in parsedPorts"
+                      :key="port"
+                      :color="isPortEnterprise(port) ? 'warning' : 'success'"
+                      :variant="isPortEnterprise(port) ? 'elevated' : 'tonal'"
+                      size="small"
+                      rounded
+                    >
+                      <VIcon 
+                        v-if="isPortEnterprise(port)" 
+                        icon="mdi-alert" 
+                        size="14" 
+                        class="mr-1"
+                      />
+                      {{ port }}
+                      <span v-if="isPortEnterprise(port)" class="ml-1 text-caption">+fee</span>
+                    </VChip>
+                  </div>
+                  <p class="text-body-2 text-medium-emphasis">
+                    <template v-if="enterprisePortCount > 0">
+                      <span class="text-warning font-weight-medium">{{ enterprisePortCount }} enterprise port{{ enterprisePortCount > 1 ? 's' : '' }}</span> detected<br>
+                      Additional fees apply for ports 0-1023, 8080, 8081, 8443, 6667
+                    </template>
+                    <template v-else>
+                      Standard ports - no additional fees
+                    </template>
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <VDivider class="my-6" />
+
+            <!-- Additional Options -->
             <div class="mb-6">
               <div class="d-flex align-center mb-4">
                 <VIcon icon="mdi-tune-variant" color="primary" size="32" class="mr-3" />
@@ -235,6 +287,7 @@
                 </p>
               </div>
 
+              <!-- Data Synchronization -->
               <div class="mb-4">
                 <VCheckbox
                   v-model="syncEnabled"
@@ -502,6 +555,7 @@ const formData = reactive({
   storage: 1,
   enterprise: '',
   staticip: false,
+  ports: '80', // Default HTTP port
 })
 
 // Synchronization switch
@@ -514,11 +568,11 @@ const generateComposeArray = () => {
     name: "componentName1",
     description: "componentDesc1",
     repotag: "runonflux/jetpack2:latest",
-    ports: "[33333]",
+    ports: parsedPorts.value.length > 0 ? parsedPorts.value : [80], // Use user-defined ports or default to 80
     domains: [""],
     environmentParameters: [""],
     commands: [""],
-    containerPorts: [80],
+    containerPorts: parsedPorts.value.length > 0 ? parsedPorts.value : [80], // Match ports with containerPorts
     containerData: syncEnabled.value ? "g:/data" : "/tmp",
     cpu: formData.cpu.toString(),
     ram: formData.memory.toString(),
@@ -554,6 +608,38 @@ const isEnterpriseAvailable = computed(() => {
   const hasAuth = !!localStorage.getItem('zelidauth')
   return hasWebCrypto && hasAuth
 })
+
+// Enterprise port detection logic (from backend config)
+const enterprisePortRanges = ['0-1023', 8080, 8081, 8443, 6667]
+
+const isPortEnterprise = (port) => {
+  const portNum = parseInt(port)
+  if (isNaN(portNum)) return false
+  
+  return enterprisePortRanges.some(range => {
+    if (typeof range === 'string' && range.includes('-')) {
+      const [min, max] = range.split('-').map(p => parseInt(p))
+      return portNum >= min && portNum <= max
+    } else {
+      return portNum === parseInt(range)
+    }
+  })
+}
+
+const parsedPorts = computed(() => {
+  if (!formData.ports) return []
+  return formData.ports.split(',')
+    .map(p => p.trim())
+    .filter(p => p && /^\d+$/.test(p))
+    .map(p => parseInt(p))
+    .filter(p => p > 0 && p <= 65535)
+})
+
+const enterprisePorts = computed(() => {
+  return parsedPorts.value.filter(port => isPortEnterprise(port))
+})
+
+const enterprisePortCount = computed(() => enterprisePorts.value.length)
 
 // Renewal period options
 const renewalOptions = [
@@ -663,6 +749,29 @@ const helpItems = [
         <li>Each node maintains its own independent data that persists across restarts</li>
         <li>Better for applications where instances should operate independently</li>
       </ul>`,
+  },
+  {
+    question: 'What are exposed ports and enterprise port fees?',
+    answer: `<p><strong>Exposed ports</strong> are the public ports that external users can access your application through. These are different from internal container ports.</p>
+      <p><strong>Enterprise ports</strong> are privileged or commonly-used exposed ports that require additional fees:</p>
+      <p><strong>Enterprise Port Ranges:</strong></p>
+      <ul>
+        <li><strong>Ports 0-1023:</strong> Well-known ports (HTTP, HTTPS, SSH, FTP, etc.)</li>
+        <li><strong>Port 8080:</strong> Alternative HTTP port</li>
+        <li><strong>Port 8081:</strong> Alternative HTTP port</li>
+        <li><strong>Port 8443:</strong> Alternative HTTPS port</li>
+        <li><strong>Port 6667:</strong> IRC (Internet Relay Chat)</li>
+      </ul>
+      <br>
+      <p><strong>Why the extra cost?</strong></p>
+      <ul>
+        <li>Well-known ports require special network privileges to bind</li>
+        <li>These ports are in high demand and limited in availability</li>
+        <li>Additional security and compliance measures are needed</li>
+        <li>Network infrastructure costs are higher for privileged ports</li>
+      </ul>
+      <br>
+      <p><strong>Standard exposed ports</strong> (like 3000, 4000, 5000) have no additional fees. Your container can still use any internal ports - only the exposed/public ports affect pricing.</p>`,
   },
 ]
 
@@ -914,12 +1023,12 @@ const calculatePresetPrices = async () => {
         ? Math.round((tempFormData.expire * 720) / 1000) * 1000 
         : (tempFormData.expire / 30) * 22000
 
-      // Generate compose array for this preset
+      // Generate compose array for this preset (use standard port 80)
       const composeData = [{
         name: "componentName1",
         description: "componentDesc1", 
         repotag: "runonflux/jetpack2:latest",
-        ports: "[33333]",
+        ports: [80], // Standard HTTP port - no enterprise fee
         domains: [""],
         environmentParameters: [""],
         commands: [""],
