@@ -559,7 +559,7 @@ const formData = reactive({
   storage: 1,
   enterprise: '',
   staticip: false,
-  ports: [3000], // Default non-enterprise port as array
+  ports: [], // No default ports
 })
 
 // Synchronization switch
@@ -1024,8 +1024,8 @@ const selectPreset = preset => {
   // Reset enterprise options when selecting preset
   formData.enterprise = ''
   formData.staticip = false
-  // Reset ports to default non-enterprise port
-  formData.ports = [3000]
+  // Reset ports to empty array
+  formData.ports = []
   // Reset synchronization to disabled when selecting preset
   syncEnabled.value = false
   calculateCost()
