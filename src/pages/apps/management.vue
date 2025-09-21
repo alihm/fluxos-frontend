@@ -68,6 +68,7 @@
               :logged-in="loggedIn"
               :current-block-height="daemonBlockCount"
               :active-apps-tab="false"
+              manage
               :api-error="apiError"
               :privilege="privilege"
             />

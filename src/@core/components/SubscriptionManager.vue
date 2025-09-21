@@ -2611,7 +2611,7 @@ onMounted(() => {
         const auth = qs.parse(zelidauth)
         if (auth.zelid) {
           appDetails.value.owner = auth.zelid
-          console.log('SubscriptionManager: Set default owner to:', auth.zelid)
+          console.log('SubscriptionManager: Set default owner to:', auth.zelid ? 'Present' : 'Missing')
         }
       } catch (error) {
         console.error('Failed to parse zelidauth for default owner:', error)
@@ -4660,7 +4660,7 @@ async function initStripePay(hash = null, name = null, price = null, description
     fiatCheckoutURL.value = ''
     checkoutLoading.value = true
     const zelidauth = localStorage.getItem('zelidauth')
-    console.log('Stripe - Raw zelidauth:', zelidauth)
+    console.log('Stripe - zelidauth:', zelidauth ? 'Present' : 'Missing')
     
     if (!zelidauth) {
       showToast('error', 'Authentication required - please login first')
@@ -4782,7 +4782,7 @@ async function initPaypalPay(hash = null, name = null, price = null, description
       }
     }
     const zelidauth = localStorage.getItem('zelidauth')
-    console.log('PayPal - Raw zelidauth:', zelidauth)
+    console.log('PayPal - zelidauth:', zelidauth ? 'Present' : 'Missing')
     
     if (!zelidauth) {
       showToast('error', 'Authentication required - please login first')

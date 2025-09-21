@@ -243,7 +243,6 @@ async function executeLocalCommand(
     console.log('From localStorage:', localStorage.getItem("backendURL"))
     console.log('Auto-detected:', getDetectedBackendURL())
     console.log('Using zelidauth:', zelidauth ? 'Present' : 'Missing')
-    console.log('Headers:', axiosConfig.headers)
 
     const result = postObject
       ? await axios.post(queryUrl, postObject, axiosConfig)
@@ -268,7 +267,7 @@ watch(isLoggedIn, (newValue) => {
 onMounted(() => {
   // Restore authentication state and set owner
   const zelidauth = localStorage.getItem('zelidauth')
-  console.log('zelidauth from localStorage:', zelidauth)
+  console.log('zelidauth from localStorage:', zelidauth ? 'Present' : 'Missing')
   
   if (zelidauth) {
     try {
@@ -278,7 +277,7 @@ onMounted(() => {
       const privilege = params.get('privilege')
       const loginType = params.get('logintype')
       
-      console.log('Parsed auth data:', { zelid, privilege, loginType })
+      console.log('Parsed auth data:', { zelid: zelid ? 'Present' : 'Missing', privilege, loginType })
       
       if (zelid) {
         // Restore flux store state

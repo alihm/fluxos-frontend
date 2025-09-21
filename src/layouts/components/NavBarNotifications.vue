@@ -25,13 +25,26 @@ const saveNotifications = () => {
 
 const checkNewVersion = async () => {
   try {
-    const response = await fetch('https://raw.githubusercontent.com/RunOnFlux/flux/master/package.json')
+    // Add timeout to prevent hanging requests
+    const controller = new AbortController()
+    const timeoutId = setTimeout(() => controller.abort(), 10000) // 10 second timeout
+
+    const response = await fetch('https://raw.githubusercontent.com/RunOnFlux/flux/master/package.json', {
+      signal: controller.signal
+    })
+
+    clearTimeout(timeoutId)
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`)
+    }
+
     const data = await response.json()
     const latestVersion = data.version
 
     notifications.value = notifications.value.map(notification => {
       notification.time = formatTime(notification.created)
-      
+
       return notification
     })
 
@@ -54,7 +67,15 @@ const checkNewVersion = async () => {
       }
     }
   } catch (error) {
-    console.error('Error fetching version:', error)
+    // Silently handle network errors - version checking is not critical functionality
+    if (error.name === 'AbortError') {
+      console.warn('Version check timed out - this is normal if GitHub is not accessible')
+    } else if (error.message.includes('Failed to fetch') || error.message.includes('ERR_CONNECTION_RESET')) {
+      // Network connectivity issues - don't spam console
+      console.warn('Unable to check for updates - network connectivity issue')
+    } else {
+      console.warn('Version check failed:', error.message)
+    }
   }
 }
 

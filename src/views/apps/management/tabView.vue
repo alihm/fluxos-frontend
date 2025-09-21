@@ -243,7 +243,7 @@
                 <div>Loading...</div>
               </div>
               <div
-                v-else-if="!loggedIn"
+                v-else-if="!loggedIn && manage"
                 class="d-flex flex-column align-center justify-center py-8"
               >
                 <VCard
@@ -264,11 +264,11 @@
                   <VBtn
                     color="primary"
                     variant="flat"
-                    to="/dashboards/home"
                     size="small"
+                    @click="showLogin = true"
                   >
                     <VIcon size="18" class="mr-2">mdi-login</VIcon>
-                    Go to Home & Sign In
+                    Sign In
                   </VBtn>
                 </VCard>
               </div>
@@ -531,6 +531,35 @@
       </div>
     </VCard>
   </div>
+
+  <!-- Login Dialog -->
+  <VDialog
+    v-model="showLogin"
+    :max-width="$vuetify.display.xs ? '95vw' : '900'"
+    :width="$vuetify.display.xs ? '95vw' : '90vw'"
+    :fullscreen="$vuetify.display.xs"
+    persistent
+    scrollable
+  >
+    <VCard>
+      <VCardText class="pt-6">
+        <Login
+          :hide-manual-login="true"
+          :xdao-open="0"
+        />
+      </VCardText>
+      <VCardActions class="pa-4 pt-0">
+        <VSpacer />
+        <VBtn
+          variant="outlined"
+          color="error"
+          @click="showLogin = false"
+        >
+          Cancel
+        </VBtn>
+      </VCardActions>
+    </VCard>
+  </VDialog>
 </template>
 
 <script setup>
@@ -539,6 +568,7 @@ import Manage from "@/views/apps/management/manage.vue"
 import Redeploy from "@/views/apps/management/redeploy.vue"
 import AppsService from "@/services/AppsService"
 import { useI18n } from "vue-i18n"
+import Login from "@/@core/components/Login.vue"
 
 const props = defineProps({
   apps: Array,
@@ -572,6 +602,7 @@ const props = defineProps({
 const emit = defineEmits(["openAppManagement"])
 const { t } = useI18n()
 const activeTabLocalIndexSpec = ref(0)
+const showLogin = ref(false)
 
 const tableOptions = ref({
   perPage: 10,
@@ -884,6 +915,13 @@ watch(
     }
   },
 )
+
+// Watch for login status changes to close dialog when logged in
+watch(() => props.loggedIn, (newValue) => {
+  if (newValue && showLogin.value) {
+    showLogin.value = false
+  }
+})
 
 function addRepotag() {
   const tag = inputTag.value.trim()
