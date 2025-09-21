@@ -1,5 +1,6 @@
 <template>
-  <VRow>
+  <div>
+    <VRow>
     <VCol cols="12">
       <VCard>
         <VCardText>
@@ -64,10 +65,10 @@
                     <VBtn
                       color="primary"
                       variant="flat"
-                      to="/dashboards/home"
+                      @click="showLogin = true"
                     >
                       <VIcon size="22" class="mr-2">mdi-login-variant</VIcon>
-                      Go to Home & Sign In
+                      Sign In
                     </VBtn>
                     <VBtn
                       variant="flat"
@@ -102,14 +103,45 @@
         </VCardText>
       </VCard>
     </VCol>
-  </VRow>
+    </VRow>
+
+    <!-- Login Dialog -->
+    <VDialog
+      v-model="showLogin"
+      :max-width="$vuetify.display.xs ? '95vw' : '900'"
+      :width="$vuetify.display.xs ? '95vw' : '90vw'"
+      :fullscreen="$vuetify.display.xs"
+      persistent
+      scrollable
+    >
+      <VCard>
+        <VCardText class="pt-6">
+          <Login
+            :hide-manual-login="true"
+            :xdao-open="0"
+          />
+        </VCardText>
+        <VCardActions class="pa-4 pt-0">
+          <VSpacer />
+          <VBtn
+            variant="outlined"
+            color="error"
+            @click="showLogin = false"
+          >
+            Cancel
+          </VBtn>
+        </VCardActions>
+      </VCard>
+    </VDialog>
+  </div>
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, computed, watch } from 'vue'
 import { useFluxStore } from '@/stores/flux'
 import axios from 'axios'
 import { getDetectedBackendURL } from '@/utils/backend'
+import Login from '@/@core/components/Login.vue'
 
 // Initialize flux store
 const fluxStore = useFluxStore()
@@ -137,6 +169,9 @@ const isLoggedIn = computed(() => {
 })
 
 // Create a new app specification with default values
+// Login dialog state
+const showLogin = ref(false)
+
 const newAppSpec = ref({
   version: 8, // Use latest version
   name: '',
@@ -222,6 +257,13 @@ async function executeLocalCommand(
     throw error
   }
 }
+
+// Watch for login status changes to close dialog when logged in
+watch(isLoggedIn, (newValue) => {
+  if (newValue && showLogin.value) {
+    showLogin.value = false
+  }
+})
 
 onMounted(() => {
   // Restore authentication state and set owner

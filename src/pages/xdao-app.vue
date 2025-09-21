@@ -7,8 +7,8 @@
       color="primary"
       elevation="2"
     >
-      <VCardText class="pa-6 pa-sm-8">
-        <div class="d-flex align-center justify-space-between flex-wrap">
+      <VCardText class="pa-6 pa-sm-8 position-relative">
+        <div class="d-flex flex-column flex-sm-row align-center justify-space-between">
           <div class="d-flex align-center flex-column flex-sm-row text-center text-sm-start">
             <VAvatar
               size="72"
@@ -31,33 +31,43 @@
             </div>
           </div>
 
-          <!-- Preview Button -->
-          <div class="d-flex align-center gap-3 mt-4 mt-sm-0 flex-wrap">
+          <!-- Login/Status Button -->
+          <div
+            :class="$vuetify.display.xs ? 'position-absolute' : 'mt-4 mt-sm-0'"
+            :style="$vuetify.display.xs ? 'top: 12px; right: 12px;' : ''"
+          >
             <VChip
               v-if="isLoggedIn"
               color="success"
               variant="elevated"
-              size="large"
-              class="px-4"
+              :size="$vuetify.display.xs ? 'small' : 'large'"
+              class="px-3"
             >
               <VAvatar
-                size="24"
+                :size="$vuetify.display.xs ? '18' : '24'"
                 color="success"
-                class="me-2"
+                :class="$vuetify.display.xs ? 'me-1' : 'me-2'"
               >
-                <VIcon icon="mdi-account-check" size="16" />
+                <VIcon icon="mdi-account-check" :size="$vuetify.display.xs ? '12' : '16'" />
               </VAvatar>
-              {{ userZelid ? userZelid.substring(0, 8) + '...' : 'Logged in' }}
+              <span :class="$vuetify.display.xs ? 'text-caption' : ''">
+                {{ $vuetify.display.xs ? userZelid?.substring(0, 6) + '..' : userZelid?.substring(0, 8) + '...' || 'Logged in' }}
+              </span>
             </VChip>
             <VBtn
               v-else
               color="primary"
-              variant="elevated"
-              size="large"
+              variant="flat"
+              :size="$vuetify.display.xs ? 'small' : 'large'"
               @click="showLogin = true"
+              class="text-none"
             >
-              <VIcon icon="mdi-login" class="me-2" />
-              Login to Vote
+              <VIcon
+                icon="mdi-login"
+                :size="$vuetify.display.xs ? '18' : '24'"
+                class="me-1 me-sm-2"
+              />
+              {{ $vuetify.display.xs ? 'Login' : 'Login to Vote' }}
             </VBtn>
           </div>
         </div>
@@ -77,33 +87,38 @@
             Filters
           </VBtn>
         
-        <VExpandTransition>
-          <div v-if="showMobileFilters" class="mt-4">
-            <VChipGroup
-              v-model="activeFilterIndex"
-              selected-class="text-primary"
-              mandatory
+        <div v-if="showMobileFilters" class="mt-4">
+          <div
+            class="filter-grid"
+            :class="{ 'grid-full-width': proposalFilters.length % 2 === 1 }"
+          >
+            <VChip
+              v-for="(filter, index) in proposalFilters"
+              :key="filter.value"
+              :value="index"
+              :variant="activeFilter === filter.value ? 'flat' : 'outlined'"
+              :color="activeFilter === filter.value ? 'primary' : 'default'"
+              size="default"
+              class="px-3 py-2 d-flex align-center filter-chip"
+              :class="{ 'last-full-width': index === proposalFilters.length - 1 && proposalFilters.length % 2 === 1 }"
+              @click="setFilter(filter.value)"
             >
-              <VChip
-                v-for="(filter, index) in proposalFilters"
-                :key="filter.value"
-                :value="index"
-                variant="outlined"
-                @click="setFilter(filter.value)"
-              >
-                <VIcon :icon="filter.icon" class="me-2" size="16" />
-                {{ filter.title }}
-                <VBadge
-                  v-if="filter.count > 0"
-                  :content="filter.count"
-                  color="primary"
-                  inline
-                  class="ml-2"
-                />
-              </VChip>
-            </VChipGroup>
+              <div class="d-flex align-center">
+                <VIcon :icon="filter.icon" class="me-1" size="18" />
+                <span>{{ filter.title }}</span>
+              </div>
+              <VBadge
+                v-if="filter.count > 0"
+                :content="filter.count"
+                :color="activeFilter === filter.value ? 'white' : 'primary'"
+                inline
+                density="compact"
+                class="badge-xs ml-1"
+              />
+              <div v-else style="width: 20px;"></div>
+            </VChip>
           </div>
-        </VExpandTransition>
+        </div>
       </VCardText>
     </VCard>
   </VCol>
@@ -442,6 +457,7 @@
         <VSpacer />
         <VBtn
           variant="outlined"
+          color="error"
           @click="showLogin = false"
         >
           Cancel
@@ -643,8 +659,8 @@ const setFilter = (filter) => {
   if (index !== -1) {
     activeFilterIndex.value = index
   }
-  // Close mobile filters after selection
-  showMobileFilters.value = false
+  // Keep filters visible after selection for better UX
+  // Don't close mobile filters when a filter is selected
 }
 
 // Switch to Add Proposal tab
@@ -1078,5 +1094,46 @@ definePage({
   .search-controls .v-col {
     padding-bottom: 8px;
   }
+
+  /* Compact badges on mobile */
+  .badge-xs :deep(.v-badge__badge) {
+    font-size: 11px !important;
+    height: 16px !important;
+    min-width: 16px !important;
+    padding: 0 4px !important;
+  }
+}
+
+/* Filter grid styles */
+.filter-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 8px;
+  align-items: start;
+}
+
+.filter-chip {
+  justify-content: space-between !important;
+  min-height: 36px;
+  width: 100%;
+}
+
+/* When there are fewer chips, let them expand */
+@media (max-width: 479px) {
+  .filter-grid {
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  }
+}
+
+@media (min-width: 480px) and (max-width: 599px) {
+  .filter-grid {
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  }
+}
+
+/* Make last chip full width when it's alone on the last row */
+.last-full-width {
+  grid-column: 1 / -1;
+  justify-content: center !important;
 }
 </style>
