@@ -72,26 +72,31 @@
       scrollable
     >
       <VCard>
-        <VCardTitle class="d-flex align-center" :class="(selectedActionType === 'upgrade' || selectedActionType === 'renew') ? 'pa-2' : 'pa-6'" :style="(selectedActionType === 'upgrade' || selectedActionType === 'renew') ? 'background-color: rgb(var(--v-theme-primary)); color: white;' : ''">
-          <h3 class="text-h5" :style="(selectedActionType === 'upgrade' || selectedActionType === 'renew') ? 'color: white;' : ''">
-            FluxDrive {{ selectedActionType === 'renew' ? 'Renewal' : selectedActionType === 'upgrade' ? 'Upgrade' : 'Checkout' }}
+        <VCardTitle class="d-flex align-center pa-2" style="background-color: rgb(var(--v-theme-primary)); color: white;">
+          <h3 class="text-h5 d-flex align-center" style="color: white;">
+            <VIcon
+              :icon="selectedActionType === 'renew' ? 'mdi-refresh' : selectedActionType === 'upgrade' ? 'mdi-arrow-up-bold' : selectedActionType === 'downgrade' ? 'mdi-arrow-down-bold' : 'mdi-plus'"
+              class="me-2"
+              style="color: white;"
+            />
+            FluxDrive {{ selectedActionType === 'renew' ? 'Renewal' : selectedActionType === 'upgrade' ? 'Upgrade' : selectedActionType === 'downgrade' ? 'Downgrade' : 'Checkout' }}
           </h3>
           <VSpacer />
           <VBtn
             icon="mdi-close"
             variant="text"
-            :color="(selectedActionType === 'upgrade' || selectedActionType === 'renew') ? 'white' : ''"
+            color="white"
             @click="closeCheckoutDialog"
           />
         </VCardTitle>
-        <VCardText :class="(selectedActionType === 'upgrade' || selectedActionType === 'renew') ? 'pa-6 pt-4' : 'pa-6 pt-0'">
+        <VCardText class="pa-6 pt-4">
           <CheckoutContent
             ref="checkoutContentRef"
             :plan-id="selectedCheckoutPlan"
             :action-type="selectedActionType"
             :gateway="'fluxpay'"
-            @payment-success="handlePaymentSuccess"
-            @payment-error="handlePaymentError"
+            @success="handlePaymentSuccess"
+            @close="handlePaymentError"
           />
         </VCardText>
       </VCard>
@@ -171,6 +176,8 @@ const handlePlanSelection = async (planId, actionType = null) => {
       actionType = 'renew'
     } else if (planStatus === 'upgrade') {
       actionType = 'upgrade'
+    } else if (planStatus === 'downgrade') {
+      actionType = 'downgrade'
     }
   } else if (!actionType) {
     actionType = 'signup'
@@ -285,6 +292,19 @@ const handlePlanSelection = async (planId, actionType = null) => {
     return
   }
 
+  if (actionType === 'downgrade') {
+    console.log('🔄 Processing downgrade for plan:', planId)
+    console.log('📊 Setting checkout values:')
+    console.log('  - selectedCheckoutPlan:', planId)
+    console.log('  - selectedActionType:', actionType)
+    // Downgrades always require payment confirmation, open checkout dialog
+    selectedCheckoutPlan.value = planId
+    selectedActionType.value = actionType
+    showCheckout.value = true
+    console.log('✅ Checkout dialog should open with downgrade action')
+    return
+  }
+
   // For signup and signin actions, open checkout dialog
   selectedCheckoutPlan.value = planId
   selectedActionType.value = actionType
@@ -308,7 +328,8 @@ const handleLoginSuccess = async () => {
     if (!selectedActionType.value) {
       if (hasActiveSubscription.value) {
         const planStatus = getPlanStatus(selectedCheckoutPlan.value)
-        selectedActionType.value = planStatus === 'current' ? 'renew' : 'upgrade'
+        selectedActionType.value = planStatus === 'current' ? 'renew' :
+                                   planStatus === 'downgrade' ? 'downgrade' : 'upgrade'
       } else {
         selectedActionType.value = 'signup'
       }
@@ -336,19 +357,25 @@ const handlePaymentSuccess = async () => {
   selectedCheckoutPlan.value = ''
   selectedActionType.value = ''
 
+  console.log('🎉 Payment successful - refreshing FluxDrive data...')
+
   // Clear renewal state in FileManager
   if (fileManagerRef.value?.clearRenewalState) {
     fileManagerRef.value.clearRenewalState()
   }
 
-  // Refresh subscription status
+  // Small delay to ensure backend has processed the upgrade
+  await new Promise(resolve => setTimeout(resolve, 2000))
+
+  // Note: Flux store mainly handles configuration data, user subscription data is handled by checkSubscriptionStatus
+
+  // Refresh subscription status and storage capacity
   await checkSubscriptionStatus()
 
-  // Trigger files reload if subscription is now active
-  // loadFiles() has internal logic to prevent duplicate calls
-  if (hasActiveSubscription.value) {
-    await loadFiles()
-  }
+  // Force reload files to refresh storage usage stats
+  await loadFiles(true) // Clear messages and force refresh
+
+  console.log('✅ FluxDrive data refreshed after payment success')
 }
 
 // Handle payment error
@@ -363,6 +390,11 @@ const closeCheckoutDialog = () => {
   // Cleanup payment monitoring if component exists
   if (checkoutContentRef.value && checkoutContentRef.value.cleanupPaymentMonitoring) {
     checkoutContentRef.value.cleanupPaymentMonitoring()
+  }
+
+  // Clear renewal state in FileManager to remove spinner
+  if (fileManagerRef.value?.clearRenewalState) {
+    fileManagerRef.value.clearRenewalState()
   }
 
   showCheckout.value = false

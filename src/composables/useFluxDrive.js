@@ -113,7 +113,7 @@ export function useFluxDrive() {
     } else if (planStorageGB > currentStorageGB) {
       return 'upgrade' // Higher tier - show Upgrade
     } else {
-      return 'downgrade' // Lower tier - disabled
+      return 'downgrade' // Lower tier - show Downgrade
     }
   }
 

@@ -50,11 +50,12 @@
             :class="[
               plan.popular ? 'pricing-card--popular' : 'pricing-card--standard',
               getPlanStatus(plan.id) === 'current' ? 'pricing-card--current' : '',
-              getPlanStatus(plan.id) === 'downgrade' ? 'pricing-card--disabled' : '',
+              getPlanStatus(plan.id) === 'downgrade' ? 'pricing-card--downgrade' : '',
               'elevation-8'
             ]"
             color="surface"
             variant="elevated"
+            :disabled="getPlanStatus(plan.id) === 'downgrade'"
           >
 
           <VCardText class="text-center pa-8 d-flex flex-column flex-grow-1">
@@ -221,11 +222,11 @@ const getButtonConfig = (plan) => {
       }
     case 'downgrade':
       return {
-        text: '-',
-        color: 'surface-variant',
+        text: 'Downgrade',
+        color: 'warning',
         variant: 'flat',
         disabled: true,
-        action: 'disabled'
+        action: 'downgrade'
       }
     case 'signup':
     default:
@@ -568,9 +569,9 @@ const handleSelectPlan = (planId) => {
     inset 0 1px 0 rgba(var(--v-theme-on-surface), 0.05);
 }
 
-.pricing-card--disabled {
-  opacity: 0.6;
-  border: 1px solid rgba(var(--v-theme-outline), 0.3) !important;
+.pricing-card--downgrade {
+  opacity: 0.85;
+  border: 1px solid rgba(var(--v-theme-warning), 0.3) !important;
   background: linear-gradient(145deg,
     color-mix(in srgb, rgb(var(--v-theme-surface)) 95%, rgb(var(--v-theme-outline)) 5%) 0%,
     color-mix(in srgb, rgb(var(--v-theme-surface)) 98%, rgb(var(--v-theme-outline)) 2%) 100%);
@@ -583,11 +584,12 @@ const handleSelectPlan = (planId) => {
     inset 0 1px 0 rgba(var(--v-theme-on-surface), 0.08);
 }
 
-.pricing-card-wrapper:has(.pricing-card--disabled):hover {
-  transform: translateY(0) scale(1);
+.pricing-card-wrapper:has(.pricing-card--downgrade):hover {
+  transform: translateY(-4px) scale(1.02);
 }
 
-.pricing-card-wrapper:has(.pricing-card--disabled) .pricing-card {
-  cursor: not-allowed;
+.pricing-card--downgrade:hover {
+  opacity: 1;
+  border-color: rgba(var(--v-theme-warning), 0.5) !important;
 }
 </style>

@@ -562,7 +562,21 @@
                 hover
                 @click.stop="item.isFolder || item.isGoBack ? handleOpenFolder(item) : previewFile(item)"
                 @contextmenu.prevent="!item.isGoBack && showContextMenu($event, item)"
+                @touchstart="!item.isGoBack && handleTouchStart($event, item)"
+                @touchend="!item.isGoBack && handleTouchEnd($event, item)"
+                @touchmove="handleTouchMove"
               >
+                <!-- Three-dot menu button (top-right corner) -->
+                <VBtn
+                  v-if="!item.isGoBack"
+                  icon="mdi-dots-vertical"
+                  size="small"
+                  variant="text"
+                  class="context-menu-btn text-medium-emphasis"
+                  style="position: absolute; top: 4px; right: 4px; z-index: 1;"
+                  @click.stop="showContextMenu($event, item)"
+                />
+
                 <!-- File Icon / Thumbnail -->
                 <div class="mb-2">
                   <VImg
@@ -905,8 +919,8 @@
               <p class="text-body-2 text-medium-emphasis mb-1">
                 {{ currentFileName || 'Please wait while your file is being uploaded' }}
               </p>
-              <p v-if="selectedVersionFile" class="text-caption text-medium-emphasis mb-2">
-                {{ formatFileSize(selectedVersionFile.size) }}
+              <p v-if="currentFileSize > 0" class="text-caption text-medium-emphasis mb-2">
+                {{ formatFileSize(currentFileSize) }}
               </p>
             </div>
 
@@ -1559,6 +1573,7 @@ const renameText = ref('')
 const currentUploadIndex = ref(0)
 const totalFilesToUpload = ref(0)
 const currentFileName = ref('')
+const currentFileSize = ref(0)
 const localUploadProgress = ref(0)
 
 // High z-index toast system for messages above dialogs
@@ -1719,6 +1734,7 @@ const uploadVersion = async () => {
   try {
     uploading.value = true
     currentFileName.value = selectedVersionFile.value.name
+    currentFileSize.value = selectedVersionFile.value.size
     localUploadProgress.value = 0
 
     // Use FluxCloud's uploadVersion API with existingFile parameter
@@ -1754,6 +1770,7 @@ const uploadVersion = async () => {
   } finally {
     uploading.value = false
     currentFileName.value = ''
+    currentFileSize.value = 0
     localUploadProgress.value = 0
   }
 }
@@ -1853,6 +1870,7 @@ const handleLocalFileSelect = async (e) => {
       const file = files[i]
       currentUploadIndex.value = i
       currentFileName.value = file.name
+      currentFileSize.value = file.size
       localUploadProgress.value = 0
 
       // File size validation with toast message (appears above dialogs)
@@ -1880,6 +1898,7 @@ const handleLocalFileSelect = async (e) => {
     // End batch upload - only set uploading to false after all files are done
     uploading.value = false
     currentFileName.value = ''
+    currentFileSize.value = 0
     localUploadProgress.value = 0
 
     // Single refresh at the end of all uploads
@@ -1950,6 +1969,7 @@ const handleLocalDrop = async (e) => {
       const file = files[i]
       currentUploadIndex.value = i
       currentFileName.value = file.name
+      currentFileSize.value = file.size
       localUploadProgress.value = 0
 
       // File size validation with toast message (appears above dialogs)
@@ -1977,6 +1997,7 @@ const handleLocalDrop = async (e) => {
     // End batch upload - only set uploading to false after all files are done
     uploading.value = false
     currentFileName.value = ''
+    currentFileSize.value = 0
     localUploadProgress.value = 0
 
     // Single refresh at the end of all uploads
@@ -2092,6 +2113,61 @@ const showContextMenu = (event, item) => {
   contextMenuX.value = event.clientX
   contextMenuY.value = event.clientY
   showGridContextMenu.value = true
+}
+
+// Touch event handling for mobile context menu
+let touchTimer = null
+let touchStartPos = { x: 0, y: 0 }
+let hasMoved = false
+
+const handleTouchStart = (event, item) => {
+  if (!event.touches || event.touches.length !== 1) return
+
+  const touch = event.touches[0]
+  touchStartPos = { x: touch.clientX, y: touch.clientY }
+  hasMoved = false
+
+  // Start long press timer (500ms)
+  touchTimer = setTimeout(() => {
+    if (!hasMoved) {
+      // Show context menu at touch position
+      const contextEvent = {
+        clientX: touchStartPos.x,
+        clientY: touchStartPos.y,
+        preventDefault: () => {}
+      }
+      showContextMenu(contextEvent, item)
+
+      // Haptic feedback if available
+      if (navigator.vibrate) {
+        navigator.vibrate(50)
+      }
+    }
+  }, 500)
+}
+
+const handleTouchMove = (event) => {
+  if (!event.touches || event.touches.length !== 1) return
+
+  const touch = event.touches[0]
+  const deltaX = Math.abs(touch.clientX - touchStartPos.x)
+  const deltaY = Math.abs(touch.clientY - touchStartPos.y)
+
+  // If user moved more than 10px, cancel long press
+  if (deltaX > 10 || deltaY > 10) {
+    hasMoved = true
+    if (touchTimer) {
+      clearTimeout(touchTimer)
+      touchTimer = null
+    }
+  }
+}
+
+const handleTouchEnd = (event, item) => {
+  if (touchTimer) {
+    clearTimeout(touchTimer)
+    touchTimer = null
+  }
 }
 
 // Use the composable
@@ -2922,6 +2998,10 @@ const handleUpgradePlan = (planId) => {
     actionType = 'upgrade'
     isRenewing.value = true
     renewalMessage.value = 'Upgrading your plan'
+  } else if (planStatus === 'downgrade') {
+    actionType = 'downgrade'
+    isRenewing.value = true
+    renewalMessage.value = 'Downgrading your plan'
   } else {
     actionType = 'signup'
   }
@@ -3639,5 +3719,48 @@ const handleUpgradePlan = (planId) => {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+/* Three-dot context menu button styling */
+.context-menu-btn {
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  background: rgba(var(--v-theme-surface), 0.8) !important;
+  backdrop-filter: blur(4px);
+  border-radius: 50%;
+  color: rgba(var(--v-theme-on-surface), 0.6) !important;
+}
+
+.context-menu-btn .v-icon {
+  color: rgba(var(--v-theme-on-surface), 0.6) !important;
+}
+
+/* Show button on hover for desktop */
+.file-grid-item:hover .context-menu-btn {
+  opacity: 1;
+}
+
+/* Always show button on mobile/touch devices */
+@media (hover: none) and (pointer: coarse) {
+  .context-menu-btn {
+    opacity: 0.8 !important;
+  }
+}
+
+/* On devices that support both touch and hover */
+@media (hover: hover) and (pointer: coarse) {
+  .context-menu-btn {
+    opacity: 0.6;
+  }
+
+  .file-grid-item:hover .context-menu-btn {
+    opacity: 1;
+  }
+}
+
+/* Focus and active states */
+.context-menu-btn:focus,
+.context-menu-btn:active {
+  opacity: 1 !important;
 }
 </style>

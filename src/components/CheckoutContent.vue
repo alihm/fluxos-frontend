@@ -40,15 +40,15 @@
           <VCard variant="outlined" class="h-100">
             <VCardTitle>
               <VIcon
-                :icon="props.actionType === 'renew' ? 'mdi-refresh' : props.actionType === 'upgrade' ? 'mdi-arrow-up-bold' : 'mdi-receipt'"
+                :icon="props.actionType === 'renew' ? 'mdi-refresh' : props.actionType === 'upgrade' ? 'mdi-arrow-up-bold' : props.actionType === 'downgrade' ? 'mdi-arrow-down-bold' : 'mdi-receipt'"
                 class="me-2"
               />
-              {{ props.actionType === 'renew' ? 'Renewal' : props.actionType === 'upgrade' ? 'Upgrade' : 'Order' }} Summary
+              {{ props.actionType === 'renew' ? 'Renewal' : props.actionType === 'upgrade' ? 'Upgrade' : props.actionType === 'downgrade' ? 'Downgrade' : 'Order' }} Summary
             </VCardTitle>
             <VCardText>
               <div class="plan-summary">
-                <!-- Full Plan Comparison for Upgrades -->
-                <div v-if="props.actionType === 'upgrade'" class="mb-3">
+                <!-- Full Plan Comparison for Upgrades/Downgrades -->
+                <div v-if="props.actionType === 'upgrade' || props.actionType === 'downgrade'" class="mb-3">
                   <div class="text-body-2 mb-3 text-center font-weight-medium">Plan Comparison</div>
 
                   <!-- Current Plan Card -->
@@ -65,40 +65,56 @@
                         </VChip>
                       </div>
                       <div class="text-body-2 text-medium-emphasis">
-                        {{ getCurrentPlanStorage() }} Storage
+                        <div>{{ getCurrentPlanStorage() }} Storage</div>
                       </div>
                     </VCardText>
                   </VCard>
 
-                  <!-- Upgrade Arrow -->
+                  <!-- Transition Arrow with Details -->
                   <div class="text-center mb-2">
-                    <div class="d-flex align-center justify-center">
-                      <VIcon icon="mdi-arrow-down" size="20" class="text-success me-1" />
-                      <span class="text-body-2 font-weight-medium text-success">Upgrade</span>
+                    <div class="d-flex align-center justify-center mb-1">
+                      <VIcon icon="mdi-arrow-down" size="20" :class="props.actionType === 'downgrade' ? 'text-warning' : 'text-success'" class="me-1" />
+                      <span class="text-body-2 font-weight-medium" :class="props.actionType === 'downgrade' ? 'text-warning' : 'text-success'">
+                        {{ props.actionType === 'downgrade' ? 'Downgrade to' : 'Upgrade to' }}
+                      </span>
                     </div>
                   </div>
 
                   <!-- New Plan Card -->
-                  <VCard variant="outlined" class="mb-2" style="border-color: rgb(var(--v-theme-success));">
+                  <VCard variant="outlined" class="mb-2" :style="`border-color: rgb(var(--v-theme-${props.actionType === 'downgrade' ? 'warning' : 'success'}));`">
                     <VCardText class="pa-3">
                       <div class="d-flex align-center mb-2">
-                        <VIcon icon="mdi-star" size="16" class="me-2 text-success" />
-                        <span class="text-body-2 font-weight-medium text-success">New Plan</span>
+                        <VIcon :icon="props.actionType === 'downgrade' ? 'mdi-arrow-down-bold' : 'mdi-star'" size="16" class="me-2" :class="props.actionType === 'downgrade' ? 'text-warning' : 'text-success'" />
+                        <span class="text-body-2 font-weight-medium" :class="props.actionType === 'downgrade' ? 'text-warning' : 'text-success'">New Plan</span>
                       </div>
                       <div class="d-flex justify-space-between align-center mb-1">
                         <span class="text-body-1 font-weight-bold">{{ getDisplayPlanName(getNewPlanName()) }}</span>
-                        <VChip color="success" variant="flat" size="small">
+                        <VChip :color="props.actionType === 'downgrade' ? 'warning' : 'success'" variant="flat" size="small">
                           ${{ getPlanPrice() }}/mo
                         </VChip>
                       </div>
                       <div class="text-body-2 text-medium-emphasis">
-                        {{ getStorageDisplay() }} Storage
+                        <div>{{ getStorageDisplay() }} Storage</div>
+                      </div>
+                    </VCardText>
+                  </VCard>
+
+                  <!-- Price Comparison Summary -->
+                  <VCard class="mt-3" variant="tonal" :color="props.actionType === 'downgrade' ? 'warning' : 'success'">
+                    <VCardText class="pa-3">
+                      <div class="d-flex justify-space-between align-center">
+                        <span class="text-body-2">
+                          {{ props.actionType === 'downgrade' ? 'You will save:' : 'Price difference:' }}
+                        </span>
+                        <span class="text-body-1 font-weight-bold">
+                          ${{ Math.abs(getPlanPrice() - getCurrentPlanPrice()).toFixed(2) }}/month
+                        </span>
                       </div>
                     </VCardText>
                   </VCard>
                 </div>
 
-                <!-- Regular Plan Details for Renew/New -->
+                <!-- Regular Plan Details for Renew/New/Downgrade -->
                 <div v-else class="plan-details">
                   <div class="d-flex justify-space-between align-center mb-3">
                     <span>Plan:</span>
@@ -145,7 +161,17 @@
                       Upgrading to a higher plan
                     </VChip>
                     <VChip
-                      v-else
+                      v-else-if="props.actionType === 'downgrade'"
+                      color="warning"
+                      variant="flat"
+                      size="small"
+                      class="action-chip"
+                    >
+                      <VIcon icon="mdi-arrow-down" size="14" class="me-1" />
+                      Downgrading to a lower plan
+                    </VChip>
+                    <VChip
+                      v-else-if="props.actionType === 'signup' || !props.actionType"
                       color="success"
                       variant="flat"
                       size="small"
@@ -220,9 +246,9 @@
                             </VChip>
                           </div>
 
-                          <!-- Subscription Dates for Renewals/Upgrades -->
-                          <div v-if="props.actionType === 'renew' || props.actionType === 'upgrade'" class="subscription-dates mb-3">
-                            <VCard elevation="12" class="pa-3" style="box-shadow: 0 12px 24px rgba(0,0,0,0.25), 0 4px 8px rgba(0,0,0,0.15), inset 0 1px 0 rgba(255,255,255,0.1); border: 1px solid rgba(var(--v-theme-success), 0.3); background: linear-gradient(145deg, rgba(255,255,255,0.1), rgba(0,0,0,0.05));">
+                          <!-- Subscription Dates for Renewals/Upgrades/Downgrades -->
+                          <div v-if="props.actionType === 'renew' || props.actionType === 'upgrade' || props.actionType === 'downgrade'" class="subscription-dates mb-3">
+                            <VCard elevation="12" class="pa-3" :style="`box-shadow: 0 12px 24px rgba(0,0,0,0.25), 0 4px 8px rgba(0,0,0,0.15), inset 0 1px 0 rgba(255,255,255,0.1); border: 1px solid rgba(var(--v-theme-${props.actionType === 'downgrade' ? 'warning' : 'success'}), 0.3); background: linear-gradient(145deg, rgba(255,255,255,0.1), rgba(0,0,0,0.05));`">
                               <div class="d-flex align-center justify-space-between">
                                 <!-- Current Subscription -->
                                 <div class="flex-grow-1 text-center">
@@ -241,9 +267,9 @@
                                 <!-- New Subscription -->
                                 <div class="flex-grow-1 text-center">
                                   <div class="d-flex justify-center mb-1" style="align-items: center; height: 1.2em;">
-                                    <VIcon icon="mdi-calendar-plus" size="16" class="text-success" style="display: flex; align-items: center; margin-right: 6px;" />
-                                    <span class="text-caption font-weight-medium text-success" style="display: flex; align-items: center;">
-                                      {{ props.actionType === 'renew' ? 'Renewal' : 'Upgrade' }} ends:
+                                    <VIcon icon="mdi-calendar-plus" size="16" :class="props.actionType === 'downgrade' ? 'text-warning' : 'text-success'" style="display: flex; align-items: center; margin-right: 6px;" />
+                                    <span class="text-caption font-weight-medium" :class="props.actionType === 'downgrade' ? 'text-warning' : 'text-success'" style="display: flex; align-items: center;">
+                                      {{ props.actionType === 'renew' ? 'Renewal' : props.actionType === 'upgrade' ? 'Upgrade' : 'Downgrade' }} ends:
                                     </span>
                                   </div>
                                   <div class="text-body-2 font-weight-medium">{{ formatEndDate(getEndDate()) }}</div>
@@ -542,14 +568,14 @@ const getFluxPriceForPlan = async () => {
 
 
 const loadCurrentSubscription = async () => {
-  if (props.actionType !== 'upgrade') {
-    return // Only needed for upgrades
+  if (props.actionType !== 'upgrade' && props.actionType !== 'downgrade') {
+    return // Only needed for upgrades and downgrades
   }
 
   try {
-    console.log('🔍 Loading current subscription for upgrade comparison')
+    console.log('🔍 Loading current subscription for', props.actionType, 'comparison')
 
-    const auth = await getAuth()
+    const auth = getAuthFromStorage()
     if (!auth.zelid) {
       console.error('No ZelID available for subscription lookup')
       return
@@ -593,11 +619,16 @@ const loadPlanDetails = async () => {
     loading.value = true
     alertMessage.value = ''
 
-    // For upgrades, load current subscription data first
+    // For upgrades and downgrades, load current subscription data first
+    console.log('📋 About to check if we need to load current subscription')
+    console.log('📋 Action type:', props.actionType)
+    console.log('📋 Should load?', props.actionType === 'upgrade' || props.actionType === 'downgrade')
+
     await loadCurrentSubscription()
 
     console.log('Loading plan details for planId:', props.planId)
     console.log('Gateway:', props.gateway)
+    console.log('Action type:', props.actionType)
 
     // Check authentication
     if (!isLoggedIn.value) {
@@ -1020,8 +1051,8 @@ const monitorPayment = async (paymentId, subId, paymentAddr, paymentType = 'flux
   // Store initial subscription state to detect new payments
   let initialSubscriptionState = null
 
-  // For renewals and upgrades, capture initial subscription state for comparison
-  if (props.actionType === 'renew' || props.actionType === 'upgrade') {
+  // For renewals, upgrades, and downgrades, capture initial subscription state for comparison
+  if (props.actionType === 'renew' || props.actionType === 'upgrade' || props.actionType === 'downgrade') {
     try {
       const auth = getAuthFromStorage()
       const initialPayload = {
@@ -1122,41 +1153,62 @@ const monitorPayment = async (paymentId, subId, paymentAddr, paymentType = 'flux
 
         const result = await response.json()
 
-        // Check if user now has active subscription (payment completed)
-        if (result.active === true) {
-          console.log('✅ Subscription is now active - payment completed!')
-
-          // Compare with initial state for renewals and upgrades
-          if ((props.actionType === 'renew' || props.actionType === 'upgrade') && initialSubscriptionState) {
-            // For renewals and upgrades, check if storage capacity changed
+        // Check subscription status based on action type
+        if (props.actionType === 'upgrade' || props.actionType === 'downgrade' || props.actionType === 'renew') {
+          // For upgrades, downgrades and renewals, check if capacity changed
+          if (initialSubscriptionState && result.active === true) {
             const capacityChanged = result.capacity !== initialSubscriptionState.capacity
-            const hasIncreasedCapacity = result.capacity > (initialSubscriptionState.capacity || 10737418240) // Default 10GB
+            const expectedCapacity = props.planId === 'pro' ? 107374182400 :
+                                      props.planId === 'standard' ? 53687091200 :
+                                      props.planId === 'starter' ? 10737418240 : 53687091200 // 100GB for pro, 50GB for standard, 10GB for starter
 
-            if (capacityChanged || hasIncreasedCapacity) {
-              console.log(`✅ ${props.actionType === 'upgrade' ? 'Upgrade' : 'Renewal'} detected - storage capacity changed!`)
-              console.log('Previous capacity:', initialSubscriptionState.capacity)
-              console.log('New capacity:', result.capacity)
+            if (capacityChanged && result.capacity === expectedCapacity) {
+              const actionText = props.actionType === 'upgrade' ? 'Upgrade' :
+                                props.actionType === 'downgrade' ? 'Downgrade' : 'Renewal'
+
+              console.log(`✅ ${actionText} confirmed - storage capacity changed!`)
+              console.log('Previous capacity:', (initialSubscriptionState.capacity_gb || Math.round(initialSubscriptionState.capacity / 1024 / 1024 / 1024)) + 'GB')
+              console.log('New capacity:', (result.capacity_gb || Math.round(result.capacity / 1024 / 1024 / 1024)) + 'GB')
+
+              clearInterval(paymentMonitoringInterval)
+              clearTimeout(paymentMonitoringTimeout)
+              paymentMonitoringInterval = null
+              paymentMonitoringTimeout = null
+              fluxPaymentProcessing.value = false
+
+              const message = props.actionType === 'renew'
+                ? 'Payment confirmed! Your subscription has been renewed.'
+                : props.actionType === 'upgrade'
+                ? 'Payment confirmed! Your subscription has been upgraded.'
+                : props.actionType === 'downgrade'
+                ? 'Payment confirmed! Your subscription has been downgraded.'
+                : 'Payment confirmed! Your subscription is now active.'
+
+              showSnackbar(message, 'success', 8000)
+              emit('success')
+            } else {
+              const actionText = props.actionType === 'downgrade' ? 'downgrade' : 'upgrade'
+              console.log(`⏳ Waiting for ${actionText} to process - current capacity:`, (result.capacity_gb || Math.round(result.capacity / 1024 / 1024 / 1024)) + 'GB')
             }
+          } else {
+            console.log('⏳ Waiting for subscription data...')
           }
-
-          clearInterval(paymentMonitoringInterval)
-          clearTimeout(paymentMonitoringTimeout)
-          paymentMonitoringInterval = null
-          paymentMonitoringTimeout = null
-          fluxPaymentProcessing.value = false
-
-          const message = props.actionType === 'renew'
-            ? 'Payment confirmed! Your subscription has been renewed.'
-            : props.actionType === 'upgrade'
-            ? 'Payment confirmed! Your subscription has been upgraded.'
-            : 'Payment confirmed! Your subscription is now active.'
-
-          showSnackbar(message, 'success', 8000)
-          emit('success')
-        } else if (result.error) {
-          console.log('Storage check error:', result.error)
         } else {
-          console.log('⏳ Subscription not yet active - continuing to monitor...', result)
+          // For new subscriptions, check if active
+          if (result.active === true) {
+            console.log('✅ New subscription is now active - payment completed!')
+
+            clearInterval(paymentMonitoringInterval)
+            clearTimeout(paymentMonitoringTimeout)
+            paymentMonitoringInterval = null
+            paymentMonitoringTimeout = null
+            fluxPaymentProcessing.value = false
+
+            showSnackbar('Payment confirmed! Your subscription is now active.', 'success', 8000)
+            emit('success')
+          } else {
+            console.log('⏳ Subscription not yet active - continuing to monitor...', result)
+          }
         }
       } else {
         console.warn('No payment_id or sub_id provided for monitoring - stopping')
@@ -1173,7 +1225,7 @@ const monitorPayment = async (paymentId, subId, paymentAddr, paymentType = 'flux
     } catch (error) {
       console.error('Error checking payment status:', error)
     }
-  }, 120000)
+  }, 120000) // Check every 2 minutes (Flux blockchain block time)
 
   // Stop monitoring after 10 minutes
   paymentMonitoringTimeout = setTimeout(() => {
@@ -1241,7 +1293,38 @@ const formatEndDate = endTime => {
 }
 
 const getCurrentSubscriptionEndDate = () => {
-  // FluxCloud method: Use period_end for current subscription end date
+  // For upgrades and downgrades, use currentSubscriptionData instead of subscriptionData
+  if ((props.actionType === 'upgrade' || props.actionType === 'downgrade') && currentSubscriptionData.value) {
+    console.log('🔍 Getting current subscription end date for', props.actionType, '(from currentSubscriptionData)...')
+    console.log('📊 Full currentSubscriptionData.value:', JSON.stringify(currentSubscriptionData.value, null, 2))
+
+    const data = currentSubscriptionData.value
+
+    // Check for period_end first
+    if (data.period_end) {
+      console.log('📅 Found period_end:', data.period_end, '(type:', typeof data.period_end, ')')
+      const date = new Date(data.period_end * 1000)
+      console.log('📅 Converted to date:', date.toISOString())
+      if (date.getFullYear() > 2000) {
+        return date
+      }
+    }
+
+    // Check for endtime as fallback
+    if (data.endtime) {
+      console.log('📅 Found endtime:', data.endtime, '(type:', typeof data.endtime, ')')
+      const date = new Date(data.endtime * 1000)
+      console.log('📅 Converted endtime to date:', date.toISOString())
+      if (date.getFullYear() > 2000) {
+        return date
+      }
+    }
+
+    console.log('⚠️ period_end/endtime not found or invalid in:', Object.keys(data))
+    return null // Return null for upgrades/downgrades if no valid date found
+  }
+
+  // For other action types, use original logic
   console.log('🔍 Getting current subscription end date (FluxCloud method)...')
   console.log('📊 Full subscriptionData.value:', JSON.stringify(subscriptionData.value, null, 2))
 
@@ -1298,8 +1381,8 @@ const getEndDate = () => {
 }
 
 const getCurrentPlan = () => {
-  // For upgrades, use the separate currentSubscriptionData
-  if (props.actionType === 'upgrade' && currentSubscriptionData.value) {
+  // For upgrades and downgrades, use the separate currentSubscriptionData
+  if ((props.actionType === 'upgrade' || props.actionType === 'downgrade') && currentSubscriptionData.value) {
     console.log('🔍 Getting current plan from currentSubscriptionData:', currentSubscriptionData.value)
     const data = currentSubscriptionData.value
 
@@ -1367,9 +1450,9 @@ const getCurrentPlanName = () => {
     }
   }
 
-  // If we can't find current plan, for upgrades we can show a generic message
-  if (props.actionType === 'upgrade') {
-    console.log('🏷️ Using fallback for upgrade - Current Subscription')
+  // If we can't find current plan, for upgrades/downgrades we can show a generic message
+  if (props.actionType === 'upgrade' || props.actionType === 'downgrade') {
+    console.log('🏷️ Using fallback for upgrade/downgrade - Current Subscription')
     return 'Current Subscription'
   }
 
@@ -1390,8 +1473,8 @@ const getCurrentPlanStorage = () => {
     if (currentPlan.storage) return `${currentPlan.storage} GB`
   }
 
-  // For upgrades, show a generic message instead of N/A
-  if (props.actionType === 'upgrade') {
+  // For upgrades and downgrades, show a generic message instead of N/A
+  if (props.actionType === 'upgrade' || props.actionType === 'downgrade') {
     return 'Current Storage'
   }
   return 'N/A'
@@ -1414,8 +1497,8 @@ const getCurrentPlanPrice = () => {
     }
   }
 
-  // For upgrades, show a placeholder instead of 0.00
-  if (props.actionType === 'upgrade') {
+  // For upgrades and downgrades, show a placeholder instead of 0.00
+  if (props.actionType === 'upgrade' || props.actionType === 'downgrade') {
     return '-.--'
   }
   return '0.00'
@@ -1543,6 +1626,15 @@ watch(() => props.planId, newPlanId => {
 
 // Load plan details on mount
 onMounted(() => {
+  console.log('💳 CheckoutContent mounted with props:', {
+    planId: props.planId,
+    gateway: props.gateway,
+    actionType: props.actionType
+  })
+  console.log('🔍 Action type is downgrade?', props.actionType === 'downgrade')
+  console.log('🔍 Should show plan comparison?', props.actionType === 'upgrade' || props.actionType === 'downgrade')
+  console.log('🔍 Will load current subscription?', props.actionType === 'upgrade' || props.actionType === 'downgrade')
+
   if (props.planId) {
     loadPlanDetails()
   }

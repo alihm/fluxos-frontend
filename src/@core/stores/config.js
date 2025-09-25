@@ -49,15 +49,54 @@ export const initConfigStore = () => {
   const configStore = useConfigStore()
 
   watch([() => configStore.theme, userPreferredColorScheme], () => {
-    vuetifyTheme.global.name.value = configStore.theme === 'system'
+    const themeName = configStore.theme === 'system'
       ? userPreferredColorScheme.value === 'dark'
         ? 'dark'
         : 'light'
       : configStore.theme
+
+    // Use the new Vuetify theme.change() API
+    if (vuetifyTheme.global.name.value !== themeName) {
+      try {
+        // Use the new theme.change() method as recommended by Vuetify
+        if (typeof vuetifyTheme.global.name.change === 'function') {
+          vuetifyTheme.global.name.change(themeName)
+        } else if (typeof vuetifyTheme.change === 'function') {
+          vuetifyTheme.change(themeName)
+        } else {
+          // Fallback to direct assignment if change method doesn't exist
+          vuetifyTheme.global.name.value = themeName
+        }
+      } catch (error) {
+        console.warn('Failed to change theme:', error)
+        // Fallback to direct assignment
+        vuetifyTheme.global.name.value = themeName
+      }
+    }
   })
   onMounted(() => {
-    if (configStore.theme === 'system')
-      vuetifyTheme.global.name.value = userPreferredColorScheme.value
+    if (configStore.theme === 'system') {
+      const themeName = userPreferredColorScheme.value
+
+      // Use the new Vuetify theme.change() API
+      if (vuetifyTheme.global.name.value !== themeName) {
+        try {
+          // Use the new theme.change() method as recommended by Vuetify
+          if (typeof vuetifyTheme.global.name.change === 'function') {
+            vuetifyTheme.global.name.change(themeName)
+          } else if (typeof vuetifyTheme.change === 'function') {
+            vuetifyTheme.change(themeName)
+          } else {
+            // Fallback to direct assignment if change method doesn't exist
+            vuetifyTheme.global.name.value = themeName
+          }
+        } catch (error) {
+          console.warn('Failed to change theme in onMounted:', error)
+          // Fallback to direct assignment
+          vuetifyTheme.global.name.value = themeName
+        }
+      }
+    }
   })
 }
 // !SECTION
