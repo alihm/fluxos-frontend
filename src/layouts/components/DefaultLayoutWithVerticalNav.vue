@@ -8,6 +8,10 @@ import NavbarThemeSwitcher from "@/layouts/components/NavbarThemeSwitcher.vue"
 import UserProfile from "@/layouts/components/UserProfile.vue"
 import NavBarI18n from "@core/components/I18n.vue"
 import { VerticalNavLayout } from "@layouts"
+import { useSnackbar } from '@/composables/useSnackbar'
+
+// Global snackbar
+const { snackbar } = useSnackbar()
 
 // const dropdownOpen = ref(false)
 // const customBackend = ref("")
@@ -122,6 +126,16 @@ import { VerticalNavLayout } from "@layouts"
     </template>
 
     <TheCustomizer />
+
+    <!-- Global Snackbar -->
+    <VSnackbar
+      v-model="snackbar.show"
+      :color="snackbar.color"
+      :timeout="snackbar.timeout"
+      location="top"
+    >
+      {{ snackbar.message }}
+    </VSnackbar>
   </VerticalNavLayout>
 </template>
 

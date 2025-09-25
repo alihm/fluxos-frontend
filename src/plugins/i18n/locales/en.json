@@ -36,6 +36,9 @@
     },
     "apiReference": {
       "title": "API Reference"
+    },
+    "fluxDrive": {
+      "title": "Flux Drive"
     }
   },
   "login": {

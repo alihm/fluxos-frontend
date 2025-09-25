@@ -455,16 +455,6 @@
       </VCardActions>
     </VCard>
   </VDialog>
-
-  <!-- Toast Snackbar -->
-  <VSnackbar
-    v-model="snackbar.show"
-    :color="snackbar.color"
-    :timeout="snackbar.timeout"
-    location="top"
-  >
-    {{ snackbar.message }}
-  </VSnackbar>
 </template>
 
 <script setup>

@@ -9,10 +9,6 @@ declare global {
   const $api: typeof import('./utils/api.js')['$api']
   const COOKIE_MAX_AGE_1_YEAR: typeof import('./utils/constants.js')['COOKIE_MAX_AGE_1_YEAR']
   const EffectScope: typeof import('vue')['EffectScope']
-  const Icon: typeof import('leaflet')['Icon']
-  const L: typeof import('leaflet')['default']
-  const L.MarkerClusterGroup: typeof import('leaflet.markercluster')['default']
-  const MarkerClusterGroup: typeof import('leaflet.markercluster')['MarkerClusterGroup']
   const acceptHMRUpdate: typeof import('pinia')['acceptHMRUpdate']
   const alphaDashValidator: typeof import('./@core/utils/validators.js')['alphaDashValidator']
   const alphaValidator: typeof import('./@core/utils/validators.js')['alphaValidator']
@@ -77,7 +73,6 @@ declare global {
   const getUser: typeof import('./utils/firebase.js')['getUser']
   const h: typeof import('vue')['h']
   const hexToRgb: typeof import('./@core/utils/colorConverter.js')['hexToRgb']
-  const icon: typeof import('leaflet')['icon']
   const ignorableWatch: typeof import('@vueuse/core')['ignorableWatch']
   const importRsaPublicKey: typeof import('./utils/enterpriseCrypto.js')['importRsaPublicKey']
   const inject: typeof import('vue')['inject']
@@ -95,10 +90,7 @@ declare global {
   const isToday: typeof import('./@core/utils/helpers.js')['isToday']
   const isWebCryptoAvailable: typeof import('./utils/enterpriseCrypto.js')['isWebCryptoAvailable']
   const kFormatter: typeof import('./@core/utils/formatters.js')['kFormatter']
-  const kkkk: typeof import('./utils/kkkk.js')['default']
-  const latLng: typeof import('leaflet')['latLng']
   const lengthValidator: typeof import('./@core/utils/validators.js')['lengthValidator']
-  const loadFirebaseUILanguageScript: typeof import('./utils/firebaseLang.js')['loadFirebaseUILanguageScript']
   const logicAnd: typeof import('@vueuse/math')['logicAnd']
   const logicNot: typeof import('@vueuse/math')['logicNot']
   const logicOr: typeof import('@vueuse/math')['logicOr']
@@ -257,6 +249,7 @@ declare global {
   const useFileDialog: typeof import('@vueuse/core')['useFileDialog']
   const useFileSystemAccess: typeof import('@vueuse/core')['useFileSystemAccess']
   const useFloor: typeof import('@vueuse/math')['useFloor']
+  const useFluxDrive: typeof import('./composables/useFluxDrive.js')['useFluxDrive']
   const useFocus: typeof import('@vueuse/core')['useFocus']
   const useFocusWithin: typeof import('@vueuse/core')['useFocusWithin']
   const useFps: typeof import('@vueuse/core')['useFps']
@@ -274,7 +267,6 @@ declare global {
   const useIntervalFn: typeof import('@vueuse/core')['useIntervalFn']
   const useKeyModifier: typeof import('@vueuse/core')['useKeyModifier']
   const useLastChanged: typeof import('@vueuse/core')['useLastChanged']
-  const useLink: typeof import('vue-router')['useLink']
   const useLocalStorage: typeof import('@vueuse/core')['useLocalStorage']
   const useMagicKeys: typeof import('@vueuse/core')['useMagicKeys']
   const useManualRefHistory: typeof import('@vueuse/core')['useManualRefHistory']
@@ -329,6 +321,7 @@ declare global {
   const useShare: typeof import('@vueuse/core')['useShare']
   const useSkins: typeof import('./@core/composable/useSkins.js')['useSkins']
   const useSlots: typeof import('vue')['useSlots']
+  const useSnackbar: typeof import('./composables/useSnackbar.js')['useSnackbar']
   const useSorted: typeof import('@vueuse/core')['useSorted']
   const useSpeechRecognition: typeof import('@vueuse/core')['useSpeechRecognition']
   const useSpeechSynthesis: typeof import('@vueuse/core')['useSpeechSynthesis']
@@ -644,6 +637,7 @@ declare module 'vue' {
     readonly useFileDialog: UnwrapRef<typeof import('@vueuse/core')['useFileDialog']>
     readonly useFileSystemAccess: UnwrapRef<typeof import('@vueuse/core')['useFileSystemAccess']>
     readonly useFloor: UnwrapRef<typeof import('@vueuse/math')['useFloor']>
+    readonly useFluxDrive: UnwrapRef<typeof import('./composables/useFluxDrive.js')['useFluxDrive']>
     readonly useFocus: UnwrapRef<typeof import('@vueuse/core')['useFocus']>
     readonly useFocusWithin: UnwrapRef<typeof import('@vueuse/core')['useFocusWithin']>
     readonly useFps: UnwrapRef<typeof import('@vueuse/core')['useFps']>
@@ -715,6 +709,7 @@ declare module 'vue' {
     readonly useShare: UnwrapRef<typeof import('@vueuse/core')['useShare']>
     readonly useSkins: UnwrapRef<typeof import('./@core/composable/useSkins.js')['useSkins']>
     readonly useSlots: UnwrapRef<typeof import('vue')['useSlots']>
+    readonly useSnackbar: UnwrapRef<typeof import('./composables/useSnackbar.js')['useSnackbar']>
     readonly useSorted: UnwrapRef<typeof import('@vueuse/core')['useSorted']>
     readonly useSpeechRecognition: UnwrapRef<typeof import('@vueuse/core')['useSpeechRecognition']>
     readonly useSpeechSynthesis: UnwrapRef<typeof import('@vueuse/core')['useSpeechSynthesis']>

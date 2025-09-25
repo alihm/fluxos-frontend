@@ -1,6 +1,7 @@
 <template>
-  {{ infoMessage }}
-  <div style="min-width: 360px">
+  <div>
+    {{ infoMessage }}
+    <div style="min-width: 360px">
     <VCard
       v-if="privilege === 'none'"
       class="mb-3 rounded-xl elevation-4 pa-4"
@@ -56,7 +57,7 @@
 
           <VTabsWindow
             v-model="currentTab"
-            :style="hideTabs ? 'min-height: 210px' : 'min-height: 210px'"
+            style="min-height: 210px"
           >
             <!-- 3rd Party -->
             <VTabsWindowItem
@@ -544,6 +545,7 @@
       :variant="toast.variant"
       top
     />
+    </div>
   </div>
 </template>
 
@@ -582,11 +584,17 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
+  xdaoOpen: {
+    type: Number,
+    default: 0,
+  },
 })
 
+// Declare emitted events
+const emit = defineEmits(['loginSuccess'])
 
 const MMSDK = new MetaMaskSDK({
-  checkInstallationImmediately: true,
+  checkInstallationImmediately: false,
   enableAnalytics: true,
   dappMetadata: {
     name: 'Flux Cloud',
@@ -725,6 +733,7 @@ const login = () => {
         fluxStore.setPrivilege(response.data.data.privilage)
         fluxStore.setZelid(zelidauth.zelid)
         localStorage.setItem("zelidauth", qs.stringify(zelidauth))
+        emit('loginSuccess')
         showToast("success", response.data.data.message)
       } else {
         showToast(response.data.status, response.data.data.message || response.data.data)
@@ -773,6 +782,7 @@ const handleSignedInUser = async user => {
         fluxStore.setZelid(authLogin.zelid)
         localStorage.setItem('loginType', 'sso')
         localStorage.setItem("zelidauth", qs.stringify(authLogin))
+        emit('loginSuccess')
         showToast("success", response.data.data.message)
       } else {
         showToast("error", response.data.data.message || response.data.data)
@@ -935,6 +945,7 @@ const initiateLoginWS = async () => {
       fluxStore.setZelid(zelidauth.zelid)
       localStorage.setItem('loginType', 'zelcore')
       localStorage.setItem("zelidauth", qs.stringify(zelidauth))
+      emit('loginSuccess')
       showToast("success", data.data.message)
     }
   }
@@ -996,6 +1007,7 @@ const onSessionConnect = async session => {
     fluxStore.setZelid(walletConnectInfo.zelid)
     localStorage.setItem('loginType', 'walletconnect')
     localStorage.setItem("zelidauth", qs.stringify(walletConnectInfo))
+    emit('loginSuccess')
     showToast("success", response.data.data.message)
   } else {
     showToast(response.data.status, response.data.data.message || response.data.data)
@@ -1048,6 +1060,7 @@ const initMetamask = async () => {
       fluxStore.setZelid(metamaskLogin.zelid)
       localStorage.setItem("loginType", 'metamask')
       localStorage.setItem("zelidauth", qs.stringify(metamaskLogin))
+      emit('loginSuccess')
       showToast("success", response.data.data.message)
     } else {
       showToast(response.data.status, response.data.data.message || response.data.data)
@@ -1084,6 +1097,7 @@ const initSSP = async () => {
       fluxStore.setZelid(sspLogin.zelid)
       localStorage.setItem("logintype", 'ssp')
       localStorage.setItem("zelidauth", qs.stringify(sspLogin))
+      emit('loginSuccess')
       showToast("success", response.data.data.message)
     } else {
       showToast(response.data.status, response.data.data.message || response.data.data)

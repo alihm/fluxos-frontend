@@ -1,0 +1,22 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//c/Users/k4mil/GitHub/fluxcloud/lib/api/model/subscription/**)",
+      "Bash(npm run build:*)",
+      "Bash(git checkout:*)",
+      "Read(//c/Users/k4mil/GitHub/fluxcloud/**)",
+      "WebFetch(domain:cloud.runonflux.io)",
+      "Bash(npm run dev:*)",
+      "WebSearch",
+      "Bash(find:*)",
+      "WebFetch(domain:vuetifyjs.com)",
+      "Read(//c/Users/k4mil/GitHub/jetpack2/flux-bridge/www/api/v1/**)",
+      "Read(//c/Users/k4mil/GitHub/jetpack2/flux-bridge-nodejs/controllers/**)",
+      "Read(//c/Users/k4mil/GitHub/jetpack2/flux-bridge/www/webhooks/v1/**)",
+      "Read(//c/Users/k4mil/GitHub/jetpack2/**)",
+      "Read(//c/Users/k4mil/GitHub/**)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

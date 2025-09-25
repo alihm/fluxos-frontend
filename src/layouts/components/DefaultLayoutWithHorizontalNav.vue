@@ -11,6 +11,10 @@ import UserProfile from "@/layouts/components/UserProfile.vue"
 import NavBarI18n from "@core/components/I18n.vue"
 import { HorizontalNavLayout } from "@layouts"
 import { VNodeRenderer } from "@layouts/components/VNodeRenderer"
+import { useSnackbar } from '@/composables/useSnackbar'
+
+// Global snackbar
+const { snackbar } = useSnackbar()
 </script>
 
 <template>
@@ -55,6 +59,16 @@ import { VNodeRenderer } from "@layouts/components/VNodeRenderer"
 
     <!-- 👉 Customizer -->
     <TheCustomizer />
+
+    <!-- Global Snackbar -->
+    <VSnackbar
+      v-model="snackbar.show"
+      :color="snackbar.color"
+      :timeout="snackbar.timeout"
+      location="top"
+    >
+      {{ snackbar.message }}
+    </VSnackbar>
   </HorizontalNavLayout>
 </template>
 

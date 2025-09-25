@@ -24,6 +24,7 @@ declare module 'vue-router/auto-routes' {
     'apps-manage-app-name': RouteRecordInfo<'apps-manage-app-name', '/apps/manage/:appName', { appName: ParamValue<true> }, { appName: ParamValue<false> }>,
     'apps-management': RouteRecordInfo<'apps-management', '/apps/management', Record<never, never>, Record<never, never>>,
     'apps-register': RouteRecordInfo<'apps-register', '/apps/register', Record<never, never>, Record<never, never>>,
+    'checkout-gateway-plan': RouteRecordInfo<'checkout-gateway-plan', '/checkout/:gateway/:plan', { gateway: ParamValue<true>, plan: ParamValue<true> }, { gateway: ParamValue<false>, plan: ParamValue<false> }>,
     'cost-calculator': RouteRecordInfo<'cost-calculator', '/cost-calculator', Record<never, never>, Record<never, never>>,
     'dashboards-home': RouteRecordInfo<'dashboards-home', '/dashboards/home', Record<never, never>, Record<never, never>>,
     'dashboards-list': RouteRecordInfo<'dashboards-list', '/dashboards/list', Record<never, never>, Record<never, never>>,
@@ -31,6 +32,7 @@ declare module 'vue-router/auto-routes' {
     'dashboards-overview': RouteRecordInfo<'dashboards-overview', '/dashboards/overview', Record<never, never>, Record<never, never>>,
     'dashboards-resources': RouteRecordInfo<'dashboards-resources', '/dashboards/resources', Record<never, never>, Record<never, never>>,
     'dashboards-rewards': RouteRecordInfo<'dashboards-rewards', '/dashboards/rewards', Record<never, never>, Record<never, never>>,
+    'flux-drive': RouteRecordInfo<'flux-drive', '/flux-drive', Record<never, never>, Record<never, never>>,
     'unauthorized': RouteRecordInfo<'unauthorized', '/unauthorized', Record<never, never>, Record<never, never>>,
     'xdao-app': RouteRecordInfo<'xdao-app', '/xdao-app', Record<never, never>, Record<never, never>>,
   }
