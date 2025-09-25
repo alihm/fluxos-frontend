@@ -1220,7 +1220,7 @@
                 </template>
                 <VListItemTitle>
                   Current Version
-                  <VChip size="x-small" color="primary" class="ml-2">Latest</VChip>
+                  <VChip size="x-small" color="success" class="ml-2">Latest</VChip>
                 </VListItemTitle>
                 <VListItemSubtitle>
                   Size: {{ convertSize(fileForVersions.size) }} •
@@ -1465,7 +1465,7 @@
             <template v-if="selectedVersionFile" #append-inner>
               <VChip
                 size="small"
-                color="primary"
+                color="surface-variant"
                 variant="tonal"
                 class="ml-2"
               >
@@ -1700,6 +1700,7 @@ const addVersion = (item) => {
   console.log('➕ Adding version for:', item.name)
   fileForAddVersion.value = item
   versionComment.value = ''
+  selectedVersionFile.value = null
   showAddVersionDialog.value = true
 }
 
@@ -1736,6 +1737,9 @@ const uploadVersion = async () => {
     currentFileName.value = selectedVersionFile.value.name
     currentFileSize.value = selectedVersionFile.value.size
     localUploadProgress.value = 0
+
+    // Close the add version dialog now that upload started
+    showAddVersionDialog.value = false
 
     // Use FluxCloud's uploadVersion API with existingFile parameter
     const existingFileHash = fileForAddVersion.value.hash

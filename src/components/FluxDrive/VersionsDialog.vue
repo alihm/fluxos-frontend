@@ -172,7 +172,7 @@
                       <VChip
                         v-if="index === 0"
                         size="small"
-                        color="blue"
+                        color="grey"
                         variant="tonal"
                         class="ms-1"
                         prepend-icon="mdi-backup-restore"
