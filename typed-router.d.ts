@@ -33,6 +33,12 @@ declare module 'vue-router/auto-routes' {
     'dashboards-resources': RouteRecordInfo<'dashboards-resources', '/dashboards/resources', Record<never, never>, Record<never, never>>,
     'dashboards-rewards': RouteRecordInfo<'dashboards-rewards', '/dashboards/rewards', Record<never, never>, Record<never, never>>,
     'flux-drive': RouteRecordInfo<'flux-drive', '/flux-drive', Record<never, never>, Record<never, never>>,
+    'marketplace': RouteRecordInfo<'marketplace', '/marketplace', Record<never, never>, Record<never, never>>,
+    'marketplace-id': RouteRecordInfo<'marketplace-id', '/marketplace/:id', { id: ParamValue<true> }, { id: ParamValue<false> }>,
+    'marketplace-games': RouteRecordInfo<'marketplace-games', '/marketplace/games', Record<never, never>, Record<never, never>>,
+    'marketplace-games-name': RouteRecordInfo<'marketplace-games-name', '/marketplace/games/:name', { name: ParamValue<true> }, { name: ParamValue<false> }>,
+    'marketplace-subscription-manager': RouteRecordInfo<'marketplace-subscription-manager', '/marketplace/SubscriptionManager', Record<never, never>, Record<never, never>>,
+    'marketplace-wordpress': RouteRecordInfo<'marketplace-wordpress', '/marketplace/wordpress', Record<never, never>, Record<never, never>>,
     'unauthorized': RouteRecordInfo<'unauthorized', '/unauthorized', Record<never, never>, Record<never, never>>,
     'xdao-app': RouteRecordInfo<'xdao-app', '/xdao-app', Record<never, never>, Record<never, never>>,
   }

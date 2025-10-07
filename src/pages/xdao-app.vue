@@ -81,332 +81,332 @@
           <VCardText class="pa-4">
             <VBtn
               variant="outlined"
-            @click="showMobileFilters = !showMobileFilters"
-          >
-            <VIcon icon="mdi-filter-variant" class="me-2" />
-            Filters
-          </VBtn>
-        
-        <div v-if="showMobileFilters" class="mt-4">
-          <div
-            class="filter-grid"
-            :class="{ 'grid-full-width': proposalFilters.length % 2 === 1 }"
-          >
-            <VChip
-              v-for="(filter, index) in proposalFilters"
-              :key="filter.value"
-              :value="index"
-              :variant="activeFilter === filter.value ? 'flat' : 'outlined'"
-              :color="activeFilter === filter.value ? 'primary' : 'default'"
-              size="default"
-              class="px-3 py-2 d-flex align-center filter-chip"
-              :class="{ 'last-full-width': index === proposalFilters.length - 1 && proposalFilters.length % 2 === 1 }"
-              @click="setFilter(filter.value)"
+              @click="showMobileFilters = !showMobileFilters"
             >
-              <div class="d-flex align-center">
-                <VIcon :icon="filter.icon" class="me-1" size="18" />
-                <span>{{ filter.title }}</span>
-              </div>
-              <VBadge
-                v-if="filter.count > 0"
-                :content="filter.count"
-                :color="activeFilter === filter.value ? 'white' : 'primary'"
-                inline
-                density="compact"
-                class="badge-xs ml-1"
-              />
-              <div v-else style="width: 20px;"></div>
-            </VChip>
-          </div>
-        </div>
-      </VCardText>
-    </VCard>
-  </VCol>
-
-  <!-- Desktop Sidebar -->
-  <VCol
-    cols="12"
-    md="4"
-    lg="3"
-    class="d-none d-md-block"
-  >
-    <VCard>
-      <VCardText class="pa-6">
-        <VList class="pa-0 sidebar-list compact-sidebar">
-          <VListItem
-            :active="activeTab === 1"
-            prepend-icon="mdi-plus-circle-outline"
-            rounded="xl"
-            class="mb-1 compact-list-item add-proposal-item"
-            @click="openAddProposal"
-          >
-            <VListItemTitle class="text-body-2 font-weight-medium">
-              Add Proposal
-            </VListItemTitle>
-          </VListItem>
-          
-          <VDivider class="my-3" />
-          
-          <VListSubheader class="text-medium-emphasis px-0 mb-2 text-body-2">
-            Filter Proposals
-          </VListSubheader>
-          <VListItem
-            v-for="filter in proposalFilters"
-            :key="filter.title"
-            :active="activeFilter === filter.value && activeTab === 0"
-            :prepend-icon="filter.icon"
-            rounded="xl"
-            class="mb-1 compact-list-item"
-            @click="setFilter(filter.value)"
-          >
-            <VListItemTitle class="text-body-2">
-              {{ filter.title }}
-              <VChip
-                v-if="filter.count > 0"
-                :color="activeFilter === filter.value && activeTab === 0 ? 'primary' : 'default'"
-                variant="tonal"
-                size="x-small"
-                class="ml-2"
-              >
-                {{ filter.count }}
-              </VChip>
-            </VListItemTitle>
-          </VListItem>
-        </VList>
-      </VCardText>
-    </VCard>
-  </VCol>
-
-  <!-- Main Content - Tab switching only affects this column -->
-  <VCol
-    cols="12"
-    md="8"
-    lg="9"
-  >
-    <!-- Proposals List View -->
-    <div v-if="activeTab === 0">
-        <!-- Search and Controls -->
-        <VCard class="mb-4">
-          <VCardText class="pa-4">
-            <VRow align="center">
-              <VCol
-                cols="12"
-                md="8"
-              >
-                <VTextField
-                  v-model="searchQuery"
-                  placeholder="Search proposals..."
-                  prepend-inner-icon="mdi-magnify"
-                  variant="outlined"
-                  density="compact"
-                  hide-details
-                />
-              </VCol>
-              <VCol
-                cols="12"
-                md="4"
-              >
-                <VSelect
-                  v-model="sortBy"
-                  :items="sortOptions"
-                  label="Sort by"
-                  variant="outlined"
-                  density="compact"
-                  hide-details
-                />
-              </VCol>
-            </VRow>
-          </VCardText>
-        </VCard>
-
-        <!-- Proposals List -->
-        <VCard v-if="loading" class="text-center pa-8">
-          <VCardText>
-            <VProgressCircular
-              indeterminate
-              color="primary"
-              size="48"
-            />
-            <div class="mt-4 text-body-1">Loading proposals...</div>
-          </VCardText>
-        </VCard>
-
-        <!-- Error State -->
-        <VCard v-else-if="error" class="text-center pa-8">
-          <VCardText>
-            <VIcon
-              icon="mdi-alert-circle-outline"
-              size="64"
-              color="error"
-              class="mb-4"
-            />
-            <h3 class="text-h5 mb-2">Failed to Load Proposals</h3>
-            <p class="text-body-1 text-medium-emphasis mb-4">
-              {{ error }}
-            </p>
-            <VBtn
-              color="primary"
-              variant="elevated"
-              @click="fetchProposals"
-            >
-              <VIcon icon="mdi-refresh" class="me-2" />
-              Try Again
+              <VIcon icon="mdi-filter-variant" class="me-2" />
+              Filters
             </VBtn>
-          </VCardText>
-        </VCard>
-
-        <!-- No Proposals State -->
-        <VCard v-else-if="filteredProposals.length === 0" class="text-center pa-8">
-          <VCardText>
-            <VIcon
-              icon="mdi-clipboard-outline"
-              size="64"
-              color="grey-lighten-1"
-              class="mb-4"
-            />
-            <h3 class="text-h5 mb-2">{{ getEmptyStateTitle() }}</h3>
-            <p class="text-body-1 text-medium-emphasis">
-              {{ getEmptyStateMessage() }}
-            </p>
-          </VCardText>
-        </VCard>
-
-        <VCard
-          v-for="proposal in filteredProposals"
-          :key="proposal.hash"
-          class="mb-4 proposal-card"
-          @click="openProposal(proposal)"
-        >
-          <VCardText class="pa-4 pa-sm-6">
-            <!-- Mobile Layout -->
-            <div class="d-block d-sm-none">
-              <!-- Status and Title -->
-              <div class="d-flex justify-space-between align-start mb-3">
-                <h3 class="text-h6 font-weight-bold flex-grow-1 me-3">{{ stripFormatting(proposal.topic) }}</h3>
-                <VChip
-                  :color="getStatusColor(proposal.status)"
-                  variant="elevated"
-                  size="small"
-                  class="flex-shrink-0"
-                >
-                  {{ proposal.status }}
-                </VChip>
-              </div>
-              
-              <!-- Author and Date -->
-              <div class="d-flex flex-column gap-2 mb-3">
-                <div class="d-flex align-center">
-                  <VAvatar
-                    v-if="proposal.nickName"
-                    size="20"
-                    :color="getStatusColor(proposal.status)"
-                    variant="tonal"
-                    class="me-2"
-                  >
-                    <span class="text-caption">{{ getAvatarText(proposal.nickName) }}</span>
-                  </VAvatar>
-                  <VIcon v-else icon="mdi-account" size="20" class="me-2 text-medium-emphasis" />
-                  <span class="text-body-2">{{ proposal.nickName || 'Anonymous' }}</span>
-                </div>
-                <div class="text-caption text-medium-emphasis">
-                  End: {{ formatDate(proposal.voteEndDate) }}
-                </div>
-              </div>
-            </div>
-
-            <!-- Desktop Layout -->
-            <div class="d-none d-sm-block">
-              <div class="d-flex justify-space-between align-start mb-3">
-                <div class="flex-grow-1 me-4">
-                  <h3 class="text-h6 font-weight-bold mb-0">{{ stripFormatting(proposal.topic) }}</h3>
-                </div>
-                <VChip
-                  :color="getStatusColor(proposal.status)"
-                  variant="elevated"
-                  size="small"
-                  class="flex-shrink-0"
-                >
-                  {{ proposal.status }}
-                </VChip>
-              </div>
-
-              <div class="d-flex justify-space-between align-center mb-3">
-                <div class="d-flex align-center">
-                  <VAvatar
-                    v-if="proposal.nickName"
-                    size="24"
-                    :color="getStatusColor(proposal.status)"
-                    variant="tonal"
-                    class="me-2"
-                  >
-                    <span class="text-caption">{{ getAvatarText(proposal.nickName) }}</span>
-                  </VAvatar>
-                  <VIcon v-else icon="mdi-account" size="24" class="me-2 text-medium-emphasis" />
-                  <span class="text-body-2">{{ proposal.nickName || 'Anonymous' }}</span>
-                </div>
-                <div class="text-caption text-medium-emphasis">
-                  End: {{ formatDate(proposal.voteEndDate) }}
-                </div>
-              </div>
-            </div>
-
-            <!-- Voting Progress -->
-            <div class="voting-progress pt-3">
-              <div class="d-flex justify-space-between text-caption mb-2">
-                <span>Required: {{ Number(proposal.votesRequired).toLocaleString() }}</span>
-                <span>Total: {{ Number(proposal.votesYes + proposal.votesNo).toLocaleString() }}</span>
-              </div>
-              
-              <VProgressLinear
-                :model-value="(proposal.votesYes + proposal.votesNo) / proposal.votesRequired * 100"
-                color="primary"
-                height="20"
-                rounded
+        
+            <div v-if="showMobileFilters" class="mt-4">
+              <div
+                class="filter-grid"
+                :class="{ 'grid-full-width': proposalFilters.length % 2 === 1 }"
               >
-                <template #default>
-                  <div class="progress-segments">
-                    <div 
-                      class="progress-yes"
-                      :style="{ width: `${(proposal.votesYes / proposal.votesRequired) * 100}%` }"
-                      v-if="proposal.votesYes > 0"
-                    >
-                    </div>
-                    <div 
-                      class="progress-no"
-                      :style="{ 
-                        width: `${(proposal.votesNo / proposal.votesRequired) * 100}%`,
-                        left: `${(proposal.votesYes / proposal.votesRequired) * 100}%`
-                      }"
-                      v-if="proposal.votesNo > 0"
-                    >
-                    </div>
-                  </div>
-                </template>
-              </VProgressLinear>
-              
-              <div class="d-flex justify-space-between text-caption mt-2">
-                <span class="text-success">Yes: {{ Number(proposal.votesYes).toLocaleString() }}</span>
-                <VChip 
-                  variant="tonal" 
-                  size="x-small" 
-                  :color="getPercentageColor(proposal)"
-                  class="percentage-chip"
+                <VChip
+                  v-for="(filter, index) in proposalFilters"
+                  :key="filter.value"
+                  :value="index"
+                  :variant="activeFilter === filter.value ? 'flat' : 'outlined'"
+                  :color="activeFilter === filter.value ? 'primary' : 'default'"
+                  size="default"
+                  class="px-3 py-2 d-flex align-center filter-chip"
+                  :class="{ 'last-full-width': index === proposalFilters.length - 1 && proposalFilters.length % 2 === 1 }"
+                  @click="setFilter(filter.value)"
                 >
-                  {{ Math.round(((proposal.votesYes + proposal.votesNo) / proposal.votesRequired) * 100) }}%
+                  <div class="d-flex align-center">
+                    <VIcon :icon="filter.icon" class="me-1" size="18" />
+                    <span>{{ filter.title }}</span>
+                  </div>
+                  <VBadge
+                    v-if="filter.count > 0"
+                    :content="filter.count"
+                    :color="activeFilter === filter.value ? 'white' : 'primary'"
+                    inline
+                    density="compact"
+                    class="badge-xs ml-1"
+                  />
+                  <div v-else style="width: 20px;"></div>
                 </VChip>
-                <span class="text-error">No: {{ Number(proposal.votesNo).toLocaleString() }}</span>
               </div>
             </div>
           </VCardText>
         </VCard>
-    </div>
+      </VCol>
 
-    <!-- Add Proposal View -->
-    <div v-if="activeTab === 1">
-      <AddProposalTab @proposal-added="onProposalAdded" />
-    </div>
-  </VCol>
-</VRow>
+      <!-- Desktop Sidebar -->
+      <VCol
+        cols="12"
+        md="4"
+        lg="3"
+        class="d-none d-md-block"
+      >
+        <VCard>
+          <VCardText class="pa-6">
+            <VList class="pa-0 sidebar-list compact-sidebar">
+              <VListItem
+                :active="activeTab === 1"
+                prepend-icon="mdi-plus-circle-outline"
+                rounded="xl"
+                class="mb-1 compact-list-item add-proposal-item"
+                @click="openAddProposal"
+              >
+                <VListItemTitle class="text-body-2 font-weight-medium">
+                  Add Proposal
+                </VListItemTitle>
+              </VListItem>
+          
+              <VDivider class="my-3" />
+          
+              <VListSubheader class="text-medium-emphasis px-0 mb-2 text-body-2">
+                Filter Proposals
+              </VListSubheader>
+              <VListItem
+                v-for="filter in proposalFilters"
+                :key="filter.title"
+                :active="activeFilter === filter.value && activeTab === 0"
+                :prepend-icon="filter.icon"
+                rounded="xl"
+                class="mb-1 compact-list-item"
+                @click="setFilter(filter.value)"
+              >
+                <VListItemTitle class="text-body-2">
+                  {{ filter.title }}
+                  <VChip
+                    v-if="filter.count > 0"
+                    :color="activeFilter === filter.value && activeTab === 0 ? 'primary' : 'default'"
+                    variant="tonal"
+                    size="x-small"
+                    class="ml-2"
+                  >
+                    {{ filter.count }}
+                  </VChip>
+                </VListItemTitle>
+              </VListItem>
+            </VList>
+          </VCardText>
+        </VCard>
+      </VCol>
+
+      <!-- Main Content - Tab switching only affects this column -->
+      <VCol
+        cols="12"
+        md="8"
+        lg="9"
+      >
+        <!-- Proposals List View -->
+        <div v-if="activeTab === 0">
+          <!-- Search and Controls -->
+          <VCard class="mb-4">
+            <VCardText class="pa-4">
+              <VRow align="center">
+                <VCol
+                  cols="12"
+                  md="8"
+                >
+                  <VTextField
+                    v-model="searchQuery"
+                    placeholder="Search proposals..."
+                    prepend-inner-icon="mdi-magnify"
+                    variant="outlined"
+                    density="compact"
+                    hide-details
+                  />
+                </VCol>
+                <VCol
+                  cols="12"
+                  md="4"
+                >
+                  <VSelect
+                    v-model="sortBy"
+                    :items="sortOptions"
+                    label="Sort by"
+                    variant="outlined"
+                    density="compact"
+                    hide-details
+                  />
+                </VCol>
+              </VRow>
+            </VCardText>
+          </VCard>
+
+          <!-- Proposals List -->
+          <VCard v-if="loading" class="text-center pa-8">
+            <VCardText>
+              <VProgressCircular
+                indeterminate
+                color="primary"
+                size="48"
+              />
+              <div class="mt-4 text-body-1">Loading proposals...</div>
+            </VCardText>
+          </VCard>
+
+          <!-- Error State -->
+          <VCard v-else-if="error" class="text-center pa-8">
+            <VCardText>
+              <VIcon
+                icon="mdi-alert-circle-outline"
+                size="64"
+                color="error"
+                class="mb-4"
+              />
+              <h3 class="text-h5 mb-2">Failed to Load Proposals</h3>
+              <p class="text-body-1 text-medium-emphasis mb-4">
+                {{ error }}
+              </p>
+              <VBtn
+                color="primary"
+                variant="elevated"
+                @click="fetchProposals"
+              >
+                <VIcon icon="mdi-refresh" class="me-2" />
+                Try Again
+              </VBtn>
+            </VCardText>
+          </VCard>
+
+          <!-- No Proposals State -->
+          <VCard v-else-if="filteredProposals.length === 0" class="text-center pa-8">
+            <VCardText>
+              <VIcon
+                icon="mdi-clipboard-outline"
+                size="64"
+                color="grey-lighten-1"
+                class="mb-4"
+              />
+              <h3 class="text-h5 mb-2">{{ getEmptyStateTitle() }}</h3>
+              <p class="text-body-1 text-medium-emphasis">
+                {{ getEmptyStateMessage() }}
+              </p>
+            </VCardText>
+          </VCard>
+
+          <VCard
+            v-for="proposal in filteredProposals"
+            :key="proposal.hash"
+            class="mb-4 proposal-card"
+            @click="openProposal(proposal)"
+          >
+            <VCardText class="pa-4 pa-sm-6">
+              <!-- Mobile Layout -->
+              <div class="d-block d-sm-none">
+                <!-- Status and Title -->
+                <div class="d-flex justify-space-between align-start mb-3">
+                  <h3 class="text-h6 font-weight-bold flex-grow-1 me-3">{{ stripFormatting(proposal.topic) }}</h3>
+                  <VChip
+                    :color="getStatusColor(proposal.status)"
+                    variant="elevated"
+                    size="small"
+                    class="flex-shrink-0"
+                  >
+                    {{ proposal.status }}
+                  </VChip>
+                </div>
+              
+                <!-- Author and Date -->
+                <div class="d-flex flex-column gap-2 mb-3">
+                  <div class="d-flex align-center">
+                    <VAvatar
+                      v-if="proposal.nickName"
+                      size="20"
+                      :color="getStatusColor(proposal.status)"
+                      variant="tonal"
+                      class="me-2"
+                    >
+                      <span class="text-caption">{{ getAvatarText(proposal.nickName) }}</span>
+                    </VAvatar>
+                    <VIcon v-else icon="mdi-account" size="20" class="me-2 text-medium-emphasis" />
+                    <span class="text-body-2">{{ proposal.nickName || 'Anonymous' }}</span>
+                  </div>
+                  <div class="text-caption text-medium-emphasis">
+                    End: {{ formatDate(proposal.voteEndDate) }}
+                  </div>
+                </div>
+              </div>
+
+              <!-- Desktop Layout -->
+              <div class="d-none d-sm-block">
+                <div class="d-flex justify-space-between align-start mb-3">
+                  <div class="flex-grow-1 me-4">
+                    <h3 class="text-h6 font-weight-bold mb-0">{{ stripFormatting(proposal.topic) }}</h3>
+                  </div>
+                  <VChip
+                    :color="getStatusColor(proposal.status)"
+                    variant="elevated"
+                    size="small"
+                    class="flex-shrink-0"
+                  >
+                    {{ proposal.status }}
+                  </VChip>
+                </div>
+
+                <div class="d-flex justify-space-between align-center mb-3">
+                  <div class="d-flex align-center">
+                    <VAvatar
+                      v-if="proposal.nickName"
+                      size="24"
+                      :color="getStatusColor(proposal.status)"
+                      variant="tonal"
+                      class="me-2"
+                    >
+                      <span class="text-caption">{{ getAvatarText(proposal.nickName) }}</span>
+                    </VAvatar>
+                    <VIcon v-else icon="mdi-account" size="24" class="me-2 text-medium-emphasis" />
+                    <span class="text-body-2">{{ proposal.nickName || 'Anonymous' }}</span>
+                  </div>
+                  <div class="text-caption text-medium-emphasis">
+                    End: {{ formatDate(proposal.voteEndDate) }}
+                  </div>
+                </div>
+              </div>
+
+              <!-- Voting Progress -->
+              <div class="voting-progress pt-3">
+                <div class="d-flex justify-space-between text-caption mb-2">
+                  <span>Required: {{ Number(proposal.votesRequired).toLocaleString() }}</span>
+                  <span>Total: {{ Number(proposal.votesYes + proposal.votesNo).toLocaleString() }}</span>
+                </div>
+              
+                <VProgressLinear
+                  :model-value="(proposal.votesYes + proposal.votesNo) / proposal.votesRequired * 100"
+                  color="primary"
+                  height="20"
+                  rounded
+                >
+                  <template #default>
+                    <div class="progress-segments">
+                      <div 
+                        class="progress-yes"
+                        :style="{ width: `${(proposal.votesYes / proposal.votesRequired) * 100}%` }"
+                        v-if="proposal.votesYes > 0"
+                      >
+                      </div>
+                      <div 
+                        class="progress-no"
+                        :style="{ 
+                          width: `${(proposal.votesNo / proposal.votesRequired) * 100}%`,
+                          left: `${(proposal.votesYes / proposal.votesRequired) * 100}%`
+                        }"
+                        v-if="proposal.votesNo > 0"
+                      >
+                      </div>
+                    </div>
+                  </template>
+                </VProgressLinear>
+              
+                <div class="d-flex justify-space-between text-caption mt-2">
+                  <span class="text-success">Yes: {{ Number(proposal.votesYes).toLocaleString() }}</span>
+                  <VChip 
+                    variant="tonal" 
+                    size="x-small" 
+                    :color="getPercentageColor(proposal)"
+                    class="percentage-chip"
+                  >
+                    {{ Math.round(((proposal.votesYes + proposal.votesNo) / proposal.votesRequired) * 100) }}%
+                  </VChip>
+                  <span class="text-error">No: {{ Number(proposal.votesNo).toLocaleString() }}</span>
+                </div>
+              </div>
+            </VCardText>
+          </VCard>
+        </div>
+
+        <!-- Add Proposal View -->
+        <div v-if="activeTab === 1">
+          <AddProposalTab @proposalAdded="onProposalAdded" />
+        </div>
+      </VCol>
+    </VRow>
 
 
     <!-- Proposal Detail Dialog -->
@@ -414,7 +414,7 @@
       v-model="showProposalDetail"
       :proposal="selectedProposal"
       :zelid="userZelid"
-      @show-login="showLogin = true"
+      @showLogin="showLogin = true"
     />
 
     <!-- Debug Info -->
@@ -427,44 +427,14 @@
     </div>
   </div>
 
+
   <!-- Login Dialog -->
-  <VDialog
+  <LoginDialog
     v-model="showLogin"
-    :max-width="$vuetify.display.xs ? '95vw' : '900'"
-    :width="$vuetify.display.xs ? '95vw' : '90vw'"
-    :fullscreen="$vuetify.display.xs"
-    persistent
-    scrollable
-  >
-    <VCard>
-      <VCardTitle class="d-flex align-center pa-4 bg-primary" style="color: white !important;">
-        <VIcon icon="mdi-login" class="me-3" color="white" />
-        <span class="text-h5" style="color: white !important;">Login Required for Voting</span>
-      </VCardTitle>
-      <VCardText class="pa-4 pa-sm-6">
-        <VAlert
-          type="info"
-          variant="tonal"
-          class="mb-4"
-        >
-          <div class="d-flex align-center">
-            You need to be logged in to participate in xDAO voting. Please choose your preferred login method below.
-          </div>
-        </VAlert>
-        <Login :hide-manual-login="true" />
-      </VCardText>
-      <VCardActions class="pa-4 pt-0">
-        <VSpacer />
-        <VBtn
-          variant="outlined"
-          color="error"
-          @click="showLogin = false"
-        >
-          Cancel
-        </VBtn>
-      </VCardActions>
-    </VCard>
-  </VDialog>
+    title="Login Required for Voting"
+    message="You need to be logged in to participate in xDAO voting. Please choose your preferred login method below."
+    @loginSuccess="showLogin = false"
+  />
 </template>
 
 <script setup>
@@ -476,7 +446,7 @@ import { storeToRefs } from 'pinia'
 // Import components
 import ProposalDetailDialog from '@/components/xdao/ProposalDetailDialog.vue'
 import AddProposalTab from '@/components/xdao/AddProposalTab.vue'
-import Login from '@/@core/components/Login.vue'
+import LoginDialog from '@/components/shared/LoginDialog.vue'
 
 // Stores
 const fluxStore = useFluxStore()
@@ -503,7 +473,7 @@ const userZelid = computed(() => zelid.value)
 
 // Proposal filters with counts
 const proposalFilters = computed(() => {
-  const getCount = (filterValue) => {
+  const getCount = filterValue => {
     if (filterValue === 'all') return proposals.value.length
     
     return proposals.value.filter(proposal => {
@@ -516,6 +486,7 @@ const proposalFilters = computed(() => {
       if (filterValue === 'rejected') {
         return (proposal.status.includes('Rejected') || proposal.status === 'Rejected')
       }
+      
       return false
     }).length
   }
@@ -561,6 +532,7 @@ const filteredProposals = computed(() => {
         // Check for all rejected variations (including "Rejected Unpaid")
         return (proposal.status.includes('Rejected') || proposal.status === 'Rejected')
       }
+      
       return false
     })
     
@@ -573,7 +545,7 @@ const filteredProposals = computed(() => {
     filtered = filtered.filter(proposal => 
       proposal.topic.toLowerCase().includes(query) ||
       proposal.description.toLowerCase().includes(query) ||
-      (proposal.nickName && proposal.nickName.toLowerCase().includes(query))
+      (proposal.nickName && proposal.nickName.toLowerCase().includes(query)),
     )
   }
 
@@ -582,6 +554,7 @@ const filteredProposals = computed(() => {
     if (sortBy.value === 'title-asc') return a.topic.localeCompare(b.topic)
     if (sortBy.value === 'title-desc') return b.topic.localeCompare(a.topic)
     if (sortBy.value === 'end-date') return a.voteEndDate - b.voteEndDate
+    
     return b.submitDate - a.submitDate // latest by default
   })
 
@@ -605,7 +578,7 @@ const fetchProposals = async () => {
       headers: {
         'Accept': 'application/json',
         'Content-Type': 'application/json',
-      }
+      },
     })
     
     console.log('API Response:', response.data)
@@ -629,7 +602,7 @@ const fetchProposals = async () => {
       message: err.message,
       code: err.code,
       response: err.response?.data,
-      status: err.response?.status
+      status: err.response?.status,
     })
     proposals.value = []
     
@@ -651,7 +624,7 @@ const fetchProposals = async () => {
   }
 }
 
-const setFilter = (filter) => {
+const setFilter = filter => {
   activeFilter.value = filter
   activeTab.value = 0 // Switch back to proposals view
   // Update the index for mobile chip group
@@ -659,6 +632,7 @@ const setFilter = (filter) => {
   if (index !== -1) {
     activeFilterIndex.value = index
   }
+
   // Keep filters visible after selection for better UX
   // Don't close mobile filters when a filter is selected
 }
@@ -668,7 +642,7 @@ const openAddProposal = () => {
   activeTab.value = 1
 }
 
-const openProposal = (proposal) => {
+const openProposal = proposal => {
   selectedProposal.value = proposal
   showProposalDetail.value = true
 }
@@ -679,17 +653,20 @@ const onProposalAdded = () => {
   activeTab.value = 0 // Switch back to view proposals tab
 }
 
-const getStatusColor = (status) => {
+const getStatusColor = status => {
   if (status === 'Open') return 'warning'
   if (status === 'Passed') return 'success'
+
   // Regular unpaid proposals should be info color
   if (status === 'Unpaid' || (status.includes('Unpaid') && !status.includes('Rejected'))) return 'info'
+
   // All rejected proposals (including "Rejected Unpaid") should be error color
   if (status.includes('Rejected') || status === 'Rejected') return 'error'
+  
   return 'primary'
 }
 
-const getProgressColor = (proposal) => {
+const getProgressColor = proposal => {
   const totalVotes = proposal.votesYes + proposal.votesNo
   const progress = totalVotes / proposal.votesRequired
   
@@ -697,18 +674,19 @@ const getProgressColor = (proposal) => {
     return proposal.votesYes > proposal.votesNo ? 'success' : 'error'
   }
   if (progress >= 0.75) return 'warning'
+  
   return 'info'
 }
 
-const getAvatarText = (name) => {
+const getAvatarText = name => {
   return name?.charAt(0).toUpperCase() || '?'
 }
 
-const formatDate = (timestamp) => {
+const formatDate = timestamp => {
   return new Date(timestamp).toLocaleDateString('en-US', {
     year: 'numeric',
     month: 'short',
-    day: 'numeric'
+    day: 'numeric',
   })
 }
 
@@ -721,7 +699,7 @@ const getEmptyStateTitle = () => {
     'open': 'No Open Proposals',
     'passed': 'No Passed Proposals', 
     'unpaid': 'No Unpaid Proposals',
-    'rejected': 'No Rejected Proposals'
+    'rejected': 'No Rejected Proposals',
   }
   
   return filterLabels[activeFilter.value] || 'No Proposals Found'
@@ -736,17 +714,18 @@ const getEmptyStateMessage = () => {
     'open': 'There are currently no open proposals for voting.',
     'passed': 'No proposals have passed yet.', 
     'unpaid': 'All passed proposals have been paid.',
-    'rejected': 'No proposals have been rejected.'
+    'rejected': 'No proposals have been rejected.',
   }
   
   return messages[activeFilter.value] || 'Try selecting a different filter.'
 }
 
-const formatDescription = (text) => {
+const formatDescription = text => {
   if (!text) return ''
   
   // For titles in list view, keep it simple (no tables)
   let formatted = text
+
     // Escape basic HTML
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
@@ -769,11 +748,12 @@ const formatDescription = (text) => {
   return formatted
 }
 
-const stripFormatting = (text) => {
+const stripFormatting = text => {
   if (!text) return ''
   
   // Strip all formatting to show clean text
   let stripped = text
+
     // Remove bold markers
     .replace(/\*\*([^*]+)\*\*/g, '$1')
     
@@ -789,9 +769,10 @@ const stripFormatting = (text) => {
   return stripped
 }
 
-const getPercentageColor = (proposal) => {
+const getPercentageColor = proposal => {
   if (proposal.status === 'Passed') return 'success'  // Green - passed
   if (proposal.status === 'Open') return 'primary'    // Blue - in progress
+  
   return 'error' // Red - not passed (rejected, unpaid, etc.)
 }
 
@@ -802,7 +783,7 @@ watch(showAddProposal, (newValue, oldValue) => {
 
 // Lifecycle
 // Watch for login status changes
-watch(isLoggedIn, (newValue) => {
+watch(isLoggedIn, newValue => {
   if (newValue && showLogin.value) {
     showLogin.value = false
   }

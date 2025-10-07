@@ -1,73 +1,73 @@
 <template>
   <VContainer>
     <VCard variant="outlined" class="mt-2">
-    <VCardText>
-      <div class="d-flex align-center justify-space-between mb-3">
-        <h4 class="text-h6">Storage Usage</h4>
-        <VProgressCircular
-          v-if="loadingStorage"
-          indeterminate
-          size="20"
-          width="2"
+      <VCardText>
+        <div class="d-flex align-center justify-space-between mb-3">
+          <h4 class="text-h6">Storage Usage</h4>
+          <VProgressCircular
+            v-if="loadingStorage"
+            indeterminate
+            size="20"
+            width="2"
+          />
+        </div>
+
+        <VProgressLinear
+          :model-value="storagePercentage"
+          color="primary"
+          height="8"
+          rounded
+          class="mb-3"
         />
-      </div>
 
-      <VProgressLinear
-        :model-value="storagePercentage"
-        color="primary"
-        height="8"
-        rounded
-        class="mb-3"
-      />
+        <div class="text-center">
+          <span class="text-body-2">
+            {{ bytesConversion(usedStorage) }} of {{ convertSize(totalStorage) }} used
+          </span>
+          <span class="text-body-2 text-medium-emphasis">
+            ({{ storagePercentage }}%)
+          </span>
+        </div>
 
-      <div class="text-center">
-        <span class="text-body-2">
-          {{ bytesConversion(usedStorage) }} of {{ convertSize(totalStorage) }} used
-        </span>
-        <span class="text-body-2 text-medium-emphasis">
-          ({{ storagePercentage }}%)
-        </span>
-      </div>
+        <!-- Additional storage details -->
+        <VRow class="mt-4" no-gutters>
+          <VCol cols="4" class="text-center">
+            <div class="text-body-2 text-medium-emphasis">Used Space</div>
+            <div class="text-h6 text-primary">{{ bytesConversion(usedStorage) }}</div>
+          </VCol>
+          <VCol cols="4" class="text-center">
+            <div class="text-body-2 text-medium-emphasis">Available</div>
+            <div class="text-h6 text-success">{{ bytesConversion(totalStorage - usedStorage) }}</div>
+          </VCol>
+          <VCol cols="4" class="text-center">
+            <div class="text-body-2 text-medium-emphasis">Total</div>
+            <div class="text-h6">{{ convertSize(totalStorage) }}</div>
+          </VCol>
+        </VRow>
 
-      <!-- Additional storage details -->
-      <VRow class="mt-4" no-gutters>
-        <VCol cols="4" class="text-center">
-          <div class="text-body-2 text-medium-emphasis">Used Space</div>
-          <div class="text-h6 text-primary">{{ bytesConversion(usedStorage) }}</div>
-        </VCol>
-        <VCol cols="4" class="text-center">
-          <div class="text-body-2 text-medium-emphasis">Available</div>
-          <div class="text-h6 text-success">{{ bytesConversion(totalStorage - usedStorage) }}</div>
-        </VCol>
-        <VCol cols="4" class="text-center">
-          <div class="text-body-2 text-medium-emphasis">Total</div>
-          <div class="text-h6">{{ convertSize(totalStorage) }}</div>
-        </VCol>
-      </VRow>
-
-      <!-- Storage status indicator -->
-      <VAlert
-        v-if="storagePercentage >= 90"
-        type="warning"
-        variant="tonal"
-        class="mt-4"
-        density="compact"
-      >
-        <template #title>Storage Almost Full</template>
-        Your storage is {{ storagePercentage }}% full. Consider upgrading your plan or removing unused files.
-      </VAlert>
-      <VAlert
-        v-else-if="storagePercentage >= 75"
-        type="info"
-        variant="tonal"
-        class="mt-4"
-        density="compact"
-      >
-        <template #title>Storage Status</template>
-        You're using {{ storagePercentage }}% of your available storage space.
-      </VAlert>
-    </VCardText>
-  </VCard>
+        <!-- Storage status indicator -->
+        <VAlert
+          v-if="storagePercentage >= 90"
+          type="warning"
+          variant="tonal"
+          class="mt-4"
+          density="compact"
+        >
+          <template #title>Storage Almost Full</template>
+          Your storage is {{ storagePercentage }}% full. Consider upgrading your plan or removing unused files.
+        </VAlert>
+        <VAlert
+          v-else-if="storagePercentage >= 75"
+          type="info"
+          variant="tonal"
+          class="mt-4"
+          density="compact"
+        >
+          <template #title>Storage Status</template>
+          You're using {{ storagePercentage }}% of your available storage space.
+        </VAlert>
+      </VCardText>
+    </VCard>
   </VContainer>
 </template>
 
@@ -84,7 +84,7 @@ const {
   hasActiveSubscription,
   bytesConversion,
   convertSize,
-  fetchStorageInfo
+  fetchStorageInfo,
 } = useFluxDrive()
 
 // Only fetch storage info if it hasn't been fetched yet
@@ -93,6 +93,7 @@ onMounted(() => {
   // we only need to call fetchStorageInfo if storage info hasn't been fetched yet
   if (!hasActiveSubscription.value || !storagePercentage.value) {
     console.log('📊 StorageInfo component: fetchStorageInfo may be needed')
+
     // fetchStorageInfo() has internal logic to prevent duplicate calls
     fetchStorageInfo()
   } else {

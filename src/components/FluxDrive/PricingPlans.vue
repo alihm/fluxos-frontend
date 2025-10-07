@@ -46,111 +46,110 @@
 
           <VCard
             flat
-            class="pricing-card h-100 w-100 d-flex flex-column rounded-lg"
+            class="pricing-card h-100 w-100 d-flex flex-column rounded-lg elevation-8"
             :class="[
               plan.popular ? 'pricing-card--popular' : 'pricing-card--standard',
               getPlanStatus(plan.id) === 'current' ? 'pricing-card--current' : '',
-              getPlanStatus(plan.id) === 'downgrade' ? 'pricing-card--downgrade' : '',
-              'elevation-8'
+              getPlanStatus(plan.id) === 'downgrade' ? 'pricing-card--downgrade' : ''
             ]"
             color="surface"
             variant="elevated"
             :disabled="getPlanStatus(plan.id) === 'downgrade'"
           >
 
-          <VCardText class="text-center pa-8 d-flex flex-column flex-grow-1">
-            <!-- Plan name -->
-            <h3 class="text-h5 mb-4 font-weight-bold">
-              {{ plan.name }}
-            </h3>
+            <VCardText class="text-center pa-8 d-flex flex-column flex-grow-1">
+              <!-- Plan name -->
+              <h3 class="text-h5 mb-4 font-weight-bold">
+                {{ plan.name }}
+              </h3>
 
-            <!-- Plan price -->
-            <div class="mb-6 price-section">
-              <div v-if="plan.price && plan.price.trim()">
-                <!-- Daily pricing chip -->
-                <div class="d-flex justify-center mb-2">
-                  <VChip
-                    color="surface-variant"
-                    variant="tonal"
-                    size="default"
-                    class="pricing-chip-small text-body-2 font-weight-medium"
-                  >
-                    $0.0017 GB / day
-                  </VChip>
+              <!-- Plan price -->
+              <div class="mb-6 price-section">
+                <div v-if="plan.price && plan.price.trim()">
+                  <!-- Daily pricing chip -->
+                  <div class="d-flex justify-center mb-2">
+                    <VChip
+                      color="surface-variant"
+                      variant="tonal"
+                      size="default"
+                      class="pricing-chip-small text-body-2 font-weight-medium"
+                    >
+                      $0.0017 GB / day
+                    </VChip>
+                  </div>
+
+                  <!-- Separator -->
+                  <VDivider class="my-2 pricing-divider" />
+
+                  <!-- Monthly pricing chip -->
+                  <div class="d-flex justify-center">
+                    <VChip
+                      color="primary"
+                      variant="flat"
+                      size="default"
+                      class="pricing-chip-large text-h6 font-weight-bold text-white"
+                    >
+                      {{ plan.price }} / Month
+                    </VChip>
+                  </div>
                 </div>
-
-                <!-- Separator -->
-                <VDivider class="my-2 pricing-divider" />
-
-                <!-- Monthly pricing chip -->
-                <div class="d-flex justify-center">
-                  <VChip
-                    color="primary"
-                    variant="flat"
-                    size="default"
-                    class="pricing-chip-large text-h6 font-weight-bold text-white"
-                  >
-                    {{ plan.price }} / Month
-                  </VChip>
+                <div v-else>
+                  <div class="d-flex justify-center">
+                    <VChip
+                      color="surface-variant"
+                      variant="tonal"
+                      size="default"
+                      class="pricing-chip-large text-body-1"
+                    >
+                      Billed monthly
+                    </VChip>
+                  </div>
                 </div>
               </div>
-              <div v-else>
-                <div class="d-flex justify-center">
-                  <VChip
-                    color="surface-variant"
-                    variant="tonal"
-                    size="default"
-                    class="pricing-chip-large text-body-1"
-                  >
-                    Billed monthly
-                  </VChip>
+
+              <!-- Storage amount -->
+              <div class="mb-6 text-center">
+                <span class="text-h6 font-weight-medium text-medium-emphasis">
+                  {{ plan.storage }}
+                </span>
+                <div class="text-body-2 mt-1 text-medium-emphasis">
+                  Storage
                 </div>
               </div>
-            </div>
 
-            <!-- Storage amount -->
-            <div class="mb-6 text-center">
-              <span class="text-h6 font-weight-medium text-medium-emphasis">
-                {{ plan.storage }}
-              </span>
-              <div class="text-body-2 mt-1 text-medium-emphasis">
-                Storage
+              <!-- Plan features -->
+              <div class="mb-6 flex-grow-1 features-container">
+                <div
+                  v-for="feature in plan.features"
+                  :key="feature"
+                  class="d-flex align-center justify-start py-2"
+                >
+                  <VIcon
+                    size="16"
+                    icon="mdi-check-circle"
+                    color="success"
+                    class="me-3"
+                  />
+                  <span class="text-body-2">{{ feature }}</span>
+                </div>
               </div>
-            </div>
 
-            <!-- Plan features -->
-            <div class="mb-6 flex-grow-1 features-container">
-              <div
-                v-for="feature in plan.features"
-                :key="feature"
-                class="d-flex align-center justify-start py-2"
+              <!-- Plan actions -->
+              <VBtn
+                block
+                :color="getButtonConfig(plan).color"
+                :variant="getButtonConfig(plan).variant"
+                :loading="subscribing && selectedPlan === plan.id"
+                :disabled="subscribing || getButtonConfig(plan).disabled"
+                size="large"
+                height="48"
+                class="pricing-btn mt-auto"
+                @click="handleSelectPlan(plan.id)"
               >
-                <VIcon
-                  size="16"
-                  icon="mdi-check-circle"
-                  color="success"
-                  class="me-3"
-                />
-                <span class="text-body-2">{{ feature }}</span>
-              </div>
-            </div>
-
-            <!-- Plan actions -->
-            <VBtn
-              block
-              :color="getButtonConfig(plan).color"
-              :variant="getButtonConfig(plan).variant"
-              :loading="subscribing && selectedPlan === plan.id"
-              :disabled="subscribing || getButtonConfig(plan).disabled"
-              size="large"
-              height="48"
-              class="pricing-btn mt-auto"
-              @click="handleSelectPlan(plan.id)"
-            >
-              {{ getButtonConfig(plan).text }}
-            </VBtn>
-          </VCardText>
-        </VCard>
+                {{ getButtonConfig(plan).text }}
+              </VBtn>
+            </VCardText>
+          </VCard>
         </div>
       </VCol>
     </VRow>
@@ -173,11 +172,11 @@ const {
   getAlertType,
   hasActiveSubscription,
   currentPlan,
-  getPlanStatus
+  getPlanStatus,
 } = useFluxDrive()
 
 // Get button configuration based on plan status
-const getButtonConfig = (plan) => {
+const getButtonConfig = plan => {
   // Enterprise plan always shows Contact Us
   if (plan.id === 'enterprise') {
     return {
@@ -185,7 +184,7 @@ const getButtonConfig = (plan) => {
       color: 'primary',
       variant: 'flat',
       disabled: false,
-      action: 'contact'
+      action: 'contact',
     }
   }
 
@@ -196,7 +195,7 @@ const getButtonConfig = (plan) => {
       color: 'primary',
       variant: 'flat',
       disabled: false,
-      action: 'signin'
+      action: 'signin',
     }
   }
 
@@ -204,44 +203,44 @@ const getButtonConfig = (plan) => {
   const status = getPlanStatus(plan.id)
 
   switch (status) {
-    case 'current':
-      return {
-        text: 'Renew',
-        color: 'success',
-        variant: 'flat',
-        disabled: false,
-        action: 'renew'
-      }
-    case 'upgrade':
-      return {
-        text: 'Upgrade',
-        color: 'primary',
-        variant: 'flat',
-        disabled: false,
-        action: 'upgrade'
-      }
-    case 'downgrade':
-      return {
-        text: 'Downgrade',
-        color: 'warning',
-        variant: 'flat',
-        disabled: true,
-        action: 'downgrade'
-      }
-    case 'signup':
-    default:
-      return {
-        text: 'Sign Up',
-        color: 'primary',
-        variant: 'flat',
-        disabled: false,
-        action: 'signup'
-      }
+  case 'current':
+    return {
+      text: 'Renew',
+      color: 'success',
+      variant: 'flat',
+      disabled: false,
+      action: 'renew',
+    }
+  case 'upgrade':
+    return {
+      text: 'Upgrade',
+      color: 'primary',
+      variant: 'flat',
+      disabled: false,
+      action: 'upgrade',
+    }
+  case 'downgrade':
+    return {
+      text: 'Downgrade',
+      color: 'warning',
+      variant: 'flat',
+      disabled: true,
+      action: 'downgrade',
+    }
+  case 'signup':
+  default:
+    return {
+      text: 'Sign Up',
+      color: 'primary',
+      variant: 'flat',
+      disabled: false,
+      action: 'signup',
+    }
   }
 }
 
 // Handle plan selection and emit to parent
-const handleSelectPlan = (planId) => {
+const handleSelectPlan = planId => {
   const config = getButtonConfig({ id: planId })
 
   // Handle Contact Us action differently
@@ -249,18 +248,20 @@ const handleSelectPlan = (planId) => {
     // Open support URL like FluxCloud does
     const supportUrl = 'https://support.runonflux.io'
     window.open(supportUrl, '_blank', 'noopener,noreferrer')
+    
     return
   }
 
   // For signin action, just trigger login without plan selection
   if (config.action === 'signin') {
     // Emit without planId to just trigger login
-    emit('select-plan', null, 'signin')
+    emit('selectPlan', null, 'signin')
+
     return
   }
 
   // For all other actions, emit to parent with action type
-  emit('select-plan', planId, config.action)
+  emit('selectPlan', planId, config.action)
 }
 </script>
 

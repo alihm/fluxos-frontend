@@ -14,6 +14,7 @@ dist-ssr
 *.local
 .vscode
 package-lock.json
+.backups
 
 /cypress/videos/
 /cypress/screenshots/
@@ -40,4 +41,8 @@ src/plugins/iconify/icons.css
 # Ignore MSW script
 public/mockServiceWorker.js
 CLAUDE.md
+
+# Claude Code documentation
+docs/claude-notes/
+.claude/
 

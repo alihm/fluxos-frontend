@@ -30,7 +30,7 @@ const checkNewVersion = async () => {
     const timeoutId = setTimeout(() => controller.abort(), 10000) // 10 second timeout
 
     const response = await fetch('https://raw.githubusercontent.com/RunOnFlux/flux/master/package.json', {
-      signal: controller.signal
+      signal: controller.signal,
     })
 
     clearTimeout(timeoutId)
@@ -187,7 +187,7 @@ const badgeProps = computed(() => ({
       :notifications="notifications"
       :badge-props="badgeProps"
       @remove="removeNotification"
-      @remove-all="removeAllNotifications"
+      @removeAll="removeAllNotifications"
       @read="markRead"
       @unread="markUnRead"
       @click:notification="handleNotificationClick"

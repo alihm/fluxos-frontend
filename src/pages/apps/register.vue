@@ -1,172 +1,134 @@
 <template>
   <div>
     <VRow>
-    <VCol cols="12">
-      <VCard>
-        <VCardText>
-          <!-- Check if user is logged in -->
-          <div v-if="!isLoggedIn">
-            <VRow>
-              <VCol cols="12" md="8" lg="6" class="mx-auto">
-                <div class="text-center py-8">
-                  <!-- Icon Container with gradient background -->
-                  <div class="d-flex justify-center mb-3">
-                    <VAvatar
-                      size="120"
-                      color="primary"
-                      variant="tonal"
-                      class="elevation-3 auth-icon-container"
-                    >
-                      <VIcon size="60" color="primary" class="auth-icon">
-                        mdi-shield-lock-outline
-                      </VIcon>
-                    </VAvatar>
-                  </div>
+      <VCol cols="12">
+        <VCard>
+          <VCardText>
+            <!-- Check if user is logged in -->
+            <div v-if="!isLoggedIn">
+              <VRow>
+                <VCol cols="12" md="8" lg="6" class="mx-auto">
+                  <div class="text-center py-8">
+                    <!-- Icon Container with gradient background -->
+                    <div class="d-flex justify-center mb-3">
+                      <VAvatar
+                        size="120"
+                        color="primary"
+                        variant="tonal"
+                        class="elevation-3 auth-icon-container"
+                      >
+                        <VIcon size="60" color="primary" class="auth-icon">
+                          mdi-shield-lock-outline
+                        </VIcon>
+                      </VAvatar>
+                    </div>
                   
-                  <!-- Title and Description -->
-                  <h1 class="text-h4 font-weight-bold mb-3">
-                    Sign In Required
-                  </h1>
+                    <!-- Title and Description -->
+                    <h1 class="text-h4 font-weight-bold mb-3">
+                      Sign In Required
+                    </h1>
                   
-                  <p class="text-body-1 text-medium-emphasis mb-8 px-4">
-                    To register and deploy applications on the Flux network, you need to authenticate with your Flux identity.
-                  </p>
+                    <p class="text-body-1 text-medium-emphasis mb-8 px-4">
+                      To register and deploy applications on the Flux network, you need to authenticate with your Flux identity.
+                    </p>
                   
-                  <!-- Features List -->
-                  <div class="d-flex justify-center mb-8">
-                    <div style="display: inline-block;">
-                      <div class="d-sm-flex">
-                        <div class="mr-sm-8">
-                          <div class="d-flex align-center mb-2">
-                            <VIcon color="success" size="20" class="mr-2 flex-shrink-0">mdi-check-circle</VIcon>
-                            <span class="text-body-2 text-no-wrap">Deploy distributed apps</span>
+                    <!-- Features List -->
+                    <div class="d-flex justify-center mb-8">
+                      <div style="display: inline-block;">
+                        <div class="d-sm-flex">
+                          <div class="mr-sm-8">
+                            <div class="d-flex align-center mb-2">
+                              <VIcon color="success" size="20" class="mr-2 flex-shrink-0">mdi-check-circle</VIcon>
+                              <span class="text-body-2 text-no-wrap">Deploy distributed apps</span>
+                            </div>
+                            <div class="d-flex align-center mb-2">
+                              <VIcon color="success" size="20" class="mr-2 flex-shrink-0">mdi-check-circle</VIcon>
+                              <span class="text-body-2 text-no-wrap">Manage resources</span>
+                            </div>
                           </div>
-                          <div class="d-flex align-center mb-2">
-                            <VIcon color="success" size="20" class="mr-2 flex-shrink-0">mdi-check-circle</VIcon>
-                            <span class="text-body-2 text-no-wrap">Manage resources</span>
-                          </div>
-                        </div>
-                        <div>
-                          <div class="d-flex align-center mb-2">
-                            <VIcon color="success" size="20" class="mr-2 flex-shrink-0">mdi-check-circle</VIcon>
-                            <span class="text-body-2 text-no-wrap">Monitor performance</span>
-                          </div>
-                          <div class="d-flex align-center">
-                            <VIcon color="success" size="20" class="mr-2 flex-shrink-0">mdi-check-circle</VIcon>
-                            <span class="text-body-2 text-no-wrap">Scale globally</span>
+                          <div>
+                            <div class="d-flex align-center mb-2">
+                              <VIcon color="success" size="20" class="mr-2 flex-shrink-0">mdi-check-circle</VIcon>
+                              <span class="text-body-2 text-no-wrap">Monitor performance</span>
+                            </div>
+                            <div class="d-flex align-center">
+                              <VIcon color="success" size="20" class="mr-2 flex-shrink-0">mdi-check-circle</VIcon>
+                              <span class="text-body-2 text-no-wrap">Scale globally</span>
+                            </div>
                           </div>
                         </div>
                       </div>
                     </div>
-                  </div>
                   
-                  <!-- Action Buttons -->
-                  <div class="d-flex flex-column flex-sm-row justify-center gap-2">
-                    <VBtn
-                      color="primary"
-                      variant="flat"
-                      @click="showLogin = true"
-                    >
-                      <VIcon size="22" class="mr-2">mdi-login-variant</VIcon>
-                      Sign In
-                    </VBtn>
-                    <VBtn
-                      variant="flat"
-                      href="https://runonflux.io"
-                      target="_blank"
-                    >
-                      <VIcon size="22" class="mr-2">mdi-information-outline</VIcon>
-                      Learn More
-                    </VBtn>
+                    <!-- Action Buttons -->
+                    <div class="d-flex flex-column flex-sm-row justify-center gap-2">
+                      <VBtn
+                        color="primary"
+                        variant="flat"
+                        @click="showLogin = true"
+                      >
+                        <VIcon size="22" class="mr-2">mdi-login-variant</VIcon>
+                        Sign In
+                      </VBtn>
+                      <VBtn
+                        variant="flat"
+                        href="https://runonflux.io"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        <VIcon size="22" class="mr-2">mdi-information-outline</VIcon>
+                        Learn More
+                      </VBtn>
+                    </div>
+
+                    <!-- Help Text -->
+                    <p class="text-caption text-medium-emphasis mt-6">
+                      New to Flux?
+                      <a href="https://docs.runonflux.io" target="_blank" rel="noopener noreferrer" class="text-primary text-decoration-none">
+                        Check our documentation
+                      </a>
+                      to get started.
+                    </p>
                   </div>
-                  
-                  <!-- Help Text -->
-                  <p class="text-caption text-medium-emphasis mt-6">
-                    New to Flux? 
-                    <a href="https://docs.runonflux.io" target="_blank" class="text-primary text-decoration-none">
-                      Check our documentation
-                    </a>
-                    to get started.
-                  </p>
-                </div>
-              </VCol>
-            </VRow>
-          </div>
+                </VCol>
+              </VRow>
+            </div>
           
-          <!-- Show registration form if logged in -->
-          <SubscriptionManager 
-            v-else
-            :app-spec="newAppSpec" 
-            new-app
-            :execute-local-command="executeLocalCommand" 
-          />
-        </VCardText>
-      </VCard>
-    </VCol>
+            <!-- Show registration form if logged in -->
+            <SubscriptionManager 
+              v-else
+              :app-spec="newAppSpec" 
+              new-app
+              :execute-local-command="executeLocalCommand" 
+            />
+          </VCardText>
+        </VCard>
+      </VCol>
     </VRow>
 
     <!-- Login Dialog -->
-    <VDialog
+    <LoginDialog
       v-model="showLogin"
-      :max-width="$vuetify.display.xs ? '95vw' : '900'"
-      :width="$vuetify.display.xs ? '95vw' : '90vw'"
-      :fullscreen="$vuetify.display.xs"
-      persistent
-      scrollable
-    >
-      <VCard>
-        <VCardText class="pt-6">
-          <Login
-            :hide-manual-login="true"
-            :xdao-open="0"
-          />
-        </VCardText>
-        <VCardActions class="pa-4 pt-0">
-          <VSpacer />
-          <VBtn
-            variant="outlined"
-            color="error"
-            @click="showLogin = false"
-          >
-            Cancel
-          </VBtn>
-        </VCardActions>
-      </VCard>
-    </VDialog>
+      title="Login Required"
+      @loginSuccess="showLogin = false"
+    />
   </div>
 </template>
 
 <script setup>
 import { ref, onMounted, computed, watch } from 'vue'
 import { useFluxStore } from '@/stores/flux'
+import { storeToRefs } from 'pinia'
 import axios from 'axios'
 import { getDetectedBackendURL } from '@/utils/backend'
-import Login from '@/@core/components/Login.vue'
+import LoginDialog from '@/components/shared/LoginDialog.vue'
 
 // Initialize flux store
 const fluxStore = useFluxStore()
+const { privilege } = storeToRefs(fluxStore)
 
-// Check if user is logged in
-const isLoggedIn = computed(() => {
-  const zelidauth = localStorage.getItem('zelidauth')
-  if (!zelidauth) return false
-  
-  // Check if flux store has zelid, if not try to restore from localStorage
-  if (!fluxStore.zelid) {
-    try {
-      const params = new URLSearchParams(zelidauth)
-      const zelid = params.get('zelid')
-      if (zelid) {
-        fluxStore.setZelid(zelid)
-        return true
-      }
-    } catch (error) {
-      console.warn('Failed to restore auth state:', error)
-    }
-  }
-  
-  return !!(zelidauth && fluxStore.zelid)
-})
+// Check if user is logged in - using privilege from flux store (reactive)
+const isLoggedIn = computed(() => privilege.value !== 'none')
 
 // Create a new app specification with default values
 // Login dialog state
@@ -249,6 +211,7 @@ async function executeLocalCommand(
       : await axios.get(queryUrl, axiosConfig)
       
     console.log('Command result:', result.data)
+    
     return result
   } catch (error) {
     console.error('Command execution failed:', error, 'Command:', command)
@@ -258,7 +221,7 @@ async function executeLocalCommand(
 }
 
 // Watch for login status changes to close dialog when logged in
-watch(isLoggedIn, (newValue) => {
+watch(isLoggedIn, newValue => {
   if (newValue && showLogin.value) {
     showLogin.value = false
   }

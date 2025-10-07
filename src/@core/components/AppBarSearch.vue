@@ -21,7 +21,7 @@ const emit = defineEmits(["update:isDialogVisible", "search"])
 
 // 👉 Hotkey
 
-// eslint-disable-next-line camelcase
+ 
 const { ctrl_k, meta_k } = useMagicKeys({
   passive: false,
   onEventFired(e) {
@@ -35,12 +35,12 @@ const searchQueryLocal = ref("")
 
 // 👉 watching control + / to open dialog
 
-/* eslint-disable camelcase */
+ 
 watch([ctrl_k, meta_k], () => {
   emit("update:isDialogVisible", true)
 })
 
-/* eslint-enable */
+ 
 
 // 👉 clear search result and close the dialog
 const clearSearchAndCloseDialog = () => {

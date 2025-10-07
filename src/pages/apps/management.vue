@@ -115,7 +115,7 @@ const expiredApps = ref([])
 const managedApplication = ref("")
 const daemonBlockCount = ref(-1)
 const loading = ref({ active: true, expired: true, blockCount: true })
-const loggedIn = ref(false)
+const loggedIn = computed(() => privilege.value !== 'none')
 const apiError = ref(false)
 const snackbar = ref({ show: false, message: "", color: "error" })
 const tabIndex = ref(0)
@@ -126,12 +126,6 @@ function showSnackbar(message, color = "error") {
   snackbar.value = { show: true, message, color }
 }
 
-function setLoginStatus() {
-  const zelidauth = localStorage.getItem("zelidauth")
-  const auth = qs.parse(zelidauth || "")
-  loggedIn.value = Boolean(auth.zelid)
-  console.log("setLoginStatus:", loggedIn.value)
-}
 
 const activeAppsLabel = computed(() => {
   if (privilege.value === 'fluxteam') {
@@ -167,9 +161,11 @@ async function decryptIfEnterprise(spec, idx = 0) {
       
       return spec
     }
+
     // Check if WebCrypto is available before proceeding
     if (!isWebCryptoAvailable()) {
       console.warn(`${tag} ⚠️ WebCrypto not available, skipping enterprise decryption`)
+      
       return spec
     }
 
@@ -264,6 +260,7 @@ async function getActiveApps() {
     if (!auth?.zelid) {
       activeApps.value = []
       loading.value.active = false
+      
       return
     }
     const response = await AppsService.myGlobalAppSpecifications(auth.zelid)
@@ -287,6 +284,7 @@ async function getExpiredApps() {
     if (!auth?.zelid) {
       expiredApps.value = []
       loading.value.expired = false
+      
       return
     }
 
@@ -360,8 +358,8 @@ watch(loggedIn, newValue => {
 })
 
 onMounted(async () => {
-  setLoginStatus()
   await getDaemonBlockCount()
+
   // Load apps on mount to ensure loading states are properly set
   await getApps()
 })

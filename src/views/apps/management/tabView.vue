@@ -244,33 +244,87 @@
               </div>
               <div
                 v-else-if="!loggedIn && manage"
-                class="d-flex flex-column align-center justify-center py-8"
+                class="d-flex flex-column align-center justify-center "
               >
-                <VCard
-                  class="pa-6 text-center"
-                  variant="tonal"
-                  color="warning"
-                  style="max-width: 400px;"
-                >
-                  <VIcon
-                    icon="mdi-account-lock-outline"
-                    color="warning"
-                    size="48"
-                    class="mb-3"
-                  />
-                  <div class="text-warning mb-4">
-                    Please log in to view your apps.
-                  </div>
-                  <VBtn
-                    color="primary"
-                    variant="flat"
-                    size="small"
-                    @click="showLogin = true"
-                  >
-                    <VIcon size="18" class="mr-2">mdi-login</VIcon>
-                    Sign In
-                  </VBtn>
-                </VCard>
+                <VRow>
+                  <VCol cols="12" md="8" lg="6" class="mx-auto">
+                    <div class="text-center">
+                      <!-- Icon Container with gradient background -->
+                      <div class="d-flex justify-center mb-4">
+                        <VAvatar
+                          size="120"
+                          color="primary"
+                          variant="tonal"
+                          class="elevation-3 auth-icon-container"
+                        >
+                          <VIcon size="60" color="primary" class="auth-icon">
+                            mdi-shield-lock-outline
+                          </VIcon>
+                        </VAvatar>
+                      </div>
+                      
+                      <!-- Title and Description -->
+                      <h1 class="text-h4 font-weight-bold mb-3">
+                        Sign In Required
+                      </h1>
+                      
+                      <p class="text-body-1 text-medium-emphasis mb-8 px-4">
+                        To manage and monitor your applications on the Flux network, you need to authenticate with your Flux identity.
+                      </p>
+                      
+                      <!-- Features List -->
+                      <div class="d-flex justify-center mb-8">
+                        <div style="display: inline-block;">
+                          <div class="d-sm-flex gap-8">
+                            <div>
+                              <div class="d-flex align-center mb-2">
+                                <VIcon color="success" size="20" class="mr-2 flex-shrink-0">mdi-check-circle</VIcon>
+                                <span class="text-body-2 text-no-wrap">View your apps</span>
+                              </div>
+                              <div class="d-flex align-center mb-2">
+                                <VIcon color="success" size="20" class="mr-2 flex-shrink-0">mdi-check-circle</VIcon>
+                                <span class="text-body-2 text-no-wrap">Manage resources</span>
+                              </div>
+                            </div>
+                            <div>
+                              <div class="d-flex align-center mb-2">
+                                <VIcon color="success" size="20" class="mr-2 flex-shrink-0">mdi-check-circle</VIcon>
+                                <span class="text-body-2 text-no-wrap">Monitor performance</span>
+                              </div>
+                              <div class="d-flex align-center">
+                                <VIcon color="success" size="20" class="mr-2 flex-shrink-0">mdi-check-circle</VIcon>
+                                <span class="text-body-2 text-no-wrap">Control deployments</span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <!-- Action Buttons -->
+                      <div class="d-flex flex-column flex-sm-row justify-center gap-2">
+                        <VBtn
+                          color="primary"
+                          variant="flat"
+                          size="large"
+                          @click="showLogin = true"
+                        >
+                          <VIcon size="22" class="mr-2">mdi-login-variant</VIcon>
+                          Sign In
+                        </VBtn>
+                        <VBtn
+                          variant="flat"
+                          size="large"
+                          href="https://runonflux.io"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          <VIcon size="22" class="mr-2">mdi-information-outline</VIcon>
+                          Learn More
+                        </VBtn>
+                      </div>
+                    </div>
+                  </VCol>
+                </VRow>
               </div>
               <div
                 v-else-if="appsDataRaw.length > 0 && filteredApps.length === 0"
@@ -505,7 +559,7 @@
               :show-manage="manage"
               :show-install="showInstall"
               :show-control="showControl"
-              @open-app-management="openAppManagement"
+              @openAppManagement="openAppManagement"
             />
             <Redeploy
               v-else
@@ -515,7 +569,7 @@
         </VDataTable>
       </VSheet>
 
-      <div>
+      <div v-if="loggedIn || !manage">
         <VRow
           class="mt-3 mb-1"
           justify="center"
@@ -533,33 +587,11 @@
   </div>
 
   <!-- Login Dialog -->
-  <VDialog
+  <LoginDialog
     v-model="showLogin"
-    :max-width="$vuetify.display.xs ? '95vw' : '900'"
-    :width="$vuetify.display.xs ? '95vw' : '90vw'"
-    :fullscreen="$vuetify.display.xs"
-    persistent
-    scrollable
-  >
-    <VCard>
-      <VCardText class="pt-6">
-        <Login
-          :hide-manual-login="true"
-          :xdao-open="0"
-        />
-      </VCardText>
-      <VCardActions class="pa-4 pt-0">
-        <VSpacer />
-        <VBtn
-          variant="outlined"
-          color="error"
-          @click="showLogin = false"
-        >
-          Cancel
-        </VBtn>
-      </VCardActions>
-    </VCard>
-  </VDialog>
+    title="Login Required"
+    @loginSuccess="handleLoginSuccess"
+  />
 </template>
 
 <script setup>
@@ -568,7 +600,7 @@ import Manage from "@/views/apps/management/manage.vue"
 import Redeploy from "@/views/apps/management/redeploy.vue"
 import AppsService from "@/services/AppsService"
 import { useI18n } from "vue-i18n"
-import Login from "@/@core/components/Login.vue"
+import LoginDialog from '@/components/shared/LoginDialog.vue'
 
 const props = defineProps({
   apps: Array,
@@ -917,7 +949,7 @@ watch(
 )
 
 // Watch for login status changes to close dialog when logged in
-watch(() => props.loggedIn, (newValue) => {
+watch(() => props.loggedIn, newValue => {
   if (newValue && showLogin.value) {
     showLogin.value = false
   }
@@ -965,6 +997,12 @@ const hasActiveFilters = computed(() => {
   )
 })
 
+function handleLoginSuccess() {
+  showLogin.value = false
+
+  // Trigger page refresh to reload data with new login status
+}
+
 onMounted(() => {
   if (props.showStatus) {
     appsGetListRunningApps()
@@ -1001,6 +1039,69 @@ onMounted(() => {
   }
   to {
     opacity: 1;
+  }
+}
+
+/* Avatar container animation */
+.auth-icon-container {
+  animation: float 3s ease-in-out infinite;
+  transition: transform 0.3s ease;
+  position: relative;
+}
+
+.auth-icon-container:hover {
+  transform: scale(1.1);
+}
+
+/* Icon pulse animation */
+.auth-icon {
+  animation: pulse 2s ease-in-out infinite;
+}
+
+/* Float animation */
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+/* Pulse animation */
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.9;
+    transform: scale(0.95);
+  }
+}
+
+/* Glow effect animation */
+.auth-icon-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(var(--v-theme-primary), 0.4) 0%, transparent 70%);
+  animation: glow 3s ease-in-out infinite;
+  z-index: -1;
+}
+
+@keyframes glow {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 0.5;
+  }
+  50% {
+    transform: scale(1.2);
+    opacity: 0.8;
   }
 }
 

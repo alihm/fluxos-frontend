@@ -1,0 +1,13 @@
+diff --git a/node_modules/monaco-editor/package.json b/node_modules/monaco-editor/package.json
+index 2017ab0..e1b2c3d 100644
+--- a/node_modules/monaco-editor/package.json
++++ b/node_modules/monaco-editor/package.json
+@@ -80,7 +80,7 @@
+   },
+   "dependencies": {
+     "marked": "14.0.0",
+-    "dompurify": "3.1.7"
++    "dompurify": "^3.2.7"
+   },
+   "vscodeCommitId": "484fdf69b8509c1c9370d913b32e9f6d3a68cc99",
+   "monacoCommitId": "7c2310116c57517348bbd868a21139f32454be22"

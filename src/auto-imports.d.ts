@@ -254,6 +254,7 @@ declare global {
   const useFocusWithin: typeof import('@vueuse/core')['useFocusWithin']
   const useFps: typeof import('@vueuse/core')['useFps']
   const useFullscreen: typeof import('@vueuse/core')['useFullscreen']
+  const useGameUtils: typeof import('./composables/useGameUtils.js')['useGameUtils']
   const useGamepad: typeof import('@vueuse/core')['useGamepad']
   const useGenerateImageVariant: typeof import('./@core/composable/useGenerateImageVariant.js')['useGenerateImageVariant']
   const useGeolocation: typeof import('@vueuse/core')['useGeolocation']
@@ -270,6 +271,8 @@ declare global {
   const useLocalStorage: typeof import('@vueuse/core')['useLocalStorage']
   const useMagicKeys: typeof import('@vueuse/core')['useMagicKeys']
   const useManualRefHistory: typeof import('@vueuse/core')['useManualRefHistory']
+  const useMarketplace: typeof import('./composables/useMarketplace.js')['useMarketplace']
+  const useMarketplaceUtils: typeof import('./composables/useMarketplaceUtils.js')['useMarketplaceUtils']
   const useMath: typeof import('@vueuse/math')['useMath']
   const useMax: typeof import('@vueuse/math')['useMax']
   const useMediaControls: typeof import('@vueuse/core')['useMediaControls']
@@ -365,6 +368,7 @@ declare global {
   const useWindowFocus: typeof import('@vueuse/core')['useWindowFocus']
   const useWindowScroll: typeof import('@vueuse/core')['useWindowScroll']
   const useWindowSize: typeof import('@vueuse/core')['useWindowSize']
+  const useWordPress: typeof import('./composables/useWordPress.js')['useWordPress']
   const watch: typeof import('vue')['watch']
   const watchArray: typeof import('@vueuse/core')['watchArray']
   const watchAtMost: typeof import('@vueuse/core')['watchAtMost']
@@ -642,6 +646,7 @@ declare module 'vue' {
     readonly useFocusWithin: UnwrapRef<typeof import('@vueuse/core')['useFocusWithin']>
     readonly useFps: UnwrapRef<typeof import('@vueuse/core')['useFps']>
     readonly useFullscreen: UnwrapRef<typeof import('@vueuse/core')['useFullscreen']>
+    readonly useGameUtils: UnwrapRef<typeof import('./composables/useGameUtils.js')['useGameUtils']>
     readonly useGamepad: UnwrapRef<typeof import('@vueuse/core')['useGamepad']>
     readonly useGenerateImageVariant: UnwrapRef<typeof import('./@core/composable/useGenerateImageVariant.js')['useGenerateImageVariant']>
     readonly useGeolocation: UnwrapRef<typeof import('@vueuse/core')['useGeolocation']>
@@ -658,6 +663,8 @@ declare module 'vue' {
     readonly useLocalStorage: UnwrapRef<typeof import('@vueuse/core')['useLocalStorage']>
     readonly useMagicKeys: UnwrapRef<typeof import('@vueuse/core')['useMagicKeys']>
     readonly useManualRefHistory: UnwrapRef<typeof import('@vueuse/core')['useManualRefHistory']>
+    readonly useMarketplace: UnwrapRef<typeof import('./composables/useMarketplace.js')['useMarketplace']>
+    readonly useMarketplaceUtils: UnwrapRef<typeof import('./composables/useMarketplaceUtils.js')['useMarketplaceUtils']>
     readonly useMath: UnwrapRef<typeof import('@vueuse/math')['useMath']>
     readonly useMax: UnwrapRef<typeof import('@vueuse/math')['useMax']>
     readonly useMediaControls: UnwrapRef<typeof import('@vueuse/core')['useMediaControls']>
@@ -753,6 +760,7 @@ declare module 'vue' {
     readonly useWindowFocus: UnwrapRef<typeof import('@vueuse/core')['useWindowFocus']>
     readonly useWindowScroll: UnwrapRef<typeof import('@vueuse/core')['useWindowScroll']>
     readonly useWindowSize: UnwrapRef<typeof import('@vueuse/core')['useWindowSize']>
+    readonly useWordPress: UnwrapRef<typeof import('./composables/useWordPress.js')['useWordPress']>
     readonly watch: UnwrapRef<typeof import('vue')['watch']>
     readonly watchArray: UnwrapRef<typeof import('@vueuse/core')['watchArray']>
     readonly watchAtMost: UnwrapRef<typeof import('@vueuse/core')['watchAtMost']>

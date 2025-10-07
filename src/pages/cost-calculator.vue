@@ -102,93 +102,93 @@
               
               <!-- CPU Cores -->
               <div class="mb-4 ml-2">
-                  <div class="text-h6 font-weight-bold">
-                    How many cores do you require?
-                  </div>
+                <div class="text-h6 font-weight-bold">
+                  How many cores do you require?
+                </div>
                 <div class="text-body-2 text-medium-emphasis">
                   (min 0.1 / max 15.0)
                 </div>
-              <div class="d-flex justify-end" style="transform: translateY(-8px);">
-                <VChip
-                  color="success"
-                  variant="tonal"
-                  size="small"
-                  rounded
-                  class="mr-2"
-                >
-                  {{ formData.cpu }} vCores
-                </VChip>
+                <div class="d-flex justify-end" style="transform: translateY(-8px);">
+                  <VChip
+                    color="success"
+                    variant="tonal"
+                    size="small"
+                    rounded
+                    class="mr-2"
+                  >
+                    {{ formData.cpu }} vCores
+                  </VChip>
+                </div>
+                <VSlider
+                  v-model="formData.cpu"
+                  :min="0.1"
+                  :max="15.0"
+                  :step="0.1"
+                  color="primary"
+                  :thumb-label="false"
+                  @update:model-value="calculateCost"
+                />
               </div>
-              <VSlider
-                v-model="formData.cpu"
-                :min="0.1"
-                :max="15.0"
-                :step="0.1"
-                color="primary"
-                :thumb-label="false"
-                @update:model-value="calculateCost"
-              />
-            </div>
 
-            <!-- Memory -->
-            <div class="mb-4 ml-2">
-              <div class="text-h6 font-weight-bold">
-                How much memory will your app need?
+              <!-- Memory -->
+              <div class="mb-4 ml-2">
+                <div class="text-h6 font-weight-bold">
+                  How much memory will your app need?
+                </div>
+                <div class="text-body-2 text-medium-emphasis">
+                  (min 100 MB / max 59000 MB)
+                </div>
+                <div class="d-flex justify-end" style="transform: translateY(-8px);">
+                  <VChip
+                    color="success"
+                    variant="tonal"
+                    size="small"
+                    rounded
+                    class="mr-2"
+                  >
+                    {{ formData.memory }} MB
+                  </VChip>
+                </div>
+                <VSlider
+                  v-model="formData.memory"
+                  :min="100"
+                  :max="59000"
+                  :step="100"
+                  color="primary"
+                  :thumb-label="false"
+                  @update:model-value="calculateCost"
+                />
               </div>
-              <div class="text-body-2 text-medium-emphasis">
-                (min 100 MB / max 59000 MB)
-              </div>
-              <div class="d-flex justify-end" style="transform: translateY(-8px);">
-                <VChip
-                  color="success"
-                  variant="tonal"
-                  size="small"
-                  rounded
-                  class="mr-2"
-                >
-                  {{ formData.memory }} MB
-                </VChip>
-              </div>
-              <VSlider
-                v-model="formData.memory"
-                :min="100"
-                :max="59000"
-                :step="100"
-                color="primary"
-                :thumb-label="false"
-                @update:model-value="calculateCost"
-              />
-            </div>
 
-            <!-- Storage -->
-            <div class="mb-4 ml-2">
-              <div class="text-h6 font-weight-bold">
-                How much storage would you like?
+              <!-- Storage -->
+              <div class="mb-4 ml-2">
+                <div class="text-h6 font-weight-bold">
+                  How much storage would you like?
+                </div>
+                <div class="text-body-2 text-medium-emphasis">
+                  (min 1 GB / max 820 GB)
+                </div>
+                <div class="d-flex justify-end" style="transform: translateY(-8px);">
+                  <VChip
+                    color="success"
+                    variant="tonal"
+                    size="small"
+                    rounded
+                    class="mr-2"
+                  >
+                    {{ formData.storage }} GB
+                  </VChip>
+                </div>
+                <VSlider
+                  v-model="formData.storage"
+                  :min="1"
+                  :max="820"
+                  :step="1"
+                  color="primary"
+                  :thumb-label="false"
+                  @update:model-value="calculateCost"
+                />
               </div>
-              <div class="text-body-2 text-medium-emphasis">
-                (min 1 GB / max 820 GB)
-              </div>
-              <div class="d-flex justify-end" style="transform: translateY(-8px);">
-                <VChip
-                  color="success"
-                  variant="tonal"
-                  size="small"
-                  rounded
-                  class="mr-2"
-                >
-                  {{ formData.storage }} GB
-                </VChip>
-              </div>
-              <VSlider
-                v-model="formData.storage"
-                :min="1"
-                :max="820"
-                :step="1"
-                color="primary"
-                :thumb-label="false"
-                @update:model-value="calculateCost"
-              />
-            </div>
             </div>
 
 
@@ -584,7 +584,7 @@ const generateComposeArray = () => {
     cpu: formData.cpu.toString(),
     ram: formData.memory.toString(),
     hdd: formData.storage.toString(),
-    tiered: false
+    tiered: false,
   }]
 }
 
@@ -613,19 +613,21 @@ const snackbarIcon = ref("mdi-check-circle")
 const isEnterpriseAvailable = computed(() => {
   const hasWebCrypto = isWebCryptoAvailable()
   const hasAuth = !!localStorage.getItem('zelidauth')
+  
   return hasWebCrypto && hasAuth
 })
 
 // Enterprise port detection logic (from backend config)
 const enterprisePortRanges = ['0-1023', 8080, 8081, 8443, 6667]
 
-const isPortEnterprise = (port) => {
+const isPortEnterprise = port => {
   const portNum = parseInt(port)
   if (isNaN(portNum)) return false
   
   return enterprisePortRanges.some(range => {
     if (typeof range === 'string' && range.includes('-')) {
       const [min, max] = range.split('-').map(p => parseInt(p))
+      
       return portNum >= min && portNum <= max
     } else {
       return portNum === parseInt(range)
@@ -635,6 +637,7 @@ const isPortEnterprise = (port) => {
 
 const parsedPorts = computed(() => {
   if (!Array.isArray(formData.ports)) return []
+  
   return formData.ports.filter(p => p > 0 && p <= 65535)
 })
 
@@ -652,12 +655,14 @@ const addPort = () => {
   const port = parseInt(portValue)
   if (isNaN(port) || port <= 0 || port > 65535) {
     newPortInput.value = ''
+    
     return
   }
   
   // Prevent duplicates
   if (formData.ports.includes(port)) {
     newPortInput.value = ''
+    
     return
   }
   
@@ -667,7 +672,7 @@ const addPort = () => {
   calculateCost()
 }
 
-const removePort = (port) => {
+const removePort = port => {
   const index = formData.ports.indexOf(port)
   if (index > -1) {
     formData.ports.splice(index, 1)
@@ -675,7 +680,7 @@ const removePort = (port) => {
   }
 }
 
-const handlePortInputKeypress = (event) => {
+const handlePortInputKeypress = event => {
   // Only allow numbers and Enter key
   if (event.key === 'Enter') {
     event.preventDefault()
@@ -826,6 +831,7 @@ const calculateCost = async (retryCount = 0) => {
   
   if (calculating.value) {
     console.log('Already calculating, returning early')
+    
     return
   }
   
@@ -858,6 +864,7 @@ const calculateCost = async (retryCount = 0) => {
         
         // Small delay to ensure toast is visible before continuing
         await new Promise(resolve => setTimeout(resolve, 100))
+
         // Don't return - continue with normal calculation
       }
       
@@ -890,7 +897,7 @@ const calculateCost = async (retryCount = 0) => {
         // For version 8+, encrypt contacts and compose data (as done in SubscriptionManager)
         const enterpriseSpecs = {
           contacts: [""],
-          compose: generateComposeArray()
+          compose: generateComposeArray(),
         }
         
         console.log('Enterprise specs to encrypt:', enterpriseSpecs)
@@ -898,7 +905,7 @@ const calculateCost = async (retryCount = 0) => {
         enterpriseValue = await encryptEnterpriseWithAes(
           JSON.stringify(enterpriseSpecs),
           aesKey,
-          encryptedAesKey
+          encryptedAesKey,
         )
         
         console.log('Enterprise encryption completed, encrypted length:', enterpriseValue.length)
@@ -926,7 +933,7 @@ const calculateCost = async (retryCount = 0) => {
       geolocation: [""],
       expire: expire,
       enterprise: enterpriseValue,
-      staticip: formData.staticip
+      staticip: formData.staticip,
     }
     
     const payload = JSON.stringify(payloadObj)
@@ -945,7 +952,7 @@ const calculateCost = async (retryCount = 0) => {
           'Content-Type': 'application/x-www-form-urlencoded',
         },
         timeout: 15000, // 15 second timeout
-      }
+      },
     )
 
     console.log('Cost calculation response:', response.data)
@@ -976,6 +983,7 @@ const calculateCost = async (retryCount = 0) => {
         costResult.flux = `Retrying... (${retryCount + 1}/3)`
         calculating.value = false
         setTimeout(() => calculateCost(retryCount + 1), 2000) // Retry after 2 seconds
+        
         return
       } else {
         showToast('error', 'API server unavailable. Please try again later.')
@@ -1019,13 +1027,17 @@ const selectPreset = preset => {
   formData.cpu = preset.cpu
   formData.memory = preset.ram * 1000
   formData.storage = preset.ssd
+
   // Reset to default 1-month expiration (same as preset calculations)
   formData.expire = 30
+
   // Reset enterprise options when selecting preset
   formData.enterprise = ''
   formData.staticip = false
+
   // Reset ports to empty array
   formData.ports = []
+
   // Reset synchronization to disabled when selecting preset
   syncEnabled.value = false
   calculateCost()
@@ -1083,7 +1095,7 @@ const calculatePresetPrices = async () => {
         cpu: tempFormData.cpu.toString(),
         ram: tempFormData.memory.toString(),
         hdd: tempFormData.storage.toString(),
-        tiered: false
+        tiered: false,
       }]
 
       const payloadObj = {
@@ -1098,7 +1110,7 @@ const calculatePresetPrices = async () => {
         geolocation: [""],
         expire: expire,
         enterprise: "",
-        staticip: tempFormData.staticip
+        staticip: tempFormData.staticip,
       }
 
       const response = await Api().post(
@@ -1109,7 +1121,7 @@ const calculatePresetPrices = async () => {
             'Content-Type': 'application/x-www-form-urlencoded',
           },
           timeout: 15000,
-        }
+        },
       )
 
       if (response.data.status !== 'error' && response.data.data.flux) {

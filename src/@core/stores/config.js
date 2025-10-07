@@ -69,6 +69,7 @@ export const initConfigStore = () => {
         }
       } catch (error) {
         console.warn('Failed to change theme:', error)
+
         // Fallback to direct assignment
         vuetifyTheme.global.name.value = themeName
       }
@@ -92,6 +93,7 @@ export const initConfigStore = () => {
           }
         } catch (error) {
           console.warn('Failed to change theme in onMounted:', error)
+
           // Fallback to direct assignment
           vuetifyTheme.global.name.value = themeName
         }

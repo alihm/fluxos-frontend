@@ -358,6 +358,7 @@
                     class="mt-2 pa-0"
                     :href="`https://explorer.runonflux.io/address/${proposal.grantAddress}`"
                     target="_blank"
+                    rel="noopener noreferrer"
                   >
                     <VIcon icon="mdi-open-in-new" size="14" class="me-1" />
                     View on Explorer
@@ -448,6 +449,7 @@
           variant="elevated"
           :href="`https://explorer.runonflux.io/address/${proposal.grantAddress}`"
           target="_blank"
+          rel="noopener noreferrer"
         >
           <VIcon icon="mdi-open-in-new" class="me-2" />
           View Address on Explorer
@@ -481,7 +483,7 @@ const props = defineProps({
   },
 })
 
-const emit = defineEmits(['update:modelValue', 'show-login'])
+const emit = defineEmits(['update:modelValue', 'showLogin'])
 
 // Theme and stores
 const theme = useTheme()
@@ -514,6 +516,7 @@ const voteOverviewSeries = computed(() => {
   }
 
   const percentage = (totalVotes.value / props.proposal.votesRequired) * 100
+  
   return [Math.min(percentage, 100).toFixed(1)]
 })
 
@@ -527,6 +530,7 @@ const voteBreakdownSeries = computed(() => {
 
   if (totalVotes.value === 0) return [0]
   const yesPercentage = (props.proposal.votesYes / totalVotes.value) * 100
+  
   return [yesPercentage.toFixed(1)]
 })
 
@@ -567,8 +571,8 @@ const voteOverviewOptions = computed(() => ({
           top: 0,
           left: 0,
           blur: 4,
-          opacity: 0.15
-        }
+          opacity: 0.15,
+        },
       },
       dataLabels: {
         name: {
@@ -579,7 +583,7 @@ const voteOverviewOptions = computed(() => ({
           fontSize: '2.2rem',
           fontWeight: '700',
           fontFamily: 'Inter, sans-serif',
-          formatter: (val) => `${val}%`,
+          formatter: val => `${val}%`,
           offsetY: 15,
         },
       },
@@ -600,14 +604,14 @@ const voteOverviewOptions = computed(() => ({
         {
           offset: 0,
           color: '#3B82F6',
-          opacity: 1
+          opacity: 1,
         },
         {
           offset: 100,
           color: '#8B5CF6',
-          opacity: 1
-        }
-      ]
+          opacity: 1,
+        },
+      ],
     },
   },
   stroke: {
@@ -653,8 +657,8 @@ const voteBreakdownOptions = computed(() => ({
           top: 0,
           left: 0,
           blur: 4,
-          opacity: 0.15
-        }
+          opacity: 0.15,
+        },
       },
       dataLabels: {
         name: {
@@ -670,7 +674,7 @@ const voteBreakdownOptions = computed(() => ({
           fontSize: '2.2rem',
           fontWeight: '700',
           fontFamily: 'Inter, sans-serif',
-          formatter: (val) => `${val}%`,
+          formatter: val => `${val}%`,
         },
       },
     },
@@ -690,14 +694,14 @@ const voteBreakdownOptions = computed(() => ({
         {
           offset: 0,
           color: '#10B981',
-          opacity: 1
+          opacity: 1,
         },
         {
           offset: 100,
           color: '#34D399',
-          opacity: 1
-        }
-      ]
+          opacity: 1,
+        },
+      ],
     },
   },
   stroke: {
@@ -719,29 +723,31 @@ const isLoadingVoteData = ref(false)
 // Computed properties
 const dialogVisible = computed({
   get: () => props.modelValue,
-  set: (value) => emit('update:modelValue', value),
+  set: value => emit('update:modelValue', value),
 })
 
 // Methods
-const getStatusColor = (status) => {
+const getStatusColor = status => {
   if (status === 'Open') return 'warning'
   if (status === 'Passed') return 'success'
   if (status === 'Unpaid') return 'info'
   if (status.includes('Rejected')) return 'error'
+  
   return 'primary'
 }
 
-const getProgressColor = (proposal) => {
+const getProgressColor = proposal => {
   const totalVotes = proposal.votesYes + proposal.votesNo
   const progress = totalVotes / proposal.votesRequired
   
   if (progress >= 1) {
     return proposal.votesYes > proposal.votesNo ? 'success' : 'error'
   }
+  
   return 'warning'
 }
 
-const getProgressText = (proposal) => {
+const getProgressText = proposal => {
   const totalVotes = proposal.votesYes + proposal.votesNo
   const progress = totalVotes / proposal.votesRequired
   const percentage = Math.round(progress * 100)
@@ -753,40 +759,42 @@ const getProgressText = (proposal) => {
   return `${percentage}% of required votes received`
 }
 
-const formatDate = (timestamp) => {
+const formatDate = timestamp => {
   return new Date(timestamp).toLocaleDateString('en-US', {
     year: 'numeric',
     month: 'short',
-    day: 'numeric'
+    day: 'numeric',
   })
 }
 
-const formatFullDate = (timestamp) => {
+const formatFullDate = timestamp => {
   return new Date(timestamp).toLocaleString('en-US', {
     year: 'numeric',
     month: 'long',
     day: 'numeric',
     hour: '2-digit',
     minute: '2-digit',
-    timeZoneName: 'short'
+    timeZoneName: 'short',
   })
 }
 
-const getProgressChipColor = (percentage) => {
+const getProgressChipColor = percentage => {
   if (percentage >= 75) return 'success'
   if (percentage >= 50) return 'warning'
   if (percentage >= 25) return 'error'
+  
   return 'grey'
 }
 
-const getProgressIcon = (percentage) => {
+const getProgressIcon = percentage => {
   if (percentage >= 75) return 'mdi-check-circle'
   if (percentage >= 50) return 'mdi-alert-circle'
   if (percentage >= 25) return 'mdi-minus-circle'
+  
   return 'mdi-clock-outline'
 }
 
-const getChartStatusText = (proposal) => {
+const getChartStatusText = proposal => {
   if (!proposal) return ''
 
   // Check the actual status first
@@ -804,7 +812,7 @@ const getChartStatusText = (proposal) => {
   return 'VOTING'
 }
 
-const copyToClipboard = async (text) => {
+const copyToClipboard = async text => {
   try {
     await navigator.clipboard.writeText(text)
     showSnackbar('Copied to clipboard!', 'success')
@@ -820,9 +828,11 @@ const getMessagePhrase = async () => {
     if (response.data.status === 'success') {
       return response.data.data
     }
+    
     return false
   } catch (error) {
     console.error('Error getting message phrase:', error)
+    
     return false
   }
 }
@@ -835,6 +845,7 @@ const loadVoteData = async () => {
     console.log('❌ No zelid available')
     myNumberOfVotes.value = 0
     hasVoted.value = false
+    
     return
   }
 
@@ -883,9 +894,11 @@ const getVoteInformation = async () => {
 
   try {
     const response = await axios.get(`https://stats.runonflux.io/proposals/voteInformation?hash=${props.proposal.hash}&zelid=${zelid}`)
+    
     return response.data
   } catch (error) {
     console.error('Error getting vote information:', error)
+    
     return null
   }
 }
@@ -899,11 +912,12 @@ const initSSP = async () => {
   try {
     if (!window.ssp) {
       showSnackbar('SSP Wallet not installed', 'error')
+      
       return
     }
 
     const responseData = await window.ssp.request('sspwid_sign_message', {
-      message: dataToSign.value
+      message: dataToSign.value,
     })
 
     if (responseData.status === 'ERROR') {
@@ -965,21 +979,24 @@ const initZelcore = async () => {
 }
 
 // Real voting functionality
-const castVote = async (voteType) => {
+const castVote = async voteType => {
   // First check if user is logged in
   if (!isLoggedIn.value) {
     showSnackbar('Please log in first', 'warning')
+    
     return
   }
 
   // Prevent voting if already voted
   if (hasVoted.value) {
     showSnackbar('You have already voted on this proposal!', 'warning')
+    
     return
   }
 
   if (!props.proposal?.hash) {
     showSnackbar('Proposal hash not available', 'error')
+    
     return
   }
 
@@ -987,8 +1004,10 @@ const castVote = async (voteType) => {
   // Check if signature is available
   if (!signature.value || !dataToSign.value) {
     showSnackbar('Missing signature. Please sign in with your wallet first.', 'warning')
+
     // Try to initiate signing
     await initSSP()
+    
     return
   }
 
@@ -1005,8 +1024,8 @@ const castVote = async (voteType) => {
 
     const response = await axios.post('https://stats.runonflux.io/proposals/voteproposal', JSON.stringify(data), {
       headers: {
-        'Content-Type': 'application/json'
-      }
+        'Content-Type': 'application/json',
+      },
     })
 
     if (response.data.status === 'success') {
@@ -1049,7 +1068,7 @@ onMounted(async () => {
 })
 
 // Watch for proposal changes
-watch(() => props.proposal, async (newProposal) => {
+watch(() => props.proposal, async newProposal => {
   console.log('🔄 Proposal changed:', newProposal?.hash, 'status:', newProposal?.status)
   if (newProposal) {
     // Reset voting state
@@ -1071,7 +1090,7 @@ watch(() => props.proposal, async (newProposal) => {
 })
 
 // Watch for zelid changes
-watch(() => props.zelid, async (newZelid) => {
+watch(() => props.zelid, async newZelid => {
   if (newZelid && props.proposal?.status === 'Open') {
     userZelid.value = newZelid
     await loadVoteData()
@@ -1079,7 +1098,7 @@ watch(() => props.zelid, async (newZelid) => {
 })
 
 // Watch for login status changes
-watch(isLoggedIn, async (newValue) => {
+watch(isLoggedIn, async newValue => {
   console.log('🔄 Login status changed:', newValue)
   if (newValue && props.proposal?.status === 'Open') {
     await loadVoteData()
@@ -1087,14 +1106,14 @@ watch(isLoggedIn, async (newValue) => {
 })
 
 // Watch for currentUserZelid changes
-watch(currentUserZelid, async (newZelid) => {
+watch(currentUserZelid, async newZelid => {
   console.log('🔄 CurrentUserZelid changed:', newZelid)
   if (newZelid && props.proposal?.status === 'Open') {
     await loadVoteData()
   }
 })
 
-const formatDescription = (text) => {
+const formatDescription = text => {
   if (!text) return ''
   
   // Split into lines for processing
@@ -1123,6 +1142,7 @@ const formatDescription = (text) => {
       
       // Process regular line
       line = line
+
         // Escape basic HTML
         .replace(/</g, '&lt;')
         .replace(/>/g, '&gt;')
@@ -1151,7 +1171,7 @@ const formatDescription = (text) => {
   return formatted.join('<br>')
 }
 
-const formatTable = (lines) => {
+const formatTable = lines => {
   if (lines.length < 2) return lines.join('<br>')
   
   // Parse table rows
@@ -1159,9 +1179,10 @@ const formatTable = (lines) => {
     line.split('|')
       .map(cell => cell.trim())
       .filter((cell, index, arr) => 
+
         // Keep cells that are not empty or are between other cells
-        index > 0 && index < arr.length - 1 || cell !== ''
-      )
+        index > 0 && index < arr.length - 1 || cell !== '',
+      ),
   )
   
   // Check if second row is a separator row (contains dashes)
@@ -1204,6 +1225,7 @@ const formatTable = (lines) => {
   }
   
   html += '</table>'
+  
   return html
 }
 </script>

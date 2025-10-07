@@ -26,6 +26,23 @@ export default [
       {
         title: 'menu.application.marketplace',  // Key for title without translation
         icon: { icon: 'mdi-shopping-search', size: 20 },
+        children: [
+          {
+            title: 'menu.application.marketplaceApps',
+            icon: { icon: 'mdi-apps', size: 20 },
+            to: 'marketplace',
+          },
+          {
+            title: 'menu.application.marketplaceGames',
+            icon: { icon: 'mdi-gamepad', size: 20 },
+            to: 'marketplace-games',
+          },
+          {
+            title: 'menu.application.marketplaceWordPress',
+            icon: { icon: 'mdi-wordpress', size: 20 },
+            to: 'marketplace-wordpress',
+          },
+        ],
       },
     ],
   },

@@ -17,7 +17,10 @@
       "globalApps": "Aplikacje Globalne",
       "localApps": "Aplikacje Lokalne",
       "registerNewApp": "Stwórz Aplikację",
-      "marketplace": "Sklep"
+      "marketplace": "Sklep",
+      "marketplaceApps": "Aplikacje",
+      "marketplaceGames": "Gry",
+      "marketplaceWordPress": "WordPress"
     },
     "administration": {
       "title": "Administracja",

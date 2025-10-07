@@ -201,7 +201,7 @@
                             color="success"
                             size="large"
                             block
-                            :loading="true"
+                            loading
                           >
                             <VIcon icon="mdi-clock-outline" class="me-2" />
                             Waiting for Payment...
@@ -326,6 +326,7 @@ const isLoggedIn = computed(() => {
 const loadSubscriptionData = async () => {
   if (!isLoggedIn.value) {
     loading.value = false
+    
     return
   }
 
@@ -333,6 +334,7 @@ const loadSubscriptionData = async () => {
     const zelidauth = localStorage.getItem('zelidauth')
     if (!zelidauth) {
       showAlert('Authentication required')
+      
       return
     }
 
@@ -343,6 +345,7 @@ const loadSubscriptionData = async () => {
     if (!auth.zelid || !auth.signature || !auth.loginPhrase) {
       console.error('LoadSubscriptionData - Missing auth fields:', auth)
       showAlert('Invalid authentication data format')
+      
       return
     }
 
@@ -363,8 +366,8 @@ const loadSubscriptionData = async () => {
         gateway: gateway.value,
         zelid: fluxStore.zelid,
         signature: signature,
-        loginPhrase: loginPhrase
-      })
+        loginPhrase: loginPhrase,
+      }),
     })
 
     const result = await response.json()
@@ -373,12 +376,14 @@ const loadSubscriptionData = async () => {
     if (result.error) {
       console.error('API Error:', result.error)
       showAlert(result.error)
+      
       return
     }
 
     if (result.warning) {
       console.warn('API Warning:', result.warning)
       showAlert(result.warning, 'warning')
+      
       return
     }
 
@@ -395,8 +400,9 @@ const loadSubscriptionData = async () => {
         pricePerMonth: `$${(result.new_plan.price / 100).toFixed(2)}`,
         priceInCents: result.new_plan.price,
         gateway: result.new_plan.gateway,
-        gatewayName: result.new_plan.gateway_name || 'Flux Pay'
+        gatewayName: result.new_plan.gateway_name || 'Flux Pay',
       }
+
       // Clear any previous error
       clearAlert()
       console.log('Selected plan set:', selectedPlan.value)
@@ -427,6 +433,7 @@ const showAlert = (message, type = 'error') => {
 const initializeFluxPayment = async () => {
   if (!isLoggedIn.value) {
     showAlert('Please login first', 'warning')
+    
     return
   }
 
@@ -436,12 +443,14 @@ const initializeFluxPayment = async () => {
     const zelidauth = localStorage.getItem('zelidauth')
     if (!zelidauth) {
       showAlert('Authentication required')
+      
       return
     }
 
     const auth = qs.parse(zelidauth)
     if (!auth.zelid || !auth.signature || !auth.loginPhrase) {
       showAlert('Invalid authentication data')
+      
       return
     }
 
@@ -455,8 +464,8 @@ const initializeFluxPayment = async () => {
         plan_name: planId.value,
         zelid: fluxStore.zelid,
         signature: auth.signature,
-        loginPhrase: auth.loginPhrase
-      })
+        loginPhrase: auth.loginPhrase,
+      }),
     })
 
     const result = await response.json()
@@ -465,7 +474,7 @@ const initializeFluxPayment = async () => {
       fluxPayment.value = {
         amount: result.flux_amount,
         usdValue: (selectedPlan.value.priceInCents / 100).toFixed(2),
-        paymentId: result.payment_id
+        paymentId: result.payment_id,
       }
       paymentProcessing.value = true
 
@@ -490,6 +499,7 @@ const initializeFluxPayment = async () => {
 const initializeCryptoComPayment = async () => {
   if (!isLoggedIn.value) {
     showAlert('Please login first', 'warning')
+    
     return
   }
 
@@ -499,12 +509,14 @@ const initializeCryptoComPayment = async () => {
     const zelidauth = localStorage.getItem('zelidauth')
     if (!zelidauth) {
       showAlert('Authentication required')
+      
       return
     }
 
     const auth = qs.parse(zelidauth)
     if (!auth.zelid || !auth.signature || !auth.loginPhrase) {
       showAlert('Invalid authentication data')
+      
       return
     }
 
@@ -518,8 +530,8 @@ const initializeCryptoComPayment = async () => {
         plan_name: planId.value,
         zelid: fluxStore.zelid,
         signature: auth.signature,
-        loginPhrase: auth.loginPhrase
-      })
+        loginPhrase: auth.loginPhrase,
+      }),
     })
 
     const result = await response.json()
@@ -538,7 +550,7 @@ const initializeCryptoComPayment = async () => {
   }
 }
 
-const monitorPayment = async (paymentId) => {
+const monitorPayment = async paymentId => {
   const checkPayment = async () => {
     try {
       const response = await fetch(`https://${bridgeURL}/api/v1/fluxpay.php`, {
@@ -549,8 +561,8 @@ const monitorPayment = async (paymentId) => {
         body: new URLSearchParams({
           action: 'STATUS',
           payment_id: paymentId,
-          zelid: fluxStore.zelid
-        })
+          zelid: fluxStore.zelid,
+        }),
       })
 
       const result = await response.json()
@@ -589,7 +601,7 @@ const cancelPayment = () => {
 }
 
 // Watch for login state changes
-watch(isLoggedIn, (newValue) => {
+watch(isLoggedIn, newValue => {
   console.log('Checkout - login state changed:', newValue)
   if (newValue) {
     // User logged in - clear warning and load data

@@ -104,16 +104,14 @@
                 </VBtn>
               </template>
               <VList>
-                <VListItem
-                  @click="$refs.fileInput?.click()"
+                <VListItem @click="$refs.fileInput?.click()"
                 >
                   <template #prepend>
                     <VIcon icon="mdi-file-upload" size="20" />
                   </template>
                   <VListItemTitle>Upload Files</VListItemTitle>
                 </VListItem>
-                <VListItem
-                  @click="$refs.folderInput?.click()"
+                <VListItem @click="$refs.folderInput?.click()"
                 >
                   <template #prepend>
                     <VIcon icon="mdi-folder-upload" size="20" />
@@ -364,276 +362,272 @@
           </div>
           <!-- List View -->
           <div v-if="viewType === 'list'">
-          <VDataTable
-            :headers="fileHeaders"
-            :items="paginatedFiles"
-            :loading="false"
-            :hover="true"
-            density="comfortable"
-            item-key="id"
-            class="file-list-table"
-            no-data-text="No files or folders found"
-            :key="`table-${files.length}`"
-            hide-default-footer
-          >
-          <template #item.preview="{ item }">
-            <div class="d-flex align-center justify-center" style="width: 60px;">
-              <VBtn
-                v-if="item.isFolder && !item.isGoBack"
-                icon
-                variant="text"
-                size="small"
-                @click="handleOpenFolder(item)"
-              >
-                <VIcon
-                  icon="mdi-folder"
-                  size="24"
-                  class="text-medium-emphasis"
-                />
-              </VBtn>
-              <VBtn
-                v-else-if="isImageFile(item.mimetype)"
-                icon
-                variant="text"
-                size="small"
-                @click="previewFile(item)"
-              >
-                <VIcon
-                  :icon="getFileIcon(item.type)"
-                  size="24"
-                  class="text-medium-emphasis"
-                />
-              </VBtn>
-              <VIcon
-                v-else-if="item.isGoBack"
-                icon="mdi-folder-arrow-up"
-                size="24"
-                class="text-medium-emphasis"
-              />
-              <VIcon
-                v-else
-                :icon="getFileIcon(item.type)"
-                size="24"
-                class="text-medium-emphasis"
-              />
-            </div>
-          </template>
-
-          <template #item.name="{ item }">
-            <div
-              class="text-truncate text-no-wrap"
-              style="max-width: 300px;"
-              :title="item.isGoBack ? 'Go back to parent folder' : item.name"
-              :class="{ 'cursor-pointer': item.isFolder || item.isGoBack }"
-              @click="(item.isFolder || item.isGoBack) ? handleOpenFolder(item) : null"
+            <VDataTable
+              :headers="fileHeaders"
+              :items="paginatedFiles"
+              :loading="false"
+              hover
+              density="comfortable"
+              item-key="id"
+              class="file-list-table"
+              no-data-text="No files or folders found"
+              :key="`table-${files.length}`"
+              hide-default-footer
             >
-              {{ item.name_abbr || item.name }}
-            </div>
-          </template>
-
-          <template #item.timestamp="{ item }">
-            <span class="text-no-wrap">
-              {{ item.isGoBack ? '-' : (item.added_date || formatDate(item.timestamp)) }}
-            </span>
-          </template>
-
-          <template #item.size="{ item }">
-            <span class="text-no-wrap">{{ item.isFolder ? '-' : convertSize(item.size) }}</span>
-          </template>
-
-
-          <template #item.actions="{ item }">
-            <VMenu v-if="!item.isGoBack">
-              <template #activator="{ props }">
-                <VBtn
-                  icon
-                  size="small"
-                  variant="text"
-                  v-bind="props"
-                  class="text-medium-emphasis"
-                >
-                  <VIcon icon="mdi-dots-vertical" size="20" class="text-medium-emphasis" />
-                </VBtn>
-              </template>
-              <VList density="compact">
-                <!-- File-specific options -->
-                <template v-if="!item.isFolder">
-                  <VListItem
+              <template #item.preview="{ item }">
+                <div class="d-flex align-center justify-center" style="width: 60px;">
+                  <VBtn
+                    v-if="item.isFolder && !item.isGoBack"
+                    icon
+                    variant="text"
+                    size="small"
+                    @click="handleOpenFolder(item)"
+                  >
+                    <VIcon
+                      icon="mdi-folder"
+                      size="24"
+                      class="text-medium-emphasis"
+                    />
+                  </VBtn>
+                  <VBtn
+                    v-else-if="isImageFile(item.mimetype)"
+                    icon
+                    variant="text"
+                    size="small"
                     @click="previewFile(item)"
                   >
-                    <template #prepend>
-                      <VIcon icon="mdi-eye" size="20" />
-                    </template>
-                    <VListItemTitle>Preview</VListItemTitle>
-                  </VListItem>
+                    <VIcon
+                      :icon="getFileIcon(item.type)"
+                      size="24"
+                      class="text-medium-emphasis"
+                    />
+                  </VBtn>
+                  <VIcon
+                    v-else-if="item.isGoBack"
+                    icon="mdi-folder-arrow-up"
+                    size="24"
+                    class="text-medium-emphasis"
+                  />
+                  <VIcon
+                    v-else
+                    :icon="getFileIcon(item.type)"
+                    size="24"
+                    class="text-medium-emphasis"
+                  />
+                </div>
+              </template>
 
-                  <VListItem
-                    @click="downloadFile(item)"
-                  >
-                    <template #prepend>
-                      <VIcon icon="mdi-download" size="20" />
-                    </template>
-                    <VListItemTitle>Download</VListItemTitle>
-                  </VListItem>
+              <template #item.name="{ item }">
+                <div
+                  class="text-truncate text-no-wrap"
+                  style="max-width: 300px;"
+                  :title="item.isGoBack ? 'Go back to parent folder' : item.name"
+                  :class="{ 'cursor-pointer': item.isFolder || item.isGoBack }"
+                  @click="(item.isFolder || item.isGoBack) ? handleOpenFolder(item) : null"
+                >
+                  {{ item.name_abbr || item.name }}
+                </div>
+              </template>
 
-                  <VListItem
-                    v-if="!item.isFolder"
-                    @click="addVersion(item)"
-                  >
-                    <template #prepend>
-                      <VIcon icon="mdi-file-plus" size="20" />
-                    </template>
-                    <VListItemTitle>Add Version</VListItemTitle>
-                  </VListItem>
+              <template #item.timestamp="{ item }">
+                <span class="text-no-wrap">
+                  {{ item.isGoBack ? '-' : (item.added_date || formatDate(item.timestamp)) }}
+                </span>
+              </template>
 
-                  <VListItem
-                    v-if="!item.isFolder && item.versions?.length > 0"
-                    @click="viewVersions(item)"
-                  >
-                    <template #prepend>
-                      <VIcon icon="mdi-history" size="20" />
-                    </template>
-                    <VListItemTitle>View Versions</VListItemTitle>
-                  </VListItem>
+              <template #item.size="{ item }">
+                <span class="text-no-wrap">{{ item.isFolder ? '-' : convertSize(item.size) }}</span>
+              </template>
 
-                </template>
 
-                <!-- Common options for files and folders (except go back entry) -->
-                <template v-if="!item.isGoBack">
-                  <VListItem
-                    @click="renameItem(item)"
-                  >
-                    <template #prepend>
-                      <VIcon icon="mdi-pencil" size="20" />
-                    </template>
-                    <VListItemTitle>Rename</VListItemTitle>
-                  </VListItem>
+              <template #item.actions="{ item }">
+                <VMenu v-if="!item.isGoBack">
+                  <template #activator="{ props }">
+                    <VBtn
+                      icon
+                      size="small"
+                      variant="text"
+                      v-bind="props"
+                      class="text-medium-emphasis"
+                    >
+                      <VIcon icon="mdi-dots-vertical" size="20" class="text-medium-emphasis" />
+                    </VBtn>
+                  </template>
+                  <VList density="compact">
+                    <!-- File-specific options -->
+                    <template v-if="!item.isFolder">
+                      <VListItem @click="previewFile(item)"
+                      >
+                        <template #prepend>
+                          <VIcon icon="mdi-eye" size="20" />
+                        </template>
+                        <VListItemTitle>Preview</VListItemTitle>
+                      </VListItem>
 
-                  <VListItem
-                    @click="moveItem(item)"
-                  >
-                    <template #prepend>
-                      <VIcon icon="mdi-folder-move" size="20" />
-                    </template>
-                    <VListItemTitle>Move To</VListItemTitle>
-                  </VListItem>
+                      <VListItem @click="downloadFile(item)"
+                      >
+                        <template #prepend>
+                          <VIcon icon="mdi-download" size="20" />
+                        </template>
+                        <VListItemTitle>Download</VListItemTitle>
+                      </VListItem>
 
-                  <VListItem
-                    v-if="!item.isFolder"
-                    @click="handleCopyLink(item)"
-                  >
-                    <template #prepend>
-                      <VIcon icon="mdi-link" size="20" />
-                    </template>
-                    <VListItemTitle>Copy Link</VListItemTitle>
-                  </VListItem>
+                      <VListItem
+                        v-if="!item.isFolder"
+                        @click="addVersion(item)"
+                      >
+                        <template #prepend>
+                          <VIcon icon="mdi-file-plus" size="20" />
+                        </template>
+                        <VListItemTitle>Add Version</VListItemTitle>
+                      </VListItem>
 
-                  <VListItem
-                    @click="deleteFile(item)"
-                    class="text-error"
-                  >
-                    <template #prepend>
-                      <VIcon icon="mdi-delete" size="20" color="error" />
+                      <VListItem
+                        v-if="!item.isFolder && item.versions?.length > 0"
+                        @click="viewVersions(item)"
+                      >
+                        <template #prepend>
+                          <VIcon icon="mdi-history" size="20" />
+                        </template>
+                        <VListItemTitle>View Versions</VListItemTitle>
+                      </VListItem>
+
                     </template>
-                    <VListItemTitle>Delete</VListItemTitle>
-                  </VListItem>
-                </template>
-              </VList>
-            </VMenu>
-          </template>
-        </VDataTable>
+
+                    <!-- Common options for files and folders (except go back entry) -->
+                    <template v-if="!item.isGoBack">
+                      <VListItem @click="renameItem(item)"
+                      >
+                        <template #prepend>
+                          <VIcon icon="mdi-pencil" size="20" />
+                        </template>
+                        <VListItemTitle>Rename</VListItemTitle>
+                      </VListItem>
+
+                      <VListItem @click="moveItem(item)"
+                      >
+                        <template #prepend>
+                          <VIcon icon="mdi-folder-move" size="20" />
+                        </template>
+                        <VListItemTitle>Move To</VListItemTitle>
+                      </VListItem>
+
+                      <VListItem
+                        v-if="!item.isFolder"
+                        @click="handleCopyLink(item)"
+                      >
+                        <template #prepend>
+                          <VIcon icon="mdi-link" size="20" />
+                        </template>
+                        <VListItemTitle>Copy Link</VListItemTitle>
+                      </VListItem>
+
+                      <VListItem
+                        @click="deleteFile(item)"
+                        class="text-error"
+                      >
+                        <template #prepend>
+                          <VIcon icon="mdi-delete" size="20" color="error" />
+                        </template>
+                        <VListItemTitle>Delete</VListItemTitle>
+                      </VListItem>
+                    </template>
+                  </VList>
+                </VMenu>
+              </template>
+            </VDataTable>
           </div>
 
           <!-- Grid View -->
           <div v-else-if="viewType === 'grid'" class="pa-2">
-          <VRow>
-            <VCol
-              v-for="item in paginatedFiles"
-              :key="item.id"
-              cols="6"
-              sm="4"
-              md="3"
-              lg="2"
-            >
-              <VCard
-                :elevation="1"
-                class="text-center pa-3 file-grid-item d-flex flex-column justify-center position-relative"
-                style="border-radius: 20px; min-height: 140px;"
-                hover
-                @click.stop="item.isFolder || item.isGoBack ? handleOpenFolder(item) : previewFile(item)"
-                @contextmenu.prevent="!item.isGoBack && showContextMenu($event, item)"
-                @touchstart="!item.isGoBack && handleTouchStart($event, item)"
-                @touchend="!item.isGoBack && handleTouchEnd($event, item)"
-                @touchmove="handleTouchMove"
+            <VRow>
+              <VCol
+                v-for="item in paginatedFiles"
+                :key="item.id"
+                cols="6"
+                sm="4"
+                md="3"
+                lg="2"
               >
-                <!-- Three-dot menu button (top-right corner) -->
-                <VBtn
-                  v-if="!item.isGoBack"
-                  icon="mdi-dots-vertical"
-                  size="small"
-                  variant="text"
-                  class="context-menu-btn text-medium-emphasis"
-                  style="position: absolute; top: 4px; right: 4px; z-index: 1;"
-                  @click.stop="showContextMenu($event, item)"
-                />
-
-                <!-- File Icon / Thumbnail -->
-                <div class="mb-2">
-                  <VImg
-                    v-if="isImageFile(item.mimetype) && item.thumbnail"
-                    :src="`${ipfsHost}/ipfs/${item.thumbnail}`"
-                    :width="48"
-                    :height="48"
-                    class="rounded mx-auto"
-                    cover
-                  />
-                  <VIcon
-                    v-else
-                    :icon="item.isGoBack ? 'mdi-folder-arrow-up' : (item.isFolder ? 'mdi-folder' : getFileIcon(item.type))"
-                    :size="48"
-                    :class="[item.isFolder || item.isGoBack ? 'text-medium-emphasis' : '']"
-                  />
-                </div>
-
-                <!-- File/Folder Name -->
-                <div class="text-caption font-weight-medium text-truncate mb-1 px-1" :title="item.name">
-                  {{ item.name_abbr || item.name }}
-                </div>
-
-                <!-- File Info (Size + Date) -->
-                <template v-if="!item.isFolder && !item.isGoBack">
-                  <div class="text-caption text-medium-emphasis mb-1" style="font-size: 13px !important;">
-                    {{ convertSize(item.size) }}
-                  </div>
-                  <div class="text-caption text-medium-emphasis" style="font-size: 12px !important;">
-                    {{ item.added_date || formatDate(item.timestamp) || '-' }}
-                  </div>
-                </template>
-
-                <!-- Folder Date -->
-                <template v-else-if="item.isFolder && !item.isGoBack">
-                  <div class="text-caption text-medium-emphasis" style="font-size: 12px !important;">
-                    {{ item.added_date || formatDate(item.timestamp) || '-' }}
-                  </div>
-                </template>
-
-                <!-- Version Badge (if file has versions) -->
-                <div
-                  v-if="!item.isFolder && !item.isGoBack && item.versions?.length > 0"
-                  class="position-absolute"
-                  style="top: 8px; right: 8px;"
+                <VCard
+                  :elevation="1"
+                  class="text-center pa-3 file-grid-item d-flex flex-column justify-center position-relative"
+                  style="border-radius: 20px; min-height: 140px;"
+                  hover
+                  @click.stop="item.isFolder || item.isGoBack ? handleOpenFolder(item) : previewFile(item)"
+                  @contextmenu.prevent="!item.isGoBack && showContextMenu($event, item)"
+                  @touchstart="!item.isGoBack && handleTouchStart($event, item)"
+                  @touchend="!item.isGoBack && handleTouchEnd($event, item)"
+                  @touchmove="handleTouchMove"
                 >
-                  <VChip
-                    size="x-small"
-                    color="primary"
-                    variant="flat"
+                  <!-- Three-dot menu button (top-right corner) -->
+                  <VBtn
+                    v-if="!item.isGoBack"
+                    icon="mdi-dots-vertical"
+                    size="small"
+                    variant="text"
+                    class="context-menu-btn text-medium-emphasis"
+                    style="position: absolute; top: 4px; right: 4px; z-index: 1;"
+                    @click.stop="showContextMenu($event, item)"
+                  />
+
+                  <!-- File Icon / Thumbnail -->
+                  <div class="mb-2">
+                    <VImg
+                      v-if="isImageFile(item.mimetype) && item.thumbnail"
+                      :src="`${ipfsHost}/ipfs/${item.thumbnail}`"
+                      :width="48"
+                      :height="48"
+                      class="rounded mx-auto"
+                      cover
+                    />
+                    <VIcon
+                      v-else
+                      :icon="item.isGoBack ? 'mdi-folder-arrow-up' : (item.isFolder ? 'mdi-folder' : getFileIcon(item.type))"
+                      :size="48"
+                      :class="[item.isFolder || item.isGoBack ? 'text-medium-emphasis' : '']"
+                    />
+                  </div>
+
+                  <!-- File/Folder Name -->
+                  <div class="text-caption font-weight-medium text-truncate mb-1 px-1" :title="item.name">
+                    {{ item.name_abbr || item.name }}
+                  </div>
+
+                  <!-- File Info (Size + Date) -->
+                  <template v-if="!item.isFolder && !item.isGoBack">
+                    <div class="text-caption text-medium-emphasis mb-1" style="font-size: 13px !important;">
+                      {{ convertSize(item.size) }}
+                    </div>
+                    <div class="text-caption text-medium-emphasis" style="font-size: 12px !important;">
+                      {{ item.added_date || formatDate(item.timestamp) || '-' }}
+                    </div>
+                  </template>
+
+                  <!-- Folder Date -->
+                  <template v-else-if="item.isFolder && !item.isGoBack">
+                    <div class="text-caption text-medium-emphasis" style="font-size: 12px !important;">
+                      {{ item.added_date || formatDate(item.timestamp) || '-' }}
+                    </div>
+                  </template>
+
+                  <!-- Version Badge (if file has versions) -->
+                  <div
+                    v-if="!item.isFolder && !item.isGoBack && item.versions?.length > 0"
+                    class="position-absolute"
+                    style="top: 8px; right: 8px;"
                   >
-                    {{ item.versions.length }}
-                  </VChip>
-                </div>
-              </VCard>
-            </VCol>
-          </VRow>
+                    <VChip
+                      size="x-small"
+                      color="primary"
+                      variant="flat"
+                    >
+                      {{ item.versions.length }}
+                    </VChip>
+                  </div>
+                </VCard>
+              </VCol>
+            </VRow>
           </div>
 
           <!-- Modern Circle Pagination Footer -->
@@ -874,6 +868,7 @@
                 class="mt-4"
                 :href="`${ipfsHost}/ipfs/${previewingFile.hash}`"
                 target="_blank"
+                rel="noopener noreferrer"
                 prepend-icon="mdi-download"
               >
                 Download File
@@ -1055,8 +1050,7 @@
         </VCardTitle>
         <VCardText class="pa-6 pt-0">
           <!-- Show pricing plans component here -->
-          <PricingPlans
-            @select-plan="handleUpgradePlan"
+          <PricingPlans @selectPlan="handleUpgradePlan"
           />
         </VCardText>
       </VCard>
@@ -1429,8 +1423,8 @@
     <VersionsDialog
       v-model="showVersionsDialog"
       :file="fileForVersions"
-      @show-message="handleVersionsMessage"
-      @preview-file="handlePreviewFile"
+      @showMessage="handleVersionsMessage"
+      @previewFile="handlePreviewFile"
     />
 
     <!-- Add Version Dialog (like FluxCloud) -->
@@ -1539,11 +1533,12 @@ import { useFluxDrive } from '@/composables/useFluxDrive'
 import PricingPlans from '@/components/FluxDrive/PricingPlans.vue'
 import VersionsDialog from '@/components/FluxDrive/VersionsDialog.vue'
 
-// Local state with persistence
+// Define emit for FileManager
+const emit = defineEmits(['select-plan']) // Local state with persistence
 const viewType = ref(localStorage.getItem('fluxdrive-view-type') || 'list') // 'list' or 'grid'
 
 // Watch viewType changes to persist to localStorage
-watch(viewType, (newValue) => {
+watch(viewType, newValue => {
   localStorage.setItem('fluxdrive-view-type', newValue)
   console.log('🔄 View type changed to:', newValue)
 })
@@ -1591,6 +1586,7 @@ const renameValidation = computed(() => {
   if (itemToRename.value && renameText.value.trim() === itemToRename.value.name) {
     return { isValid: false, hint: 'Name is the same as current name' }
   }
+  
   return { isValid: true, hint: '' }
 })
 
@@ -1641,19 +1637,19 @@ const handleVersionsMessage = ({ message, type }) => {
     success: 'mdi-check-circle',
     error: 'mdi-alert-circle',
     warning: 'mdi-alert',
-    info: 'mdi-information'
+    info: 'mdi-information',
   }
   showToastMessage(message, type, iconMap[type] || 'mdi-check-circle')
 }
 
 // Handle file preview requests from VersionsDialog
-const handlePreviewFile = (file) => {
+const handlePreviewFile = file => {
   console.log('🔍 FileManager received preview-file event:', file.name, file.hash)
   previewFile(file)
 }
 
 // Local copy link function with success message (files only)
-const handleCopyLink = async (item) => {
+const handleCopyLink = async item => {
   try {
     let linkUrl = ''
 
@@ -1673,20 +1669,20 @@ const handleCopyLink = async (item) => {
     showLocalMessage(
       `Link for "${item.name}" copied to clipboard`,
       'success',
-      'mdi-link'
+      'mdi-link',
     )
   } catch (error) {
     console.error('Copy link error:', error)
     showLocalMessage(
       `Failed to copy link for "${item.name}": ${error.message}`,
       'error',
-      'mdi-link-off'
+      'mdi-link-off',
     )
   }
 }
 
 // View versions function
-const viewVersions = (item) => {
+const viewVersions = item => {
   console.log('🔍 Viewing versions for:', item.name)
   console.log('🔍 File data:', JSON.stringify(item, null, 2))
   console.log('🔍 File versions array:', item.versions)
@@ -1696,7 +1692,7 @@ const viewVersions = (item) => {
 }
 
 // Add version function (like FluxCloud)
-const addVersion = (item) => {
+const addVersion = item => {
   console.log('➕ Adding version for:', item.name)
   fileForAddVersion.value = item
   versionComment.value = ''
@@ -1707,7 +1703,7 @@ const addVersion = (item) => {
 // Version file selection handler
 const selectedVersionFile = ref(null)
 
-const handleVersionFileSelect = (event) => {
+const handleVersionFileSelect = event => {
   const files = event.target.files
   if (files && files.length > 0) {
     selectedVersionFile.value = files[0]
@@ -1721,6 +1717,7 @@ const handleVersionFileSelect = (event) => {
 const uploadVersion = async () => {
   if (!selectedVersionFile.value || !fileForAddVersion.value) {
     showLocalMessage('Please select a file first', 'error')
+    
     return
   }
 
@@ -1729,6 +1726,7 @@ const uploadVersion = async () => {
 
   if (fileSizeInMB > 100) {
     showToastMessage(`File too large! Upload limit is 100.00 MB (${fileSize} provided)`, 'error', 'mdi-file-alert')
+    
     return
   }
 
@@ -1765,7 +1763,7 @@ const uploadVersion = async () => {
     showLocalMessage(
       `New version of "${fileForAddVersion.value.name}" added successfully`,
       'success',
-      'mdi-upload'
+      'mdi-upload',
     )
 
   } catch (error) {
@@ -1780,7 +1778,7 @@ const uploadVersion = async () => {
 }
 
 // Custom upload function with progress tracking
-const uploadFileWithProgress = async (file) => {
+const uploadFileWithProgress = async file => {
   try {
     // Get authentication details
     const zelidauth = localStorage.getItem('zelidauth')
@@ -1814,7 +1812,7 @@ const uploadFileWithProgress = async (file) => {
     return new Promise((resolve, reject) => {
       const xhr = new XMLHttpRequest()
 
-      xhr.upload.onprogress = (e) => {
+      xhr.upload.onprogress = e => {
         if (e.lengthComputable) {
           localUploadProgress.value = Math.round((e.loaded / e.total) * 100)
         }
@@ -1846,7 +1844,7 @@ const uploadFileWithProgress = async (file) => {
 }
 
 // Format file size to match Windows File Explorer (uses base 1024 with 2 decimal precision)
-const formatFileSize = (bytes) => {
+const formatFileSize = bytes => {
   if (bytes === 0) return '0 Bytes'
   const k = 1024
   const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB']
@@ -1855,11 +1853,12 @@ const formatFileSize = (bytes) => {
 
   // Use 2 decimal places for precision like Windows
   if (i === 0) return Math.round(value) + ' ' + sizes[i]
+  
   return parseFloat(value.toFixed(2)) + ' ' + sizes[i]
 }
 
 // Local upload handlers with proper error handling
-const handleLocalFileSelect = async (e) => {
+const handleLocalFileSelect = async e => {
   const files = Array.from(e.target.files)
   console.log(`📤 Selected ${files.length} file(s) for upload`)
 
@@ -1885,7 +1884,7 @@ const handleLocalFileSelect = async (e) => {
         showToastMessage(
           `File "${file.name}" is too large! Upload limit is 100.00 MB (${fileSize} provided)`,
           'error',
-          'mdi-file-alert'
+          'mdi-file-alert',
         )
         continue
       }
@@ -1918,13 +1917,13 @@ const handleLocalFileSelect = async (e) => {
         showLocalMessage(
           `File "${uploadResults[0].file}" uploaded successfully`,
           'success',
-          'mdi-upload'
+          'mdi-upload',
         )
       } else {
         showLocalMessage(
           `Failed to upload "${uploadResults[0].file}": ${uploadResults[0].error}`,
           'error',
-          'mdi-upload-off'
+          'mdi-upload-off',
         )
       }
     } else if (uploadResults.length > 1) {
@@ -1934,21 +1933,21 @@ const handleLocalFileSelect = async (e) => {
         showLocalMessage(
           `All ${successCount} files uploaded successfully`,
           'success',
-          'mdi-upload-multiple'
+          'mdi-upload-multiple',
         )
       } else if (successCount === 0) {
         // All failed
         showLocalMessage(
           `Failed to upload all ${failCount} files`,
           'error',
-          'mdi-upload-off'
+          'mdi-upload-off',
         )
       } else {
         // Mixed results
         showLocalMessage(
           `Uploaded ${successCount} of ${uploadResults.length} files (${failCount} failed)`,
           'warning',
-          'mdi-upload-multiple'
+          'mdi-upload-multiple',
         )
       }
     }
@@ -1958,7 +1957,7 @@ const handleLocalFileSelect = async (e) => {
 }
 
 
-const handleLocalDrop = async (e) => {
+const handleLocalDrop = async e => {
   const files = Array.from(e.dataTransfer.files)
   console.log(`📤 Dropped ${files.length} file(s) for upload`)
 
@@ -1984,7 +1983,7 @@ const handleLocalDrop = async (e) => {
         showToastMessage(
           `File "${file.name}" is too large! Upload limit is 100.00 MB (${fileSize} provided)`,
           'error',
-          'mdi-file-alert'
+          'mdi-file-alert',
         )
         continue
       }
@@ -2017,13 +2016,13 @@ const handleLocalDrop = async (e) => {
         showLocalMessage(
           `File "${uploadResults[0].file}" uploaded successfully`,
           'success',
-          'mdi-upload'
+          'mdi-upload',
         )
       } else {
         showLocalMessage(
           `Failed to upload "${uploadResults[0].file}": ${uploadResults[0].error}`,
           'error',
-          'mdi-upload-off'
+          'mdi-upload-off',
         )
       }
     } else if (uploadResults.length > 1) {
@@ -2033,21 +2032,21 @@ const handleLocalDrop = async (e) => {
         showLocalMessage(
           `All ${successCount} files uploaded successfully`,
           'success',
-          'mdi-upload-multiple'
+          'mdi-upload-multiple',
         )
       } else if (successCount === 0) {
         // All failed
         showLocalMessage(
           `Failed to upload all ${failCount} files`,
           'error',
-          'mdi-upload-off'
+          'mdi-upload-off',
         )
       } else {
         // Mixed results
         showLocalMessage(
           `Uploaded ${successCount} of ${uploadResults.length} files (${failCount} failed)`,
           'warning',
-          'mdi-upload-multiple'
+          'mdi-upload-multiple',
         )
       }
     }
@@ -2062,9 +2061,10 @@ const hideContextMenu = () => {
   contextMenuItem.value = null
 }
 
-const handleContextMenuAction = (action) => {
+const handleContextMenuAction = action => {
   if (!contextMenuItem.value) {
     console.warn('No context menu item selected')
+    
     return
   }
 
@@ -2073,33 +2073,33 @@ const handleContextMenuAction = (action) => {
   hideContextMenu()
 
   switch (action) {
-    case 'preview':
-      previewFile(item)
-      break
-    case 'download':
-      downloadFile(item)
-      break
-    case 'addVersion':
-      addVersion(item)
-      break
-    case 'versions':
-      viewVersions(item)
-      break
-    case 'rename':
-      console.log('Calling renameItem with:', item)
-      renameItem(item)
-      break
-    case 'move':
-      moveItem(item)
-      break
-    case 'copy':
-      handleCopyLink(item)
-      break
-    case 'delete':
-      deleteFile(item)
-      break
-    default:
-      console.warn('Unknown context menu action:', action)
+  case 'preview':
+    previewFile(item)
+    break
+  case 'download':
+    downloadFile(item)
+    break
+  case 'addVersion':
+    addVersion(item)
+    break
+  case 'versions':
+    viewVersions(item)
+    break
+  case 'rename':
+    console.log('Calling renameItem with:', item)
+    renameItem(item)
+    break
+  case 'move':
+    moveItem(item)
+    break
+  case 'copy':
+    handleCopyLink(item)
+    break
+  case 'delete':
+    deleteFile(item)
+    break
+  default:
+    console.warn('Unknown context menu action:', action)
   }
 }
 
@@ -2138,7 +2138,7 @@ const handleTouchStart = (event, item) => {
       const contextEvent = {
         clientX: touchStartPos.x,
         clientY: touchStartPos.y,
-        preventDefault: () => {}
+        preventDefault: () => {},
       }
       showContextMenu(contextEvent, item)
 
@@ -2150,7 +2150,7 @@ const handleTouchStart = (event, item) => {
   }, 500)
 }
 
-const handleTouchMove = (event) => {
+const handleTouchMove = event => {
   if (!event.touches || event.touches.length !== 1) return
 
   const touch = event.touches[0]
@@ -2220,13 +2220,14 @@ const {
   bytesConversion,
   usedStorage,
   totalStorage,
+
   // Error management
   hasError,
   errorMessage,
   errorType,
   setError,
   clearError,
-  uploadVersionToFluxCloud
+  uploadVersionToFluxCloud,
 } = useFluxDrive()
 
 // Note: Upload success messages are handled in local upload handlers
@@ -2238,9 +2239,10 @@ const files = computed(() => {
   }
 
   const query = searchQuery.value.toLowerCase().trim()
+  
   return allFiles.value.filter(file =>
     file.name.toLowerCase().includes(query) ||
-    (file.type && file.type.toLowerCase().includes(query))
+    (file.type && file.type.toLowerCase().includes(query)),
   )
 })
 
@@ -2258,7 +2260,7 @@ const paginatedFiles = computed(() => {
       totalFiles: stableFiles.value.length,
       start,
       end,
-      stableFilesLength: stableFiles.value.length
+      stableFilesLength: stableFiles.value.length,
     })
   }
 
@@ -2282,7 +2284,7 @@ const paginationRange = computed(() => {
     }
   }
 
-  range.forEach((i) => {
+  range.forEach(i => {
     if (l) {
       if (i - l === 2) {
         rangeWithDots.push(l + 1)
@@ -2301,12 +2303,12 @@ const paginationRange = computed(() => {
 // Removed showSnackbar - using unified local message system
 
 // Debug: Watch files array changes
-watch(files, (newFiles) => {
+watch(files, newFiles => {
   console.log('🔍 FileManager: Files changed:', {
     length: newFiles?.length || 0,
     files: newFiles?.slice(0, 5), // Show more files
     isArray: Array.isArray(newFiles),
-    allFiles: newFiles // Show complete array
+    allFiles: newFiles, // Show complete array
   })
   console.log('🔍 FileManager: View type:', viewType.value)
   console.log('🔍 FileManager: Has active subscription:', hasActiveSubscription.value)
@@ -2319,24 +2321,24 @@ const navigateToRoot = () => {
 }
 
 // Wrapper functions to reset page before navigation
-const handleOpenFolder = (item) => {
+const handleOpenFolder = item => {
   currentPage.value = 1 // Reset to first page when navigating
   openFolder(item)
 }
 
-const handleNavigateToFolder = (item) => {
+const handleNavigateToFolder = item => {
   currentPage.value = 1 // Reset to first page when navigating
   navigateToFolder(item)
 }
 
 // Item actions
-const openFile = (item) => {
+const openFile = item => {
   // Open file in new tab
   window.open(`${ipfsHost}/ipfs/${item.hash}`, '_blank')
 }
 
 // Helper function to check if file is a video
-const isVideoFile = (file) => {
+const isVideoFile = file => {
   const videoExtensions = ['mp4', 'webm', 'ogg', 'mov', 'avi', 'mkv', 'm4v', 'flv', 'wmv']
   const videoMimeTypes = ['video/mp4', 'video/webm', 'video/ogg', 'video/quicktime', 'video/x-msvideo', 'video/x-matroska', 'video/x-flv', 'video/x-ms-wmv']
 
@@ -2362,7 +2364,7 @@ const isVideoFile = (file) => {
 }
 
 // Helper function to check if file is audio
-const isAudioFile = (file) => {
+const isAudioFile = file => {
   const audioExtensions = ['mp3', 'wav', 'ogg', 'm4a', 'flac', 'aac', 'wma']
   const audioMimeTypes = ['audio/mpeg', 'audio/wav', 'audio/ogg', 'audio/mp4', 'audio/flac', 'audio/aac', 'audio/x-ms-wma']
 
@@ -2387,7 +2389,7 @@ const isAudioFile = (file) => {
   return false
 }
 
-const downloadFile = async (item) => {
+const downloadFile = async item => {
   console.log('📥 Starting download:', item.name, 'from hash:', item.hash)
 
   try {
@@ -2402,7 +2404,7 @@ const downloadFile = async (item) => {
       method: 'GET',
       headers: {
         'Accept': '*/*',
-      }
+      },
     })
 
     if (!response.ok) {
@@ -2462,7 +2464,7 @@ const downloadFile = async (item) => {
   }
 }
 
-const renameItem = (item) => {
+const renameItem = item => {
   console.log('🏷️ renameItem called with:', item)
   console.log('🏷️ Setting up rename dialog...')
 
@@ -2473,7 +2475,7 @@ const renameItem = (item) => {
   console.log('🏷️ Rename dialog should be visible now:', {
     showRenameDialog: showRenameDialog.value,
     itemToRename: itemToRename.value?.name,
-    renameText: renameText.value
+    renameText: renameText.value,
   })
 }
 
@@ -2496,6 +2498,7 @@ const confirmRename = async () => {
     const zelidauth = localStorage.getItem('zelidauth')
     if (!zelidauth) {
       showLocalMessage('Authentication required. Please log in.', 'error', 'mdi-account-alert')
+      
       return
     }
 
@@ -2506,11 +2509,12 @@ const confirmRename = async () => {
     console.log('🔐 Auth data check:', {
       hasZelid: !!authData.zelid,
       hasSignature: !!authData.signature,
-      hasLoginPhrase: !!authData.loginPhrase
+      hasLoginPhrase: !!authData.loginPhrase,
     })
 
     if (!authData.zelid || !authData.signature || !authData.loginPhrase) {
       showLocalMessage('Authentication incomplete. Please log in again.', 'error', 'mdi-account-alert')
+      
       return
     }
 
@@ -2521,7 +2525,7 @@ const confirmRename = async () => {
     const requestBody = {
       zelid: authData.zelid,
       signature: authData.signature,
-      loginPhrase: authData.loginPhrase
+      loginPhrase: authData.loginPhrase,
     }
 
     if (isFolder) {
@@ -2539,7 +2543,7 @@ const confirmRename = async () => {
     const response = await fetch(apiEndpoint, {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: new URLSearchParams(requestBody)
+      body: new URLSearchParams(requestBody),
     })
 
     console.log('📡 Rename API response status:', response.status)
@@ -2575,7 +2579,7 @@ const confirmRename = async () => {
       showLocalMessage(
         `${isFolder ? 'Folder' : 'File'} "${newName}" renamed successfully`,
         'success',
-        'mdi-rename-box'
+        'mdi-rename-box',
       )
     } else {
       const errorMessage = result.error || result.message || 'Failed to rename item'
@@ -2588,7 +2592,7 @@ const confirmRename = async () => {
   }
 }
 
-const moveItem = (item) => {
+const moveItem = item => {
   itemToMove.value = item
   moveDestination.value = ''
   showMoveDialog.value = true
@@ -2612,7 +2616,7 @@ const confirmMove = async () => {
       // Look for the folder in the current files list
       const trimmedDestination = rawDestination.trim().replace(/^\/+/, '') // Remove leading slashes
       const destinationFolder = files.value.find(f =>
-        f.isFolder && f.name === trimmedDestination
+        f.isFolder && f.name === trimmedDestination,
       )
       if (destinationFolder) {
         destinationUuid = destinationFolder.uuid || destinationFolder.id
@@ -2637,11 +2641,12 @@ const confirmMove = async () => {
         rawDestination: rawDestination,
         normalizedDestination: destination,
         currentFolder: currentFolder.value,
-        authData: { ...authData, signature: '[HIDDEN]', loginPhrase: '[HIDDEN]' }
+        authData: { ...authData, signature: '[HIDDEN]', loginPhrase: '[HIDDEN]' },
       })
 
       if (!authData.zelid || !authData.loginPhrase || !authData.signature) {
         showLocalMessage('Authentication required. Please log in again.', 'error', 'mdi-account-alert')
+        
         return
       }
 
@@ -2658,8 +2663,9 @@ const confirmMove = async () => {
           signature: authData.signature,
           loginPhrase: authData.loginPhrase,
           uuid: itemToMove.value.uuid,
+
           // Use UUID if available, otherwise use path
-          destination: destinationUuid || destination
+          destination: destinationUuid || destination,
         }
       } else {
         // Move file using FluxCloud approach
@@ -2669,8 +2675,9 @@ const confirmMove = async () => {
           signature: authData.signature,
           loginPhrase: authData.loginPhrase,
           hash: itemToMove.value.hash,
+
           // Use UUID if available, otherwise use path
-          destination: destinationUuid || destination
+          destination: destinationUuid || destination,
         }
       }
 
@@ -2680,7 +2687,7 @@ const confirmMove = async () => {
         identifier: itemToMove.value.isFolder ? itemToMove.value.uuid : itemToMove.value.hash,
         destination: destination,
         destinationUuid: destinationUuid,
-        actualDestinationSent: destinationUuid || destination
+        actualDestinationSent: destinationUuid || destination,
       })
 
       const response = await fetch(apiEndpoint, {
@@ -2688,7 +2695,7 @@ const confirmMove = async () => {
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
         },
-        body: new URLSearchParams(apiParams)
+        body: new URLSearchParams(apiParams),
       })
 
       console.log('📡 Move API response status:', response.status)
@@ -2701,6 +2708,7 @@ const confirmMove = async () => {
       } catch (e) {
         console.error('❌ Failed to parse JSON response:', e)
         showLocalMessage('Invalid response from server', 'error', 'mdi-server-network-off')
+        
         return
       }
 
@@ -2708,6 +2716,7 @@ const confirmMove = async () => {
 
       if (response.status === 404) {
         showLocalMessage('Move functionality is not available on this server', 'warning', 'mdi-folder-move-outline')
+        
         return
       }
 
@@ -2724,7 +2733,7 @@ const confirmMove = async () => {
         showLocalMessage(
           `"${movedItemName}" moved successfully to ${destinationText}`,
           'success',
-          'mdi-folder-move'
+          'mdi-folder-move',
         )
 
         console.log(`✅ Move successful: ${movedItemName} → ${destination}`)
@@ -2784,31 +2793,32 @@ const handlePreviewMenuAction = (action, item) => {
   // Small delay to ensure modal closes before opening new dialogs
   setTimeout(() => {
     switch (action) {
-      case 'rename':
-        renameItem(item)
-        break
-      case 'move':
-        moveItem(item)
-        break
-      case 'copy':
-        handleCopyLink(item)
-        break
-      case 'delete':
-        deleteFile(item)
-        break
-      default:
-        console.warn('Unknown preview menu action:', action)
+    case 'rename':
+      renameItem(item)
+      break
+    case 'move':
+      moveItem(item)
+      break
+    case 'copy':
+      handleCopyLink(item)
+      break
+    case 'delete':
+      deleteFile(item)
+      break
+    default:
+      console.warn('Unknown preview menu action:', action)
     }
   }, 100)
 }
 
 
-const downloadFileVersion = async (version) => {
+const downloadFileVersion = async version => {
   const hash = version.hash || version.id
   const name = version.name || fileForVersions.value?.name || 'file'
 
   if (!hash) {
     showLocalMessage('Cannot download: No hash available for this version', 'error', 'mdi-download-off')
+    
     return
   }
 
@@ -2836,10 +2846,11 @@ const downloadFileVersion = async (version) => {
   }
 }
 
-const openFileVersion = (version) => {
+const openFileVersion = version => {
   const hash = version.hash || version.id
   if (!hash) {
     showLocalMessage('Cannot open: No hash available for this version', 'error', 'mdi-open-in-new')
+    
     return
   }
 
@@ -2859,7 +2870,7 @@ const confirmCreateFolder = async () => {
 
     // Check if folder with same name already exists at the same level
     const existingFolder = allFiles.value.find(file =>
-      file.isFolder && file.name.toLowerCase() === folderName.toLowerCase()
+      file.isFolder && file.name.toLowerCase() === folderName.toLowerCase(),
     )
 
     if (existingFolder) {
@@ -2868,9 +2879,10 @@ const confirmCreateFolder = async () => {
         `Folder "${folderName}" already exists`,
         'error',
         'mdi-folder-alert',
-        5000 // Show error for 5 seconds
+        5000, // Show error for 5 seconds
       )
       newFolderName.value = '' // Clear input after error
+      
       return
     }
 
@@ -2887,7 +2899,7 @@ const confirmCreateFolder = async () => {
       showLocalMessage(
         `Folder "${folderName}" created successfully`,
         'success',
-        'mdi-folder-plus'
+        'mdi-folder-plus',
       )
 
     } catch (error) {
@@ -2895,7 +2907,7 @@ const confirmCreateFolder = async () => {
       showLocalMessage(
         `Failed to create folder "${folderName}": ${error.message}`,
         'error',
-        'mdi-folder-alert'
+        'mdi-folder-alert',
       )
     }
 
@@ -2904,7 +2916,7 @@ const confirmCreateFolder = async () => {
 }
 
 // Delete file with dialog confirmation
-const deleteFile = (item) => {
+const deleteFile = item => {
   itemToDelete.value = item
   showDeleteDialog.value = true
 }
@@ -2931,7 +2943,7 @@ const confirmDelete = async () => {
       showLocalMessage(
         `${isFolder ? 'Folder' : 'File'} "${itemName}" deleted successfully`,
         'success',
-        'mdi-delete'
+        'mdi-delete',
       )
 
     } catch (error) {
@@ -2939,7 +2951,7 @@ const confirmDelete = async () => {
       showLocalMessage(
         `Failed to delete "${itemName}": ${error.message}`,
         'error',
-        'mdi-delete-alert'
+        'mdi-delete-alert',
       )
     }
 
@@ -2967,9 +2979,6 @@ onMounted(() => {
   }
 })
 
-// Define emit for FileManager
-const emit = defineEmits(['select-plan'])
-
 // Renewal state
 const isRenewing = ref(false)
 const renewalMessage = ref('')
@@ -2982,11 +2991,11 @@ const clearRenewalState = () => {
 
 // Expose methods to parent
 defineExpose({
-  clearRenewalState
+  clearRenewalState,
 })
 
 // Handle upgrade plan selection
-const handleUpgradePlan = (planId) => {
+const handleUpgradePlan = planId => {
   console.log('🔄 FileManager plan selection:', planId)
   showUpgradeDialog.value = false
 
@@ -3013,7 +3022,7 @@ const handleUpgradePlan = (planId) => {
   console.log('🔍 Plan status:', planStatus, '→ Action type:', actionType)
 
   // Emit to parent component with correct action
-  emit('select-plan', planId, actionType)
+  emit('selectPlan', planId, actionType)
 }
 </script>
 

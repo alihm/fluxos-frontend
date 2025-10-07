@@ -134,7 +134,10 @@ const { snackbar } = useSnackbar()
       :timeout="snackbar.timeout"
       location="top"
     >
-      {{ snackbar.message }}
+      <div class="d-flex align-center gap-2">
+        <VIcon v-if="snackbar.icon" :icon="snackbar.icon" />
+        <span>{{ snackbar.message }}</span>
+      </div>
     </VSnackbar>
   </VerticalNavLayout>
 </template>

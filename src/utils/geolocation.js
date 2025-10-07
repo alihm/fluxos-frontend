@@ -1,4 +1,4 @@
-/* eslint-disable camelcase */
+ 
 // if available: true, can be launched without limitations and need for stats
 const countries = [
   {

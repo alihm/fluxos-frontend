@@ -1517,10 +1517,10 @@ async function loadBackupList(type = 'local', itemsList = 'backupList') {
         const BackupItem = {
           component: componentItem,
           create: +backupItem[0].create,
-          // eslint-disable-next-line camelcase
+           
           file_size: backupItem[0].size,
           file: `${volumePath.mount}/backup/${type}/${backupItem[0].name}`,
-          // eslint-disable-next-line camelcase
+           
           file_name: backupItem[0].name,
         }
 
@@ -1868,12 +1868,12 @@ const urlValidationRules = computed(() => [
 
 async function processChunks(chunks, type) {
   const typeToRefMap = {
-    // eslint-disable-next-line camelcase
+     
     restore_upload: restoreFromUploadStatus,
-    // eslint-disable-next-line camelcase
+     
     restore_remote: restoreFromRemoteURLStatus,
     backup: tarProgress,
-    // eslint-disable-next-line camelcase
+     
     restore_fluxdrive: restoreFromFluxDriveStatus,
   }
 
@@ -2230,7 +2230,7 @@ const uploadToFluxDrive = async () => {
 
     const uploadPromises = selectedBackup.value.map(async backup => {
       try {
-        // eslint-disable-next-line camelcase
+         
         const { file, component, file_size, file_name, create } = backup
         let timestamp = create
         if (Math.abs(timestamp - prevoiusTimestamp) > 1000 * 60 * 60) {
@@ -2246,11 +2246,11 @@ const uploadToFluxDrive = async () => {
         const data = {
           appname: props.appSpec.name,
           component,
-          // eslint-disable-next-line camelcase
+           
           filename: file_name,
           timestamp,
           host: hostUrl,
-          // eslint-disable-next-line camelcase
+           
           filesize: file_size,
         }
 
@@ -2260,7 +2260,7 @@ const uploadToFluxDrive = async () => {
         if (response && response.data && response.data.status === 'success') {
           fluxDriveUploadTask.value.push({
             taskId: response.data.data.taskId,
-            // eslint-disable-next-line camelcase
+             
             filename: file_name,
             component,
             status: 'in queue',
@@ -2342,10 +2342,10 @@ function addAllBackupComponents(timestamp) {
   if (checkpoint) {
     const filteredComponents = checkpoint.components.map(component => ({
       component: component.component,
-      // eslint-disable-next-line camelcase
+       
       file_url: component.file_url,
       timestamp: checkpoint.timestamp,
-      // eslint-disable-next-line camelcase
+       
       file_size: component.file_size,
     }))
 
@@ -2361,10 +2361,10 @@ function addComponent(selected, timestamp) {
     newComponents.value[existingIndex] = {
 
       component: selected.component,
-      // eslint-disable-next-line camelcase
+       
       file_url: selected.file_url,
       timestamp,
-      // eslint-disable-next-line camelcase
+       
       file_size: selected.file_size,
     }
   } else {
@@ -2372,9 +2372,9 @@ function addComponent(selected, timestamp) {
     newComponents.value.push({
       component: selected.component,
       timestamp,
-      // eslint-disable-next-line camelcase
+       
       file_url: selected.file_url,
-      // eslint-disable-next-line camelcase
+       
       file_size: selected.file_size,
     })
   }
@@ -2383,7 +2383,7 @@ function addComponent(selected, timestamp) {
 async function restoreFromFluxDrive(newComponents) {
   const restoreItems = newComponents.map(item => ({
     component: item.component,
-    // eslint-disable-next-line camelcase
+     
     file_size: item.file_size,
     url: item.file_url,
   }))
@@ -2510,13 +2510,13 @@ const addRemoteUrlItem = async (appname, component) => {
       // Add or update the item in the queue
       if (existingItemIndex !== -1) {
         restoreRemoteUrlItems.value[existingItemIndex].url = restoreRemoteUrl.value
-        // eslint-disable-next-line camelcase
+         
         restoreRemoteUrlItems.value[existingItemIndex].file_size = remoteFileSizeResponse.value.data.data
       } else {
         restoreRemoteUrlItems.value.push({
           url: restoreRemoteUrl.value,
           component,
-          // eslint-disable-next-line camelcase
+           
           file_size: remoteFileSizeResponse.data.data,
         })
       }
@@ -2570,16 +2570,16 @@ const addFiles = async filesToAdd => {
     )
 
     const newFileData = {
-      // eslint-disable-next-line camelcase
+       
       selected_file: f,
       uploading: false,
       uploaded: false,
       progress: 0,
       path: `${volumePathValue}/backup/upload`,
       component: restoreRemoteFile.value,
-      // eslint-disable-next-line camelcase
+       
       file_name: `backup_${restoreRemoteFile.value.toLowerCase()}.tar.gz`,
-      // eslint-disable-next-line camelcase
+       
       file_size: f.size,
     }
 
@@ -2595,7 +2595,7 @@ const addFiles = async filesToAdd => {
 
 const removeFile = file => {
   files.value = files.value.filter(
-    // eslint-disable-next-line camelcase
+     
     selected_file => selected_file.selected_file.name !== file.selected_file.name,
   )
 }

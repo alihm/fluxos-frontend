@@ -23,14 +23,15 @@ const sharedState = {
   currentFolderUuid: ref(''), // Store current folder UUID
   folderHierarchy: ref([]), // Store folder hierarchy: [{path: '/', uuid: ''}, {path: '/folder1', uuid: 'uuid1'}]
   breadcrumbs: ref([{ title: 'Home', path: '/' }]),
+
   // Error state management
   errorState: ref({
     hasError: false,
     message: '',
     type: 'error', // 'error', 'warning', 'info', 'success'
     timestamp: null,
-    persistent: false // If true, error won't auto-clear
-  })
+    persistent: false, // If true, error won't auto-clear
+  }),
 }
 
 export function useFluxDrive() {
@@ -57,11 +58,13 @@ export function useFluxDrive() {
         const authData = zelidauthRaw.includes('zelid=') ?
           Object.fromEntries(new URLSearchParams(zelidauthRaw)) :
           JSON.parse(zelidauthRaw)
+        
         return authData.zelid || fluxStore.zelid
       } catch {
         return fluxStore.zelid
       }
     }
+    
     return fluxStore.zelid
   }
 
@@ -69,6 +72,7 @@ export function useFluxDrive() {
   const isLoggedIn = computed(() => {
     const zelidauth = localStorage.getItem('zelidauth')
     const zelid = getZelid()
+    
     return !!(zelidauth && zelid)
   })
 
@@ -85,17 +89,19 @@ export function useFluxDrive() {
     if (storageGB <= 10) return 'starter'
     if (storageGB <= 50) return 'standard'
     if (storageGB <= 100) return 'pro'
+    
     return 'enterprise' // For custom/larger plans
   })
 
   // Plan comparison helpers
-  const getPlanStorageGB = (planId) => {
+  const getPlanStorageGB = planId => {
     const plan = fluxDrivePlans.value.find(p => p.id === planId)
     if (!plan) return 0
+    
     return parseInt(plan.storage.replace(/[^\d]/g, ''))
   }
 
-  const getPlanStatus = (planId) => {
+  const getPlanStatus = planId => {
     // Enterprise plan is always available for contact
     if (planId === 'enterprise') {
       return 'upgrade' // Always show as upgrade option
@@ -122,6 +128,7 @@ export function useFluxDrive() {
     // Prevent duplicate calls if storage info is already being fetched or already fetched
     if (sharedState.loadingStorage.value || sharedState.storageInfoFetched.value) {
       console.log('⏭️ Storage info already loading or fetched, skipping duplicate call')
+      
       return
     }
 
@@ -141,8 +148,8 @@ export function useFluxDrive() {
         body: new URLSearchParams({
           zelid: authData.zelid || getZelid(),
           signature: authData.signature || '',
-          loginPhrase: authData.loginPhrase || ''
-        })
+          loginPhrase: authData.loginPhrase || '',
+        }),
       })
 
       const result = await response.json()
@@ -170,7 +177,7 @@ export function useFluxDrive() {
           usedMB: (usedStorage.value / (1024 * 1024)).toFixed(2) + ' MB',
           usedGB: (usedStorage.value / (1024 ** 3)).toFixed(2) + ' GB',
           totalGB: (totalStorage.value / (1024 ** 3)).toFixed(2) + ' GB',
-          percentage: Math.round((usedStorage.value / totalStorage.value) * 100) + '%'
+          percentage: Math.round((usedStorage.value / totalStorage.value) * 100) + '%',
         })
       }
     } catch (error) {
@@ -184,8 +191,12 @@ export function useFluxDrive() {
     if (!isLoggedIn.value) {
       hasActiveSubscription.value = false
       subscriptionChecked.value = true
+      
       return false
     }
+
+    // Track start time to ensure minimum loading animation display
+    const startTime = Date.now()
 
     try {
       sharedState.loadingStorage.value = true
@@ -195,6 +206,7 @@ export function useFluxDrive() {
       if (!zelid) {
         console.error('No zelid found')
         hasActiveSubscription.value = false
+        
         return false
       }
 
@@ -213,8 +225,8 @@ export function useFluxDrive() {
         body: new URLSearchParams({
           zelid: authData.zelid || zelid,
           signature: authData.signature || '',
-          loginPhrase: authData.loginPhrase || ''
-        })
+          loginPhrase: authData.loginPhrase || '',
+        }),
       })
 
       const result = await response.json()
@@ -224,7 +236,6 @@ export function useFluxDrive() {
       if (result.active === true) {
         console.log('✅ Active subscription detected')
         hasActiveSubscription.value = true
-        subscriptionChecked.value = true
 
         // Update storage info if available (from storage endpoint)
         if (result.capacity !== undefined) {
@@ -247,26 +258,62 @@ export function useFluxDrive() {
         console.log('📊 Storage updated from /storage endpoint:', {
           used: usedStorage.value,
           total: totalStorage.value,
-          percentage: Math.round((usedStorage.value / totalStorage.value) * 100) + '%'
+          percentage: Math.round((usedStorage.value / totalStorage.value) * 100) + '%',
         })
 
+        // Ensure minimum 1.5s delay for loader animation visibility
+        const elapsed = Date.now() - startTime
+        const minDelay = 1500
+        if (elapsed < minDelay) {
+          await new Promise(resolve => setTimeout(resolve, minDelay - elapsed))
+        }
+
+        subscriptionChecked.value = true
+        
         return true
       } else if (result.error || result.warning) {
         const errorMsg = result.error || result.warning
         console.log('❌ No active subscription:', errorMsg)
         hasActiveSubscription.value = false
+
+        // Ensure minimum 1.5s delay for loader animation visibility
+        const elapsed = Date.now() - startTime
+        const minDelay = 1500
+        if (elapsed < minDelay) {
+          await new Promise(resolve => setTimeout(resolve, minDelay - elapsed))
+        }
+
         subscriptionChecked.value = true
+        
         return false
       } else {
         console.log('❌ No active subscription found')
         hasActiveSubscription.value = false
+
+        // Ensure minimum 1.5s delay for loader animation visibility
+        const elapsed = Date.now() - startTime
+        const minDelay = 1500
+        if (elapsed < minDelay) {
+          await new Promise(resolve => setTimeout(resolve, minDelay - elapsed))
+        }
+
         subscriptionChecked.value = true
+        
         return false
       }
     } catch (error) {
       console.error('Subscription check error:', error)
       hasActiveSubscription.value = false
+
+      // Ensure minimum 1.5s delay for loader animation visibility
+      const elapsed = Date.now() - startTime
+      const minDelay = 1500
+      if (elapsed < minDelay) {
+        await new Promise(resolve => setTimeout(resolve, minDelay - elapsed))
+      }
+
       subscriptionChecked.value = true
+      
       return false
     } finally {
       sharedState.loadingStorage.value = false
@@ -316,8 +363,8 @@ export function useFluxDrive() {
         'Web 3 Infrastructure',
         'Decentralized Storage',
         'Global Distribution',
-        'Unlimited Bandwidth'
-      ]
+        'Unlimited Bandwidth',
+      ],
     },
     {
       id: 'standard',
@@ -332,8 +379,8 @@ export function useFluxDrive() {
         'Web 3 Infrastructure',
         'Decentralized Storage',
         'Global Distribution',
-        'Unlimited Bandwidth'
-      ]
+        'Unlimited Bandwidth',
+      ],
     },
     {
       id: 'pro',
@@ -348,8 +395,8 @@ export function useFluxDrive() {
         'Web 3 Infrastructure',
         'Decentralized Storage',
         'Global Distribution',
-        'Unlimited Bandwidth'
-      ]
+        'Unlimited Bandwidth',
+      ],
     },
     {
       id: 'enterprise',
@@ -364,9 +411,9 @@ export function useFluxDrive() {
         'Web 3 Infrastructure',
         'Decentralized Storage',
         'Global Distribution',
-        'Unlimited Bandwidth'
-      ]
-    }
+        'Unlimited Bandwidth',
+      ],
+    },
   ])
 
   // File table headers
@@ -375,12 +422,13 @@ export function useFluxDrive() {
     { title: 'Name', key: 'name', sortable: true },
     { title: 'Updated', key: 'timestamp', sortable: true, width: 160 },
     { title: 'Size', key: 'size', sortable: true, width: 90 },
-    { title: '', key: 'actions', sortable: false, width: 40 }
+    { title: '', key: 'actions', sortable: false, width: 40 },
   ])
 
   // Computed
   const storagePercentage = computed(() => {
     if (totalStorage.value === 0) return 0
+    
     return Math.round((usedStorage.value / totalStorage.value) * 100)
   })
 
@@ -402,7 +450,7 @@ export function useFluxDrive() {
       message,
       type,
       timestamp,
-      persistent
+      persistent,
     }
 
     // Auto-clear non-persistent errors after 4 seconds
@@ -421,8 +469,9 @@ export function useFluxDrive() {
       message: '',
       type: 'error',
       timestamp: null,
-      persistent: false
+      persistent: false,
     }
+
     // Also clear the legacy resultMessage
     resultMessage.value = ''
     console.log('✅ All errors cleared')
@@ -433,20 +482,22 @@ export function useFluxDrive() {
   const errorType = computed(() => sharedState.errorState.value.type)
 
   // Utility function to get alert type from result message
-  const getAlertType = (message) => {
+  const getAlertType = message => {
     if (message.includes('alert-success')) return 'success'
     if (message.includes('alert-danger')) return 'error'
     if (message.includes('alert-warning')) return 'warning'
     if (message.includes('alert-info')) return 'info'
+    
     return 'info'
   }
 
   // API Methods
-  const selectPlan = async (planId) => {
+  const selectPlan = async planId => {
     // Handle Enterprise/Flux Drive Pro plan differently - contact us
     if (planId === 'enterprise') {
       const supportUrl = 'https://support.runonflux.io'
       window.open(supportUrl, '_blank', 'noopener,noreferrer')
+      
       return
     }
 
@@ -454,6 +505,7 @@ export function useFluxDrive() {
       // Store the plan selection for after login
       pendingPlanSelection.value = planId
       showLogin.value = true
+      
       return
     }
 
@@ -463,8 +515,8 @@ export function useFluxDrive() {
       path: '/fluxdrive-checkout',
       query: {
         plan: planId,
-        gateway: 'fluxpay'
-      }
+        gateway: 'fluxpay',
+      },
     })
   }
 
@@ -473,6 +525,7 @@ export function useFluxDrive() {
 
     if (!hasActiveSubscription.value) {
       console.log('❌ No active subscription')
+      
       return []
     }
 
@@ -486,7 +539,7 @@ export function useFluxDrive() {
       hasZelid: !!parsedAuth.zelid,
       hasSignature: !!parsedAuth.signature,
       hasLoginPhrase: !!parsedAuth.loginPhrase,
-      bridgeURL
+      bridgeURL,
     })
 
     let allFiles = []
@@ -502,7 +555,7 @@ export function useFluxDrive() {
           signature: parsedAuth.signature || '',
           loginPhrase: parsedAuth.loginPhrase || '',
           page: '1',
-          size: '100'
+          size: '100',
         }
 
         // Use appropriate folder parameter
@@ -520,7 +573,7 @@ export function useFluxDrive() {
         const response = await fetch(`${bridgeURL}/api/v1/ipfs/read`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-          body: new URLSearchParams(requestParams)
+          body: new URLSearchParams(requestParams),
         })
 
         const result = await response.json()
@@ -583,14 +636,14 @@ export function useFluxDrive() {
           signature: parsedAuth.signature || '',
           loginPhrase: parsedAuth.loginPhrase || '',
           page: '1',
-          size: '1000'  // Large size to get all files
+          size: '1000',  // Large size to get all files
           // No currentFolder parameter - might return all files
         }
 
         const response = await fetch(`${bridgeURL}/api/v1/ipfs/read`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-          body: new URLSearchParams(requestParams)
+          body: new URLSearchParams(requestParams),
         })
 
         const result = await response.json()
@@ -614,8 +667,8 @@ export function useFluxDrive() {
           body: new URLSearchParams({
             zelid: parsedAuth.zelid || getZelid(),
             signature: parsedAuth.signature || '',
-            loginPhrase: parsedAuth.loginPhrase || ''
-          })
+            loginPhrase: parsedAuth.loginPhrase || '',
+          }),
         })
 
         const result = await response.json()
@@ -639,8 +692,8 @@ export function useFluxDrive() {
                   currentFolder: folder.uuid || folder.name,
                   page: '1',
                   size: '1000',
-                  includeFolders: true
-                })
+                  includeFolders: true,
+                }),
               })
 
               const folderResult = await folderResponse.json()
@@ -680,8 +733,8 @@ export function useFluxDrive() {
               zelid: parsedAuth.zelid || getZelid(),
               signature: parsedAuth.signature || '',
               loginPhrase: parsedAuth.loginPhrase || '',
-              q: term
-            })
+              q: term,
+            }),
           })
 
           const result = await response.json()
@@ -722,7 +775,7 @@ export function useFluxDrive() {
         signature: parsedAuth.signature || '',
         loginPhrase: parsedAuth.loginPhrase || '',
         gateway: gateway,
-        plan_name: planName
+        plan_name: planName,
       }
 
       console.log('🔄 Renewing subscription:', requestBody)
@@ -730,7 +783,7 @@ export function useFluxDrive() {
       const response = await fetch(`${bridgeURL}/api/v1/subscriptions.php`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: new URLSearchParams(requestBody)
+        body: new URLSearchParams(requestBody),
       })
 
       const result = await response.json()
@@ -775,7 +828,7 @@ export function useFluxDrive() {
         signature: parsedAuth.signature || '',
         loginPhrase: parsedAuth.loginPhrase || '',
         gateway: gateway,
-        plan_name: planName
+        plan_name: planName,
       }
 
       console.log('🔄 Upgrading subscription:', requestBody)
@@ -783,7 +836,7 @@ export function useFluxDrive() {
       const response = await fetch(`${bridgeURL}/api/v1/subscriptions.php`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: new URLSearchParams(requestBody)
+        body: new URLSearchParams(requestBody),
       })
 
       const result = await response.json()
@@ -825,6 +878,7 @@ export function useFluxDrive() {
     // Prevent duplicate calls if files are already being loaded
     if (sharedState.loadingFiles.value) {
       console.log('⏭️ Files already being loaded, skipping duplicate call')
+      
       return
     }
 
@@ -850,25 +904,26 @@ export function useFluxDrive() {
         // Process all found files
         const processedFiles = allFoundFiles.map(item => {
           console.log('🔧 Processing file:', item)
+          
           return {
-          id: item.hash || item.uuid || Date.now(),
-          name: item.name || 'Orphaned File',
-          name_abbr: item.name_abbr || item.name,
-          size: item.size || 0,
-          hash: item.hash || '',
-          hash_abbr: item.hash_abbr || (item.hash ? (item.hash.substring(0, 8) + '...') : ''),
-          added_date: item.timestamp ? new Date(item.timestamp).toLocaleString() : new Date().toLocaleString(),
-          timestamp: item.timestamp || 0,
-          mimetype: item.mimetype || '',
-          type: item.type || 'file',
-          icon: getFileIcon(item.type || 'file'),
-          thumbnail: item.thumbnail,
-          width: item.width || 0,
-          deleting: false,
-          isFolder: item.type === 'folder',
-          owner: item.owner,
-          parent: 'ORPHANED'
-        }
+            id: item.hash || item.uuid || Date.now(),
+            name: item.name || 'Orphaned File',
+            name_abbr: item.name_abbr || item.name,
+            size: item.size || 0,
+            hash: item.hash || '',
+            hash_abbr: item.hash_abbr || (item.hash ? (item.hash.substring(0, 8) + '...') : ''),
+            added_date: item.timestamp ? new Date(item.timestamp).toLocaleString() : new Date().toLocaleString(),
+            timestamp: item.timestamp || 0,
+            mimetype: item.mimetype || '',
+            type: item.type || 'file',
+            icon: getFileIcon(item.type || 'file'),
+            thumbnail: item.thumbnail,
+            width: item.width || 0,
+            deleting: false,
+            isFolder: item.type === 'folder',
+            owner: item.owner,
+            parent: 'ORPHANED',
+          }
         })
 
 
@@ -881,6 +936,7 @@ export function useFluxDrive() {
         loading.value = false
         console.log('✅ Recovery mode completed with', processedFiles.length, 'files')
         console.log('🔧 Final files.value:', files.value)
+        
         return
       }
     }
@@ -899,6 +955,7 @@ export function useFluxDrive() {
       checkRateLimit()
 
       const zelidauth = localStorage.getItem('zelidauth')
+
       // Get proper authentication
       const authData = zelidauth ?
         (zelidauth.includes('zelid=') ?
@@ -920,7 +977,7 @@ export function useFluxDrive() {
         folderParam: folderParam,
         page: currentPage.value,
         size: filesPerPage.value,
-        url: `${bridgeURL}/api/v1/ipfs/read`
+        url: `${bridgeURL}/api/v1/ipfs/read`,
       })
 
       const requestParams = {
@@ -930,7 +987,7 @@ export function useFluxDrive() {
         page: '1',  // Always fetch from page 1 since we handle pagination on frontend
         size: '100',  // Increase size to see more files
         includeVersions: true,  // Request versions data
-        includeFolders: true    // FluxCloud compatibility
+        includeFolders: true,    // FluxCloud compatibility
       }
 
       // Only add folder filter if not in recovery mode
@@ -939,6 +996,7 @@ export function useFluxDrive() {
         requestParams.includeFolders = true
       } else {
         console.log('🔧 RECOVERY MODE: Attempting to show ALL files using different approaches')
+
         // Try different approaches to get all files
         requestParams.showAllFiles = 'true'
         requestParams.includeOrphaned = 'true'
@@ -957,7 +1015,7 @@ export function useFluxDrive() {
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
         },
-        body: requestBody
+        body: requestBody,
       })
 
       const result = await response.json()
@@ -967,12 +1025,15 @@ export function useFluxDrive() {
       if (result.error) {
         if (result.error.indexOf("No active subscription.") > -1) {
           resultMessage.value = `<div class="alert alert-danger">${result.error}</div>`
+          
           return
         } else if (result.error.indexOf("Session expired") > -1) {
           resultMessage.value = `<div class="alert alert-danger">${result.error}</div>`
+          
           return
         } else {
           resultMessage.value = `<div class="alert alert-danger">${result.error}</div>`
+          
           return
         }
       }
@@ -995,11 +1056,12 @@ export function useFluxDrive() {
           // Only check for filtering issues if we're using path-based approach (fallback)
           if (sharedState.currentFolderUuid.value) {
             console.log('✅ Using UUID-based loading - API filtering should work correctly')
+
             // Trust the API response when using UUID
           } else {
             // Only do filtering check for path-based fallback
             const hasProperFolderSupport = result.files.some(file =>
-              file.folder === folderParam || file.path?.includes(currentFolder.value)
+              file.folder === folderParam || file.path?.includes(currentFolder.value),
             )
 
             if (!hasProperFolderSupport) {
@@ -1042,7 +1104,7 @@ export function useFluxDrive() {
               type: file.type || 'file',
               icon: file.icon,
               thumbnail: file.thumbnail,
-              mimetype: file.mimetype || ''
+              mimetype: file.mimetype || '',
             }))
 
             groupedFiles.push(mainFile)
@@ -1077,7 +1139,7 @@ export function useFluxDrive() {
               isFolder: true,
               uuid: item.uuid,
               owner: item.owner,
-              parent: currentFolder.value // Always use current folder as parent
+              parent: currentFolder.value, // Always use current folder as parent
             }
           }
 
@@ -1101,8 +1163,9 @@ export function useFluxDrive() {
             isFolder: false,
             owner: item.owner,
             parent: item.parent || currentFolder.value,
+
             // Add versions support
-            versions: item.versions || []
+            versions: item.versions || [],
           }
         })
 
@@ -1125,7 +1188,7 @@ export function useFluxDrive() {
             deleting: false,
             isFolder: true,
             isGoBack: true,
-            parent: currentFolder.value
+            parent: currentFolder.value,
           }
           parsedFiles.unshift(goBackEntry)
         }
@@ -1157,7 +1220,7 @@ export function useFluxDrive() {
           hasFiles: 'files' in result,
           filesType: typeof result.files,
           isArray: Array.isArray(result.files),
-          fullResponse: result
+          fullResponse: result,
         })
         files.value = []
 
@@ -1197,6 +1260,7 @@ export function useFluxDrive() {
   const searchFile = async () => {
     if (!searchQuery.value?.trim()) {
       resultMessage.value = `<div class="alert alert-warning">Please enter a search term</div>`
+      
       return
     }
 
@@ -1208,6 +1272,7 @@ export function useFluxDrive() {
       checkRateLimit()
 
       const zelidauth = localStorage.getItem('zelidauth')
+
       // Get proper authentication
       const authData = zelidauth ?
         (zelidauth.includes('zelid=') ?
@@ -1223,8 +1288,8 @@ export function useFluxDrive() {
           zelid: authData.zelid || getZelid(),
           signature: authData.signature || '',
           loginPhrase: authData.loginPhrase || '',
-          q: searchQuery.value
-        })
+          q: searchQuery.value,
+        }),
       })
 
       const result = await response.json()
@@ -1254,8 +1319,9 @@ export function useFluxDrive() {
             thumbnail: file.thumbnail,
             width: 0,
             deleting: false,
+
             // Add versions support to search results
-            versions: file.versions || []
+            versions: file.versions || [],
           }
         }).filter(f => f !== null)
 
@@ -1277,7 +1343,7 @@ export function useFluxDrive() {
     }
   }
 
-  const handleDrop = async (e) => {
+  const handleDrop = async e => {
     isDragOver.value = false
     const files = Array.from(e.dataTransfer.files)
     console.log(`📤 Dropped ${files.length} file(s) for upload`)
@@ -1291,7 +1357,7 @@ export function useFluxDrive() {
     }
   }
 
-  const handleFileSelect = async (e) => {
+  const handleFileSelect = async e => {
     const files = Array.from(e.target.files)
     console.log(`📤 Selected ${files.length} file(s) for upload`)
 
@@ -1307,16 +1373,17 @@ export function useFluxDrive() {
     e.target.value = ''
   }
 
-  const handleFolderSelect = async (e) => {
+  const handleFolderSelect = async e => {
     e.preventDefault()
     e.stopPropagation()
     console.log('🚀 handleFolderSelect STARTED - no alerts should appear yet')
 
     // Override alert temporarily to track where it comes from
     const originalAlert = window.alert
-    window.alert = (message) => {
+    window.alert = message => {
       console.error('🚨 ALERT BLOCKED:', message)
       console.trace('Alert called from:')
+
       // Don't show the alert, just log it
     }
 
@@ -1326,6 +1393,7 @@ export function useFluxDrive() {
 
     if (files.length === 0) {
       showSnackbar('No files found in the selected folder', 'warning')
+      
       return
     }
 
@@ -1352,114 +1420,114 @@ export function useFluxDrive() {
 
       // Process each folder
       for (const [folderName, folderFiles] of Object.entries(folderStructure)) {
-      console.log(`📂 Processing folder: ${folderName} with ${folderFiles.length} files`)
+        console.log(`📂 Processing folder: ${folderName} with ${folderFiles.length} files`)
 
-      try {
+        try {
         // Check if folder already exists like FluxCloud does (line 26-32)
-        const folderExists = files.value?.some(f => f.isFolder && f.name === folderName) || false
-        if (folderExists) {
-          showSnackbar(`A folder named '${folderName}' already exists`, 'error')
-          continue
-        }
-
-        // Create main folder exactly like FluxCloud (lines 33-36)
-        console.log(`📁 Creating main folder: ${folderName}`)
-        const mainFolder = await createFluxCloudFolder(currentFolder.value === '/' ? '/' : currentFolder.value, folderName)
-        console.log('📁 Created main folder:', mainFolder)
-
-        // Analyze files to build subfolder structure like FluxCloud does
-        const subFolders = new Map()
-        const folderMap = new Map()
-
-        // Pass 1: Create subfolder hierarchy like FluxCloud
-        for (let i = 0; i < folderFiles.length; i++) {
-          const file = folderFiles[i]
-          const pathParts = file.webkitRelativePath.split('/')
-          pathParts.shift() // Remove root folder name
-          const fileName = pathParts.pop() // Remove file name
-
-          if (pathParts.length > 0) {
-            // File is in a subfolder - create the subfolder hierarchy
-            let parentUuid = mainFolder.uuid || mainFolder.id
-            let currentPath = ''
-
-            for (const pathSegment of pathParts) {
-              if (currentPath) currentPath += '/'
-              currentPath += pathSegment
-
-              if (!subFolders.has(currentPath)) {
-                console.log(`📁 Creating subfolder: ${pathSegment}`)
-                resultMessage.value = `<div class="alert alert-info">Creating folder '${pathSegment}'...</div>`
-
-                // Create subfolder using FluxCloud approach (lines 89-93)
-                const subFolder = await createFluxCloudFolder(parentUuid, pathSegment)
-                subFolders.set(currentPath, subFolder)
-                parentUuid = subFolder.uuid || subFolder.id
-              } else {
-                parentUuid = subFolders.get(currentPath).uuid || subFolders.get(currentPath).id
-              }
-            }
-            folderMap.set(file, subFolders.get(currentPath))
-          } else {
-            // File goes directly in main folder
-            folderMap.set(file, mainFolder)
-          }
-        }
-
-        // Pass 2: Upload all files to their respective folders like FluxCloud
-        for (let i = 0; i < folderFiles.length; i++) {
-          const file = folderFiles[i]
-          if (file.size > 100000000) {
-            showSnackbar(`File "${file.name}" too large! Upload limit is 100MB`, 'error')
+          const folderExists = files.value?.some(f => f.isFolder && f.name === folderName) || false
+          if (folderExists) {
+            showSnackbar(`A folder named '${folderName}' already exists`, 'error')
             continue
           }
 
-          const targetFolder = folderMap.get(file) || mainFolder
-          console.log(`📤 Uploading file ${i + 1}/${folderFiles.length} to folder UUID: ${targetFolder.uuid || targetFolder.id}`)
-          resultMessage.value = `<div class="alert alert-info">Uploading "${file.name}" (${i + 1}/${folderFiles.length})...</div>`
+          // Create main folder exactly like FluxCloud (lines 33-36)
+          console.log(`📁 Creating main folder: ${folderName}`)
+          const mainFolder = await createFluxCloudFolder(currentFolder.value === '/' ? '/' : currentFolder.value, folderName)
+          console.log('📁 Created main folder:', mainFolder)
 
-          // Reset progress for this file
-          uploadProgress.value = 0
+          // Analyze files to build subfolder structure like FluxCloud does
+          const subFolders = new Map()
+          const folderMap = new Map()
 
-          // Extract just the filename (not the full path) like FluxCloud does
-          const pathParts = file.webkitRelativePath.split('/')
-          const justFileName = pathParts[pathParts.length - 1] // Get the last part (actual filename)
+          // Pass 1: Create subfolder hierarchy like FluxCloud
+          for (let i = 0; i < folderFiles.length; i++) {
+            const file = folderFiles[i]
+            const pathParts = file.webkitRelativePath.split('/')
+            pathParts.shift() // Remove root folder name
+            const fileName = pathParts.pop() // Remove file name
 
-          // Debug file info
-          console.log(`📋 File ${i + 1} details:`)
-          console.log(`   - Original path: ${file.webkitRelativePath}`)
-          console.log(`   - Clean filename: ${justFileName}`)
-          console.log(`   - File size: ${file.size} bytes`)
-          console.log(`   - File type: ${file.type}`)
-          console.log(`   - Target folder UUID: ${targetFolder.uuid || targetFolder.id}`)
+            if (pathParts.length > 0) {
+            // File is in a subfolder - create the subfolder hierarchy
+              let parentUuid = mainFolder.uuid || mainFolder.id
+              let currentPath = ''
 
-          // Use FluxCloud's exact approach: pass folder UUID and clean filename
-          try {
-            const uploadResult = await uploadFileToFluxCloudFolder(targetFolder.uuid || targetFolder.id, justFileName, file)
-            console.log(`✅ Upload complete for: ${justFileName}`)
-            console.log(`📄 Full server response for "${justFileName}":`, JSON.stringify(uploadResult, null, 2))
+              for (const pathSegment of pathParts) {
+                if (currentPath) currentPath += '/'
+                currentPath += pathSegment
 
-            // Check if we got a unique identifier back
-            if (uploadResult.hash) {
-              console.log(`🔗 File hash: ${uploadResult.hash}`)
+                if (!subFolders.has(currentPath)) {
+                  console.log(`📁 Creating subfolder: ${pathSegment}`)
+                  resultMessage.value = `<div class="alert alert-info">Creating folder '${pathSegment}'...</div>`
+
+                  // Create subfolder using FluxCloud approach (lines 89-93)
+                  const subFolder = await createFluxCloudFolder(parentUuid, pathSegment)
+                  subFolders.set(currentPath, subFolder)
+                  parentUuid = subFolder.uuid || subFolder.id
+                } else {
+                  parentUuid = subFolders.get(currentPath).uuid || subFolders.get(currentPath).id
+                }
+              }
+              folderMap.set(file, subFolders.get(currentPath))
+            } else {
+            // File goes directly in main folder
+              folderMap.set(file, mainFolder)
             }
-            if (uploadResult.id || uploadResult.uuid) {
-              console.log(`🆔 File ID/UUID: ${uploadResult.id || uploadResult.uuid}`)
-            }
-
-            // Check if there are any indicators of file collision/overwriting
-            if (uploadResult.message) {
-              console.log(`📝 Server message: ${uploadResult.message}`)
-            }
-          } catch (uploadError) {
-            console.error(`❌ Upload failed for: ${justFileName}`, uploadError)
           }
-        }
 
-        resultMessage.value = `<div class="alert alert-success">Folder "${folderName}" uploaded successfully with ${folderFiles.length} files</div>`
-      } catch (error) {
-        console.error(`❌ Error uploading folder ${folderName}:`, error)
-        showSnackbar(`Failed to upload folder "${folderName}": ${error.message}`, 'error')
+          // Pass 2: Upload all files to their respective folders like FluxCloud
+          for (let i = 0; i < folderFiles.length; i++) {
+            const file = folderFiles[i]
+            if (file.size > 100000000) {
+              showSnackbar(`File "${file.name}" too large! Upload limit is 100MB`, 'error')
+              continue
+            }
+
+            const targetFolder = folderMap.get(file) || mainFolder
+            console.log(`📤 Uploading file ${i + 1}/${folderFiles.length} to folder UUID: ${targetFolder.uuid || targetFolder.id}`)
+            resultMessage.value = `<div class="alert alert-info">Uploading "${file.name}" (${i + 1}/${folderFiles.length})...</div>`
+
+            // Reset progress for this file
+            uploadProgress.value = 0
+
+            // Extract just the filename (not the full path) like FluxCloud does
+            const pathParts = file.webkitRelativePath.split('/')
+            const justFileName = pathParts[pathParts.length - 1] // Get the last part (actual filename)
+
+            // Debug file info
+            console.log(`📋 File ${i + 1} details:`)
+            console.log(`   - Original path: ${file.webkitRelativePath}`)
+            console.log(`   - Clean filename: ${justFileName}`)
+            console.log(`   - File size: ${file.size} bytes`)
+            console.log(`   - File type: ${file.type}`)
+            console.log(`   - Target folder UUID: ${targetFolder.uuid || targetFolder.id}`)
+
+            // Use FluxCloud's exact approach: pass folder UUID and clean filename
+            try {
+              const uploadResult = await uploadFileToFluxCloudFolder(targetFolder.uuid || targetFolder.id, justFileName, file)
+              console.log(`✅ Upload complete for: ${justFileName}`)
+              console.log(`📄 Full server response for "${justFileName}":`, JSON.stringify(uploadResult, null, 2))
+
+              // Check if we got a unique identifier back
+              if (uploadResult.hash) {
+                console.log(`🔗 File hash: ${uploadResult.hash}`)
+              }
+              if (uploadResult.id || uploadResult.uuid) {
+                console.log(`🆔 File ID/UUID: ${uploadResult.id || uploadResult.uuid}`)
+              }
+
+              // Check if there are any indicators of file collision/overwriting
+              if (uploadResult.message) {
+                console.log(`📝 Server message: ${uploadResult.message}`)
+              }
+            } catch (uploadError) {
+              console.error(`❌ Upload failed for: ${justFileName}`, uploadError)
+            }
+          }
+
+          resultMessage.value = `<div class="alert alert-success">Folder "${folderName}" uploaded successfully with ${folderFiles.length} files</div>`
+        } catch (error) {
+          console.error(`❌ Error uploading folder ${folderName}:`, error)
+          showSnackbar(`Failed to upload folder "${folderName}": ${error.message}`, 'error')
         }
       }
 
@@ -1506,8 +1574,8 @@ export function useFluxDrive() {
           'signature': authData.signature,
           'loginPhrase': authData.loginPhrase,
           'currentFolder': currentFolder.isEmpty || currentFolder === '' ? '/' : currentFolder,
-          'name': name
-        })
+          'name': name,
+        }),
       })
 
       const result = await response.json()
@@ -1538,13 +1606,13 @@ export function useFluxDrive() {
         signature: authData.signature,
         loginPhrase: authData.loginPhrase,
         name: folderName,
-        currentFolder: parentUuid // Use parent UUID directly like FluxCloud
+        currentFolder: parentUuid, // Use parent UUID directly like FluxCloud
       }
 
       const response = await fetch(`${bridgeURL}/api/v1/ipfs/createfolder`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: new URLSearchParams(apiParams)
+        body: new URLSearchParams(apiParams),
       })
 
       const result = await response.json()
@@ -1581,7 +1649,7 @@ export function useFluxDrive() {
       const uploadPromise = new Promise((resolve, reject) => {
         const xhr = new XMLHttpRequest()
 
-        xhr.upload.onprogress = (e) => {
+        xhr.upload.onprogress = e => {
           if (e.lengthComputable) {
             uploadProgress.value = Math.round((e.loaded / e.total) * 100)
           }
@@ -1631,7 +1699,7 @@ export function useFluxDrive() {
       const uploadPromise = new Promise((resolve, reject) => {
         const xhr = new XMLHttpRequest()
 
-        xhr.upload.onprogress = (e) => {
+        xhr.upload.onprogress = e => {
           if (e.lengthComputable) {
             uploadProgress.value = Math.round((e.loaded / e.total) * 100)
           }
@@ -1663,7 +1731,7 @@ export function useFluxDrive() {
   }
 
   // Helper function to upload without managing global upload state
-  const uploadDataWithoutStateManagement = async (file) => {
+  const uploadDataWithoutStateManagement = async file => {
     try {
       // Get authentication details
       const zelidauth = localStorage.getItem('zelidauth')
@@ -1698,7 +1766,7 @@ export function useFluxDrive() {
       const uploadPromise = new Promise((resolve, reject) => {
         const xhr = new XMLHttpRequest()
 
-        xhr.upload.onprogress = (e) => {
+        xhr.upload.onprogress = e => {
           if (e.lengthComputable) {
             uploadProgress.value = Math.round((e.loaded / e.total) * 100)
           }
@@ -1768,7 +1836,7 @@ export function useFluxDrive() {
       const uploadPromise = new Promise((resolve, reject) => {
         const xhr = new XMLHttpRequest()
 
-        xhr.upload.onprogress = (e) => {
+        xhr.upload.onprogress = e => {
           if (e.lengthComputable) {
             uploadProgress.value = Math.round((e.loaded / e.total) * 100)
           }
@@ -1845,14 +1913,14 @@ export function useFluxDrive() {
         folder: folderPath || 'root',
         currentFolder: currentFolder.value,
         currentFolderUuid: sharedState.currentFolderUuid.value,
-        zelid: authData.zelid
+        zelid: authData.zelid,
       })
 
       // Upload file using XMLHttpRequest for progress tracking
       const uploadPromise = new Promise((resolve, reject) => {
         const xhr = new XMLHttpRequest()
 
-        xhr.upload.onprogress = (e) => {
+        xhr.upload.onprogress = e => {
           if (e.lengthComputable) {
             uploadProgress.value = Math.round((e.loaded / e.total) * 100)
           }
@@ -1895,7 +1963,7 @@ export function useFluxDrive() {
           type: result.type || 'file',
           thumbnail: result.thumbnail || null,
           width: 0,
-          deleting: false
+          deleting: false,
         }
 
         // Add to files list if on first page
@@ -1943,13 +2011,13 @@ export function useFluxDrive() {
     }
   }
 
-  const copyLink = (file) => {
+  const copyLink = file => {
     const link = `${ipfsHost}/ipfs/${file.hash}`
     navigator.clipboard.writeText(link)
     showSnackbar('Link copied to clipboard', 'success')
   }
 
-  const previewFile = (file) => {
+  const previewFile = file => {
     previewingFile.value = file
     showFileModal.value = true
   }
@@ -1959,7 +2027,7 @@ export function useFluxDrive() {
     previewingFile.value = null
   }
 
-  const openFolder = async (folder) => {
+  const openFolder = async folder => {
     console.log('Opening folder:', folder)
     if (folder.isFolder) {
       let newPath
@@ -1971,6 +2039,7 @@ export function useFluxDrive() {
         if (sharedState.folderHierarchy.value.length > 1) {
           // Remove current folder from hierarchy
           sharedState.folderHierarchy.value.pop()
+
           // Get parent folder info
           const parentFolder = sharedState.folderHierarchy.value[sharedState.folderHierarchy.value.length - 1]
           newPath = parentFolder.path
@@ -1993,7 +2062,7 @@ export function useFluxDrive() {
         sharedState.folderHierarchy.value.push({
           path: newPath,
           uuid: newFolderUuid,
-          name: folder.name
+          name: folder.name,
         })
       }
 
@@ -2016,12 +2085,13 @@ export function useFluxDrive() {
       // If no files returned for subfolder, show empty state
       if (files.value.length === 0 && newPath !== '/') {
         console.log('📁 No files in folder:', newPath)
+
         // Folder is empty, which is expected for new folders
       }
     }
   }
 
-  const updateBreadcrumbs = (path) => {
+  const updateBreadcrumbs = path => {
     if (path === '/') {
       sharedState.breadcrumbs.value = [{ title: 'Home', path: '/', disabled: false }]
     } else {
@@ -2034,7 +2104,7 @@ export function useFluxDrive() {
         crumbs.push({
           title: part,
           path: currentPath,
-          disabled: false
+          disabled: false,
         })
       })
 
@@ -2042,7 +2112,7 @@ export function useFluxDrive() {
     }
   }
 
-  const navigateToFolder = async (breadcrumb) => {
+  const navigateToFolder = async breadcrumb => {
     console.log('📁 Navigating to breadcrumb:', breadcrumb)
     currentFolder.value = breadcrumb.path
 
@@ -2104,7 +2174,7 @@ export function useFluxDrive() {
 
       // Find the current folder in our file list to get its full data
       const parentFolderData = sharedState.files.value.find(f =>
-        f.isFolder && f.name === currentFolder.value.split('/').pop()
+        f.isFolder && f.name === currentFolder.value.split('/').pop(),
       )
 
       console.log('🔍 Create folder debug:', {
@@ -2119,13 +2189,14 @@ export function useFluxDrive() {
           uuid: f.uuid,
           hash: f.hash,
           id: f.id,
-          type: f.type
+          type: f.type,
         })),
-        authData: { ...authData, signature: '[HIDDEN]', loginPhrase: '[HIDDEN]' }
+        authData: { ...authData, signature: '[HIDDEN]', loginPhrase: '[HIDDEN]' },
       })
 
       if (!authData.zelid || !authData.loginPhrase || !authData.signature) {
         showSnackbar('Authentication required. Please log in again.', 'error')
+        
         return
       }
 
@@ -2134,7 +2205,7 @@ export function useFluxDrive() {
         withSlash: currentFolder.value,
         withoutSlash: currentFolder.value === '/' ? '' : currentFolder.value.replace(/^\//, ''),
         withoutLeadingSlash: currentFolder.value === '/' ? '/' : currentFolder.value.replace(/^\//, ''),
-        empty: currentFolder.value === '/' ? '' : currentFolder.value
+        empty: currentFolder.value === '/' ? '' : currentFolder.value,
       }
 
       console.log('🚀 Creating folder - trying different path formats:', folderPathOptions)
@@ -2144,7 +2215,7 @@ export function useFluxDrive() {
         zelid: authData.zelid,
         signature: authData.signature,
         loginPhrase: authData.loginPhrase,
-        name: folderName
+        name: folderName,
       }
 
       if (currentFolder.value === '/') {
@@ -2166,7 +2237,7 @@ export function useFluxDrive() {
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
         },
-        body: new URLSearchParams(apiParams)
+        body: new URLSearchParams(apiParams),
       })
 
       console.log('📡 Create folder API call params:', apiParams)
@@ -2181,6 +2252,7 @@ export function useFluxDrive() {
       } catch (e) {
         console.error('❌ Failed to parse JSON response:', e)
         showSnackbar('Invalid response from server', 'error')
+        
         return
       }
 
@@ -2208,7 +2280,7 @@ export function useFluxDrive() {
           zelid: authData.zelid,
           signature: authData.signature,
           loginPhrase: authData.loginPhrase,
-          name: folderName
+          name: folderName,
         }
 
         if (currentFolder.value === '/') {
@@ -2231,7 +2303,7 @@ export function useFluxDrive() {
           headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
           },
-          body: new URLSearchParams(alternativeParams)
+          body: new URLSearchParams(alternativeParams),
         })
 
         const altResult = await altResponse.json()
@@ -2257,7 +2329,7 @@ export function useFluxDrive() {
             signature: authData.signature,
             loginPhrase: authData.loginPhrase,
             name: folderName,
-            currentFolder: folderPathOptions.withSlash  // Try with slash this time
+            currentFolder: folderPathOptions.withSlash,  // Try with slash this time
           }
 
           console.log('🔄 Third attempt params:', thirdParams)
@@ -2268,7 +2340,7 @@ export function useFluxDrive() {
               headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',
               },
-              body: new URLSearchParams(thirdParams)
+              body: new URLSearchParams(thirdParams),
             })
 
             const thirdResult = await thirdResponse.json()
@@ -2307,6 +2379,7 @@ export function useFluxDrive() {
 
   const deleteFile = async (file, skipConfirm = false) => {
     const itemType = file.isFolder ? 'folder' : 'file'
+
     // Skip confirmation is used for programmatic calls or when confirmation is handled elsewhere
     if (!skipConfirm && !confirm(`Are you sure you want to delete this ${itemType}: ${file.name}?`)) return
 
@@ -2336,7 +2409,7 @@ export function useFluxDrive() {
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
         },
-        body: new URLSearchParams(params)
+        body: new URLSearchParams(params),
       })
 
       const result = await response.json()
@@ -2369,7 +2442,7 @@ export function useFluxDrive() {
   }
 
   // Utility functions
-  const getFileIcon = (type) => {
+  const getFileIcon = type => {
     const icons = {
       pdf: 'mdi-file-pdf-box',
       png: 'mdi-file-image',
@@ -2389,27 +2462,30 @@ export function useFluxDrive() {
       mp3: 'mdi-music',
       txt: 'mdi-file-document-outline',
     }
+    
     return icons[type?.toLowerCase()] || 'mdi-file'
   }
 
-  const isImageFile = (mimetype) => {
+  const isImageFile = mimetype => {
     return ['image/jpeg', 'image/jpg', 'image/bmp', 'image/png', 'image/webp', 'image/gif'].includes(mimetype)
   }
 
-  const convertSize = (size) => {
+  const convertSize = size => {
     const sizes = ["Bytes", "KB", "MB", "GB", "TB"]
     if (size == 0) return "0"
     const i = parseInt(Math.floor(Math.log(size) / Math.log(1024)))
+    
     return (size / Math.pow(1024, i)).toFixed(1) + " " + sizes[i]
   }
 
-  const bytesConversion = (bytes) => {
+  const bytesConversion = bytes => {
     if (bytes <= 0) return "0"
     if (bytes <= 99999999) return (bytes / (1024 ** 2)).toFixed(1) + " MB"
+    
     return (bytes / (1024 ** 3)).toFixed(1) + " GB"
   }
 
-  const formatDate = (date) => {
+  const formatDate = date => {
     if (!date || date === null || date === undefined || date === 0 || isNaN(date)) {
       return '-'
     }
@@ -2419,9 +2495,11 @@ export function useFluxDrive() {
       if (isNaN(dateObj.getTime())) {
         return '-'
       }
+      
       return dateObj.toLocaleString()
     } catch (error) {
       console.warn('Error formatting date:', date, error)
+      
       return '-'
     }
   }
@@ -2479,6 +2557,7 @@ export function useFluxDrive() {
     } else {
       console.log('📋 User sees pricing plans')
     }
+
     // Otherwise, user sees pricing plans to select from
   }
 
@@ -2565,6 +2644,6 @@ export function useFluxDrive() {
 
     // Config
     ipfsHost,
-    bridgeURL
+    bridgeURL,
   }
 }

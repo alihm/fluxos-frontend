@@ -17,7 +17,10 @@
       "globalApps": "Global Apps",
       "localApps": "Local Apps",
       "registerNewApp": "Register New App",
-      "marketplace": "Marketplace"
+      "marketplace": "Marketplace",
+      "marketplaceApps": "Applications",
+      "marketplaceGames": "Games",
+      "marketplaceWordPress": "WordPress"
     },
     "administration": {
       "title": "Administration",

@@ -53,6 +53,7 @@ watch(
     // Disable transitions during theme change to prevent wave effect
     disableTransitions()
     updateLogoByTheme()
+
     // Re-enable transitions after theme change is complete
     enableTransitions()
   },
@@ -108,5 +109,29 @@ html:not(.theme-transitioning) *::after {
 html:not(.theme-transitioning) .v-progress-circular,
 html:not(.theme-transitioning) .v-progress-linear {
   transition: opacity 0.2s ease !important;
+}
+
+/* Modern scrollbar for TOS dialog */
+.tos-scroll-area::-webkit-scrollbar {
+  width: 12px !important;
+}
+
+.tos-scroll-area::-webkit-scrollbar-track {
+  background: rgba(128, 128, 128, 0.3) !important;
+  border-radius: 6px !important;
+}
+
+.tos-scroll-area::-webkit-scrollbar-thumb {
+  background: rgba(128, 128, 128, 0.7) !important;
+  border-radius: 6px !important;
+}
+
+.tos-scroll-area::-webkit-scrollbar-thumb:hover {
+  background: rgba(128, 128, 128, 0.9) !important;
+}
+
+.tos-scroll-area {
+  scrollbar-width: thin !important;
+  scrollbar-color: rgba(128, 128, 128, 0.7) rgba(128, 128, 128, 0.3) !important;
 }
 </style>

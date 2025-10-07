@@ -1292,7 +1292,7 @@ async function saveContent() {
   }
 
   const fileToUpload = {
-    // eslint-disable-next-line camelcase
+     
     file_name: currentEditFile.value,
     content: currentValue,
   }

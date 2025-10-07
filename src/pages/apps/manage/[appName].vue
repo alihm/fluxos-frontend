@@ -1006,7 +1006,7 @@ const tabs = computed(() => [
     value: "8",
   },
   { label: "Instances", value: "9" },
-   isOwnerZelidauth.value && { label: "Subscription", value: "10" },
+  isOwnerZelidauth.value && { label: "Subscription", value: "10" },
 ].filter(Boolean)) // removes `false` if condition fails
 
 const callResponse = ref({ status: null, data: null })
@@ -1583,6 +1583,7 @@ async function getDecryptedEnterpriseFields(options = {}) {
   if (!isWebCryptoAvailable()) {
     console.warn('WebCrypto not available, cannot decrypt enterprise app')
     showToast('warning', 'Enterprise features require HTTPS or localhost. Please access this application using a secure connection.')
+    
     return null
   }
 

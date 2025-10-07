@@ -304,7 +304,6 @@
       </VCardText>
     </VCard>
   </VDialog>
-
 </template>
 
 <script setup>
@@ -315,12 +314,12 @@ import { useSnackbar } from '@/composables/useSnackbar'
 const props = defineProps({
   modelValue: {
     type: Boolean,
-    default: false
+    default: false,
   },
   file: {
     type: Object,
-    default: () => ({})
-  }
+    default: () => ({}),
+  },
 })
 
 const emit = defineEmits(['update:modelValue', 'show-message', 'preview-file'])
@@ -329,14 +328,14 @@ const emit = defineEmits(['update:modelValue', 'show-message', 'preview-file'])
 const {
   bytesConversion,
   copyLink,
-  previewFile
+  previewFile,
 } = useFluxDrive()
 
 const { showSnackbar } = useSnackbar()
 
 // Helper to show messages via parent FileManager's toast system
 const showMessage = (message, type = 'success') => {
-  emit('show-message', { message, type })
+  emit('showMessage', { message, type })
 }
 
 // Get bridgeURL and ipfsHost from localStorage or defaults
@@ -353,24 +352,26 @@ const downloadingFileSize = ref(0)
 // Computed
 const dialog = computed({
   get: () => props.modelValue,
-  set: (value) => emit('update:modelValue', value)
+  set: value => emit('update:modelValue', value),
 })
 
 // Methods
-const formatDate = (timestamp) => {
+const formatDate = timestamp => {
   const date = new Date(typeof timestamp === 'number' ? timestamp : new Date(timestamp).getTime())
+  
   return date.toLocaleString()
 }
 
-const formatFileSize = (bytes) => {
+const formatFileSize = bytes => {
   if (bytes === 0) return '0 Bytes'
   const k = 1024
   const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB']
   const i = Math.floor(Math.log(bytes) / Math.log(k))
+  
   return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
 }
 
-const getFileIcon = (filename) => {
+const getFileIcon = filename => {
   if (!filename) return 'mdi-file'
 
   const ext = filename.split('.').pop()?.toLowerCase()
@@ -434,17 +435,19 @@ const getFileIcon = (filename) => {
   return iconMap[ext] || 'mdi-file'
 }
 
-const openFile = (file) => {
+const openFile = file => {
   console.log('🔍 Opening file for preview:', file.name, file.hash)
   console.log('🔍 File object:', JSON.stringify(file, null, 2))
+
   // Emit to parent FileManager to handle preview
-  emit('preview-file', file)
-  console.log('🔍 Emitted preview-file event, closing versions dialog')
+  emit('previewFile', file)
+  console.log('🔍 Emitted previewFile event, closing versions dialog')
+
   // Close the versions dialog to allow the file preview modal to show
   dialog.value = false
 }
 
-const openVersion = (version) => {
+const openVersion = version => {
   // Create a file-like object for the version
   const versionFile = {
     ...props.file,
@@ -452,18 +455,20 @@ const openVersion = (version) => {
     name: version.filename || props.file.name,
     size: version.size,
     thumbnail: version.thumbnail,
-    timestamp: version.timestamp
+    timestamp: version.timestamp,
   }
   console.log('🔍 Opening version for preview:', versionFile.name, versionFile.hash)
   console.log('🔍 Version file object:', JSON.stringify(versionFile, null, 2))
+
   // Emit to parent FileManager to handle preview
-  emit('preview-file', versionFile)
-  console.log('🔍 Emitted preview-file event for version, closing versions dialog')
+  emit('previewFile', versionFile)
+  console.log('🔍 Emitted previewFile event for version, closing versions dialog')
+
   // Close the versions dialog to allow the file preview modal to show
   dialog.value = false
 }
 
-const downloadFile = async (file) => {
+const downloadFile = async file => {
   console.log('📥 Starting download:', file.name, 'from hash:', file.hash)
 
   try {
@@ -479,7 +484,7 @@ const downloadFile = async (file) => {
       method: 'GET',
       headers: {
         'Accept': '*/*',
-      }
+      },
     })
 
     if (!response.ok) {
@@ -537,7 +542,7 @@ const downloadFile = async (file) => {
   }
 }
 
-const downloadVersion = async (version) => {
+const downloadVersion = async version => {
   const fileName = version.filename || props.file.name
   console.log('📥 Starting version download:', fileName, 'from hash:', version.hash)
 
@@ -553,7 +558,7 @@ const downloadVersion = async (version) => {
       method: 'GET',
       headers: {
         'Accept': '*/*',
-      }
+      },
     })
 
     if (!response.ok) {
@@ -611,7 +616,7 @@ const downloadVersion = async (version) => {
   }
 }
 
-const copyFileLink = async (hash) => {
+const copyFileLink = async hash => {
   const link = `https://ipfs.runonflux.io/ipfs/${hash}`
   console.log('📋 Copying link to clipboard:', link)
 
@@ -647,7 +652,6 @@ const copyFileLink = async (hash) => {
     }
   }
 }
-
 </script>
 
 <style scoped>

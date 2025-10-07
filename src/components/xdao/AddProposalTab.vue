@@ -248,6 +248,7 @@
                           size="small"
                           :href="`https://explorer.runonflux.io/address/${foundationAddress}`"
                           target="_blank"
+                          rel="noopener noreferrer"
                         >
                           <VIcon icon="mdi-open-in-new" size="14" class="me-1" />
                           View on Explorer
@@ -295,9 +296,9 @@
 import { ref, computed, onMounted } from 'vue'
 import { useTheme } from 'vuetify'
 import axios from 'axios'
-import FluxIDImg from '@/assets/images/FluxID.svg?url'
-import SSPLogoBlackImg from '@/assets/images/ssp-logo-black.svg?url'
-import SSPLogoWhiteImg from '@/assets/images/ssp-logo-white.svg?url'
+import FluxIDImg from '@images/FluxID.svg?url'
+import SSPLogoBlackImg from '@images/ssp-logo-black.svg?url'
+import SSPLogoWhiteImg from '@images/ssp-logo-white.svg?url'
 
 // Props and Emits
 const emit = defineEmits(['proposal-added'])
@@ -349,24 +350,27 @@ const validationStatus = computed(() => {
   if (!canValidate.value) {
     return { color: 'grey', text: 'Complete Form to Validate' }
   }
+  
   return { color: 'primary', text: 'Validate Proposal' }
 })
 
 // Validation rules
 const rules = {
-  required: (value) => !!value || 'This field is required',
-  minLength: (min) => (value) => 
+  required: value => !!value || 'This field is required',
+  minLength: min => value => 
     (value && value.length >= min) || `Minimum ${min} characters required`,
 }
 
 const grantRules = computed(() => {
   const baseRules = []
   if (formData.value.grantValue) {
-    baseRules.push((value) => {
+    baseRules.push(value => {
       const num = Number(value)
+      
       return (!isNaN(num) && Number.isInteger(num)) || 'Grant amount must be a whole number'
     })
   }
+  
   return baseRules
 })
 
@@ -374,9 +378,10 @@ const grantAddressRules = computed(() => {
   if (formData.value.grantValue && formData.value.grantValue > 0) {
     return [
       rules.required,
-      (value) => !/\s/.test(value) || 'Address cannot contain spaces',
+      value => !/\s/.test(value) || 'Address cannot contain spaces',
     ]
   }
+  
   return []
 })
 
@@ -388,6 +393,7 @@ const validateProposal = async () => {
     // Basic validation
     if (!canValidate.value) {
       showError('Please complete all required fields correctly')
+      
       return
     }
 
@@ -433,7 +439,7 @@ const registerProposal = async () => {
         headers: {
           'Content-Type': 'application/json',
         },
-      }
+      },
     )
 
     if (response.data.status === 'success') {
@@ -456,6 +462,7 @@ const payWithZelcore = () => {
   try {
     if (!foundationAddress.value || !proposalPrice.value || !registrationHash.value) {
       showError('Payment details not available. Please try registering again.')
+      
       return
     }
 
@@ -480,6 +487,7 @@ const payWithSSP = async () => {
   try {
     if (!window.ssp) {
       showError('SSP Wallet not installed')
+      
       return
     }
 
@@ -502,7 +510,7 @@ const payWithSSP = async () => {
 }
 
 
-const copyToClipboard = async (text) => {
+const copyToClipboard = async text => {
   try {
     await navigator.clipboard.writeText(text)
     showSuccess('Copied to clipboard!')
@@ -511,7 +519,7 @@ const copyToClipboard = async (text) => {
   }
 }
 
-const formatDeadline = (timestamp) => {
+const formatDeadline = timestamp => {
   return new Date(timestamp).toLocaleString('en-US', {
     year: 'numeric',
     month: 'long',
@@ -558,20 +566,20 @@ onMounted(() => {
   fetchProposalPrice()
 })
 
-const showSuccess = (message) => {
+const showSuccess = message => {
   successMessage.value = message
   showSuccessMessage.value = true
   
   // Only emit when actual payment is completed
   if (message.includes('payment') && registrationHash.value) {
     setTimeout(() => {
-      emit('proposal-added')
+      emit('proposalAdded')
       resetForm()
     }, 2000)
   }
 }
 
-const showError = (message) => {
+const showError = message => {
   errorMessage.value = message
   showErrorMessage.value = true
 }

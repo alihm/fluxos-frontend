@@ -64,7 +64,12 @@ export default [
         alignAttributesVertically: true,
         ignores: [],
       }],
-      'camelcase': 'error',
+      'camelcase': ['error', {
+        properties: 'never',
+        ignoreDestructuring: true,
+        ignoreImports: true,
+        allow: ['^[a-z]+(_[a-z]+)+$'], // Allow snake_case for API properties
+      }],
       'arrow-parens': ['error', 'as-needed'],
       'newline-before-return': 'error',
       'lines-around-comment': ['error', {

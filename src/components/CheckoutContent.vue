@@ -140,53 +140,53 @@
 
                 <!-- Action-specific messaging -->
                 <div class="d-flex justify-center mb-3">
-                    <VChip
-                      v-if="props.actionType === 'renew'"
-                      color="primary"
-                      variant="flat"
-                      size="small"
-                      class="action-chip"
-                    >
-                      <VIcon icon="mdi-refresh" size="14" class="me-1" />
-                      Renewing your current plan
-                    </VChip>
-                    <VChip
-                      v-else-if="props.actionType === 'upgrade'"
-                      color="secondary"
-                      variant="flat"
-                      size="small"
-                      class="action-chip"
-                    >
-                      <VIcon icon="mdi-arrow-up" size="14" class="me-1" />
-                      Upgrading to a higher plan
-                    </VChip>
-                    <VChip
-                      v-else-if="props.actionType === 'downgrade'"
-                      color="warning"
-                      variant="flat"
-                      size="small"
-                      class="action-chip"
-                    >
-                      <VIcon icon="mdi-arrow-down" size="14" class="me-1" />
-                      Downgrading to a lower plan
-                    </VChip>
-                    <VChip
-                      v-else-if="props.actionType === 'signup' || !props.actionType"
-                      color="success"
-                      variant="flat"
-                      size="small"
-                      class="action-chip"
-                    >
-                      <VIcon icon="mdi-plus" size="14" class="me-1" />
-                      New subscription
-                    </VChip>
+                  <VChip
+                    v-if="props.actionType === 'renew'"
+                    color="primary"
+                    variant="flat"
+                    size="small"
+                    class="action-chip"
+                  >
+                    <VIcon icon="mdi-refresh" size="14" class="me-1" />
+                    Renewing your current plan
+                  </VChip>
+                  <VChip
+                    v-else-if="props.actionType === 'upgrade'"
+                    color="secondary"
+                    variant="flat"
+                    size="small"
+                    class="action-chip"
+                  >
+                    <VIcon icon="mdi-arrow-up" size="14" class="me-1" />
+                    Upgrading to a higher plan
+                  </VChip>
+                  <VChip
+                    v-else-if="props.actionType === 'downgrade'"
+                    color="warning"
+                    variant="flat"
+                    size="small"
+                    class="action-chip"
+                  >
+                    <VIcon icon="mdi-arrow-down" size="14" class="me-1" />
+                    Downgrading to a lower plan
+                  </VChip>
+                  <VChip
+                    v-else-if="props.actionType === 'signup' || !props.actionType"
+                    color="success"
+                    variant="flat"
+                    size="small"
+                    class="action-chip"
+                  >
+                    <VIcon icon="mdi-plus" size="14" class="me-1" />
+                    New subscription
+                  </VChip>
                 </div>
 
                 <div class="d-flex justify-space-between">
-                    <span class="text-h6">Total:</span>
-                    <span class="text-h6 font-weight-bold">${{ getPlanPrice() }}</span>
-                  </div>
+                  <span class="text-h6">Total:</span>
+                  <span class="text-h6 font-weight-bold">${{ getPlanPrice() }}</span>
                 </div>
+              </div>
             </VCardText>
           </VCard>
         </VCol>
@@ -475,7 +475,7 @@ const cleanupPaymentMonitoring = () => {
 
 // Expose the cleanup method
 defineExpose({
-  cleanupPaymentMonitoring
+  cleanupPaymentMonitoring,
 })
 
 // Composables
@@ -511,6 +511,7 @@ const isLoggedIn = computed(() => {
 
   try {
     const auth = qs.parse(zelidauth)
+    
     return !!(auth.zelid && (auth.signature || auth.zelidauth))
   } catch {
     return false
@@ -578,6 +579,7 @@ const loadCurrentSubscription = async () => {
     const auth = getAuthFromStorage()
     if (!auth.zelid) {
       console.error('No ZelID available for subscription lookup')
+      
       return
     }
 
@@ -653,7 +655,7 @@ const loadPlanDetails = async () => {
         storage: 10737418240, // 10GB in bytes
         storage_gb: 10,
         period: 'month',
-        cycle: 'monthly'
+        cycle: 'monthly',
       },
       'standard': {
         plan_name: 'standard',
@@ -661,7 +663,7 @@ const loadPlanDetails = async () => {
         storage: 53687091200, // 50GB in bytes
         storage_gb: 50,
         period: 'month',
-        cycle: 'monthly'
+        cycle: 'monthly',
       },
       'pro': {
         plan_name: 'pro',
@@ -669,8 +671,8 @@ const loadPlanDetails = async () => {
         storage: 107374182400, // 100GB in bytes
         storage_gb: 100,
         period: 'month',
-        cycle: 'monthly'
-      }
+        cycle: 'monthly',
+      },
     }
 
     const auth = getAuthFromStorage()
@@ -742,11 +744,12 @@ const loadPlanDetails = async () => {
         selectedPlan.value = {
           ...fluxDriveDisplayData[props.planId],
           price_id: apiPlan.price_id,  // Get price_id from API
-          sub_id: apiPlan.sub_id       // Get sub_id if available
+          sub_id: apiPlan.sub_id,       // Get sub_id if available
         }
         console.log('Merged FluxDrive plan with API price_id:', selectedPlan.value.price_id)
       } else {
         selectedPlan.value = apiPlan
+
         // Load estimated FLUX amount for non-FluxDrive plans (already loaded for FluxDrive)
         if (!estimatedFluxAmount.value) {
           estimatedFluxAmount.value = await getFluxPriceForPlan()
@@ -1045,6 +1048,7 @@ const monitorPayment = async (paymentId, subId, paymentAddr, paymentType = 'flux
     console.error('❌ CRITICAL: Payment monitoring started without payment ID or subscription ID!')
     console.error('This should not happen - monitoring requires valid payment identifiers')
     console.error('Preventing false positive payment confirmation')
+    
     return // Exit without starting monitoring
   }
 
@@ -1159,12 +1163,12 @@ const monitorPayment = async (paymentId, subId, paymentAddr, paymentType = 'flux
           if (initialSubscriptionState && result.active === true) {
             const capacityChanged = result.capacity !== initialSubscriptionState.capacity
             const expectedCapacity = props.planId === 'pro' ? 107374182400 :
-                                      props.planId === 'standard' ? 53687091200 :
-                                      props.planId === 'starter' ? 10737418240 : 53687091200 // 100GB for pro, 50GB for standard, 10GB for starter
+              props.planId === 'standard' ? 53687091200 :
+                props.planId === 'starter' ? 10737418240 : 53687091200 // 100GB for pro, 50GB for standard, 10GB for starter
 
             if (capacityChanged && result.capacity === expectedCapacity) {
               const actionText = props.actionType === 'upgrade' ? 'Upgrade' :
-                                props.actionType === 'downgrade' ? 'Downgrade' : 'Renewal'
+                props.actionType === 'downgrade' ? 'Downgrade' : 'Renewal'
 
               console.log(`✅ ${actionText} confirmed - storage capacity changed!`)
               console.log('Previous capacity:', (initialSubscriptionState.capacity_gb || Math.round(initialSubscriptionState.capacity / 1024 / 1024 / 1024)) + 'GB')
@@ -1179,10 +1183,10 @@ const monitorPayment = async (paymentId, subId, paymentAddr, paymentType = 'flux
               const message = props.actionType === 'renew'
                 ? 'Payment confirmed! Your subscription has been renewed.'
                 : props.actionType === 'upgrade'
-                ? 'Payment confirmed! Your subscription has been upgraded.'
-                : props.actionType === 'downgrade'
-                ? 'Payment confirmed! Your subscription has been downgraded.'
-                : 'Payment confirmed! Your subscription is now active.'
+                  ? 'Payment confirmed! Your subscription has been upgraded.'
+                  : props.actionType === 'downgrade'
+                    ? 'Payment confirmed! Your subscription has been downgraded.'
+                    : 'Payment confirmed! Your subscription is now active.'
 
               showSnackbar(message, 'success', 8000)
               emit('success')
@@ -1321,6 +1325,7 @@ const getCurrentSubscriptionEndDate = () => {
     }
 
     console.log('⚠️ period_end/endtime not found or invalid in:', Object.keys(data))
+    
     return null // Return null for upgrades/downgrades if no valid date found
   }
 
@@ -1334,6 +1339,7 @@ const getCurrentSubscriptionEndDate = () => {
     // FluxCloud uses period_end for current subscription end date
     if (data.period_end) {
       console.log('📅 Found period_end:', data.period_end, '(type:', typeof data.period_end, ')')
+
       // FluxCloud treats this as timestamp in seconds
       const date = new Date(data.period_end * 1000)
       console.log('📅 Converted to date:', date.toISOString())
@@ -1346,6 +1352,7 @@ const getCurrentSubscriptionEndDate = () => {
   }
 
   console.log('⚠️ Using current date as fallback')
+  
   return new Date() // Return current date as fallback
 }
 
@@ -1359,6 +1366,7 @@ const getEndDate = () => {
 
     if (newPlan && newPlan.endtime) {
       console.log('📅 Raw new_plan.endtime:', newPlan.endtime, typeof newPlan.endtime)
+
       // FluxCloud treats this as timestamp in seconds
       const date = new Date(newPlan.endtime * 1000)
       console.log('📅 Parsed new plan end date:', date)
@@ -1374,9 +1382,11 @@ const getEndDate = () => {
   }
 
   console.log('⚠️ No new_plan endtime found, calculating +1 month from now')
+
   // Fallback: calculate as 1 month from current time (now)
   const endDate = new Date()
   endDate.setMonth(endDate.getMonth() + 1)
+  
   return endDate
 }
 
@@ -1389,12 +1399,14 @@ const getCurrentPlan = () => {
     // The current subscription API response should contain the current plan info
     if (data.plan) {
       console.log('📋 Using currentSubscriptionData.plan:', data.plan)
+      
       return data.plan
     }
 
     // If plan info is at root level
     if (data.plan_name || data.storage_gb || data.price) {
       console.log('📋 Using currentSubscriptionData root level data')
+      
       return data
     }
 
@@ -1409,12 +1421,14 @@ const getCurrentPlan = () => {
     // For new signups, data.plan should be the plan being purchased
     if (data.plan && !data.new_plan) {
       console.log('📋 Using data.plan:', data.plan)
+      
       return data.plan
     }
 
     // Check if current plan data is in the root level
     if (data.plan_name || data.storage_gb || data.price) {
       console.log('📋 Using root level data as plan')
+      
       return data
     }
   }
@@ -1422,19 +1436,23 @@ const getCurrentPlan = () => {
   // Try to get from flux store user subscription data as last resort
   if (fluxStore.user && fluxStore.user.fluxdrive_subscription) {
     console.log('📋 Using flux store subscription data:', fluxStore.user.fluxdrive_subscription)
+    
     return fluxStore.user.fluxdrive_subscription
   }
 
   console.log('⚠️ No current plan data found anywhere')
+  
   return null
 }
 
 const getNewPlan = () => {
   if (subscriptionData.value) {
     const data = subscriptionData.value
+
     // New plan is in new_plan field
     return data.new_plan || null
   }
+  
   return null
 }
 
@@ -1446,6 +1464,7 @@ const getCurrentPlanName = () => {
     const planName = currentPlan.plan_name || currentPlan.name
     if (planName) {
       console.log('🏷️ Current plan name result:', planName)
+      
       return planName
     }
   }
@@ -1453,15 +1472,18 @@ const getCurrentPlanName = () => {
   // If we can't find current plan, for upgrades/downgrades we can show a generic message
   if (props.actionType === 'upgrade' || props.actionType === 'downgrade') {
     console.log('🏷️ Using fallback for upgrade/downgrade - Current Subscription')
+    
     return 'Current Subscription'
   }
 
   console.log('🏷️ Using fallback - Current Plan')
+  
   return 'Current Plan'
 }
 
 const getNewPlanName = () => {
   const newPlan = getNewPlan()
+  
   return newPlan?.plan_name || newPlan?.name || selectedPlan.value?.plan_name || 'New Plan'
 }
 
@@ -1477,6 +1499,7 @@ const getCurrentPlanStorage = () => {
   if (props.actionType === 'upgrade' || props.actionType === 'downgrade') {
     return 'Current Storage'
   }
+  
   return 'N/A'
 }
 
@@ -1490,6 +1513,7 @@ const getCurrentPlanPrice = () => {
       if (currentPlan.price > 10) {
         return (currentPlan.price / 100).toFixed(2)
       }
+      
       return currentPlan.price.toFixed(2)
     }
     if (currentPlan.cost && currentPlan.cost > 0) {
@@ -1501,6 +1525,7 @@ const getCurrentPlanPrice = () => {
   if (props.actionType === 'upgrade' || props.actionType === 'downgrade') {
     return '-.--'
   }
+  
   return '0.00'
 }
 
@@ -1573,6 +1598,7 @@ const getStorageDisplay = () => {
     // If storage is in bytes, convert to GB
     if (selectedPlan.value.storage > 1000000) {
       const gb = Math.round(selectedPlan.value.storage / (1024 * 1024 * 1024))
+      
       return `${gb} GB`
     }
 
@@ -1608,7 +1634,7 @@ const getStorageDisplay = () => {
   return 'error GB'
 }
 
-const copyToClipboard = async (text) => {
+const copyToClipboard = async text => {
   try {
     await navigator.clipboard.writeText(text)
     showSnackbar('Address copied to clipboard', 'success', 8000)
@@ -1629,7 +1655,7 @@ onMounted(() => {
   console.log('💳 CheckoutContent mounted with props:', {
     planId: props.planId,
     gateway: props.gateway,
-    actionType: props.actionType
+    actionType: props.actionType,
   })
   console.log('🔍 Action type is downgrade?', props.actionType === 'downgrade')
   console.log('🔍 Should show plan comparison?', props.actionType === 'upgrade' || props.actionType === 'downgrade')

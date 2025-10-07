@@ -9,59 +9,35 @@
     </div>
 
     <!-- Loading state while checking subscription -->
-    <div v-if="!subscriptionChecked" class="d-flex justify-center align-center" style="min-height: 400px;">
-      <VProgressCircular
-        indeterminate
-        color="primary"
-        :size="60"
-        :width="4"
-      />
-    </div>
+    <LoadingSpinner
+      v-if="!subscriptionChecked"
+      icon="mdi-cloud"
+      :icon-size="56"
+      title="Loading FluxDrive..."
+    />
 
     <!-- Show pricing plans for non-subscribers -->
     <PricingPlans
       v-else-if="!hasActiveSubscription"
-      @select-plan="(planId, actionType) => handlePlanSelection(planId, actionType)"
+      @selectPlan="(planId, actionType) => handlePlanSelection(planId, actionType)"
     />
 
     <!-- Show actual FluxDrive interface for subscribers -->
     <div v-else>
       <FileManager
         ref="fileManagerRef"
-        @select-plan="handlePlanSelection"
+        @selectPlan="handlePlanSelection"
       />
       <StorageInfo />
     </div>
 
+
     <!-- Login Dialog -->
-    <VDialog
+    <LoginDialog
       v-model="showLogin"
-      :max-width="$vuetify.display.xs ? '95vw' : '900'"
-      :width="$vuetify.display.xs ? '95vw' : '90vw'"
-      :fullscreen="$vuetify.display.xs"
-      persistent
-      scrollable
-    >
-      <VCard>
-        <VCardText class="pt-6">
-          <Login
-            :hide-manual-login="true"
-            :xdao-open="0"
-            @login-success="handleLoginSuccess"
-          />
-        </VCardText>
-        <VCardActions class="pa-4 pt-0">
-          <VSpacer />
-          <VBtn
-            variant="outlined"
-            color="error"
-            @click="showLogin = false"
-          >
-            Cancel
-          </VBtn>
-        </VCardActions>
-      </VCard>
-    </VDialog>
+      title="Login Required"
+      @loginSuccess="handleLoginSuccess"
+    />
     <!-- Checkout Dialog -->
     <VDialog
       v-model="showCheckout"
@@ -94,7 +70,7 @@
             ref="checkoutContentRef"
             :plan-id="selectedCheckoutPlan"
             :action-type="selectedActionType"
-            :gateway="'fluxpay'"
+            gateway="fluxpay"
             @success="handlePaymentSuccess"
             @close="handlePaymentError"
           />
@@ -107,7 +83,8 @@
 <script setup>
 import { onMounted, ref, watch } from 'vue'
 import { useFluxDrive } from '@/composables/useFluxDrive'
-import Login from '@/@core/components/Login.vue'
+import LoginDialog from '@/components/shared/LoginDialog.vue'
+import LoadingSpinner from '@/components/Marketplace/LoadingSpinner.vue'
 import PricingPlans from '@/components/FluxDrive/PricingPlans.vue'
 import FileManager from '@/components/FluxDrive/FileManager.vue'
 import StorageInfo from '@/components/FluxDrive/StorageInfo.vue'
@@ -126,11 +103,12 @@ const {
   handlePostLogin,
   getPlanStatus,
   renewSubscription,
-  upgradeSubscription
+  upgradeSubscription,
 } = useFluxDrive()
 
 // Import flux store to refresh user data after login
 import { useFluxStore } from '@/stores/flux'
+
 const fluxStore = useFluxStore()
 
 // Checkout dialog state
@@ -152,19 +130,21 @@ const handlePlanSelection = async (planId, actionType = null) => {
   if (actionType === 'signin') {
     console.log('🔐 Sign in action - showing login dialog without plan selection')
     showLogin.value = true
+    
     return
   }
 
   console.log('🔍 Current subscription status:', {
     isLoggedIn: isLoggedIn.value,
     hasActiveSubscription: hasActiveSubscription.value,
-    planStatus: planId ? getPlanStatus(planId) : 'N/A'
+    planStatus: planId ? getPlanStatus(planId) : 'N/A',
   })
 
   // For enterprise plan, redirect to support
   if (planId === 'enterprise') {
     const supportUrl = 'https://support.runonflux.io'
     window.open(supportUrl, '_blank', 'noopener,noreferrer')
+    
     return
   }
 
@@ -193,11 +173,13 @@ const handlePlanSelection = async (planId, actionType = null) => {
         const authData = zelidauth.includes('zelid=') ?
           Object.fromEntries(new URLSearchParams(zelidauth)) :
           JSON.parse(zelidauth)
+        
         return authData.zelid || fluxStore.zelid
       } catch {
         return fluxStore.zelid
       }
     }
+    
     return fluxStore.zelid
   })()
 
@@ -206,6 +188,7 @@ const handlePlanSelection = async (planId, actionType = null) => {
     console.log('🔐 User not logged in - saving plan selection for after login:', planId)
     showLogin.value = true
     selectedCheckoutPlan.value = planId // Save plan for after login
+    
     return
   }
 
@@ -229,6 +212,7 @@ const handlePlanSelection = async (planId, actionType = null) => {
       } else if (result.subscription) {
         console.log('✅ Renewal completed successfully')
         await checkSubscriptionStatus()
+
         // Show success message to user
         alert('Subscription renewed successfully!')
       } else {
@@ -245,6 +229,7 @@ const handlePlanSelection = async (planId, actionType = null) => {
     } catch (error) {
       console.error('❌ Renewal failed:', error)
       alert('Renewal failed: ' + error.message)
+
       // Fallback to checkout dialog
       selectedCheckoutPlan.value = planId
       selectedActionType.value = actionType
@@ -255,6 +240,7 @@ const handlePlanSelection = async (planId, actionType = null) => {
         fileManagerRef.value.clearRenewalState()
       }
     }
+    
     return
   }
 
@@ -279,6 +265,7 @@ const handlePlanSelection = async (planId, actionType = null) => {
       }
     } catch (error) {
       console.error('❌ Upgrade failed:', error)
+
       // Fallback to checkout dialog
       selectedCheckoutPlan.value = planId
       selectedActionType.value = actionType
@@ -289,6 +276,7 @@ const handlePlanSelection = async (planId, actionType = null) => {
         fileManagerRef.value.clearRenewalState()
       }
     }
+    
     return
   }
 
@@ -297,11 +285,13 @@ const handlePlanSelection = async (planId, actionType = null) => {
     console.log('📊 Setting checkout values:')
     console.log('  - selectedCheckoutPlan:', planId)
     console.log('  - selectedActionType:', actionType)
+
     // Downgrades always require payment confirmation, open checkout dialog
     selectedCheckoutPlan.value = planId
     selectedActionType.value = actionType
     showCheckout.value = true
     console.log('✅ Checkout dialog should open with downgrade action')
+    
     return
   }
 
@@ -324,12 +314,13 @@ const handleLoginSuccess = async () => {
   // If there was a pending plan selection, open checkout
   if (selectedCheckoutPlan.value) {
     console.log('🎯 Found pending plan selection:', selectedCheckoutPlan.value)
+
     // Determine action type for the selected plan after login
     if (!selectedActionType.value) {
       if (hasActiveSubscription.value) {
         const planStatus = getPlanStatus(selectedCheckoutPlan.value)
         selectedActionType.value = planStatus === 'current' ? 'renew' :
-                                   planStatus === 'downgrade' ? 'downgrade' : 'upgrade'
+          planStatus === 'downgrade' ? 'downgrade' : 'upgrade'
       } else {
         selectedActionType.value = 'signup'
       }
@@ -379,7 +370,7 @@ const handlePaymentSuccess = async () => {
 }
 
 // Handle payment error
-const handlePaymentError = (error) => {
+const handlePaymentError = error => {
   console.error('Payment error:', error)
 }
 
@@ -438,5 +429,5 @@ onMounted(async () => {
 </script>
 
 <style scoped>
-@import '@/assets/styles/flux-drive.scss';
+@import '@styles/flux-drive.scss';
 </style>
