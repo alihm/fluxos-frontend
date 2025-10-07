@@ -131,23 +131,6 @@ fluxos-frontend/
 └── vite.config.js   # Vite configuration
 ```
 
-## Environment Variables
-
-Create a `.env` file in the root directory:
-
-```env
-# API Configuration
-VITE_API_URL=https://api.runonflux.io
-
-# Firebase Configuration
-VITE_FIREBASE_API_KEY=your_api_key
-VITE_FIREBASE_AUTH_DOMAIN=your_domain
-VITE_FIREBASE_PROJECT_ID=your_project_id
-
-# WalletConnect
-VITE_WALLETCONNECT_PROJECT_ID=your_project_id
-```
-
 ## API Integration
 
 This frontend communicates with the Flux backend API. The backend handles:
