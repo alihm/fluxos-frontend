@@ -1,20 +1,18 @@
-# FluxOS - Frontend
+# Flux Gravity - Frontend
 
 ![Flux.png](flux_banner.png)
 
-[![DeepScan grade](https://deepscan.io/api/teams/6436/projects/8442/branches/100920/badge/grade.svg)](https://deepscan.io/dashboard#view=project&tid=6436&pid=8442&bid=100920)[![CodeFactor](https://www.codefactor.io/repository/github/runonflux/flux/badge)](https://www.codefactor.io/repository/github/runonflux/flux)[![Total alerts](https://img.shields.io/lgtm/alerts/g/RunOnFlux/flux.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/RunOnFlux/flux/alerts/)[![Language grade: JavaScript](https://img.shields.io/lgtm/grade/javascript/g/RunOnFlux/flux.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/RunOnFlux/flux/context:javascript)[![codecov](https://codecov.io/gh/RunOnFlux/flux/branch/development/graph/badge.svg?token=N31OUPUWZJ)](https://codecov.io/gh/RunOnFlux/flux)
+Flux Gravity is available on domains, load balancing the entire Flux network:
 
-FluxOS is available on domains, load balancing the entire Flux network:
-
-[FluxOS Home](https://home.runonflux.io)
+[Flux Home](https://home.runonflux.io)
 
 [API Documentation](https://docs.runonflux.io)
 
 [Source Code Documentation](https://source.runonflux.io)
 
-## About FluxOS Frontend
+## About Flux Gravity Frontend
 
-FluxOS Frontend is a modern Vue.js 3 application that provides the user interface for the Flux Network. It enables users to:
+Flux Gravity Frontend is a modern Vue.js 3 application that provides the user interface for the Flux Network. It enables users to:
 
 - **Manage Flux Nodes** - Monitor and control Flux nodes through an intuitive web interface
 - **Deploy Applications** - Browse and deploy applications from the Flux Marketplace
