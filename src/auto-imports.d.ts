@@ -12,6 +12,7 @@ declare global {
   const acceptHMRUpdate: typeof import('pinia')['acceptHMRUpdate']
   const alphaDashValidator: typeof import('./@core/utils/validators.js')['alphaDashValidator']
   const alphaValidator: typeof import('./@core/utils/validators.js')['alphaValidator']
+  const appKit: typeof import('./utils/walletService.js')['appKit']
   const arrayBufferToBase64: typeof import('./utils/enterpriseCrypto.js')['arrayBufferToBase64']
   const asyncComputed: typeof import('@vueuse/core')['asyncComputed']
   const auth: typeof import('./utils/firebase.js')['auth']
@@ -20,6 +21,7 @@ declare global {
   const base64ToUint8Array: typeof import('./utils/enterpriseCrypto.js')['base64ToUint8Array']
   const betweenValidator: typeof import('./@core/utils/validators.js')['betweenValidator']
   const checkWebCryptoAvailability: typeof import('./utils/enterpriseCrypto.js')['checkWebCryptoAvailability']
+  const closeWalletConnect: typeof import('./utils/walletService.js')['closeWalletConnect']
   const colors: typeof import('./utils/colors.js')['default']
   const computed: typeof import('vue')['computed']
   const computedAsync: typeof import('@vueuse/core')['computedAsync']
@@ -27,6 +29,8 @@ declare global {
   const computedInject: typeof import('@vueuse/core')['computedInject']
   const computedWithControl: typeof import('@vueuse/core')['computedWithControl']
   const confirmedValidator: typeof import('./@core/utils/validators.js')['confirmedValidator']
+  const connectBrowserMetaMask: typeof import('./utils/walletService.js')['connectBrowserMetaMask']
+  const connectMetaMask: typeof import('./utils/walletService.js')['connectMetaMask']
   const controlledComputed: typeof import('@vueuse/core')['controlledComputed']
   const controlledRef: typeof import('@vueuse/core')['controlledRef']
   const createApp: typeof import('vue')['createApp']
@@ -51,6 +55,7 @@ declare global {
   const defineComponent: typeof import('vue')['defineComponent']
   const definePage: typeof import('unplugin-vue-router/runtime')['definePage']
   const defineStore: typeof import('pinia')['defineStore']
+  const disconnectWalletConnect: typeof import('./utils/walletService.js')['disconnectWalletConnect']
   const eagerComputed: typeof import('@vueuse/core')['eagerComputed']
   const effectScope: typeof import('vue')['effectScope']
   const emailValidator: typeof import('./@core/utils/validators.js')['emailValidator']
@@ -66,18 +71,22 @@ declare global {
   const formatDateToMonthShort: typeof import('./@core/utils/formatters.js')['formatDateToMonthShort']
   const geolocation: typeof import('./utils/geolocation.js')['default']
   const getActivePinia: typeof import('pinia')['getActivePinia']
+  const getConnectedAccount: typeof import('./utils/walletService.js')['getConnectedAccount']
   const getCurrentInstance: typeof import('vue')['getCurrentInstance']
   const getCurrentScope: typeof import('vue')['getCurrentScope']
   const getDetectedBackendURL: typeof import('./utils/backend.js')['getDetectedBackendURL']
   const getEnterprisePGPKeys: typeof import('./utils/enterpriseCrypto.js')['getEnterprisePGPKeys']
+  const getMetaMaskSDK: typeof import('./utils/walletService.js')['getMetaMaskSDK']
   const getUser: typeof import('./utils/firebase.js')['getUser']
   const h: typeof import('vue')['h']
+  const hasWalletConnectSession: typeof import('./utils/walletService.js')['hasWalletConnectSession']
   const hexToRgb: typeof import('./@core/utils/colorConverter.js')['hexToRgb']
   const ignorableWatch: typeof import('@vueuse/core')['ignorableWatch']
   const importRsaPublicKey: typeof import('./utils/enterpriseCrypto.js')['importRsaPublicKey']
   const inject: typeof import('vue')['inject']
   const injectLocal: typeof import('@vueuse/core')['injectLocal']
   const integerValidator: typeof import('./@core/utils/validators.js')['integerValidator']
+  const isBrowserMetaMaskAvailable: typeof import('./utils/walletService.js')['isBrowserMetaMaskAvailable']
   const isDefined: typeof import('@vueuse/core')['isDefined']
   const isEmpty: typeof import('./@core/utils/helpers.js')['isEmpty']
   const isEmptyArray: typeof import('./@core/utils/helpers.js')['isEmptyArray']
@@ -87,8 +96,10 @@ declare global {
   const isReactive: typeof import('vue')['isReactive']
   const isReadonly: typeof import('vue')['isReadonly']
   const isRef: typeof import('vue')['isRef']
+  const isSSPAvailable: typeof import('./utils/walletService.js')['isSSPAvailable']
   const isToday: typeof import('./@core/utils/helpers.js')['isToday']
   const isWebCryptoAvailable: typeof import('./utils/enterpriseCrypto.js')['isWebCryptoAvailable']
+  const isZelcoreAvailable: typeof import('./utils/walletService.js')['isZelcoreAvailable']
   const kFormatter: typeof import('./@core/utils/formatters.js')['kFormatter']
   const lengthValidator: typeof import('./@core/utils/validators.js')['lengthValidator']
   const logicAnd: typeof import('@vueuse/math')['logicAnd']
@@ -125,9 +136,12 @@ declare global {
   const onUnmounted: typeof import('vue')['onUnmounted']
   const onUpdated: typeof import('vue')['onUpdated']
   const onWatcherCleanup: typeof import('vue')['onWatcherCleanup']
+  const openWalletConnect: typeof import('./utils/walletService.js')['openWalletConnect']
   const paginationMeta: typeof import('./utils/paginationMeta.js')['paginationMeta']
   const passwordValidator: typeof import('./@core/utils/validators.js')['passwordValidator']
   const pausableWatch: typeof import('@vueuse/core')['pausableWatch']
+  const payWithSSP: typeof import('./utils/walletService.js')['payWithSSP']
+  const payWithZelcore: typeof import('./utils/walletService.js')['payWithZelcore']
   const paymentBridge: typeof import('./utils/fiatGateways.js')['paymentBridge']
   const prefixWithPlus: typeof import('./@core/utils/formatters.js')['prefixWithPlus']
   const provide: typeof import('vue')['provide']
@@ -159,6 +173,11 @@ declare global {
   const shallowReactive: typeof import('vue')['shallowReactive']
   const shallowReadonly: typeof import('vue')['shallowReadonly']
   const shallowRef: typeof import('vue')['shallowRef']
+  const signWithBrowserMetaMask: typeof import('./utils/walletService.js')['signWithBrowserMetaMask']
+  const signWithMetaMask: typeof import('./utils/walletService.js')['signWithMetaMask']
+  const signWithSSP: typeof import('./utils/walletService.js')['signWithSSP']
+  const signWithWalletConnect: typeof import('./utils/walletService.js')['signWithWalletConnect']
+  const signWithZelcore: typeof import('./utils/walletService.js')['signWithZelcore']
   const storeToRefs: typeof import('pinia')['storeToRefs']
   const syncRef: typeof import('@vueuse/core')['syncRef']
   const syncRefs: typeof import('@vueuse/core')['syncRefs']
@@ -369,6 +388,7 @@ declare global {
   const useWindowScroll: typeof import('@vueuse/core')['useWindowScroll']
   const useWindowSize: typeof import('@vueuse/core')['useWindowSize']
   const useWordPress: typeof import('./composables/useWordPress.js')['useWordPress']
+  const wagmiAdapter: typeof import('./utils/walletService.js')['wagmiAdapter']
   const watch: typeof import('vue')['watch']
   const watchArray: typeof import('@vueuse/core')['watchArray']
   const watchAtMost: typeof import('@vueuse/core')['watchAtMost']
@@ -383,6 +403,7 @@ declare global {
   const watchSyncEffect: typeof import('vue')['watchSyncEffect']
   const watchThrottled: typeof import('@vueuse/core')['watchThrottled']
   const watchTriggerable: typeof import('@vueuse/core')['watchTriggerable']
+  const watchWalletAccount: typeof import('./utils/walletService.js')['watchWalletAccount']
   const watchWithFilter: typeof import('@vueuse/core')['watchWithFilter']
   const whenever: typeof import('@vueuse/core')['whenever']
 }
@@ -404,6 +425,7 @@ declare module 'vue' {
     readonly acceptHMRUpdate: UnwrapRef<typeof import('pinia')['acceptHMRUpdate']>
     readonly alphaDashValidator: UnwrapRef<typeof import('./@core/utils/validators.js')['alphaDashValidator']>
     readonly alphaValidator: UnwrapRef<typeof import('./@core/utils/validators.js')['alphaValidator']>
+    readonly appKit: UnwrapRef<typeof import('./utils/walletService.js')['appKit']>
     readonly arrayBufferToBase64: UnwrapRef<typeof import('./utils/enterpriseCrypto.js')['arrayBufferToBase64']>
     readonly asyncComputed: UnwrapRef<typeof import('@vueuse/core')['asyncComputed']>
     readonly auth: UnwrapRef<typeof import('./utils/firebase.js')['auth']>
@@ -412,6 +434,7 @@ declare module 'vue' {
     readonly base64ToUint8Array: UnwrapRef<typeof import('./utils/enterpriseCrypto.js')['base64ToUint8Array']>
     readonly betweenValidator: UnwrapRef<typeof import('./@core/utils/validators.js')['betweenValidator']>
     readonly checkWebCryptoAvailability: UnwrapRef<typeof import('./utils/enterpriseCrypto.js')['checkWebCryptoAvailability']>
+    readonly closeWalletConnect: UnwrapRef<typeof import('./utils/walletService.js')['closeWalletConnect']>
     readonly colors: UnwrapRef<typeof import('./utils/colors.js')['default']>
     readonly computed: UnwrapRef<typeof import('vue')['computed']>
     readonly computedAsync: UnwrapRef<typeof import('@vueuse/core')['computedAsync']>
@@ -419,6 +442,8 @@ declare module 'vue' {
     readonly computedInject: UnwrapRef<typeof import('@vueuse/core')['computedInject']>
     readonly computedWithControl: UnwrapRef<typeof import('@vueuse/core')['computedWithControl']>
     readonly confirmedValidator: UnwrapRef<typeof import('./@core/utils/validators.js')['confirmedValidator']>
+    readonly connectBrowserMetaMask: UnwrapRef<typeof import('./utils/walletService.js')['connectBrowserMetaMask']>
+    readonly connectMetaMask: UnwrapRef<typeof import('./utils/walletService.js')['connectMetaMask']>
     readonly controlledComputed: UnwrapRef<typeof import('@vueuse/core')['controlledComputed']>
     readonly controlledRef: UnwrapRef<typeof import('@vueuse/core')['controlledRef']>
     readonly createApp: UnwrapRef<typeof import('vue')['createApp']>
@@ -443,6 +468,7 @@ declare module 'vue' {
     readonly defineComponent: UnwrapRef<typeof import('vue')['defineComponent']>
     readonly definePage: UnwrapRef<typeof import('unplugin-vue-router/runtime')['definePage']>
     readonly defineStore: UnwrapRef<typeof import('pinia')['defineStore']>
+    readonly disconnectWalletConnect: UnwrapRef<typeof import('./utils/walletService.js')['disconnectWalletConnect']>
     readonly eagerComputed: UnwrapRef<typeof import('@vueuse/core')['eagerComputed']>
     readonly effectScope: UnwrapRef<typeof import('vue')['effectScope']>
     readonly emailValidator: UnwrapRef<typeof import('./@core/utils/validators.js')['emailValidator']>
@@ -458,18 +484,22 @@ declare module 'vue' {
     readonly formatDateToMonthShort: UnwrapRef<typeof import('./@core/utils/formatters.js')['formatDateToMonthShort']>
     readonly geolocation: UnwrapRef<typeof import('./utils/geolocation.js')['default']>
     readonly getActivePinia: UnwrapRef<typeof import('pinia')['getActivePinia']>
+    readonly getConnectedAccount: UnwrapRef<typeof import('./utils/walletService.js')['getConnectedAccount']>
     readonly getCurrentInstance: UnwrapRef<typeof import('vue')['getCurrentInstance']>
     readonly getCurrentScope: UnwrapRef<typeof import('vue')['getCurrentScope']>
     readonly getDetectedBackendURL: UnwrapRef<typeof import('./utils/backend.js')['getDetectedBackendURL']>
     readonly getEnterprisePGPKeys: UnwrapRef<typeof import('./utils/enterpriseCrypto.js')['getEnterprisePGPKeys']>
+    readonly getMetaMaskSDK: UnwrapRef<typeof import('./utils/walletService.js')['getMetaMaskSDK']>
     readonly getUser: UnwrapRef<typeof import('./utils/firebase.js')['getUser']>
     readonly h: UnwrapRef<typeof import('vue')['h']>
+    readonly hasWalletConnectSession: UnwrapRef<typeof import('./utils/walletService.js')['hasWalletConnectSession']>
     readonly hexToRgb: UnwrapRef<typeof import('./@core/utils/colorConverter.js')['hexToRgb']>
     readonly ignorableWatch: UnwrapRef<typeof import('@vueuse/core')['ignorableWatch']>
     readonly importRsaPublicKey: UnwrapRef<typeof import('./utils/enterpriseCrypto.js')['importRsaPublicKey']>
     readonly inject: UnwrapRef<typeof import('vue')['inject']>
     readonly injectLocal: UnwrapRef<typeof import('@vueuse/core')['injectLocal']>
     readonly integerValidator: UnwrapRef<typeof import('./@core/utils/validators.js')['integerValidator']>
+    readonly isBrowserMetaMaskAvailable: UnwrapRef<typeof import('./utils/walletService.js')['isBrowserMetaMaskAvailable']>
     readonly isDefined: UnwrapRef<typeof import('@vueuse/core')['isDefined']>
     readonly isEmpty: UnwrapRef<typeof import('./@core/utils/helpers.js')['isEmpty']>
     readonly isEmptyArray: UnwrapRef<typeof import('./@core/utils/helpers.js')['isEmptyArray']>
@@ -479,8 +509,10 @@ declare module 'vue' {
     readonly isReactive: UnwrapRef<typeof import('vue')['isReactive']>
     readonly isReadonly: UnwrapRef<typeof import('vue')['isReadonly']>
     readonly isRef: UnwrapRef<typeof import('vue')['isRef']>
+    readonly isSSPAvailable: UnwrapRef<typeof import('./utils/walletService.js')['isSSPAvailable']>
     readonly isToday: UnwrapRef<typeof import('./@core/utils/helpers.js')['isToday']>
     readonly isWebCryptoAvailable: UnwrapRef<typeof import('./utils/enterpriseCrypto.js')['isWebCryptoAvailable']>
+    readonly isZelcoreAvailable: UnwrapRef<typeof import('./utils/walletService.js')['isZelcoreAvailable']>
     readonly kFormatter: UnwrapRef<typeof import('./@core/utils/formatters.js')['kFormatter']>
     readonly lengthValidator: UnwrapRef<typeof import('./@core/utils/validators.js')['lengthValidator']>
     readonly logicAnd: UnwrapRef<typeof import('@vueuse/math')['logicAnd']>
@@ -517,9 +549,12 @@ declare module 'vue' {
     readonly onUnmounted: UnwrapRef<typeof import('vue')['onUnmounted']>
     readonly onUpdated: UnwrapRef<typeof import('vue')['onUpdated']>
     readonly onWatcherCleanup: UnwrapRef<typeof import('vue')['onWatcherCleanup']>
+    readonly openWalletConnect: UnwrapRef<typeof import('./utils/walletService.js')['openWalletConnect']>
     readonly paginationMeta: UnwrapRef<typeof import('./utils/paginationMeta.js')['paginationMeta']>
     readonly passwordValidator: UnwrapRef<typeof import('./@core/utils/validators.js')['passwordValidator']>
     readonly pausableWatch: UnwrapRef<typeof import('@vueuse/core')['pausableWatch']>
+    readonly payWithSSP: UnwrapRef<typeof import('./utils/walletService.js')['payWithSSP']>
+    readonly payWithZelcore: UnwrapRef<typeof import('./utils/walletService.js')['payWithZelcore']>
     readonly paymentBridge: UnwrapRef<typeof import('./utils/fiatGateways.js')['paymentBridge']>
     readonly prefixWithPlus: UnwrapRef<typeof import('./@core/utils/formatters.js')['prefixWithPlus']>
     readonly provide: UnwrapRef<typeof import('vue')['provide']>
@@ -551,6 +586,11 @@ declare module 'vue' {
     readonly shallowReactive: UnwrapRef<typeof import('vue')['shallowReactive']>
     readonly shallowReadonly: UnwrapRef<typeof import('vue')['shallowReadonly']>
     readonly shallowRef: UnwrapRef<typeof import('vue')['shallowRef']>
+    readonly signWithBrowserMetaMask: UnwrapRef<typeof import('./utils/walletService.js')['signWithBrowserMetaMask']>
+    readonly signWithMetaMask: UnwrapRef<typeof import('./utils/walletService.js')['signWithMetaMask']>
+    readonly signWithSSP: UnwrapRef<typeof import('./utils/walletService.js')['signWithSSP']>
+    readonly signWithWalletConnect: UnwrapRef<typeof import('./utils/walletService.js')['signWithWalletConnect']>
+    readonly signWithZelcore: UnwrapRef<typeof import('./utils/walletService.js')['signWithZelcore']>
     readonly storeToRefs: UnwrapRef<typeof import('pinia')['storeToRefs']>
     readonly syncRef: UnwrapRef<typeof import('@vueuse/core')['syncRef']>
     readonly syncRefs: UnwrapRef<typeof import('@vueuse/core')['syncRefs']>
@@ -761,6 +801,7 @@ declare module 'vue' {
     readonly useWindowScroll: UnwrapRef<typeof import('@vueuse/core')['useWindowScroll']>
     readonly useWindowSize: UnwrapRef<typeof import('@vueuse/core')['useWindowSize']>
     readonly useWordPress: UnwrapRef<typeof import('./composables/useWordPress.js')['useWordPress']>
+    readonly wagmiAdapter: UnwrapRef<typeof import('./utils/walletService.js')['wagmiAdapter']>
     readonly watch: UnwrapRef<typeof import('vue')['watch']>
     readonly watchArray: UnwrapRef<typeof import('@vueuse/core')['watchArray']>
     readonly watchAtMost: UnwrapRef<typeof import('@vueuse/core')['watchAtMost']>
@@ -775,6 +816,7 @@ declare module 'vue' {
     readonly watchSyncEffect: UnwrapRef<typeof import('vue')['watchSyncEffect']>
     readonly watchThrottled: UnwrapRef<typeof import('@vueuse/core')['watchThrottled']>
     readonly watchTriggerable: UnwrapRef<typeof import('@vueuse/core')['watchTriggerable']>
+    readonly watchWalletAccount: UnwrapRef<typeof import('./utils/walletService.js')['watchWalletAccount']>
     readonly watchWithFilter: UnwrapRef<typeof import('@vueuse/core')['watchWithFilter']>
     readonly whenever: UnwrapRef<typeof import('@vueuse/core')['whenever']>
   }

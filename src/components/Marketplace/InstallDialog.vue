@@ -1379,6 +1379,7 @@ import geolocationData from '@/utils/geolocation'
 import { paymentBridge } from '@/utils/fiatGateways'
 import { getUser } from '@/utils/firebase'
 import { importRsaPublicKey, encryptAesKeyWithRsaKey, encryptEnterpriseWithAes, isWebCryptoAvailable } from '@/utils/enterpriseCrypto'
+import { payWithZelcore, payWithSSP, isSSPAvailable, isZelcoreAvailable, isBrowserMetaMaskAvailable, getConnectedAccount, hasWalletConnectSession, signWithWalletConnect as walletServiceSignWithWalletConnect, watchWalletAccount, signWithSSP as walletServiceSignWithSSP, signWithZelcore as walletServiceSignWithZelcore } from '@/utils/walletService'
 import axios from 'axios'
 import qs from 'query-string'
 
@@ -1516,15 +1517,17 @@ const checkAuthentication = () => {
 
     // Use loginType from localStorage (already lowercase)
     if (storedLoginType) {
-      isZelCoreUser.value = storedLoginType.includes('zelcore') || storedLoginType === 'zel'
+      // Check if user is using any wallet-based auth (not SSO)
+      // WalletConnect, ZelCore, MetaMask, and SSP all need signing step
+      isWalletUser.value = storedLoginType !== 'sso'
     } else {
       // Legacy detection method
-      isZelCoreUser.value = zelidauth.value && zelidauth.value.includes('zelid=')
+      isWalletUser.value = zelidauth.value && zelidauth.value.includes('zelid=')
     }
 
   } catch (error) {
     console.error('Authentication check failed:', error)
-    isZelCoreUser.value = false
+    isWalletUser.value = false
   }
 }
 
@@ -1559,23 +1562,26 @@ const availableWallets = computed(() => {
 
   const wallets = []
   const storedLoginType = (localStorage.getItem('loginType') || '').toLowerCase()
+  console.log('[InstallDialog] Detecting wallets, loginType:', storedLoginType)
 
   // Check wallet availability based on logintype
-  if (storedLoginType === 'ssp' && window.ssp) {
+  if (storedLoginType === 'ssp' && isSSPAvailable()) {
     wallets.push('SSP')
   }
 
-  if (storedLoginType === 'metamask' && window.ethereum && window.ethereum.isMetaMask) {
+  if (storedLoginType === 'metamask' && isBrowserMetaMaskAvailable()) {
     wallets.push('MetaMask')
   }
 
-  if (storedLoginType === 'walletconnect' && window.ethereum && isWalletConnectProvider(window.ethereum)) {
+  if (storedLoginType === 'walletconnect') {
+    // Trust loginType - don't check localStorage or initialize AppKit
+    // AppKit will only initialize when user clicks sign button
     wallets.push('WalletConnect')
   }
 
   // ZelCore: check extension availability, otherwise assume app available
   if (storedLoginType === 'zelcore') {
-    if (window.zelcore) {
+    if (isZelcoreAvailable()) {
       wallets.push('ZelCore Extension')
     } else {
       wallets.push('ZelCore App')
@@ -1603,7 +1609,7 @@ const detectedSigningMethod = computed(() => {
     const loginType = storedLoginType.toLowerCase()
 
     if (loginType === 'zelcore') {
-      detectedMethod = window.zelcore ? 'ZelCore Extension' : 'ZelCore App'
+      detectedMethod = isZelcoreAvailable() ? 'ZelCore Extension' : 'ZelCore App'
     } else if (loginType === 'ssp') {
       detectedMethod = 'SSP'
     } else if (loginType === 'metamask') {
@@ -1629,7 +1635,7 @@ const detectedSigningMethod = computed(() => {
   }
 
   console.log('Detected signing method:', detectedMethod)
-  
+
   return detectedMethod
 })
 
@@ -1650,6 +1656,11 @@ watch(detectedSigningMethod, (newMethod, oldMethod) => {
 onMounted(async () => {
   checkAuthentication()
   fetchDeploymentInfo()
+
+  // No automatic polling or AppKit initialization on page load
+  // AppKit will only initialize when user clicks sign button
+  // This prevents stale relay errors from appearing on page load
+  console.log('[InstallDialog] Lazy AppKit initialization enabled - will init only on sign button click')
 
   // Fetch live geolocation data for instance availability checking
   try {
@@ -2006,7 +2017,7 @@ watch(() => props.app, newApp => {
 const fluxStore = useFluxStore()
 const { privilege } = storeToRefs(fluxStore)
 const zelidauth = ref(null)
-const isZelCoreUser = ref(false)
+const isWalletUser = ref(false)
 
 // Payment methods - 2 fiat + 2 crypto options for all users
 const paymentMethods = computed(() => {
@@ -2632,7 +2643,7 @@ const nextStep = () => {
     }
 
     // For non-wallet users (SSO), skip the signing step (step 4)
-    if (!isZelCoreUser.value && nextStepIndex === 4) {
+    if (!isWalletUser.value && nextStepIndex === 4) {
       nextStepIndex = 5 // Skip to payment step
     }
 
@@ -2714,7 +2725,7 @@ const handlePreviousStep = () => {
   }
 
   // Regular app navigation
-  const signingStepIndex = isZelCoreUser.value ? 4 : -1 // Signing is step 4 for wallet users, non-existent for SSO users
+  const signingStepIndex = isWalletUser.value ? 4 : -1 // Signing is step 4 for wallet users, non-existent for SSO users
 
   // If going back FROM signing/payment/deployment step, reset signing state
   if (currentStep.value >= signingStepIndex) {
@@ -2746,7 +2757,7 @@ const handlePreviousStep = () => {
     }
 
     // For non-wallet users (SSO), skip the signing step when going backwards (step 4)
-    if (!isZelCoreUser.value && currentStep.value === 5 && prevStepIndex === 4) {
+    if (!isWalletUser.value && currentStep.value === 5 && prevStepIndex === 4) {
       prevStepIndex = 3 // Skip back to email alerts step
     }
 
@@ -2919,8 +2930,8 @@ watch([() => config.value.cpu, () => config.value.ram, () => config.value.storag
     redirectCountdown.value = 3
 
     // If user was on signing step or later, keep them on signing step to re-sign
-    if (currentStep.value >= (isZelCoreUser.value ? 2 : 1)) {
-      currentStep.value = isZelCoreUser.value ? 2 : 1
+    if (currentStep.value >= (isWalletUser.value ? 2 : 1)) {
+      currentStep.value = isWalletUser.value ? 2 : 1
     }
   }
 }, { deep: true })
@@ -3082,12 +3093,34 @@ const generateDeploymentMessage = async () => {
       const scaledRAM = Math.round(component.ram * ramMultiplier)
       const scaledHDD = Math.round(component.hdd * ssdMultiplier)
 
+      // Auto-generate ports from portSpecs if available (matches FluxCloud deployment_mixin.dart:99-119)
+      let componentPorts = component.ports || []
+      if (component.portSpecs && component.portSpecs.length > 0) {
+        const generatedPorts = []
+        for (const portSpec of component.portSpecs) {
+          const parts = portSpec.split('-')
+          const minPort = parseInt(parts[0])
+          const maxPort = parseInt(parts[1])
+
+          if (!isNaN(minPort) && !isNaN(maxPort)) {
+            // Generate random port within range
+            const randomPort = Math.floor(Math.random() * (maxPort - minPort + 1) + minPort)
+            generatedPorts.push(randomPort)
+          }
+        }
+
+        // Use generated ports if we successfully generated them
+        if (generatedPorts.length > 0) {
+          componentPorts = generatedPorts
+        }
+      }
+
       // Match exact structure from FluxCloud AppComponent (lines 150-176)
       const appComponent = {
         name: component.name,
         description: component.description,
         repotag: component.repotag,
-        ports: component.ports,
+        ports: componentPorts,
         domains: component.domains.map(d => d.replace(/"/g, '"')),
         environmentParameters: environmentParameters, // Version 4+ uses correct spelling
         commands: component.commands.map(c => c.replace(/"/g, '"')),
@@ -3124,6 +3157,32 @@ const generateDeploymentMessage = async () => {
     nodes: props.app.nodes || [],
     staticip: props.app.staticip || false,
     enterprise: '', // v8 enterprise support - will be populated if isAutoEnterprise is true
+  }
+
+  // Upload environmentParameters to Flux Storage for components with envFluxStorage flag (matches FluxCloud deployment_mixin.dart:198-213)
+  // This handles games and regular apps. WordPress uses app-level uploadEnvToStorage flag above.
+  for (const component of globalAppSpec.compose) {
+    if (component.envFluxStorage && component.environmentParameters && component.environmentParameters.length > 0) {
+      // Check if already uploaded (e.g., by WordPress uploadEnvToStorage logic)
+      const alreadyUploaded = component.environmentParameters.some(param => param.startsWith('F_S_ENV='))
+
+      if (!alreadyUploaded) {
+        try {
+          const envid = StorageService.generateContactsId() // Use same generator as FluxCloud
+          await StorageService.uploadEnv({
+            envid,
+            env: component.environmentParameters,
+          })
+
+          // Replace environmentParameters with storage reference
+          component.environmentParameters = [StorageService.getEnvStorageReference(envid)]
+          console.log(`✅ Uploaded env for component ${component.name}, reference: ${component.environmentParameters[0]}`)
+        } catch (error) {
+          console.error('Flux Storage upload failed:', error)
+          throw new Error(`Failed to upload environment parameters to Flux Storage: ${error.message}`)
+        }
+      }
+    }
   }
 
   // Handle v8 enterprise encryption if isAutoEnterprise is enabled
@@ -3211,27 +3270,17 @@ const generateDeploymentMessage = async () => {
 }
 
 const signWithSSP = async message => {
-  if (!window.ssp) {
-    throw new Error('SSP Wallet not installed')
-  }
-
   if (sspSigningInProgress) {
-    return
+    return Promise.reject(new Error('SSP signing already in progress'))
   }
 
   try {
     sspSigningInProgress = true
-    const responseData = await window.ssp.request('sspwid_sign_message', {
-      message: message,
-    })
-
-    if (responseData.status === 'ERROR') {
-      throw new Error(responseData.data || responseData.result)
-    }
+    const result = await walletServiceSignWithSSP(message)
 
     deploymentSignature.value = {
-      signature: responseData.signature,
-      address: responseData.address,
+      signature: result.signature,
+      address: result.address,
       method: 'SSP',
     }
     sspSigningInProgress = false
@@ -3250,7 +3299,7 @@ let signingCancelled = false
 
 const signWithZelCore = async message => {
   if (zelcoreSigningInProgress) {
-    return
+    return Promise.reject(new Error('ZelCore signing already in progress'))
   }
 
   return new Promise(async (resolve, reject) => {
@@ -3262,7 +3311,7 @@ const signWithZelCore = async message => {
       if (!zelidauth) {
         zelcoreSigningInProgress = false
         reject(new Error('ZelCore user not logged in'))
-        
+
         return
       }
 
@@ -3275,86 +3324,48 @@ const signWithZelCore = async message => {
         if (!zelid) {
           zelcoreSigningInProgress = false
           reject(new Error('ZelID not found in authentication data'))
-          
+
           return
         }
       } catch (e) {
         zelcoreSigningInProgress = false
         reject(new Error('Could not parse zelidauth data'))
-        
+
         return
       }
 
-      // Handle long messages using Flux Storage (same as xDAO implementation)
-      let messageToSign = message
-      let useFluxStorage = false
-
-      if (message.length > 1800) {
-
-        try {
-          // Upload to Flux Storage (same endpoint as xDAO)
-          const data = {
-            publicid: Math.floor((Math.random() * 999999999999999)).toString(),
-            public: message,
-          }
-
-          const response = await axios.post('https://storage.runonflux.io/v1/public', data)
-
-          if (response.status === 200) {
-            // Use Flux Storage URL format
-            messageToSign = `FLUX_URL=https://storage.runonflux.io/v1/public/${data.publicid}`
-            useFluxStorage = true
-
-          } else {
-            throw new Error('Storage upload failed with status: ' + response.status)
-          }
-        } catch (error) {
-          console.error('Flux Storage upload failed:', error.message)
-          zelcoreSigningInProgress = false
-          reject(new Error('Message too long for ZelCore and Flux Storage is unavailable. Please try again later.'))
-          
-          return
-        }
-      }
-
-      // Detect ZelCore version - external desktop app vs browser extension
+      // Check if we need custom WebSocket callback for desktop app
       const hasExtension = window.zelcore && typeof window.zelcore.sign === 'function'
       const hasProtocol = window.zelcore && typeof window.zelcore.protocol === 'function'
-      const isExternalApp = !window.zelcore // External desktop app doesn't inject window.zelcore
+      const isExternalApp = !window.zelcore
 
+      // If extension, use shared function directly
       if (hasExtension) {
-        // ZelCore Extension - direct signing
         try {
-          const signature = await window.zelcore.sign(messageToSign)
-
+          const result = await walletServiceSignWithZelcore(message, zelid)
           deploymentSignature.value = {
-            signature: signature,
-            address: zelid,
+            signature: result.signature,
+            address: result.address,
             method: 'ZelCore Extension',
           }
-
           zelcoreSigningInProgress = false
           resolve()
         } catch (error) {
           zelcoreSigningInProgress = false
-          reject(new Error('ZelCore Extension signing failed: ' + error.message))
+          reject(error)
         }
 
-      } else if (hasProtocol || isExternalApp) {
-        // ZelCore Desktop App - protocol URL with WebSocket callback handling (like FluxCloud)
+        return
+      }
 
-        // Get backend URL - prioritize detected backend over localStorage
+      // For desktop app, need custom WebSocket with query-string parsing
+      if (hasProtocol || isExternalApp) {
         const backendURL = getDetectedBackendURL()
-        const callbackURL = `${backendURL}/id/providesign`
-
-
-        // Set up WebSocket for ZelCore response (like SubscriptionManager)
-        // IMPORTANT: Use the SAME timestamp that was used in the message
         const timestamp = deploymentTimestamp.value
         if (!timestamp) {
           zelcoreSigningInProgress = false
           reject(new Error('Message timestamp not available'))
-          
+
           return
         }
 
@@ -3362,34 +3373,27 @@ const signWithZelCore = async message => {
         const sigMessage = `${zelid}${timestamp}`
         const wsUri = `${wsBackendURL}/ws/sign/${sigMessage}`
 
-
         try {
           const ws = new WebSocket(wsUri)
 
           const timeoutId = setTimeout(() => {
             ws.close()
             zelcoreSigningInProgress = false
-            reject(new Error('ZelCore signing timeout. Please make sure ZelCore app is running and try again.'))
-          }, 60000) // 60 second timeout
+            reject(new Error('ZelCore signing timeout'))
+          }, 60000)
 
           ws.onmessage = event => {
             try {
-
-              // Parse the query string response using qs (like SubscriptionManager)
               const parsed = qs.parse(event.data)
-
-              // Check for signature in the flattened structure: data[signature]
               if (parsed.status === 'success' && parsed['data[signature]']) {
                 clearTimeout(timeoutId)
                 ws.close()
                 zelcoreSigningInProgress = false
-
                 deploymentSignature.value = {
                   signature: parsed['data[signature]'],
                   address: zelid,
                   method: 'ZelCore App',
                 }
-
                 resolve()
               } else {
                 clearTimeout(timeoutId)
@@ -3398,7 +3402,6 @@ const signWithZelCore = async message => {
                 reject(new Error('ZelCore signing failed: ' + (parsed.message || 'No signature in response')))
               }
             } catch (error) {
-              console.error('Error parsing WebSocket message:', error)
               clearTimeout(timeoutId)
               ws.close()
               zelcoreSigningInProgress = false
@@ -3406,62 +3409,47 @@ const signWithZelCore = async message => {
             }
           }
 
-          ws.onopen = () => {
-          }
-
           ws.onerror = error => {
-            console.error('WebSocket error:', error)
             clearTimeout(timeoutId)
             zelcoreSigningInProgress = false
             reject(new Error('WebSocket connection failed'))
           }
-
-          ws.onclose = event => {
-          }
-
         } catch (error) {
           zelcoreSigningInProgress = false
           reject(new Error('Failed to establish WebSocket connection: ' + error.message))
+
+          return
         }
 
-        // Protocol setup with correct callback URL
-
-        // For signing, use action=sign (same as FluxCloud)
-        const protocol = `zel:?action=sign&message=${encodeURIComponent(messageToSign)}&icon=https%3A%2F%2Fraw.githubusercontent.com%2Frunonflux%2Fflux%2Fmaster%2FzelID.svg&callback=${encodeURIComponent(callbackURL)}`
-
-        // Launch ZelCore protocol
-        if (window.zelcore && window.zelcore.protocol) {
-          window.zelcore.protocol(protocol)
-        } else {
-          const hiddenLink = document.createElement('a')
-          hiddenLink.href = protocol
-          hiddenLink.style.display = 'none'
-          document.body.appendChild(hiddenLink)
-          hiddenLink.click()
-          document.body.removeChild(hiddenLink)
+        // Use shared function to trigger protocol (with skipWebSocket flag so caller handles WebSocket)
+        const callbackURL = `${backendURL}/id/providesign`
+        try {
+          await walletServiceSignWithZelcore(message, zelid, callbackURL, undefined, true) // skipWebSocket = true
+          // Don't resolve here - custom WebSocket above handles that
+        } catch (error) {
+          zelcoreSigningInProgress = false
+          reject(error)
         }
 
-
-      } else {
-        // ZelCore not available, but user was logged in via ZelCore
-        // Use existing authentication credentials for signing
-
-        // Use the existing signature from login for deployment
-        const authData = zelidauth.includes('zelid=')
-          ? Object.fromEntries(new URLSearchParams(zelidauth))
-          : JSON.parse(zelidauth)
-
-        deploymentSignature.value = {
-          signature: authData.signature,
-          address: zelid,
-          method: 'ZelCore (Existing Auth)',
-          loginPhrase: authData.loginPhrase,
-        }
-
-        zelcoreSigningInProgress = false
-        resolve()
+        return
       }
 
+      // ZelCore not available, but user was logged in via ZelCore
+      // Use existing authentication credentials for signing
+      // Use the existing signature from login for deployment
+      const authData = zelidauth.includes('zelid=')
+        ? Object.fromEntries(new URLSearchParams(zelidauth))
+        : JSON.parse(zelidauth)
+
+      deploymentSignature.value = {
+        signature: authData.signature,
+        address: zelid,
+        method: 'ZelCore (Existing Auth)',
+        loginPhrase: authData.loginPhrase,
+      }
+
+      zelcoreSigningInProgress = false
+      resolve()
     } catch (error) {
       console.error('ZelCore signing error:', error)
       zelcoreSigningInProgress = false
@@ -3476,7 +3464,7 @@ const signWithMetaMask = async message => {
   }
 
   if (metamaskSigningInProgress) {
-    return
+    return Promise.reject(new Error('MetaMask signing already in progress'))
   }
 
   try {
@@ -3505,40 +3493,45 @@ const signWithMetaMask = async message => {
 }
 
 const signWithWalletConnect = async message => {
-  if (!window.ethereum) {
-    throw new Error('No Ethereum provider found')
-  }
-
-  if (!isWalletConnectProvider(window.ethereum)) {
-    throw new Error('WalletConnect not available')
-  }
+  console.log('[InstallDialog] Starting WalletConnect signing...')
 
   if (walletConnectSigningInProgress) {
-    return
+    console.warn('[InstallDialog] WalletConnect signing already in progress')
+    return Promise.reject(new Error('WalletConnect signing already in progress'))
   }
 
   try {
     walletConnectSigningInProgress = true
+    console.log('[InstallDialog] Calling walletService sign function...')
 
-    // Request account access
-    const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' })
-    const account = accounts[0]
+    // Use the walletService signing function which handles Reown AppKit
+    const signature = await walletServiceSignWithWalletConnect(message)
+    console.log('[InstallDialog] Sign function returned, signature:', signature?.substring(0, 20) + '...')
 
-    // Sign the message
-    const signature = await window.ethereum.request({
-      method: 'personal_sign',
-      params: [message, account],
+    const connectedAccount = getConnectedAccount()
+    console.log('[InstallDialog] Connected account:', connectedAccount)
+
+    if (!connectedAccount?.address) {
+      throw new Error('No connected account found')
+    }
+
+    console.log('[InstallDialog] ✅ Setting deploymentSignature with:', {
+      signatureLength: signature.length,
+      address: connectedAccount.address,
+      method: 'WalletConnect',
     })
 
     deploymentSignature.value = {
       signature: signature,
-      address: account,
+      address: connectedAccount.address,
       method: 'WalletConnect',
     }
 
+    console.log('[InstallDialog] ✅ deploymentSignature set:', deploymentSignature.value)
     walletConnectSigningInProgress = false
+    console.log('[InstallDialog] ✅ WalletConnect signing complete')
   } catch (error) {
-    console.error('WalletConnect signing failed:', error)
+    console.error('[InstallDialog] WalletConnect signing failed:', error)
     walletConnectSigningInProgress = false
     throw new Error('WalletConnect signing failed: ' + error.message)
   }
@@ -3706,7 +3699,7 @@ const resetDialog = () => {
   signatureError.value = ''
   paymentProcessing.value = false
   paymentConfirmed.value = false
-  paymentMethod.value = isZelCoreUser.value ? 'flux' : 'stripe'
+  paymentMethod.value = isWalletUser.value ? 'flux' : 'stripe'
   showLoginDialog.value = false // Reset login dialog state
 
   // Cancel any running countdown
@@ -3841,20 +3834,13 @@ const processFluxPayment = async () => {
   paymentProcessing.value = true
 
   try {
-    // Build ZelCore payment URL
-    const amount = totalFluxPrice.value
-    const address = fluxPaymentAddress.value
-    const message = paymentHash.value
-
-    const zelCoreUrl = `zel:?action=pay&coin=flux&address=${address}&amount=${amount}&message=${message}&icon=https%3A%2F%2Fraw.githubusercontent.com%2Frunonflux%2Fflux%2Fmaster%2Fflux_banner.png`
-
-
-    // Try to open ZelCore
-    try {
-      window.location.href = zelCoreUrl
-    } catch (error) {
-      window.open(zelCoreUrl, '_self')
-    }
+    // Use walletService to initiate Zelcore payment
+    await payWithZelcore({
+      address: fluxPaymentAddress.value,
+      amount: totalFluxPrice.value,
+      message: paymentHash.value,
+      coin: 'flux'
+    })
 
     // Start monitoring for payment
     await startPaymentMonitoring()
@@ -4030,28 +4016,20 @@ const processSSPPayment = async () => {
 
   try {
     // Check if SSP wallet is installed
-    if (!window.ssp) {
+    if (!isSSPAvailable()) {
       showSnackbar('SSP Wallet not installed', 'error')
       paymentProcessing.value = false
-      
+
       return
     }
 
-    // Build SSP payment data
-    const data = {
+    // Use walletService to initiate SSP payment
+    const response = await payWithSSP({
       message: paymentHash.value,
       amount: totalFluxPrice.value.toString(),
       address: fluxPaymentAddress.value,
       chain: 'flux',
-    }
-
-
-    // Request payment through SSP wallet
-    const response = await window.ssp.request('pay', data)
-
-    if (response.status === 'ERROR') {
-      throw new Error(response.data || response.result)
-    }
+    })
 
     showSnackbar(`SSP payment initiated: ${response.txid}`, 'success', 5000)
 
@@ -4114,7 +4092,7 @@ const deployApp = async () => {
       instances: config.value.instances,
       paymentMethod: paymentMethod.value,
       totalCost: totalCost.value,
-      isZelCoreUser: isZelCoreUser,
+      isWalletUser: isWalletUser,
       signatureCompleted: signatureCompleted.value,
     }
 
@@ -4524,7 +4502,7 @@ const validateEmail = () => {
 }
 
 // Watch for authentication changes
-watch(isZelCoreUser, isZelCore => {
+watch(isWalletUser, isZelCore => {
   paymentMethod.value = isZelCore ? 'flux' : 'stripe'
 }, { immediate: true })
 

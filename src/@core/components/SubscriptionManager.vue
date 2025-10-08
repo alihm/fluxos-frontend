@@ -2241,7 +2241,7 @@ import { ref, computed, watch, onMounted } from 'vue'
 import axios from 'axios'
 import geolocations from '@/utils/geolocation'
 import qs from 'qs'
-import { SignClient } from '@walletconnect/sign-client'
+import { signWithWalletConnect, getConnectedAccount, payWithSSP, payWithZelcore, signWithSSP, signWithZelcore } from '@/utils/walletService'
 import { getUser } from '@/utils/firebase'
 import { getDetectedBackendURL } from "@/utils/backend"
 import { paymentBridge } from '@/utils/fiatGateways'
@@ -4918,19 +4918,17 @@ async function initPaypalPay(hash = null, name = null, price = null, description
 
 async function initZelcorePay() {
   try {
-    const protocol = `zel:?action=pay&coin=zelcash&address=${deploymentAddress.value}&amount=${appSpecPrice.value?.flux || 0}&message=${registrationHash.value}`
-    
     // Track payment attempt
     paymentMethod.value = 'Zelcore'
     paymentAmount.value = appSpecPrice.value?.flux || 0
-    
-    const a = document.createElement('a')
-    a.href = protocol
-    a.style.display = 'none'
-    document.body.appendChild(a)
-    a.click()
-    document.body.removeChild(a)
-    
+
+    await payWithZelcore({
+      address: deploymentAddress.value,
+      amount: appSpecPrice.value?.flux || 0,
+      message: registrationHash.value,
+      coin: 'zelcash',
+    })
+
     showToast('info', 'Zelcore payment initiated - please complete payment in Zelcore wallet')
   } catch (error) {
     showToast('error', 'Failed to open Zelcore')
@@ -4939,31 +4937,21 @@ async function initZelcorePay() {
 
 async function initSSPPay() {
   try {
-    if (!window.ssp) {
-      showToast('error', 'SSP Wallet not installed')
-      
-      return
-    }
-    
     // Track payment attempt
     paymentMethod.value = 'SSP'
     paymentAmount.value = appSpecPrice.value?.flux || 0
-    
+
     const data = {
       message: registrationHash.value,
       amount: (appSpecPrice.value?.flux || 0).toString(),
       address: deploymentAddress.value,
       chain: 'flux',
     }
-    
-    const response = await window.ssp.request('pay', data)
-    if (response.status === 'ERROR') {
-      throw new Error(response.data || response.result)
-    } else {
-      showToast('success', `SSP payment initiated: ${response.txid}`)
 
-      // Note: For crypto payments, we show as "processing" since we need to wait for blockchain confirmation
-    }
+    const response = await payWithSSP(data)
+    showToast('success', `SSP payment initiated: ${response.txid}`)
+
+    // Note: For crypto payments, we show as "processing" since we need to wait for blockchain confirmation
   } catch (error) {
     showToast('error', error.message)
 
@@ -4975,21 +4963,14 @@ async function initSSPPay() {
 
 async function initWalletConnect() {
   try {
-    if (!signClient.value) {
-      showToast('error', 'WalletConnect not initialized. Please connect using the Sign tab first.')
-      
+    const account = getConnectedAccount()
+    if (!account) {
+      showToast('error', 'WalletConnect not connected. Please log into FluxOS first.')
+
       return
     }
-    const sessions = signClient.value.session.getAll()
-    const lastKeyIndex = sessions.length - 1
-    const lastSession = sessions[lastKeyIndex]
-    if (lastSession) {
-      showToast('success', 'Using existing WalletConnect session for signing')
 
-      // This would be for signing, not payment - WalletConnect in RegisterFluxApp is used for signing
-    } else {
-      showToast('error', 'WalletConnect session expired. Please log into FluxOS again')
-    }
+    showToast('success', 'Using existing WalletConnect session for signing')
   } catch (error) {
     console.error(error)
     showToast('error', error.message)
@@ -5052,25 +5033,17 @@ async function initSignFluxSSO() {
 // === Sign with Zelcore ===
 async function initSignZelcore() {
   try {
-    const message = dataToSign.value
-    const icon = 'https%3A%2F%2Fraw.githubusercontent.com%2Frunonflux%2Fflux%2Fmaster%2FzelID.svg'
-    let protocol = `zel:?action=sign&message=${encodeURIComponent(message)}&icon=${icon}&callback=${callbackValue.value}`
-
-    if (!window.zelcore && message.length > 1800) {
-      const publicid = Math.floor(Math.random() * 999999999999999).toString()
-      await axios.post('https://storage.runonflux.io/v1/public', {
-        publicid,
-        public: message,
-      })
-      protocol = `zel:?action=sign&message=FLUX_URL=https://storage.runonflux.io/v1/public/${publicid}&icon=${icon}&callback=${callbackValue.value}`
+    const zelidauth = localStorage.getItem('zelidauth')
+    let zelid
+    if (zelidauth) {
+      const authData = zelidauth.includes('zelid=')
+        ? Object.fromEntries(new URLSearchParams(zelidauth))
+        : JSON.parse(zelidauth)
+      zelid = authData.zelid
     }
 
-    const a = document.createElement('a')
-    a.href = protocol
-    a.style.display = 'none'
-    document.body.appendChild(a)
-    a.click()
-    document.body.removeChild(a)
+    // signWithZelcore handles long messages, storage upload, and protocol launching
+    await signWithZelcore(dataToSign.value, zelid, callbackValue.value)
   } catch (error) {
     showToast('error', `Zelcore sign error: ${error}`)
   }
@@ -5107,31 +5080,15 @@ function onError(evt) { console.error('WS error', evt) }
 // === WalletConnect ===
 async function initSignWalletConnect() {
   try {
-    if (!signClient.value) {
-      signClient.value = await SignClient.init({
-        projectId: 'fluxapp',
-        metadata: {
-          name: 'Flux App',
-          description: 'Flux Login',
-          url: window.location.origin,
-          icons: [],
-        },
-      })
-    }
+    const account = getConnectedAccount()
+    if (!account) {
+      showToast('error', 'WalletConnect not connected. Please log into FluxOS first.')
 
-    const session = signClient.value.session.getAll().at(-1)
-    if (!session) {
       return
     }
 
-    const result = await signClient.value.request({
-      topic: session.topic,
-      chainId: 'eip155:1',
-      request: {
-        method: 'personal_sign',
-        params: [dataToSig.value, session.namespaces.eip155.accounts[0].split(':')[2]],
-      },
-    })
+    // Sign the message using the wallet service
+    const result = await signWithWalletConnect(dataToSign.value)
 
     signature.value = result
   } catch (err) {
@@ -5162,19 +5119,8 @@ async function initSignMetamask() {
 // === SSP ===
 async function initSignSSP() {
   try {
-    if (!window.ssp) {
-      showToast('error', 'SSP Wallet not found')
-      
-      return
-    }
-
-    const res = await window.ssp.request('sspwid_sign_message', {
-      message: dataToSign.value,
-    })
-
-    if (res.status === 'ERROR') throw new Error(res.data || res.result)
-
-    signature.value = res.signature
+    const result = await signWithSSP(dataToSign.value)
+    signature.value = result.signature
   } catch (err) {
     showToast('error', err.message)
   }

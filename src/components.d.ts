@@ -119,6 +119,5 @@ declare module 'vue' {
     VolumeBrowser: typeof import('./@core/components/VolumeBrowser.vue')['default']
     VolumePathBuilder: typeof import('./@core/components/VolumePathBuilder.vue')['default']
     VueApexCharts: typeof import('vue3-apexcharts')['default']
-    WordPressGuide: typeof import('./components/Marketplace/WordPressGuide.vue')['default']
   }
 }

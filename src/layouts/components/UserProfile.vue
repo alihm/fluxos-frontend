@@ -5,6 +5,7 @@ import IDService from "@/services/IDService"
 import qs from "qs"
 import { useRoute, useRouter } from "vue-router"
 import { eventBus } from "@/utils/eventBus"
+import { disconnectWalletConnect } from "@/utils/walletService"
 
 const route = useRoute()
 const router = useRouter()
@@ -74,25 +75,40 @@ const userData = {
 
 async function logout() {
   const zelidauth = localStorage.getItem("zelidauth")
+  const loginType = localStorage.getItem("loginType")
 
+  // Clear auth data
   localStorage.removeItem("zelidauth")
   localStorage.removeItem("loginType")
   fluxStore.setPrivilege("none")
   fluxStore.setZelid("")
 
+  // Logout from backend session
   try {
-    const response = await IDService.logoutCurrentSession(zelidauth)
+    await IDService.logoutCurrentSession(zelidauth)
   } catch (error) {
     console.error("API error during logout:", error)
   }
 
-
-  try {
-    await firebase.auth().signOut()
-    console.log("Firebase logged out successfully.")
-  } catch (error) {
-    console.error("Error during Firebase logout:", error)
+  // Logout from the specific authentication provider
+  if (loginType === 'sso') {
+    // Only logout from Firebase if logged in via SSO (Google/Apple)
+    try {
+      await firebase.auth().signOut()
+      console.log("Firebase logged out successfully")
+    } catch (error) {
+      console.error("Error during Firebase logout:", error)
+    }
+  } else if (loginType === 'walletconnect') {
+    // Disconnect WalletConnect if logged in via WalletConnect
+    try {
+      await disconnectWalletConnect()
+      console.log("WalletConnect disconnected successfully")
+    } catch (error) {
+      console.error("Error disconnecting WalletConnect:", error)
+    }
   }
+  // For other login types (zelcore, ssp, metamask), no additional cleanup needed
 
   showToast('success', 'Logged out successfully')
   if (route.path === "/") {

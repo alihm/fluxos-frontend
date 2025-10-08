@@ -567,9 +567,7 @@ import metamaskLogo from "@images/metamask.svg?url"
 import sspLogoBlack from "@images/ssp-logo-black.svg?url"
 import sspLogoWhite from "@images/ssp-logo-white.svg?url"
 import walletConnectLogo from "@images/walletconnect.svg?url"
-import { MetaMaskSDK } from "@metamask/sdk"
-import { WalletConnectModal } from "@walletconnect/modal"
-import { SignClient } from "@walletconnect/sign-client"
+import { openWalletConnect, signWithWalletConnect, closeWalletConnect, signWithMetaMask, disconnectWalletConnect, appKit } from '@/utils/walletService'
 import axios from "axios"
 
 import { storeToRefs } from "pinia"
@@ -592,17 +590,6 @@ const props = defineProps({
 
 // Declare emitted events
 const emit = defineEmits(['loginSuccess'])
-
-const MMSDK = new MetaMaskSDK({
-  checkInstallationImmediately: false,
-  enableAnalytics: true,
-  dappMetadata: {
-    name: 'Flux Cloud',
-    url: window.location.hostname === 'localhost'
-      ? window.location.origin
-      : 'https://home.runonflux.io',
-  },
-})
 
 const tosLink = "https://cdn.runonflux.io/Flux_Terms_of_Service.pdf"
 const privacyLink = "https://runonflux.io/privacyPolicy"
@@ -659,22 +646,7 @@ const passwordRulesMatch = computed(() => [
   v => v === createSSOForm.value.pw1 || t("login.passwordMismatch"),
 ])
 
-const isLocalhost = window.location.hostname === "localhost"
-
-const projectId = "df787edc6839c7de49d527bba9199eaa"
-
-const walletConnectOptions = {
-  projectId,
-  metadata: {
-    name: "Flux Cloud",
-    description: "Flux, Your Gateway to a Decentralized World",
-    url: isLocalhost ? window.location.origin : "https://home.runonflux.io",
-    icons: ["https://home.runonflux.io/img/logo.png"],
-  },
-}
-
-const walletConnectModal = new WalletConnectModal(walletConnectOptions)
-const signClient = ref(null)
+const appKitAccount = ref(null)
 
 const backendURL = ref(localStorage.getItem("backendURL") || getDetectedBackendURL())
 
@@ -954,63 +926,80 @@ const initiateLoginWS = async () => {
 
 const initWalletConnect = async () => {
   try {
-    if (!signClient.value) {
-      const signClientInstance = await SignClient.init(walletConnectOptions)
+    // Get login phrase first
+    await getZelIdLoginPhrase()
 
-      signClient.value = signClientInstance
+    // Open WalletConnect and wait for connection
+    const address = await openWalletConnect()
+    appKitAccount.value = { address }
+
+    // Sign the message (wallet is now connected)
+    try {
+      var signature = await signWithWalletConnect(loginPhrase.value)
+    } catch (signError) {
+      // If session expired, disconnect and reconnect
+      if (signError.message && signError.message.includes('Session expired')) {
+        // Try to disconnect (may fail if already disconnected)
+        try {
+          await disconnectWalletConnect()
+        } catch (e) {
+          // Silent fail - expected if already disconnected
+        }
+
+        // Reconnect (openWalletConnect now clears cache)
+        const newAddress = await openWalletConnect()
+        appKitAccount.value = { address: newAddress }
+
+        // Wait for provider to initialize with namespaces
+        let retries = 0
+        let providerReady = false
+
+        while (retries < 10 && !providerReady) {
+          await new Promise(r => setTimeout(r, 500))
+          try {
+            const provider = await appKit?.getWalletProvider?.()
+            if (provider?.namespaces) {
+              providerReady = true
+            } else {
+              retries++
+            }
+          } catch (e) {
+            retries++
+          }
+        }
+
+        if (!providerReady) {
+          throw new Error('Provider failed to initialize after reconnection')
+        }
+
+        // Try signing again
+        signature = await signWithWalletConnect(loginPhrase.value)
+      } else {
+        throw signError
+      }
     }
 
-    const { uri, approval } = await signClient.value.connect({
-      requiredNamespaces: {
-        eip155: {
-          methods: ["personal_sign"],
-          chains: ["eip155:1"],
-          events: ["chainChanged", "accountsChanged"],
-        },
-      },
-    })
+    // Verify login
+    const walletConnectInfo = {
+      zelid: address,
+      signature: signature,
+      loginPhrase: loginPhrase.value,
+    }
 
-    if (uri) {
-      walletConnectModal.openModal({ uri })
-
-      const session = await approval()
-
-      onSessionConnect(session)
-      walletConnectModal.closeModal()
+    const response = await IDService.verifyLogin(walletConnectInfo)
+    if (response.data.status === "success") {
+      fluxStore.setPrivilege(response.data.data.privilage)
+      fluxStore.setZelid(walletConnectInfo.zelid)
+      localStorage.setItem('loginType', 'walletconnect')
+      localStorage.setItem("zelidauth", qs.stringify(walletConnectInfo))
+      emit('loginSuccess')
+      showToast("success", response.data.data.message)
+      closeWalletConnect()
+    } else {
+      showToast(response.data.status, response.data.data.message || response.data.data)
     }
   } catch (error) {
-    showToast("error", error.message)
-  }
-}
-
-const onSessionConnect = async session => {
-  await getZelIdLoginPhrase()
-
-  const result = await signClient.value.request({
-    topic: session.topic,
-    chainId: "eip155:1",
-    request: {
-      method: "personal_sign",
-      params: [loginPhrase.value, session.namespaces.eip155.accounts[0].split(":")[2]],
-    },
-  })
-
-  const walletConnectInfo = {
-    zelid: session.namespaces.eip155.accounts[0].split(":")[2],
-    signature: result,
-    loginPhrase: loginPhrase.value,
-  }
-
-  const response = await IDService.verifyLogin(walletConnectInfo)
-  if (response.data.status === "success") {
-    fluxStore.setPrivilege(response.data.data.privilage)
-    fluxStore.setZelid(walletConnectInfo.zelid)
-    localStorage.setItem('loginType', 'walletconnect')
-    localStorage.setItem("zelidauth", qs.stringify(walletConnectInfo))
-    emit('loginSuccess')
-    showToast("success", response.data.data.message)
-  } else {
-    showToast(response.data.status, response.data.data.message || response.data.data)
+    showToast("error", error.message || "Failed to connect with WalletConnect")
   }
 }
 
@@ -1020,36 +1009,18 @@ const initMetamask = async () => {
   try {
     if (isSigning.value) {
       showToast("warning", "Please complete the previous MetaMask request.")
-      
+
       return
-    }
-    let provider = MMSDK.getProvider()
-
-    if (!provider) {
-      await MMSDK.init()
-      provider = MMSDK.getProvider()
-    }
-
-    if (!provider) {
-      throw new Error("MetaMask provider still not available after init")
     }
 
     isSigning.value = true
     await getZelIdLoginPhrase()
 
-    const accounts = await provider.request({ method: "eth_requestAccounts" })
-    const account = accounts[0]
-    if (!account) throw new Error("No MetaMask account found")
-
-    const msg = loginPhrase.value
-
-    const signature = await provider.request({
-      method: "personal_sign",
-      params: [msg, account],
-    })
+    // Use walletService to sign with MetaMask
+    const { address, signature } = await signWithMetaMask(loginPhrase.value)
 
     const metamaskLogin = {
-      zelid: account,
+      zelid: address,
       signature,
       loginPhrase: loginPhrase.value,
     }

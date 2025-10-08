@@ -466,6 +466,7 @@ import { useFluxStore } from '@/stores/flux'
 import { storeToRefs } from 'pinia'
 import axios from 'axios'
 import { useSnackbar } from '@/composables/useSnackbar'
+import { signWithSSP, signWithZelcore } from '@/utils/walletService'
 
 // Props and Emits
 const props = defineProps({
@@ -910,28 +911,15 @@ const loadVotes = async () => {
 
 const initSSP = async () => {
   try {
-    if (!window.ssp) {
-      showSnackbar('SSP Wallet not installed', 'error')
-      
-      return
-    }
+    const result = await signWithSSP(dataToSign.value)
 
-    const responseData = await window.ssp.request('sspwid_sign_message', {
-      message: dataToSign.value,
-    })
-
-    if (responseData.status === 'ERROR') {
-      throw new Error(responseData.data || responseData.result)
-    }
-
-    signature.value = responseData.signature
-    userZelid.value = responseData.address
+    signature.value = result.signature
+    userZelid.value = result.address
 
     // Load vote information after getting zelid
     await loadVotes()
 
     showSnackbar('Successfully signed with SSP', 'success')
-    console.log('Successfully signed with SSP')
   } catch (error) {
     console.error('SSP signing error:', error)
     showSnackbar(error.message || 'Failed to sign with SSP', 'error')
@@ -940,36 +928,9 @@ const initSSP = async () => {
 
 const initZelcore = async () => {
   try {
-    if (dataToSign.value.length > 1800) {
-      // Upload to flux storage for long messages
-      const data = {
-        publicid: Math.floor((Math.random() * 999999999999999)).toString(),
-        public: dataToSign.value,
-      }
-      await axios.post('https://storage.runonflux.io/v1/public', data)
-
-      const protocol = `zel:?action=sign&message=FLUX_URL=https://storage.runonflux.io/v1/public/${data.publicid}&icon=https%3A%2F%2Fraw.githubusercontent.com%2Frunonflux%2Fflux%2Fmaster%2FzelID.svg`
-
-      const hiddenLink = document.createElement('a')
-      hiddenLink.href = protocol
-      hiddenLink.style.display = 'none'
-      document.body.appendChild(hiddenLink)
-      hiddenLink.click()
-      document.body.removeChild(hiddenLink)
-    } else {
-      const protocol = `zel:?action=sign&message=${dataToSign.value}&icon=https%3A%2F%2Fraw.githubusercontent.com%2Frunonflux%2Fflux%2Fmaster%2FzelID.svg`
-
-      if (window.zelcore) {
-        window.zelcore.protocol(protocol)
-      } else {
-        const hiddenLink = document.createElement('a')
-        hiddenLink.href = protocol
-        hiddenLink.style.display = 'none'
-        document.body.appendChild(hiddenLink)
-        hiddenLink.click()
-        document.body.removeChild(hiddenLink)
-      }
-    }
+    // signWithZelcore handles long messages and protocol launching automatically
+    // No callback URL means user will manually complete the signing flow
+    await signWithZelcore(dataToSign.value, userZelid.value || currentUserZelid.value)
 
     console.log('Zelcore signing initiated')
   } catch (error) {
