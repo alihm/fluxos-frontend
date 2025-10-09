@@ -61,7 +61,17 @@
               :options="editorOptions"
               :theme="editorTheme"
               class="monaco-editor"
+              @mount="editorMounted = true"
             />
+            <!-- Custom loader overlay -->
+            <div v-show="!editorMounted" class="monaco-loader-overlay">
+              <LoadingSpinner
+                icon="mdi-file-import"
+                :icon-size="50"
+                title="Loading editor..."
+                message=""
+              />
+            </div>
           </div>
         </div>
       </VCardText>
@@ -110,6 +120,7 @@ import { ref, watch, computed } from 'vue'
 import { useTheme } from 'vuetify'
 import yaml from 'js-yaml'
 import { VueMonacoEditor } from '@guolao/vue-monaco-editor'
+import LoadingSpinner from '@/components/Marketplace/LoadingSpinner.vue'
 
 const theme = useTheme()
 
@@ -127,6 +138,7 @@ const isDragging = ref(false)
 const fileInput = ref(null)
 const loadedSpec = ref(null)
 const specJson = ref('')
+const editorMounted = ref(false)
 const snackbar = ref({
   show: false,
   message: '',
@@ -165,6 +177,7 @@ watch(isOpen, (newValue) => {
     setTimeout(() => {
       loadedSpec.value = null
       specJson.value = ''
+      editorMounted.value = false
     }, 300)
   }
 })
@@ -385,6 +398,9 @@ async function processFile(file) {
     // Store the loaded spec and show it for editing
     loadedSpec.value = spec
     specJson.value = JSON.stringify(spec, null, 2)
+
+    // Reset editor mounted state to show loader
+    editorMounted.value = false
   } catch (error) {
     console.error('Error parsing file:', error)
     snackbar.value.message = error.message
@@ -438,6 +454,7 @@ async function processFile(file) {
   border: 1px solid rgba(var(--v-border-color), var(--v-border-opacity));
   border-radius: 4px;
   overflow: hidden;
+  position: relative;
 }
 
 .monaco-editor {
@@ -456,5 +473,25 @@ async function processFile(file) {
 .dialog-actions {
   padding-left: 32px !important;
   padding-right: 32px !important;
+}
+
+.monaco-loader-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(var(--v-theme-surface), 0.95);
+  z-index: 10;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.monaco-loader-overlay :deep(.loading-container) {
+  min-height: auto !important;
+  margin-top: 0 !important;
+  padding: 0 !important;
 }
 </style>
