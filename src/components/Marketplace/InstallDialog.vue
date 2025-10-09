@@ -2889,8 +2889,10 @@ const signApplicationMessage = async () => {
     }, 3000)
 
   } catch (error) {
-    signingErrors.value.signing = 'Failed to sign message: ' + error.message
+    const errorMessage = 'Failed to sign message: ' + error.message
+    signingErrors.value.signing = errorMessage
     signingProgress.value.signing = false
+    showSnackbar(errorMessage, 'error', 6000)
   }
 }
 
@@ -3667,7 +3669,9 @@ const registerApplication = async () => {
 
   } catch (error) {
     console.error('Registration error:', error)
-    signingErrors.value.registering = 'Failed to register application: ' + error.message
+    const errorMessage = 'Failed to register application: ' + error.message
+    signingErrors.value.registering = errorMessage
+    showSnackbar(errorMessage, 'error', 6000)
 
     // If signature is missing, reset signing state so user can re-sign
     if (error.message.includes('No signature available')) {
@@ -5296,12 +5300,8 @@ watch(() => props.modelValue, newValue => {
 
 .wallet-link {
   display: inline-block;
-  cursor: pointer;
-}
-
-.wallet-link:hover .walletIcon {
-  filter: opacity(70%);
-  transform: scale(1.1);
+  cursor: default;
+  pointer-events: none;
 }
 
 /* Payment Method Logo Styling */
