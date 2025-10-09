@@ -86,12 +86,19 @@ const panelStyle = computed(() => {
 .image-section {
   flex: 1;
   max-width: 50%;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .header-image {
   max-height: 300px;
-  width: 100%;
+  max-width: 100%;
+  width: auto;
+  height: auto;
   object-fit: contain;
+  display: block;
 }
 
 /* Responsive adjustments */
@@ -103,6 +110,7 @@ const panelStyle = computed(() => {
 
   .image-section {
     max-width: 100%;
+    width: 100%;
   }
 
   .game-title {
@@ -124,14 +132,15 @@ const panelStyle = computed(() => {
   }
 
   .image-section {
-    display: flex !important;
-    justify-content: center;
     max-width: 100%;
+    width: 100%;
   }
 
   .header-image {
     max-height: 150px;
+    max-width: 90%;
     width: auto;
+    height: auto;
   }
 }
 </style>

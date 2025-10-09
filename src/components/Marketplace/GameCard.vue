@@ -22,6 +22,7 @@
           v-if="game.icon"
           :src="parseLandingImage(game.icon)"
           class="game-logo"
+          max-height="200"
           contain
         />
       </div>
@@ -73,6 +74,7 @@ const navigateToGame = () => {
 
 <style scoped>
 .game-card {
+  --logo-max-height: 200px;
   height: 500px;
   border-radius: 24px;
   overflow: hidden;
@@ -113,12 +115,48 @@ const navigateToGame = () => {
   display: flex;
   align-items: center;
   justify-content: center;
+  overflow: hidden;
+  width: 100%;
 }
 
 .game-logo {
-  max-height: 200px;
-  max-width: 300px;
+  max-height: var(--logo-max-height);
+  max-width: 90%;
+  height: var(--logo-max-height);
+  width: auto;
   filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.8));
+}
+
+.game-logo :deep(.v-responsive) {
+  max-height: var(--logo-max-height) !important;
+  height: var(--logo-max-height) !important;
+  max-width: 100% !important;
+  width: auto !important;
+}
+
+.game-logo :deep(.v-responsive__sizer) {
+  padding-bottom: 0 !important;
+}
+
+.game-logo :deep(.v-responsive__content) {
+  max-height: var(--logo-max-height) !important;
+  height: 100% !important;
+  max-width: 100% !important;
+}
+
+.game-logo :deep(.v-img__img) {
+  object-fit: contain !important;
+  position: relative !important;
+  max-height: var(--logo-max-height) !important;
+  max-width: 100% !important;
+}
+
+.game-logo :deep(img) {
+  max-width: 100% !important;
+  max-height: var(--logo-max-height) !important;
+  width: auto !important;
+  height: auto !important;
+  object-fit: contain !important;
 }
 
 .view-details-btn {
@@ -141,12 +179,20 @@ const navigateToGame = () => {
 /* Responsive adjustments */
 @media (max-width: 600px) {
   .game-card {
+    --logo-max-height: 100px;
     height: 500px;
   }
 
+  .game-card-content {
+    padding: 16px;
+  }
+
+  .logo-section {
+    padding: 0 10px;
+  }
+
   .game-logo {
-    max-height: 150px;
-    max-width: 250px;
+    max-width: 85% !important;
   }
 
   .view-details-btn {
@@ -156,6 +202,34 @@ const navigateToGame = () => {
 
   .pricing-text {
     font-size: 14px;
+  }
+
+  .price-chip {
+    font-size: 12px;
+  }
+}
+
+/* Extra small screens */
+@media (max-width: 400px) {
+  .game-card {
+    --logo-max-height: 70px;
+  }
+
+  .game-card-content {
+    padding: 12px;
+  }
+
+  .logo-section {
+    padding: 0 8px;
+  }
+
+  .game-logo {
+    max-width: 80% !important;
+  }
+
+  .price-chip {
+    font-size: 11px;
+    padding: 4px 8px;
   }
 }
 </style>

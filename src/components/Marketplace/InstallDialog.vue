@@ -84,10 +84,8 @@
             <div class="step-container">
 
               <!-- Selected Configuration Display (for games) -->
-              <div v-if="selectedConfig" class="config-section modern-section selected-config-section" style="margin-bottom: 24px; padding: 0 !important; height: 120px;">
-                <div v-if="appIcon && !imageError" class="config-logo" style="display: flex; justify-content: center; align-items: center; height: 100%;">
-                  <img :src="appIcon" :alt="app.displayName || app.name" style="max-height: 100%; max-width: 100%; object-fit: contain;" @error="imageError = true" />
-                </div>
+              <div v-if="selectedConfig && appIcon && !imageError" class="selected-config-logo-container">
+                <img :src="appIcon" :alt="app.displayName || app.name" class="selected-config-logo" @error="imageError = true" />
               </div>
 
               <div class="config-section modern-section hardware-section">
@@ -6299,22 +6297,21 @@ watch(() => props.modelValue, newValue => {
   }
 }
 
-/* Selected Configuration Section (for games) */
-.selected-config-section .selected-config-info {
-  padding: 16px;
-  text-align: center;
+/* Selected Configuration Logo */
+.selected-config-logo-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 24px;
+  width: 100%;
 }
 
-.selected-config-section h4 {
-  font-size: 1.5rem;
-  font-weight: 600;
-  margin-bottom: 8px;
-}
-
-.selected-config-section .config-description {
-  font-size: 1rem;
-  opacity: 0.8;
-  margin-bottom: 8px;
+.selected-config-logo {
+  width: 300px;
+  height: auto;
+  max-height: 180px;
+  object-fit: contain;
+  display: block;
 }
 </style>
 
