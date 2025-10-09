@@ -183,7 +183,6 @@ Contributions are welcome! Please:
 ## Development Guidelines
 
 - Follow Vue 3 Composition API patterns
-- Use TypeScript types when possible
 - Follow ESLint rules (`npm run lint`)
 - Test thoroughly before submitting PRs
 - Keep components small and reusable
