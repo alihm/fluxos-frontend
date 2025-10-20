@@ -16,157 +16,157 @@
     </div>
 
     <!-- Users Section -->
-        <VCard elevation="1">
-          <VCardText class="pa-3">
-            <VRow class="mb-3">
-              <VCol cols="12" md="6">
-                <VTextField
-                  v-model="usersSearch"
-                  label="Search users"
-                  variant="outlined"
-                  density="compact"
-                  clearable
-                  hide-details
-                >
-                  <template #prepend-inner>
-                    <VIcon icon="mdi-magnify" size="22" />
-                  </template>
-                </VTextField>
-              </VCol>
-              <VCol cols="12" md="6" class="d-flex justify-end align-center">
-                <VBtn
-                  color="primary"
-                  variant="flat"
-                  @click="loadUsers"
-                >
-                  <VIcon icon="mdi-refresh" size="22" class="mr-2" />
-                  Refresh
-                </VBtn>
-              </VCol>
-            </VRow>
+    <VCard elevation="1">
+      <VCardText class="pa-3">
+        <VRow class="mb-3">
+          <VCol cols="12" md="6">
+            <VTextField
+              v-model="usersSearch"
+              label="Search users"
+              variant="outlined"
+              density="compact"
+              clearable
+              hide-details
+            >
+              <template #prepend-inner>
+                <VIcon icon="mdi-magnify" size="22" />
+              </template>
+            </VTextField>
+          </VCol>
+          <VCol cols="12" md="6" class="d-flex justify-end align-center">
+            <VBtn
+              color="primary"
+              variant="flat"
+              @click="loadUsers"
+            >
+              <VIcon icon="mdi-refresh" size="22" class="mr-2" />
+              Refresh
+            </VBtn>
+          </VCol>
+        </VRow>
 
-            <VCard variant="outlined">
-              <VDataTable
-                :headers="usersHeaders"
-                :items="users"
-                :search="usersSearch"
-                :loading="usersLoading"
-                item-value="zelid"
-                hover
-                show-expand
-                v-model:expanded="expanded"
-                class="compact-table"
+        <VCard variant="outlined">
+          <VDataTable
+            :headers="usersHeaders"
+            :items="users"
+            :search="usersSearch"
+            :loading="usersLoading"
+            item-value="zelid"
+            hover
+            show-expand
+            v-model:expanded="expanded"
+            class="compact-table"
+          >
+            <template #[`item.data-table-expand`]="{ item, internalItem, isExpanded, toggleExpand }">
+              <VAvatar
+                size="32"
+                variant="tonal"
+                color="grey"
+                @click="() => toggleExpand(internalItem)"
+                style="cursor: pointer;"
               >
-                <template #[`item.data-table-expand`]="{ item, internalItem, isExpanded, toggleExpand }">
-                  <VAvatar
-                    size="32"
-                    variant="tonal"
-                    color="grey"
-                    @click="() => toggleExpand(internalItem)"
-                    style="cursor: pointer;"
-                  >
-                    <VIcon :icon="isExpanded(internalItem) ? 'mdi-chevron-down' : 'mdi-chevron-right'" size="20" />
-                  </VAvatar>
-                </template>
-                <template #item.zelid="{ item }">
-                  <div class="d-flex align-center py-2">
-                    <VAvatar color="primary" variant="flat" size="32" class="mr-3">
-                      <VIcon icon="mdi-fingerprint" size="18" color="white" />
-                    </VAvatar>
-                    <span class="text-body-2 font-weight-medium">{{ item.zelid }}</span>
+                <VIcon :icon="isExpanded(internalItem) ? 'mdi-chevron-down' : 'mdi-chevron-right'" size="20" />
+              </VAvatar>
+            </template>
+            <template #item.zelid="{ item }">
+              <div class="d-flex align-center py-2">
+                <VAvatar color="primary" variant="flat" size="32" class="mr-3">
+                  <VIcon icon="mdi-fingerprint" size="18" color="white" />
+                </VAvatar>
+                <span class="text-body-2 font-weight-medium">{{ item.zelid }}</span>
+              </div>
+            </template>
+
+            <template #item.loginPhrase="{ item }">
+              <span class="text-body-2 font-weight-medium">{{ item.loginPhrase }}</span>
+            </template>
+
+            <template #item.actions="{ item }">
+              <div class="d-flex align-center justify-end gap-2">
+                <VTooltip location="top" v-if="item.loginPhrase === currentLoginPhrase">
+                  <template #activator="{ props }">
+                    <VIcon v-bind="props" icon="mdi-information-outline" color="info" size="20" />
+                  </template>
+                  <span>Your current session</span>
+                </VTooltip>
+                <VBtn
+                  size="small"
+                  color="error"
+                  variant="flat"
+                  prepend-icon="mdi-logout"
+                  @click="confirmLogoutUser(item)"
+                >
+                  Log Out
+                </VBtn>
+              </div>
+            </template>
+
+            <template #expanded-row="{ columns, item }">
+              <tr>
+                <td :colspan="columns.length" class="pa-4 bg-surface">
+                  <div class="text-subtitle-2 font-weight-medium mb-3 d-flex align-center">
+                    <VIcon icon="mdi-view-list" size="18" class="mr-2" />
+                    Active Sessions
                   </div>
-                </template>
+                  <VCard variant="outlined">
+                    <VList class="py-0">
+                      <VListItem
+                        v-for="(session, index) in getUserSessions(item.zelid)"
+                        :key="session.loginPhrase"
+                        class="px-4"
+                      >
+                        <div class="d-flex align-center justify-space-between w-100 py-2">
+                          <div class="d-flex align-center">
+                            <VAvatar color="success" variant="tonal" size="32" class="mr-3">
+                              <VIcon icon="mdi-key-variant" size="18" />
+                            </VAvatar>
+                            <span class="text-body-2 font-weight-medium">{{ session.loginPhrase }}</span>
+                          </div>
+                          <div class="d-flex align-center gap-2">
+                            <VTooltip location="top" v-if="session.loginPhrase === currentLoginPhrase">
+                              <template #activator="{ props }">
+                                <VChip v-bind="props" size="small" variant="tonal" color="info" prepend-icon="mdi-information-outline">
+                                  Current
+                                </VChip>
+                              </template>
+                              <span>Your current session</span>
+                            </VTooltip>
+                            <VBtn
+                              size="small"
+                              color="error"
+                              variant="flat"
+                              prepend-icon="mdi-logout"
+                              @click="confirmLogoutUser(session)"
+                            >
+                              Log Out
+                            </VBtn>
+                          </div>
+                        </div>
+                        <VDivider v-if="index < getUserSessions(item.zelid).length - 1" />
+                      </VListItem>
+                    </VList>
+                  </VCard>
+                </td>
+              </tr>
+            </template>
 
-                <template #item.loginPhrase="{ item }">
-                  <span class="text-body-2 font-weight-medium">{{ item.loginPhrase }}</span>
-                </template>
-
-                <template #item.actions="{ item }">
-                  <div class="d-flex align-center justify-end gap-2">
-                    <VTooltip location="top" v-if="item.loginPhrase === currentLoginPhrase">
-                      <template #activator="{ props }">
-                        <VIcon v-bind="props" icon="mdi-information-outline" color="info" size="20" />
-                      </template>
-                      <span>Your current session</span>
-                    </VTooltip>
-                    <VBtn
-                      size="small"
-                      color="error"
-                      variant="flat"
-                      prepend-icon="mdi-logout"
-                      @click="confirmLogoutUser(item)"
-                    >
-                      Log Out
-                    </VBtn>
-                  </div>
-                </template>
-
-                <template #expanded-row="{ columns, item }">
-                  <tr>
-                    <td :colspan="columns.length" class="pa-4 bg-surface">
-                      <div class="text-subtitle-2 font-weight-medium mb-3 d-flex align-center">
-                        <VIcon icon="mdi-view-list" size="18" class="mr-2" />
-                        Active Sessions
-                      </div>
-                      <VCard variant="outlined">
-                        <VList class="py-0">
-                          <VListItem
-                            v-for="(session, index) in getUserSessions(item.zelid)"
-                            :key="session.loginPhrase"
-                            class="px-4"
-                          >
-                            <div class="d-flex align-center justify-space-between w-100 py-2">
-                              <div class="d-flex align-center">
-                                <VAvatar color="success" variant="tonal" size="32" class="mr-3">
-                                  <VIcon icon="mdi-key-variant" size="18" />
-                                </VAvatar>
-                                <span class="text-body-2 font-weight-medium">{{ session.loginPhrase }}</span>
-                              </div>
-                              <div class="d-flex align-center gap-2">
-                                <VTooltip location="top" v-if="session.loginPhrase === currentLoginPhrase">
-                                  <template #activator="{ props }">
-                                    <VChip v-bind="props" size="small" variant="tonal" color="info" prepend-icon="mdi-information-outline">
-                                      Current
-                                    </VChip>
-                                  </template>
-                                  <span>Your current session</span>
-                                </VTooltip>
-                                <VBtn
-                                  size="small"
-                                  color="error"
-                                  variant="flat"
-                                  prepend-icon="mdi-logout"
-                                  @click="confirmLogoutUser(session)"
-                                >
-                                  Log Out
-                                </VBtn>
-                              </div>
-                            </div>
-                            <VDivider v-if="index < getUserSessions(item.zelid).length - 1" />
-                          </VListItem>
-                        </VList>
-                      </VCard>
-                    </td>
-                  </tr>
-                </template>
-
-                <template #bottom>
-                  <div class="text-center pa-4 border-t">
-                    <VBtn
-                      color="error"
-                      variant="flat"
-                      size="default"
-                      @click="confirmLogoutAllUsers"
-                    >
-                      <VIcon icon="mdi-account-multiple-remove" size="22" class="mr-2" />
-                      Log Out All Users
-                    </VBtn>
-                  </div>
-                </template>
-              </VDataTable>
-            </VCard>
-          </VCardText>
+            <template #bottom>
+              <div class="text-center pa-4 border-t">
+                <VBtn
+                  color="error"
+                  variant="flat"
+                  size="default"
+                  @click="confirmLogoutAllUsers"
+                >
+                  <VIcon icon="mdi-account-multiple-remove" size="22" class="mr-2" />
+                  Log Out All Users
+                </VBtn>
+              </div>
+            </template>
+          </VDataTable>
         </VCard>
+      </VCardText>
+    </VCard>
 
     <!-- Confirmation Dialogs -->
     <VDialog v-model="logoutUserDialog" max-width="500">
@@ -236,7 +236,7 @@ const usersHeaders = [
   { title: '', key: 'data-table-expand', sortable: false, width: '48px' },
   { title: 'Flux ID', key: 'zelid', sortable: true },
   { title: 'Login Phrase', key: 'loginPhrase', sortable: true },
-  { title: '', key: 'actions', sortable: false, align: 'end' }
+  { title: '', key: 'actions', sortable: false, align: 'end' },
 ]
 
 // Dialog states
@@ -249,11 +249,12 @@ const currentLoginPhrase = computed(() => {
   const zelidauth = localStorage.getItem('zelidauth')
   if (!zelidauth) return ''
   const auth = qs.parse(zelidauth)
+  
   return auth.loginPhrase || ''
 })
 
 // Get sessions for a specific user
-const getUserSessions = (zelid) => {
+const getUserSessions = zelid => {
   return sessions.value.filter(session => session.zelid === zelid)
 }
 
@@ -264,7 +265,7 @@ const loadUsers = async () => {
     const zelidauth = localStorage.getItem('zelidauth')
     const [usersResponse, sessionsResponse] = await Promise.all([
       IDService.loggedUsers(zelidauth),
-      IDService.loggedSessions(zelidauth)
+      IDService.loggedSessions(zelidauth),
     ])
 
     if (usersResponse.data.status === 'error') {
@@ -287,7 +288,7 @@ const loadUsers = async () => {
 }
 
 // Confirm logout user
-const confirmLogoutUser = (item) => {
+const confirmLogoutUser = item => {
   selectedItem.value = item
   logoutUserDialog.value = true
 }

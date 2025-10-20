@@ -14,68 +14,134 @@
             >
               <VIcon size="26">{{ props.newApp ? 'mdi-package-variant-plus' : 'mdi-account-cog' }}</VIcon>
             </VAvatar>
-            <span class="text-h5">{{ props.newApp ? 'Register New Application' : 'Subscription Management' }}</span>
+            <span class="border-frame-title">{{ props.newApp ? 'Register New Application' : 'Subscription Management' }}</span>
           </div>
-          <VTooltip v-if="props.newApp" location="top">
-            <template #activator="{ props: tooltipProps }">
-              <VBtn
-                v-bind="tooltipProps"
-                icon
-                color="success"
-                variant="tonal"
-                size="small"
-                class="import-glow-btn mr-2"
-                @click="showSpecImportDialog = true"
-              >
-                <VIcon size="22">mdi-file-import</VIcon>
-              </VBtn>
-            </template>
-            <span>Import Specification</span>
-          </VTooltip>
+
+          <!-- Right side buttons -->
+          <div class="d-flex align-center gap-4">
+            <!-- Upgrade to Latest Application Specification Button (only for V3-V7 apps, shown for redeploy) -->
+            <VTooltip v-if="props.isRedeploy && specVersion >= 3 && specVersion < LATEST_SPEC_VERSION" location="top">
+              <template #activator="{ props: tooltipProps }">
+                <VBtn
+                  v-bind="tooltipProps"
+                  icon
+                  color="warning"
+                  variant="tonal"
+                  density="comfortable"
+                  class="import-glow-btn border-frame-btn"
+                  @click="openConversionDialog"
+                  :loading="isConverting"
+                  :disabled="isConverting"
+                >
+                  <VIcon size="26">mdi-upload</VIcon>
+                </VBtn>
+              </template>
+              <span>Upgrade to latest application specification</span>
+            </VTooltip>
+
+            <!-- Import Spec Button (only for new apps) -->
+            <VTooltip v-if="props.newApp" location="top">
+              <template #activator="{ props: tooltipProps }">
+                <VBtn
+                  v-bind="tooltipProps"
+                  icon
+                  color="success"
+                  variant="tonal"
+                  density="comfortable"
+                  class="import-glow-btn border-frame-btn"
+                  @click="showSpecImportDialog = true"
+                >
+                  <VIcon size="22">mdi-file-import</VIcon>
+                </VBtn>
+              </template>
+              <span>Import Specification</span>
+            </VTooltip>
+          </div>
         </div>
       </VCol>
     </VRow>
-    <!-- Tabs + Button -->
-    <div class="d-flex align-center justify-space-between flex-nowrap">
-      <!-- Tabs -->
-      <div class="d-flex flex-grow-1 min-w-0 align-center">
+    <!-- Tabs -->
+    <div class="d-flex align-center justify-space-between flex-wrap gap-4 tabs-container-overflow">
+      <!-- Tabs with Validate button inside on mobile -->
+      <div class="d-flex flex-grow-1 min-w-0 align-center tabs-inner-overflow" :class="$vuetify.display.xs ? 'gap-1' : ''">
         <VTabs
           v-model="tab"
           start
           density="comfortable"
-          class="v-tabs-pill"
+          class="v-tabs-pill mobile-scrollable-tabs"
         >
           <VTab
             v-for="(item, index) in tabItems"
             :key="index"
             :value="item.value"
-            class="mx-1"
+            class="mobile-circle-tab mx-1"
           >
+            <VTooltip v-if="$vuetify.display.xs" location="top" activator="parent">
+              {{ item.label }}
+            </VTooltip>
             <div class="d-flex align-center tab-content">
               <VIcon
-                class="mr-1"
-                style="font-size: 22px !important; height: 22px !important; width: 22px !important;"
+                :style="{
+                  fontSize: '22px !important',
+                  height: '22px !important',
+                  width: '22px !important',
+                  marginRight: $vuetify.display.xs ? '0' : '4px'
+                }"
               >
                 {{ item.icon }}
               </VIcon>
               <span class="d-none d-sm-inline">{{ item.label }}</span>
             </div>
           </VTab>
+
+          <!-- Validate & Register Button - Inside tabs row on mobile -->
+          <VTooltip v-if="$vuetify.display.xs" location="top">
+            <template #activator="{ props: tooltipProps }">
+              <VBtn
+                v-bind="tooltipProps"
+                icon
+                color="success"
+                variant="tonal"
+                class="mobile-circle-tab review-glow-btn mx-1"
+                style="width: 44px !important; height: 44px !important;"
+                @click="tab = 99"
+                :disabled="tab !== 2"
+              >
+                <VIcon
+                  :style="{
+                    fontSize: '22px !important',
+                    height: '22px !important',
+                    width: '22px !important'
+                  }"
+                >
+                  mdi-check-decagram
+                </VIcon>
+              </VBtn>
+            </template>
+            <span>Review and sign to register</span>
+          </VTooltip>
         </VTabs>
       </div>
-      
 
-      <!-- Button: opens its own VWindowItem -->
-      <VBtn
-        color="primary"
-        class="ml-2"
-        @click="tab = 99"
-        :disabled="tab === 99 || tab === 100"
-      >
-        <VIcon size="24" class="mr-1">mdi-check-decagram</VIcon>
-        <span class="d-none d-sm-inline">Validate & Register</span>
-      </VBtn>
-      
+      <!-- Button: opens its own VWindowItem - Desktop only -->
+      <VTooltip location="top" max-width="200">
+        <template #activator="{ props: tooltipProps }">
+          <VBtn
+            v-bind="tooltipProps"
+            v-if="!$vuetify.display.xs"
+            color="success"
+            variant="tonal"
+            class="ml-2 review-glow-btn"
+            style="margin-right: 12px;"
+            @click="tab = 99"
+            :disabled="tab !== 2"
+          >
+            <VIcon size="24" class="mr-1">mdi-check-decagram</VIcon>
+            <span>Review</span>
+          </VBtn>
+        </template>
+        <span>Review, validate, and sign your app specification</span>
+      </VTooltip>
     </div>
 
     <!-- Shared VWindow Content -->
@@ -87,11 +153,20 @@
               v-model="appDetails.name"
               label="Name"
               prepend-inner-icon="mdi-rename-box"
-              outlined
-              dense
+              variant="outlined"
+              density="comfortable"
               :disabled="isNameLocked"
               class="mb-3"
-            />
+            >
+              <template #append-inner>
+                <VTooltip location="top">
+                  <template #activator="{ props }">
+                    <VIcon v-bind="props" size="20" color="grey">mdi-information-outline</VIcon>
+                  </template>
+                  <span>Application name (must be unique across the Flux network)</span>
+                </VTooltip>
+              </template>
+            </VTextField>
 
             <VTextarea
               v-model="appDetails.description"
@@ -99,19 +174,72 @@
               prepend-inner-icon="mdi-text"
               auto-grow
               rows="1"
-              outlined
-              dense
+              variant="outlined"
+              density="comfortable"
               class="mb-3"
-            />
+            >
+              <template #append-inner>
+                <VTooltip location="top">
+                  <template #activator="{ props }">
+                    <VIcon v-bind="props" size="20" color="grey">mdi-information-outline</VIcon>
+                  </template>
+                  <span>Brief description of your application and its purpose</span>
+                </VTooltip>
+              </template>
+            </VTextarea>
 
             <VTextField
               v-model="appDetails.owner"
               label="Owner"
               prepend-inner-icon="mdi-account"
-              outlined
-              dense
+              variant="outlined"
+              density="comfortable"
               class="mb-3"
-            />
+            >
+              <template #append-inner>
+                <VTooltip location="top">
+                  <template #activator="{ props }">
+                    <VIcon v-bind="props" size="20" color="grey">mdi-information-outline</VIcon>
+                  </template>
+                  <span>FluxID or Zelcore identity that owns this application</span>
+                </VTooltip>
+              </template>
+            </VTextField>
+
+            <!-- Specification Version (shown for update and redeploy, not for new registration) -->
+            <VTextField
+              v-if="!props.newApp"
+              :model-value="specVersion"
+              label="Specification Version"
+              prepend-inner-icon="mdi-tag"
+              variant="outlined"
+              density="comfortable"
+              readonly
+              class="mb-3"
+            >
+              <template #append-inner>
+                <VTooltip location="top" max-width="300">
+                  <template #activator="{ props: tooltipProps }">
+                    <VIcon
+                      v-bind="tooltipProps"
+                      size="20"
+                      :color="specVersion >= LATEST_SPEC_VERSION ? 'success' : 'warning'"
+                      class="mr-2"
+                    >
+                      {{ specVersion >= LATEST_SPEC_VERSION ? 'mdi-check-circle' : 'mdi-alert-circle' }}
+                    </VIcon>
+                  </template>
+                  <span v-if="specVersion >= LATEST_SPEC_VERSION">Using latest specification version</span>
+                  <span v-else>This application is using an older specification version. Upgrading to the latest version will unlock new features and improvements.</span>
+                </VTooltip>
+                <VTooltip location="top">
+                  <template #activator="{ props: tooltipProps }">
+                    <VIcon v-bind="tooltipProps" size="20" color="grey">mdi-information-outline</VIcon>
+                  </template>
+                  <span>Current specification version of this application</span>
+                </VTooltip>
+              </template>
+            </VTextField>
 
             <!--
               <VCombobox
@@ -141,14 +269,14 @@
             -->
           
           
-            <div class="d-flex align-center mb-3">
+            <div v-if="versionFlags.supportsContacts" class="d-flex align-center mb-3">
               <VCombobox
                 v-model="appDetails.contacts"
                 label="Contact"
                 prepend-inner-icon="mdi-email"
                 multiple
-                outlined
-                dense
+                variant="outlined"
+                density="comfortable"
                 :items="[]"
                 hide-no-data
                 hide-details
@@ -165,6 +293,14 @@
                   >
                     {{ item.value }}
                   </VChip>
+                </template>
+                <template #append-inner>
+                  <VTooltip location="top">
+                    <template #activator="{ props }">
+                      <VIcon v-bind="props" size="20" color="grey">mdi-information-outline</VIcon>
+                    </template>
+                    <span>Contact emails for app notifications (press Enter to add multiple)</span>
+                  </VTooltip>
                 </template>
               </VCombobox>
 
@@ -202,6 +338,7 @@
                 class="flex-grow-1"
                 hide-details
                 :thumb-label="false"
+                :thumb-size="18"
                 track-size="4"
               />
               <div class="text-right text-caption grey--text mr-3">
@@ -225,6 +362,7 @@
                   hide-details
                   class="ma-0"
                   label="Renewal"
+                  :disabled="!versionFlags.supportsExpire"
                 />
               </div>
 
@@ -236,15 +374,17 @@
                 class="flex-grow-1"
                 hide-details
                 :thumb-label="false"
+                :thumb-size="18"
                 track-size="4"
-                :disabled="!renewalEnabled && !newApp"
+                :disabled="!versionFlags.supportsExpire || (!renewalEnabled && !newApp)"
               />
               <span class="mb-5">
                 <div class="d-flex justify-space-between align-center px-3">
                   <!-- left -->
-                  <span style="line-height: 1.25;">
+                  <span style="line-height: 1.25; font-size: 0.875rem;">
                     <template v-if="newApp">
-
+                      Your application will be subscribed until
+                      <b>{{ new Date(appRunningTill.new).toLocaleString('en-GB', timeOptions.shortDate) }}</b>.
                     </template>
                     <template v-else>
                       Currently your application is subscribed until
@@ -256,7 +396,7 @@
                     {{ renewalLabels[appDetails.renewalIndex] }}
                   </span>
                 </div>
-                <span v-if="renewalEnabled && !newApp" class="px-3">
+                <span v-if="renewalEnabled && !newApp" class="px-3" style="font-size: 0.8125rem;">
                   Your new adjusted subscription ends on
                   <b>{{ new Date(appRunningTill.new).toLocaleString('en-GB', timeOptions.shortDate) }}</b>.
                 </span>
@@ -274,32 +414,49 @@
                 </span>
               </span>
             </div>
-            <div class="d-flex align-center mb-1 mt-4">
+            <!-- Additional Options Section (V7+) -->
+            <div v-if="versionFlags.supportsStaticIp" class="d-flex align-center mb-1 mt-4">
               <VChip color="default" variant="tonal" class="mr-2"  label>
                 <VIcon class="mr-1">mdi-cog-box</VIcon>
                 Additional Options
               </VChip>
             </div>
-            <div class="d-flex flex-wrap gap-4 mt-1 pa-2">
+            <div v-if="versionFlags.supportsStaticIp" class="d-flex flex-wrap gap-4 mt-1 pa-2">
               <!-- Static IP Switch -->
-              <VSwitch
-                v-model="appDetails.staticip"
-                inset
-                hide-details
-                class="ma-0"
-                density="compact"
-                label="Static IP"
-              />
+              <div class="d-flex align-center pa-2 switch-container">
+                <VSwitch
+                  v-model="appDetails.staticip"
+                  inset
+                  hide-details
+                  class="ma-0"
+                  density="compact"
+                  label="Static IP"
+                />
+                <VTooltip location="top" max-width="300">
+                  <template #activator="{ props }">
+                    <VIcon v-bind="props" size="20" color="grey" class="ml-2" style="vertical-align: middle;">mdi-information-outline</VIcon>
+                  </template>
+                  <span>Reserve a static IP address for this application. Useful for services that require consistent IP addressing.</span>
+                </VTooltip>
+              </div>
 
               <!-- Enterprise Switch -->
-              <VSwitch
-                v-model="isPrivateApp"
-                inset
-                hide-details
-                class="ma-0"
-                density="compact"
-                label="Enterprise"
-              />
+              <div class="d-flex align-center pa-2 switch-container">
+                <VSwitch
+                  v-model="isPrivateApp"
+                  inset
+                  hide-details
+                  class="ma-0"
+                  density="compact"
+                  label="Enterprise"
+                />
+                <VTooltip location="top" max-width="300">
+                  <template #activator="{ props }">
+                    <VIcon v-bind="props" size="20" color="grey" class="ml-2" style="vertical-align: middle;">mdi-information-outline</VIcon>
+                  </template>
+                  <span>Enable Enterprise mode to deploy on specific priority nodes with encrypted specifications and private repository support.</span>
+                </VTooltip>
+              </div>
             </div>
 
           </div>
@@ -488,6 +645,9 @@
                 :key="`component-${componentIndex}`"
                 :value="`component-${componentIndex}`"
               >
+                <VTooltip v-if="$vuetify.display.xs" location="top" activator="parent">
+                  {{ component.name || `Component ${componentIndex + 1}` }}
+                </VTooltip>
                 <div class="d-flex align-center tab-content">
                   <VIcon class="mr-1" style="font-size: 22px !important; height: 22px !important; width: 22px !important;">
                     mdi-cube-outline
@@ -496,15 +656,13 @@
                   <VBtn
                     v-if="props.newApp"
                     icon
-                    size="x-small"
                     variant="flat"
-                    density="compact"
                     color="error"
-                    class="ml-2"
-                    style="font-size: 18px !important; height: 18px !important; width: 18px !important;"
+                    class="ml-3"
+                    style="width: 16px !important; height: 16px !important; min-width: 16px !important; padding: 0 !important;"
                     @click.stop="removeComposeComponent(componentIndex)"
                   >
-                    <VIcon style="font-size: 14px !important; height: 14px !important; width: 14px !important;">mdi-close</VIcon>
+                    <VIcon style="font-size: 12px !important; width: 12px !important; height: 12px !important;">mdi-close</VIcon>
                   </VBtn>
                 </div>
               </VTab>
@@ -534,39 +692,83 @@
                   v-model="component.name"
                   label="Name"
                   prepend-inner-icon="mdi-tag"
-                  outlined dense class="mb-3"
+                  density="comfortable"
+                  variant="outlined"
+                  class="mb-3"
                   :disabled="!props.newApp"
-                />
+                >
+                  <template #append-inner>
+                    <VTooltip location="top">
+                      <template #activator="{ props }">
+                        <VIcon v-bind="props" size="20" color="grey">mdi-information-outline</VIcon>
+                      </template>
+                      <span>Component name (must be unique within the app)</span>
+                    </VTooltip>
+                  </template>
+                </VTextField>
 
                 <VTextField
                   v-model="component.description"
                   label="Description"
                   prepend-inner-icon="mdi-text"
-                  outlined dense class="mb-3"
-                />
+                  density="comfortable"
+                  variant="outlined"
+                  class="mb-3"
+                >
+                  <template #append-inner>
+                    <VTooltip location="top">
+                      <template #activator="{ props }">
+                        <VIcon v-bind="props" size="20" color="grey">mdi-information-outline</VIcon>
+                      </template>
+                      <span>Brief description of this component's purpose</span>
+                    </VTooltip>
+                  </template>
+                </VTextField>
 
                 <VTextField
                   v-model="component.repotag"
                   label="Repository Tag"
                   prepend-inner-icon="mdi-docker"
-                  outlined dense class="mb-3"
-                  :disabled="!props.newApp"
-                  :hint="!props.newApp ? 'Repository tag cannot be changed when updating an existing app' : ''"
-                  :persistent-hint="!props.newApp"
-                />
+                  density="comfortable"
+                  variant="outlined"
+                  class="mb-3"
+                  :readonly="!props.newApp"
+                >
+                  <template #append-inner>
+                    <VTooltip location="top">
+                      <template #activator="{ props }">
+                        <VIcon v-bind="props" size="20" color="grey">mdi-information-outline</VIcon>
+                      </template>
+                      <span v-if="props.newApp">Docker image repository and tag (e.g., nginx:latest)</span>
+                      <span v-else>Repository tag cannot be changed when updating an existing app</span>
+                    </VTooltip>
+                  </template>
+                </VTextField>
 
                 <!-- Repository Auth for Enterprise Apps (v7+) -->
                 <VTextField
-                  v-if="props.appSpec?.version >= 7 && isPrivateApp"
+                  v-if="versionFlags.supportsRepoAuth"
                   v-model="component.repoauth"
                   label="Repository Authentication"
                   placeholder="Docker authentication username:apikey"
                   prepend-inner-icon="mdi-lock"
-                  density="compact"
+                  density="comfortable"
                   variant="outlined"
-                  class="mb-4"
+                  class="mb-3"
+                  :hint="!isPrivateApp ? 'Enable Enterprise mode to use this feature' : ''"
                   persistent-hint
-                />
+                  :disabled="!isPrivateApp"
+                >
+                  <template #append-inner>
+                    <VTooltip location="top">
+                      <template #activator="{ props }">
+                        <VIcon v-bind="props" size="20" color="grey">mdi-information-outline</VIcon>
+                      </template>
+                      <span v-if="!isPrivateApp">Enterprise feature - Enable Enterprise mode to use private repository authentication</span>
+                      <span v-else>Docker registry credentials (format: username:password or username:token)</span>
+                    </VTooltip>
+                  </template>
+                </VTextField>
 
                 <!-- Secrets for Enterprise Apps (v7) -->
                 <VTextField
@@ -575,13 +777,22 @@
                   label="Secrets"
                   placeholder="Enter secrets (will be encrypted)"
                   prepend-inner-icon="mdi-key"
-                  density="compact"
+                  density="comfortable"
                   variant="outlined"
-                  class="mb-4"
+                  class="mb-3"
                   persistent-hint
-                />
+                >
+                  <template #append-inner>
+                    <VTooltip location="top">
+                      <template #activator="{ props }">
+                        <VIcon v-bind="props" size="20" color="grey">mdi-information-outline</VIcon>
+                      </template>
+                      <span>Sensitive data that will be encrypted and securely stored (e.g., API keys, passwords)</span>
+                    </VTooltip>
+                  </template>
+                </VTextField>
 
-                <div class="d-flex align-center mb-2 mt-2">
+                <div class="d-flex align-center mb-3 mt-2">
                   <VChip
                     color="default"
                     variant="tonal"
@@ -604,11 +815,13 @@
                   v-model="component.containerData"
                   label="Container Data Path"
                   prepend-inner-icon="mdi-folder"
-                  outlined dense class="mb-3 mt-4"
+                  density="comfortable"
+                  variant="outlined"
+                  class="mb-3 mt-4"
                   readonly
                 />
 
-                <div class="d-flex align-center mb-2 mt-2">
+                <div class="d-flex align-center mb-3 mt-2">
                   <VChip
                     color="default"
                     variant="tonal"
@@ -621,78 +834,122 @@
                   </VChip>
                 </div>
 
-                <VBadge
-                  class="d-inline-flex"
-                  :model-value="component.environmentParameters?.length > 0"
-                  :content="component.environmentParameters.length"
-                  color="primary"
-                  offset-x="15"
-                  offset-y="6"
-                >
-                  <VBtn
-                    class="mb-3 mr-2"
-                    variant="outlined"
-                    prepend-icon="mdi-format-list-bulleted"
-                    color="grey"
-                    @click="openEnvDialog(componentIndex)"
+                <div class="d-flex flex-wrap gap-2 env-buttons-container">
+                  <VBadge
+                    class="env-button-wrapper"
+                    :model-value="component.environmentParameters?.length > 0"
+                    :content="component.environmentParameters.length"
+                    color="primary"
+                    offset-x="10"
+                    offset-y="6"
                   >
-                    Environment Variables
-                  </VBtn>
-                </VBadge>
+                    <VBtn
+                      class="env-button"
+                      variant="outlined"
+                      prepend-icon="mdi-format-list-bulleted"
+                      color="grey"
+                      block
+                      @click="openEnvDialog(componentIndex)"
+                    >
+                      <span class="env-btn-text">Environment Variables</span>
+                      <VSpacer />
+                      <VTooltip location="top">
+                        <template #activator="{ props }">
+                          <VIcon v-bind="props" size="18" color="grey" class="env-info-icon ml-2">mdi-information-outline</VIcon>
+                        </template>
+                        <span>Set environment variables for your container (e.g., API keys, configuration)</span>
+                      </VTooltip>
+                    </VBtn>
+                  </VBadge>
 
-                <VBadge
-                  class="d-inline-flex"
-                  :model-value="component.commands?.length > 0"
-                  :content="component.commands.length"
-                  color="primary"
-                  offset-x="15"
-                  offset-y="6"
-                >
-                  <VBtn
-                    class="mb-3 mr-2"
-                    variant="outlined"
-                    prepend-icon="mdi-console"
-                    color="grey"
-                    @click="openCommandsDialog(componentIndex)"
+                  <VBadge
+                    class="env-button-wrapper"
+                    :model-value="component.commands?.length > 0"
+                    :content="component.commands.length"
+                    color="primary"
+                    offset-x="10"
+                    offset-y="6"
                   >
-                    Commands
-                  </VBtn>
-                </VBadge>
+                    <VBtn
+                      class="env-button"
+                      variant="outlined"
+                      prepend-icon="mdi-console"
+                      color="grey"
+                      block
+                      @click="openCommandsDialog(componentIndex)"
+                    >
+                      <span class="env-btn-text">Commands</span>
+                      <VSpacer />
+                      <VTooltip location="top" max-width="420">
+                        <template #activator="{ props }">
+                          <VIcon v-bind="props" size="18" color="grey" class="env-info-icon ml-2">mdi-information-outline</VIcon>
+                        </template>
+                        <div class="text-left pa-2">
+                          <div class="text-caption mb-2" style="color: inherit !important;">Maps to Docker API's "Cmd" field when creating the container. Provides default arguments to the container's ENTRYPOINT. Each entry is a separate argument.</div>
+                          <div class="text-caption mb-2" style="color: inherit !important;">Example: ["--port", "8080", "--verbose"]</div>
+                          <div class="text-caption" style="color: #ff9800 !important;">
+                            <VIcon size="22" class="mr-1" style="vertical-align: middle; color: #ff9800 !important;">mdi-alert-circle</VIcon>
+                            Not for environment variables or setup instructions!
+                          </div>
+                        </div>
+                      </VTooltip>
+                    </VBtn>
+                  </VBadge>
+                </div>
                 <div class="mb-3">
-                  <div class="d-flex align-center mb-2">
+                  <div class="d-flex align-center mb-3">
                     <VChip color="default" variant="tonal" style="width: 100%;" label>
                       <VIcon class="mr-1">mdi-connection</VIcon>
                       Port Bindings
                     </VChip>
                   </div>
-                 
-                  <div class="border rounded pa-2">
+
+                  <div class="border rounded d-flex flex-column justify-center" style="min-height: 60px;">
                     <!-- Add new ports -->
-                    <div class="d-flex align-center gap-2" v-if="newPorts[componentIndex]">
+                    <div class="d-flex align-center gap-2 px-2" v-if="newPorts[componentIndex]" :class="component.ports && component.ports.length > 0 ? 'py-2' : ''">
                       <VTextField
                         v-model.number="newPorts[componentIndex].exposed"
                         type="number"
                         label="Exposed Port"
-                        density="compact"
+                        density="comfortable"
+                        variant="outlined"
                         hide-details
-                        dense
-                        style="max-width: 140px;"
-                      />
+                        style="max-width: 180px;"
+                        @input="handleExposedPortInput(componentIndex)"
+                      >
+                        <template #append-inner>
+                          <VTooltip location="top">
+                            <template #activator="{ props }">
+                              <VIcon v-bind="props" size="18" color="grey">mdi-information-outline</VIcon>
+                            </template>
+                            <span>External port accessible from outside</span>
+                          </VTooltip>
+                        </template>
+                      </VTextField>
                       <VTextField
                         v-model.number="newPorts[componentIndex].container"
                         type="number"
                         label="Container Port"
-                        density="compact"
+                        density="comfortable"
+                        variant="outlined"
                         hide-details
-                        dense
-                        style="max-width: 140px;"
-                      />
+                        style="max-width: 180px;"
+                      >
+                        <template #append-inner>
+                          <VTooltip location="top">
+                            <template #activator="{ props }">
+                              <VIcon v-bind="props" size="18" color="grey">mdi-information-outline</VIcon>
+                            </template>
+                            <span>Internal port inside the container</span>
+                          </VTooltip>
+                        </template>
+                      </VTextField>
                       <VBtn icon color="primary" density="compact" @click="addPortPair(componentIndex)">
                         <VIcon size="18">mdi-plus</VIcon>
                       </VBtn>
                     </div>
                     <!-- Editable Chip List -->
-                    <div class="d-flex flex-wrap align-center gap-1 mt-2">
+                    <div class="d-flex flex-wrap align-center gap-1 px-2 pb-2" v-if="component.ports && component.ports.length > 0">
                       <div
                         v-for="(port, idx) in component.ports"
                         :key="'port-pair-' + idx"
@@ -726,7 +983,7 @@
                             :ref="el => setExposedInput(idx, el)"
                             v-model.number="component.ports[idx]"
                             hide-details
-                            dense
+                            density="compact"
                             type="number"
                             style="max-width: 120px; font-size: 12px;"
                             variant="outlined"
@@ -738,7 +995,7 @@
                           <VTextField
                             v-model.number="component.containerPorts[idx]"
                             hide-details
-                            dense
+                            density="compact"
                             type="number"
                             style="max-width: 120px; font-size: 12px;"
                             variant="outlined"
@@ -1065,7 +1322,7 @@
                   </VCard>
                 </VDialog>
 
-                <div class="d-flex align-center mb-2">
+                <div class="d-flex align-center mb-3">
                   <VChip color="default" variant="tonal" style="width: 100%;" label>
                     <VIcon class="mr-1">mdi-progress-wrench</VIcon>
                     Hardware Resource
@@ -1075,10 +1332,13 @@
                   <VRow dense>
                     <!-- CPU -->
                     <VCol cols="12">
-                      <div class="d-flex align-center">
-                        <div class="d-flex align-center label-column">
-                          <VIcon size="20" class="mr-1">mdi-speedometer</VIcon>
-                          <span>CPU (vCore) </span>
+                      <div class="hardware-item">
+                        <div class="hardware-label-box">
+                          <VIcon size="26" class="hardware-icon">mdi-speedometer</VIcon>
+                          <div class="hardware-label-text">
+                            <span class="hardware-name">CPU</span>
+                            <span class="hardware-unit">vCore</span>
+                          </div>
                         </div>
                         <VSlider
                           v-model="component.cpu"
@@ -1086,13 +1346,14 @@
                           :max="15"
                           :step="0.1"
                           :thumb-label="false"
+                          :thumb-size="18"
                           hide-details
                           class="flex-grow-1 hardware-slider"
                         />
                         <VTextField
                           v-model.number="component.cpu"
                           type="number"
-                          step="0.1" 
+                          step="0.1"
                           hide-details
                           density="compact"
                           variant="outlined"
@@ -1102,10 +1363,13 @@
                     </VCol>
                     <!-- RAM -->
                     <VCol cols="12">
-                      <div class="d-flex align-center">
-                        <div class="d-flex align-center label-column">
-                          <VIcon size="20" class="mr-1">mdi-memory</VIcon>
-                          <span>RAM (MB)</span>
+                      <div class="hardware-item">
+                        <div class="hardware-label-box">
+                          <VIcon size="26" class="hardware-icon">mdi-memory</VIcon>
+                          <div class="hardware-label-text">
+                            <span class="hardware-name">RAM</span>
+                            <span class="hardware-unit">MB</span>
+                          </div>
                         </div>
                         <VSlider
                           v-model="component.ram"
@@ -1113,6 +1377,7 @@
                           :max="65536"
                           :step="100"
                           :thumb-label="false"
+                          :thumb-size="18"
                           hide-details
                           class="flex-grow-1 hardware-slider"
                         />
@@ -1127,12 +1392,15 @@
                         />
                       </div>
                     </VCol>
-                    <!-- HDD -->
+                    <!-- SSD -->
                     <VCol cols="12">
-                      <div class="d-flex align-center">
-                        <div class="d-flex align-center label-column">
-                          <VIcon size="20" class="mr-1">mdi-harddisk</VIcon>
-                          <span>HDD (GB)</span>
+                      <div class="hardware-item">
+                        <div class="hardware-label-box">
+                          <VIcon size="26" class="hardware-icon">mdi-harddisk</VIcon>
+                          <div class="hardware-label-text">
+                            <span class="hardware-name">SSD</span>
+                            <span class="hardware-unit">GB</span>
+                          </div>
                         </div>
                         <VSlider
                           v-model="component.hdd"
@@ -1140,6 +1408,7 @@
                           :max="820"
                           :step="1"
                           :thumb-label="false"
+                          :thumb-size="18"
                           hide-details
                           class="flex-grow-1 hardware-slider"
                         />
@@ -1416,10 +1685,10 @@
                 <VProgressCircular indeterminate color="primary" size="24" />
               </div>
               <div v-else-if="hasValidatedSpec && verifyAppSpecResponse === true" class="d-flex justify-center">
-                <VIcon color="success" size="24">mdi-check-circle</VIcon>
+                <VIcon color="success" size="22">mdi-check-circle</VIcon>
               </div>
               <div v-else-if="hasValidatedSpec && verifyAppSpecResponse === false" class="d-flex justify-center">
-                <VIcon color="error" size="24">mdi-close-circle</VIcon>
+                <VIcon color="error" size="22">mdi-close-circle</VIcon>
               </div>
             </div>
           </div>
@@ -1448,9 +1717,28 @@
                 </template>
 
                 <template v-else-if="hasCalculatedPrice && appSpecPrice?.flux">
-                  <span class="mr-1">
-                    ${{ appSpecPrice.usd }} USD ({{ appSpecPrice.flux }} FLUX with {{ appSpecPrice.fluxDiscount }}% discount)
-                  </span>
+                  <div class="d-flex align-center flex-wrap gap-1 mr-1">
+                    <span class="price-display">
+                      <span class="d-none d-sm-inline" style="white-space: nowrap;">${{ appSpecPrice.usd }} USD</span>
+                      <span class="d-inline d-sm-none" style="white-space: nowrap; font-size: 11px;">${{ appSpecPrice.usd }} USD</span>
+                    </span>
+                    <span style="opacity: 0.5;">|</span>
+                    <div class="d-flex align-center gap-1">
+                      <span class="price-display">
+                        <span class="d-none d-sm-inline" style="white-space: nowrap;">{{ appSpecPrice.flux }} FLUX</span>
+                        <span class="d-inline d-sm-none" style="white-space: nowrap; font-size: 11px;">{{ appSpecPrice.flux }} FLUX</span>
+                      </span>
+                      <VChip
+                        v-if="appSpecPrice?.fluxDiscount > 0"
+                        color="success"
+                        size="x-small"
+                        class="discount-chip"
+                        label
+                      >
+                        -{{ appSpecPrice.fluxDiscount }}%
+                      </VChip>
+                    </div>
+                  </div>
                   <VIcon size="22" color="success">mdi-check-circle</VIcon>
                 </template>
 
@@ -1479,10 +1767,10 @@
                     <template v-else-if="blockHeight && props.appSpec?.height">
                       <!-- For existing apps, show validation status -->
                       <template v-if="isExpiryValid">
-                        Validated ({{ expiryLabel }})
+                        {{ expiryLabel }}
                       </template>
                       <template v-else>
-                        Application expires in under a week. Extend the subscription to update specs.
+                        Expires in under a week. Renewal subscription to update.
                       </template>
                     </template>
                     <template v-else>
@@ -1523,133 +1811,43 @@
                   <VProgressCircular indeterminate color="primary" size="24" />
                 </div>
                 <div v-else-if="registrationHash" class="d-flex justify-center">
-                  <VIcon color="success" size="24">mdi-check-circle</VIcon>
+                  <VIcon color="success" size="22">mdi-check-circle</VIcon>
                 </div>
               </div>
             </div>
             
             <div class="d-flex justify-center align-center mt-4">
-              <!-- Sign Message Button -->
-              <VBtn v-if="hasCalculatedPrice && !signature" variant="flat" style="width: 100%" @click="dataSign()">
+              <!-- Sign Message Button (only for non-SSO logins) -->
+              <VBtn
+                v-if="hasCalculatedPrice && !signature && !isSigning && !signingFailed && loginType !== 'sso' && !(hasValidatedSpec && verifyAppSpecResponse === false) && !(hasCalculatedPrice && !appSpecPrice?.flux && appSpecPrice?.flux !== 0) && !(hasCheckedExpiry && !isExpiryValid && !newApp)"
+                variant="flat"
+                style="width: 100%"
+                @click="dataSign()"
+              >
                 <VIcon start size="24">mdi-file-sign</VIcon> Sign Message
               </VBtn>
-              
-              <!-- Register Application Button -->
-              <VBtn v-else-if="signature && !registrationHash" variant="flat" color="success" style="width: 100%" :loading="isPropagating" @click="propagateSignedMessage()">
-                <VIcon start size="24">mdi-send</VIcon> Register Application
+
+              <!-- Retry Signing Button (when signing or registration failed) -->
+              <VBtn
+                v-else-if="signingFailed && !signature"
+                variant="flat"
+                color="warning"
+                style="width: 100%"
+                @click="dataSign()"
+              >
+                <VIcon start size="20">mdi-refresh</VIcon> Retry Signing
               </VBtn>
-              
-              <!-- Registration Success - Go to Test & Pay -->
-              <div v-else-if="registrationHash" class="w-100">
-                <VAlert 
-                  type="success" 
-                  variant="tonal" 
-                  class="mb-4 registration-success-alert" 
-                  icon="mdi-check-circle"
-                  :style="{
-                    backgroundColor: theme.global.name.value === 'dark' ? 'rgba(76, 175, 80, 0.12)' : 'rgba(76, 175, 80, 0.08)',
-                    borderColor: theme.global.name.value === 'dark' ? 'rgba(76, 175, 80, 0.4)' : 'rgba(76, 175, 80, 0.6)',
-                    color: theme.global.name.value === 'dark' ? 'rgba(129, 199, 132, 1)' : 'rgba(46, 125, 50, 1)'
-                  }"
-                >
-                  <div class="text-center">
-                    <div
-                      class="font-weight-bold mb-2" :style="{
-                        color: theme.global.name.value === 'dark' ? 'rgba(165, 214, 167, 1)' : 'rgba(27, 94, 32, 1)'
-                      }">🎉 Registration Successful!</div>
-                    <div
-                      class="text-body-2 mb-3" :style="{
-                        color: theme.global.name.value === 'dark' ? 'rgba(129, 199, 132, 0.8)' : 'rgba(46, 125, 50, 0.8)'
-                      }">Your app has been registered to the Flux network.</div>
-                    <VBtn 
-                      variant="flat" 
-                      color="primary" 
-                      @click="tab = 100"
-                    >
-                      <VIcon start size="20">mdi-test-tube</VIcon> 
-                      Proceed to Test & Payment
-                      <VIcon end size="16">mdi-arrow-right</VIcon>
-                    </VBtn>
-                  </div>
-                </VAlert>
 
-                <!-- Payment Status Alert -->
-                <VAlert 
-                  v-if="paymentCompleted" 
-                  type="success" 
-                  variant="tonal" 
-                  class="mb-4 payment-success-alert" 
-                  :icon="isCryptoPayment(paymentMethod) ? 'mdi-check-circle' : 'mdi-credit-card-check'"
-                  :style="{
-                    backgroundColor: theme.global.name.value === 'dark' ? 'rgba(76, 175, 80, 0.12)' : 'rgba(76, 175, 80, 0.08)',
-                    borderColor: theme.global.name.value === 'dark' ? 'rgba(76, 175, 80, 0.4)' : 'rgba(76, 175, 80, 0.6)'
-                  }"
-                >
-                  <div class="text-center">
-                    <div
-                      class="font-weight-bold mb-2" :style="{
-                        color: theme.global.name.value === 'dark' ? 'rgba(165, 214, 167, 1)' : 'rgba(27, 94, 32, 1)'
-                      }">
-                      <span v-if="isCryptoPayment(paymentMethod)">₿ Crypto Payment Completed!</span>
-                      <span v-else>💳 Payment Completed!</span>
-                    </div>
-                    <div
-                      class="text-body-2" :style="{
-                        color: theme.global.name.value === 'dark' ? 'rgba(129, 199, 132, 0.9)' : 'rgba(46, 125, 50, 0.9)'
-                      }">
-                      <span v-if="isCryptoPayment(paymentMethod)">
-                        Successfully paid {{ paymentAmount }} FLUX via {{ paymentMethod }}
-                      </span>
-                      <span v-else>
-                        Successfully paid ${{ paymentAmount }} USD via {{ paymentMethod }}
-                      </span>
-                    </div>
-                  </div>
-                </VAlert>
-
-                <!-- Payment Pending Alert -->
-                <VAlert 
-                  v-else-if="paymentMethod && !paymentCompleted" 
-                  type="info" 
-                  variant="tonal" 
-                  class="mb-4 payment-pending-alert" 
-                  :icon="isCryptoPayment(paymentMethod) ? 'mdi-currency-usd' : 'mdi-credit-card-clock'"
-                  :style="{
-                    backgroundColor: theme.global.name.value === 'dark' ? 'rgba(33, 150, 243, 0.12)' : 'rgba(33, 150, 243, 0.08)',
-                    borderColor: theme.global.name.value === 'dark' ? 'rgba(33, 150, 243, 0.4)' : 'rgba(33, 150, 243, 0.6)'
-                  }"
-                >
-                  <div class="text-center">
-                    <div
-                      class="font-weight-bold mb-2" :style="{
-                        color: theme.global.name.value === 'dark' ? 'rgba(144, 202, 249, 1)' : 'rgba(13, 71, 161, 1)'
-                      }">
-                      <span v-if="isCryptoPayment(paymentMethod)">₿ Crypto Payment Initiated</span>
-                      <span v-else>⏳ Payment Processing</span>
-                    </div>
-                    <div
-                      class="text-body-2" :style="{
-                        color: theme.global.name.value === 'dark' ? 'rgba(100, 181, 246, 0.9)' : 'rgba(25, 118, 210, 0.9)'
-                      }">
-                      <span v-if="isCryptoPayment(paymentMethod)">
-                        {{ paymentMethod }} payment initiated for {{ paymentAmount }} FLUX. Complete payment in your wallet.
-                      </span>
-                      <span v-else>
-                        Waiting for {{ paymentMethod }} payment confirmation (${{ paymentAmount }} USD)
-                      </span>
-                    </div>
-                    <div v-if="!isCryptoPayment(paymentMethod)" class="mt-3">
-                      <VBtn 
-                        size="small" 
-                        variant="outlined" 
-                        @click="paymentCompleted = true"
-                      >
-                        Mark as Paid (Test)
-                      </VBtn>
-                    </div>
-                  </div>
-                </VAlert>
-              </div>
+              <!-- Cancel Signing button (only for non-SSO logins during signing) -->
+              <VBtn
+                v-else-if="isSigning && !signature && loginType !== 'sso'"
+                variant="outlined"
+                color="error"
+                style="width: 100%"
+                @click="cancelSigning()"
+              >
+                <VIcon start size="20">mdi-close-circle</VIcon> Cancel Signing
+              </VBtn>
             </div>
           </template>
         </div>
@@ -1666,7 +1864,7 @@
           }"
         >
           <!-- Test Installation Section -->
-          <VCard class="mb-4" v-if="!testFinished">
+          <VCard class="mb-4" v-if="!testFinished && specsHaveChanged && (props.newApp || appSpecPrice?.flux !== 0) && !paymentProcessing && !paymentConfirmed">
             <VCardTitle class="bg-primary text-white">
               <VIcon class="mr-2">mdi-test-tube</VIcon>
               Test Application Installation
@@ -1676,20 +1874,32 @@
                 Test your application install/launch to ensure your specifications work correctly.
                 The installation log will appear below once completed.
               </p>
-              
+
               <VAlert v-if="testError" type="error" variant="tonal" class="mb-4">
                 <div class="d-flex align-center justify-space-between">
                   <div>
                     <strong>WARNING:</strong> Test failed! Check logs below and fix your specifications before paying.
                   </div>
-                  <VBtn
-                    size="small"
-                    color="warning"
-                    variant="outlined"
-                    @click="forceEnablePayment"
-                  >
-                    Enable Payment Anyway
-                  </VBtn>
+                  <div class="d-flex gap-2">
+                    <VBtn
+                      icon
+                      size="small"
+                      color="primary"
+                      variant="outlined"
+                      @click="testAppInstall"
+                      :loading="testRunning"
+                    >
+                      <VIcon size="20">mdi-restart</VIcon>
+                    </VBtn>
+                    <VBtn
+                      size="small"
+                      color="warning"
+                      variant="outlined"
+                      @click="forceEnablePayment"
+                    >
+                      Enable Payment Anyway
+                    </VBtn>
+                  </div>
                 </div>
               </VAlert>
 
@@ -1698,16 +1908,16 @@
                 variant="flat"
                 :loading="testRunning"
                 @click="testAppInstall"
-                :disabled="testFinished"
+                :disabled="testFinished && !testError"
               >
                 <VIcon class="mr-2">mdi-play</VIcon>
-                Test Installation
+                {{ testFinished && !testError ? 'Test Completed' : 'Test Installation' }}
               </VBtn>
             </VCardText>
           </VCard>
 
           <!-- Test Output -->
-          <VCard v-if="testOutput.length > 0" class="mb-4">
+          <VCard v-if="testOutput.length > 0 && !paymentProcessing && !paymentConfirmed" class="mb-4">
             <VCardTitle 
               class="bg-secondary text-white d-flex align-center justify-space-between"
               style="cursor: pointer;"
@@ -1761,8 +1971,36 @@
             </VExpandTransition>
           </VCard>
 
+          <!-- Network Error Alert -->
+          <VAlert
+            v-if="testError && testFinished"
+            color="error"
+            density="compact"
+            class="mt-4 mb-0 pa-3"
+          >
+            <template #default>
+              <div class="d-flex align-center justify-start w-100">
+                <VIcon icon="mdi-alert-decagram" class="mr-3" size="28" />
+                <div class="flex-grow-1">
+                  Test failed. Check logs and retry or switch backend.
+                </div>
+                <VBtn
+                  icon="mdi-refresh"
+                  color="white"
+                  variant="text"
+                  size="default"
+                  :loading="testRunning"
+                  @click="testAppInstall"
+                  class="ml-2"
+                >
+                  <VIcon size="24">mdi-refresh</VIcon>
+                </VBtn>
+              </div>
+            </template>
+          </VAlert>
+
           <!-- Payment Section -->
-          <div v-if="testFinished && !testError">
+          <div v-if="(testFinished && !testError) || (!props.newApp && renewalEnabled && !specsHaveChanged) || (!props.newApp && registrationHash && appSpecPrice?.flux === 0) || paymentProcessing || paymentConfirmed">
             <!-- Warning Alert if test had warnings -->
             <VAlert 
               v-if="hasTestWarnings" 
@@ -1775,8 +2013,8 @@
               Please review the installation logs above. You can still proceed with payment, 
               but consider addressing these warnings for optimal performance.
             </VAlert>
-            <VRow class="mb-4">
-              <VCol cols="12">
+            <VRow v-if="!paymentProcessing && !paymentConfirmed" class="mb-4">
+              <VCol cols="12" class="pb-0">
                 <VCard class="payment-info-card" elevation="2">
                   <VCardTitle 
                     class="d-flex align-center"
@@ -1807,9 +2045,9 @@
                       >Your app is ready for deployment</div>
                     </div>
                   </VCardTitle>
-                  <VCardText class="pa-6">
-                    <VList class="bg-transparent">
-                      <VListItem class="px-0">
+                  <VCardText class="px-4 pt-4 pb-2">
+                    <VList class="bg-transparent payment-info-list">
+                      <VListItem class="px-0 py-1">
                         <template #prepend>
                           <VIcon color="success" class="mr-3">mdi-clock-check</VIcon>
                         </template>
@@ -1817,8 +2055,8 @@
                           <strong>Payment window:</strong> 30 minutes remaining
                         </VListItemTitle>
                       </VListItem>
-                      
-                      <VListItem class="px-0">
+
+                      <VListItem class="px-0 py-1">
                         <template #prepend>
                           <VIcon color="primary" class="mr-3">mdi-calendar-end</VIcon>
                         </template>
@@ -1826,13 +2064,13 @@
                           <strong>Subscription until:</strong> {{ subscribedTill }}
                         </VListItemTitle>
                       </VListItem>
-                      
-                      <VListItem class="px-0">
+
+                      <VListItem class="px-0 py-1">
                         <template #prepend>
-                          <VIcon color="info" class="mr-3">mdi-information</VIcon>
+                          <VIcon color="warning" class="mr-3">mdi-rocket-launch</VIcon>
                         </template>
                         <VListItemTitle class="text-body-1">
-                          Choose your preferred payment method below
+                          <strong>Deployment time:</strong> Up to 45 min after payment
                         </VListItemTitle>
                       </VListItem>
                     </VList>
@@ -1841,11 +2079,115 @@
               </VCol>
             </VRow>
 
+            <!-- Deployment Success -->
+            <div v-if="paymentConfirmed && !paymentProcessing" class="payment-monitoring-container">
+              <VRow no-gutters class="justify-center">
+                <VCol cols="12" class="pa-3">
+                  <VCard elevation="2" class="deployment-success-card">
+                    <VCardText class="pa-8 text-center">
+                      <VIcon icon="mdi-check-circle" size="80" color="success" class="mb-4" />
+                      <h2 class="text-h4 font-weight-bold mb-3 text-success">
+                        {{ props.newApp ? 'Deployment Successful!' : 'Update Successful!' }}
+                      </h2>
+                      <p class="text-body-1 mb-6 text-medium-emphasis">
+                        {{ props.newApp
+                          ? 'Your application is now active and running on the Flux network.'
+                          : 'Your application specification has been successfully updated on the Flux network.'
+                        }}
+                      </p>
+                      <VBtn
+                        v-if="props.newApp"
+                        color="primary"
+                        size="large"
+                        :to="`/apps/manage/${appDetails.name}`"
+                      >
+                        <VIcon start>mdi-cog</VIcon>
+                        Manage Application
+                      </VBtn>
+                    </VCardText>
+                  </VCard>
+                </VCol>
+              </VRow>
+            </div>
+
+            <!-- Payment Monitoring Spinner (MOVED OUTSIDE PAYMENT SECTION - separate from payment cards) -->
+            {{ console.log('🎬 MONITORING SECTION RENDER:', {
+              paymentProcessing: paymentProcessing,
+              paymentConfirmed: paymentConfirmed,
+              shouldShow: paymentProcessing && !paymentConfirmed
+            }) }}
+            <div v-if="paymentProcessing && !paymentConfirmed" class="payment-monitoring-container">
+              <VRow no-gutters class="justify-center">
+                <VCol cols="12" class="pa-3">
+                  <VCard elevation="2" class="payment-monitoring-card">
+                    <VCardText class="pa-6">
+                      <LoadingSpinner
+                        icon="mdi-rocket-launch"
+                        :icon-size="48"
+                        title="Waiting for deployment..."
+                        message=""
+                      />
+                      <div class="d-flex justify-center">
+                        <div class="deployment-monitoring-wrapper">
+                          <div class="deployment-message-box">
+                            <div class="d-flex align-center">
+                              <VIcon color="success" size="20" class="mr-2">mdi-check-circle</VIcon>
+                              <span v-if="props.newApp || props.isRedeploy">Payment confirmation and deployment will be detected automatically.</span>
+                              <span v-else-if="appSpecPrice?.flux === 0">Update will be detected automatically.</span>
+                              <span v-else>Payment confirmation and update will be detected automatically.</span>
+                            </div>
+                            <div class="d-flex align-center">
+                              <VIcon color="warning" size="20" class="mr-2">mdi-clock-alert</VIcon>
+                              <span>This can take up to 15 minutes.</span>
+                            </div>
+                          </div>
+                          <VBtn
+                            variant="outlined"
+                            color="error"
+                            class="mt-4"
+                            block
+                            @click="cancelPaymentMonitoring"
+                          >
+                            <VIcon start size="20">mdi-close-circle</VIcon>
+                            Cancel Monitoring
+                          </VBtn>
+                          <VBtn
+                            variant="outlined"
+                            color="success"
+                            class="mt-2"
+                            block
+                            @click="emulatePaymentConfirmed"
+                          >
+                            <VIcon start size="20">mdi-check-circle</VIcon>
+                            Test: Emulate Success
+                          </VBtn>
+                        </div>
+                      </div>
+                    </VCardText>
+                  </VCard>
+                </VCol>
+              </VRow>
+            </div>
+
+            <!-- Payment Method Selection Label -->
+            <div v-if="!paymentProcessing && !paymentConfirmed" class="payment-methods-container" style="margin-top: 0;">
+              <VRow no-gutters class="justify-center">
+                <VCol cols="12" sm="12" md="12" lg="10" xl="8" class="px-3 pb-3 pt-1">
+                  <div class="payment-method-selection-label">
+                    <VAvatar size="48" color="primary" variant="flat" class="mr-3">
+                      <VIcon size="28" color="white">mdi-credit-card-outline</VIcon>
+                    </VAvatar>
+                    <span>Select payment method</span>
+                  </div>
+                </VCol>
+              </VRow>
+            </div>
+
             <!-- Payment Methods -->
-            <div class="payment-methods-container">
+            <div v-if="!paymentProcessing && !paymentConfirmed" class="payment-methods-container">
               <VRow no-gutters class="justify-center">
                 <!-- Fiat Payment -->
-                <VCol cols="12" md="6" lg="5" xl="4" class="pa-3">
+                <VCol cols="12" sm="6" md="6" lg="5" xl="4" class="pa-3">
                   <VCard 
                     class="payment-method-card h-100" 
                     elevation="0"
@@ -1863,45 +2205,37 @@
                         </div>
                       </div>
                     </VCardTitle>
-                    
+
                     <VCardText class="pa-6">
                       <div class="text-center">
                         <!-- Payment Icons -->
                         <div class="payment-icons-grid mb-4">
-                          <VCard 
+                          <VCard
                             v-if="stripeEnabled"
-                            variant="outlined" 
+                            variant="outlined"
                             class="payment-icon-card"
                             @click="() => initStripePay(registrationHash, appDetails.name, appSpecPrice?.usd, appDetails.description)"
                             hover
-                            :style="{
-                              border: theme.global.name.value === 'dark' ? '2px solid rgba(144, 202, 249, 0.3)' : '2px solid rgba(25, 118, 210, 0.3)',
-                              backgroundColor: theme.global.name.value === 'dark' ? 'rgba(33, 150, 243, 0.05)' : 'rgba(33, 150, 243, 0.02)'
-                            }"
                           >
                             <VCardText class="d-flex align-center justify-center pa-6">
                               <img
-                                class="payment-brand-icon"
+                                class="payment-brand-icon-small"
                                 :src="StripeImg"
                                 alt="Stripe"
                               />
                             </VCardText>
                           </VCard>
-                          
-                          <VCard 
+
+                          <VCard
                             v-if="paypalEnabled"
-                            variant="outlined" 
+                            variant="outlined"
                             class="payment-icon-card"
                             @click="() => initPaypalPay(registrationHash, appDetails.name, appSpecPrice?.usd, appDetails.description)"
                             hover
-                            :style="{
-                              border: theme.global.name.value === 'dark' ? '2px solid rgba(144, 202, 249, 0.3)' : '2px solid rgba(25, 118, 210, 0.3)',
-                              backgroundColor: theme.global.name.value === 'dark' ? 'rgba(33, 150, 243, 0.05)' : 'rgba(33, 150, 243, 0.02)'
-                            }"
                           >
                             <VCardText class="d-flex align-center justify-center pa-6">
                               <img
-                                class="payment-brand-icon"
+                                class="payment-brand-icon-small"
                                 :src="PayPalThemeImg"
                                 alt="PayPal"
                               />
@@ -1910,12 +2244,40 @@
                         </div>
                         
                         <!-- USD Price Display -->
-                        <div v-if="stripeEnabled || paypalEnabled" class="mt-4">
+                        <div v-if="stripeEnabled || paypalEnabled" class="mt-4 mb-4">
                           <VChip color="success" variant="flat" size="large">
-                            ${{ appSpecPrice?.usd || 0 }} USD
+                            ${{ appSpecPrice?.usd || 0 }} USD + VAT
                           </VChip>
                         </div>
-                        
+
+                        <!-- Payment Advantages -->
+                        <div v-if="stripeEnabled || paypalEnabled" class="mb-4">
+                          <div class="payment-field-container mb-2">
+                            <div class="payment-field-label">
+                              <VIcon color="success">mdi-shield-check</VIcon>
+                            </div>
+                            <div class="payment-field-value">
+                              Secure payment processing
+                            </div>
+                          </div>
+                          <div class="payment-field-container mb-2">
+                            <div class="payment-field-label">
+                              <VIcon color="success">mdi-clock-fast</VIcon>
+                            </div>
+                            <div class="payment-field-value">
+                              Instant payment confirmation
+                            </div>
+                          </div>
+                          <div class="payment-field-container">
+                            <div class="payment-field-label">
+                              <VIcon color="success">mdi-currency-usd</VIcon>
+                            </div>
+                            <div class="payment-field-value">
+                              Multiple currency support
+                            </div>
+                          </div>
+                        </div>
+
                         <!-- Warning -->
                         <VAlert 
                           v-if="!stripeEnabled && !paypalEnabled" 
@@ -1932,7 +2294,7 @@
                 </VCol>
 
                 <!-- Crypto Payment -->
-                <VCol cols="12" md="6" lg="5" xl="4" class="pa-3">
+                <VCol cols="12" sm="6" md="6" lg="5" xl="4" class="pa-3">
                   <VCard 
                     class="payment-method-card h-100" 
                     elevation="0"
@@ -1954,66 +2316,108 @@
                       <!-- Wallet Options -->
                       <div class="text-center">
                         <div class="wallet-icons-grid mb-4">
-                          <VCard 
-                            variant="outlined" 
+                          <VCard
+                            variant="outlined"
                             class="wallet-icon-card"
                             @click="initZelcorePay"
                             hover
                           >
-                            <VCardText class="d-flex flex-column align-center justify-center pa-6">
+                            <VCardText class="d-flex align-center justify-center pa-6">
                               <img
-                                class="wallet-brand-icon mb-3"
+                                class="wallet-brand-icon mr-3"
                                 :src="FluxIDImg"
                                 alt="Zelcore"
                               />
-                              <span class="text-body-2 font-weight-medium">Zelcore</span>
+                              <span class="text-h6 font-weight-medium">Zelcore</span>
                             </VCardText>
                           </VCard>
-                          
-                          <VCard 
-                            variant="outlined" 
+
+                          <VCard
+                            variant="outlined"
                             class="wallet-icon-card"
                             @click="initSSPPay"
                             hover
                           >
-                            <VCardText class="d-flex flex-column align-center justify-center pa-6">
+                            <VCardText class="d-flex align-center justify-center pa-6">
                               <img
-                                class="wallet-brand-icon mb-3"
+                                class="wallet-brand-icon mr-3"
                                 :src="SSPLogoThemeImg"
                                 alt="SSP"
                               />
-                              <span class="text-body-2 font-weight-medium">SSP</span>
+                              <span class="text-h6 font-weight-medium">SSP</span>
                             </VCardText>
                           </VCard>
                         </div>
-                        
+
+                        <!-- FLUX Price Display -->
+                        <div class="text-center mb-4">
+                          <VChip color="primary" variant="flat" size="large">
+                            <VIcon start size="16">mdi-lightning-bolt</VIcon>
+                            {{ appSpecPrice?.flux || 0 }} FLUX
+                            <VChip
+                              v-if="appSpecPrice?.fluxDiscount > 0"
+                              color="success"
+                              variant="flat"
+                              size="x-small"
+                              class="ml-2"
+                            >
+                              -{{ appSpecPrice.fluxDiscount }}%
+                            </VChip>
+                          </VChip>
+                        </div>
+
                         <!-- Payment Details -->
-                        <VCard variant="tonal" color="surface" class="mt-4">
+                        <VCard variant="flat">
                           <VCardText class="pa-4">
-                            <div class="text-center mb-3">
-                              <VChip color="primary" variant="flat" size="large">
-                                <VIcon start size="16">mdi-lightning-bolt</VIcon>
-                                {{ appSpecPrice?.flux || 0 }} FLUX
-                                <VChip 
-                                  v-if="appSpecPrice?.fluxDiscount > 0"
-                                  color="success" 
-                                  variant="flat"
-                                  size="x-small"
-                                  class="ml-2"
+                            <!-- Address Field -->
+                            <div class="mb-3">
+                              <div class="payment-field-container">
+                                <div class="payment-field-label">
+                                  <VIcon size="16" class="mr-1">mdi-wallet</VIcon>
+                                  Send to
+                                </div>
+                                <div class="payment-field-value">
+                                  {{ deploymentAddress || 'Loading...' }}
+                                </div>
+                                <VBtn
+                                  icon
+                                  variant="plain"
+                                  size="small"
+                                  class="copy-btn payment-field-copy"
+                                  :data-clipboard-text="deploymentAddress"
+                                  :disabled="!deploymentAddress"
                                 >
-                                  -{{ appSpecPrice.fluxDiscount }}%
-                                </VChip>
-                              </VChip>
-                            </div>
-                            
-                            <div class="text-caption text-medium-emphasis">
-                              <div class="mb-2 text-center">
-                                <strong>Send to:</strong><br>
-                                <code class="text-caption">{{ deploymentAddress || 'Loading...' }}</code>
+                                  <VIcon size="20" color="grey">mdi-content-copy</VIcon>
+                                  <VTooltip activator="parent" location="top">
+                                    Copy Address
+                                  </VTooltip>
+                                </VBtn>
                               </div>
-                              <div class="text-center">
-                                <strong>Message:</strong><br>
-                                <code class="text-caption">{{ registrationHash }}</code>
+                            </div>
+
+                            <!-- Message Field -->
+                            <div>
+                              <div class="payment-field-container">
+                                <div class="payment-field-label">
+                                  <VIcon size="16" class="mr-1">mdi-message-text</VIcon>
+                                  Message
+                                </div>
+                                <div class="payment-field-value">
+                                  {{ registrationHash || 'Loading...' }}
+                                </div>
+                                <VBtn
+                                  icon
+                                  variant="plain"
+                                  size="small"
+                                  class="copy-btn payment-field-copy"
+                                  :data-clipboard-text="registrationHash"
+                                  :disabled="!registrationHash"
+                                >
+                                  <VIcon size="20" color="grey">mdi-content-copy</VIcon>
+                                  <VTooltip activator="parent" location="top">
+                                    Copy Message
+                                  </VTooltip>
+                                </VBtn>
                               </div>
                             </div>
                           </VCardText>
@@ -2304,6 +2708,57 @@
     v-model="showSpecImportDialog"
     @import="handleSpecImport"
   />
+
+  <!-- Upgrade Spec Dialog -->
+  <UpgradeSpecDialog
+    v-model="showUpgradeDialog"
+    :current-version="specVersion"
+    :target-version="LATEST_SPEC_VERSION"
+    @confirm="convertToLatestSpec"
+  />
+
+  <!-- Popup Blocked Dialog -->
+  <VDialog v-model="popupBlockedDialog" max-width="500">
+    <VCard rounded="xl" class="overflow-hidden">
+      <VCardTitle class="d-flex align-center gap-3 bg-primary text-white" style="height: 52px; padding-inline: 16px;">
+        <VIcon icon="mdi-alert-circle" color="orange" size="28" />
+        <span class="text-h6">Popup Blocked</span>
+      </VCardTitle>
+      <VCardText class="py-8 px-6 text-center">
+        <VIcon icon="mdi-block-helper" color="orange" size="64" class="mb-4" />
+        <p class="text-body-1 mb-3">
+          Your browser blocked the {{ blockedPaymentType }} checkout window.
+        </p>
+        <p class="text-body-2 text-medium-emphasis">
+          Click the button below to open the payment page in a new tab.
+        </p>
+      </VCardText>
+      <VCardActions class="pa-0 d-flex ga-0">
+        <VBtn
+          color="error"
+          variant="flat"
+          size="large"
+          class="rounded-0 rounded-bl-xl popup-dialog-btn"
+          style="flex: 1; max-width: 50%;"
+          @click="() => { popupBlockedDialog = false; cancelPaymentMonitoring(); }"
+        >
+          <VIcon start icon="mdi-close-circle" />
+          Cancel
+        </VBtn>
+        <VBtn
+          color="primary"
+          variant="flat"
+          size="large"
+          class="rounded-0 rounded-br-xl popup-dialog-btn"
+          style="flex: 1; max-width: 50%;"
+          @click="openBlockedPayment"
+        >
+          <VIcon start icon="mdi-open-in-new" />
+          Open Payment
+        </VBtn>
+      </VCardActions>
+    </VCard>
+  </VDialog>
 </template>
 
 <script setup>
@@ -2318,17 +2773,21 @@ import { paymentBridge } from '@/utils/fiatGateways'
 import AppsService from "@/services/AppsService"
 import { storeToRefs } from "pinia"
 import { useFluxStore } from "@/stores/flux"
-import { useTheme } from 'vuetify'
+import { useTheme, useDisplay } from 'vuetify'
 import ImportJsonDialog from '@/components/dialogs/ImportJsonDialog.vue'
 import ImportSpecDialog from '@/components/dialogs/ImportSpecDialog.vue'
-import { 
-  importRsaPublicKey, 
-  encryptAesKeyWithRsaKey, 
+import UpgradeSpecDialog from '@/components/dialogs/UpgradeSpecDialog.vue'
+import LoadingSpinner from '@/components/Marketplace/LoadingSpinner.vue'
+import ClipboardJS from 'clipboard'
+import {
+  importRsaPublicKey,
+  encryptAesKeyWithRsaKey,
   encryptEnterpriseWithAes,
   encryptMessage,
   getEnterprisePGPKeys,
   isWebCryptoAvailable,
 } from '@/utils/enterpriseCrypto'
+import { convertToLatestVersion, LATEST_SPEC_VERSION as SPEC_LATEST_VERSION } from '@/utils/specConverter'
 
 // Import payment images
 import StripeImg from '@images/Stripe.svg?url'
@@ -2341,7 +2800,28 @@ const props = defineProps({
   appSpec: Object,
   newApp: Boolean,
   executeLocalCommand: Function,
+  resetTrigger: Number, // Timestamp to trigger internal tab reset when subscription tab becomes active
+  isRedeploy: Boolean, // Flag to indicate if this is a redeploy operation
 })
+
+// Define emits
+defineEmits(['specConverted'])
+
+// Spec version constants
+const LATEST_SPEC_VERSION = SPEC_LATEST_VERSION
+const specVersion = computed(() => props.appSpec?.version || LATEST_SPEC_VERSION)
+
+// Version feature flags - control UI visibility based on spec version
+const versionFlags = computed(() => ({
+  supportsInstances: specVersion.value >= 3,      // V3+: instances field
+  supportsCompose: specVersion.value >= 4,        // V4+: compose array (multi-component)
+  supportsContacts: specVersion.value >= 5,       // V5+: contacts array
+  supportsGeolocation: specVersion.value >= 5,    // V5+: geolocation array
+  supportsExpire: specVersion.value >= 6,         // V6+: expire field
+  supportsNodes: specVersion.value >= 7,          // V7+: nodes array
+  supportsStaticIp: specVersion.value >= 7,       // V7+: staticip field
+  supportsRepoAuth: specVersion.value >= 7,       // V7+: repoauth per component
+}))
 
 const signature = ref('')
 const timestamp = ref(Date.now())
@@ -2350,6 +2830,8 @@ const version = 1
 const signClient = ref(null)
 const websocket = ref(null)
 const loginType  = ref(localStorage.getItem('loginType'))
+const isSigning = ref(false) // Track if signing is in progress
+const signingFailed = ref(false) // Track if signing failed
 const tab = ref(0)
 const renewalEnabled = ref(false)
 const isNameLocked = ref(false)
@@ -2362,6 +2844,18 @@ const logsExpanded = ref(true)
 const paymentCompleted = ref(false)
 const paymentMethod = ref('')
 const paymentAmount = ref(0)
+const paymentMonitoringInterval = ref(null)
+const paymentMonitoringTimeout = ref(null)
+const paymentConfirmed = ref(false)
+const paymentProcessing = ref(false)
+const popupBlockedDialog = ref(false)
+const blockedPaymentUrl = ref('')
+const blockedPaymentType = ref('')
+
+// Spec version upgrade
+const availableVersions = [3, 4, 5, 6, 7, 8]
+const isConverting = ref(false)
+const showUpgradeDialog = ref(false)
 
 // Helper function to check if payment method is crypto
 function isCryptoPayment(method) {
@@ -2393,6 +2887,7 @@ onMounted(() => {
 
 // Theme-aware images
 const theme = useTheme()
+const display = useDisplay()
 const PayPalThemeImg = computed(() => {
   return PayPalImg // Use the main PayPal.png file for both themes
 })
@@ -2412,10 +2907,16 @@ const possibleLocations = ref([])
 const tabItems = computed(() => {
   const baseItems = [
     { label: 'General', icon: 'mdi-application', value: 0 },
-    { label: 'Geolocation', icon: 'mdi-earth', value: 1 },
-    { label: 'Components', icon: 'mdi-cube', value: 2 },
   ]
-  
+
+  // Only show Geolocation tab for V5+
+  if (versionFlags.value.supportsGeolocation) {
+    baseItems.push({ label: 'Geolocation', icon: 'mdi-earth', value: 1 })
+  }
+
+  // Components tab always shown
+  baseItems.push({ label: 'Components', icon: 'mdi-cube', value: 2 })
+
   // Only show Priority/Enterprise Nodes tab for v7+ private apps
   if (props.appSpec?.version >= 7 && isPrivateApp.value) {
     baseItems.push({
@@ -2611,6 +3112,41 @@ function saveCommandChanges() {
   if (index === null) return
   props.appSpec.compose[index].commands = [...commandsDialog.entries]
   commandsDialog.show = false
+}
+
+// Upgrade spec to latest version
+function openConversionDialog() {
+  if (!props.isRedeploy || specVersion.value >= LATEST_SPEC_VERSION) return
+  showUpgradeDialog.value = true
+}
+
+function convertToLatestSpec() {
+  isConverting.value = true
+
+  try {
+    const spec = props.appSpec
+
+    // If already latest version, nothing to do
+    if (spec.version >= LATEST_SPEC_VERSION) {
+      showToast('info', 'Application is already using latest specification format')
+      isConverting.value = false
+      return
+    }
+
+    // Use the specConverter utility to convert
+    const convertedSpec = convertToLatestVersion(spec)
+
+    // Update props.appSpec with converted spec (keep the reference, just update properties)
+    Object.keys(spec).forEach(key => delete spec[key])
+    Object.assign(spec, convertedSpec)
+
+    showToast('success', `Application upgraded from V${specVersion.value} to V${LATEST_SPEC_VERSION} successfully`)
+  } catch (error) {
+    console.error('Error converting specification:', error)
+    showToast('error', `Failed to upgrade specification: ${error.message}`)
+  } finally {
+    isConverting.value = false
+  }
 }
 
 const renewalOptions = [
@@ -2864,6 +3400,19 @@ async function fetchCurrentBlockHeight() {
 onMounted(async () => {
   Promise.all([getMarketPlace(), getMultiplier()])
   await fetchCurrentBlockHeight()
+
+  // Initialize clipboard.js for copy buttons
+  const clipboard = new ClipboardJS('.copy-btn')
+
+  clipboard.on('success', (e) => {
+    showToast('success', 'Copied to clipboard!')
+    e.clearSelection()
+  })
+
+  clipboard.on('error', (e) => {
+    showToast('error', 'Failed to copy to clipboard')
+    console.error('Copy error:', e)
+  })
 })
 
 
@@ -2872,20 +3421,104 @@ const blockTimeMs = 2 * 60 * 1000 // 2 minutes per block
 
 // 1️⃣  Clone once (on mount) – never overwritten
 const originalExpireSnapshot = ref(null)
+const originalAppSpecSnapshot = ref(null)
 
 onMounted(() => {
   originalExpireSnapshot.value = props.appSpec?.expire ?? 22000
-  
+
+  // Store original app spec for comparison (excluding expire field)
+  if (!props.newApp && props.appSpec) {
+    const specCopy = JSON.parse(JSON.stringify(props.appSpec))
+    delete specCopy.expire
+    originalAppSpecSnapshot.value = specCopy
+  }
+
   // For new apps, enable renewal by default (which means setting the period)
   if (props.newApp) {
     renewalEnabled.value = true
   }
 })
 
+// Check if specs have changed (excluding expire field)
+const specsHaveChanged = computed(() => {
+  if (props.newApp) return true // New apps always need testing
+  if (!originalAppSpecSnapshot.value) return true // No snapshot means we need to test
+  if (!props.appSpec) return true // No spec means we need to test
+
+  // Compare current spec (without expire) to original snapshot
+  try {
+    const currentSpecCopy = JSON.parse(JSON.stringify(props.appSpec))
+    delete currentSpecCopy.expire
+
+    const hasChanged = JSON.stringify(currentSpecCopy) !== JSON.stringify(originalAppSpecSnapshot.value)
+
+    if (hasChanged) {
+      console.log('⚠️ Spec changes detected')
+    } else {
+      console.log('✅ No spec changes detected')
+    }
+
+    return hasChanged
+  } catch (error) {
+    console.error('Error comparing specs:', error)
+    return true // If comparison fails, assume specs changed
+  }
+})
+
+// Watch for spec changes and clear registration if user modifies specs after signing
+// This ensures that if user signs, then changes specs, they need to sign again
+// We store what was actually signed (appSpecFormated) and compare against it
+let signedSpecState = ref(null)
+
+watch(() => props.appSpec, (newSpec) => {
+  if (!newSpec || props.newApp) return // Skip for new apps
+  if (!registrationHash.value) return // No hash to clear
+  if (!signedSpecState.value) return // No signed spec to compare against
+
+  // If user changes props.appSpec after signing, the old signature is invalid
+  try {
+    const currentSpecCopy = JSON.parse(JSON.stringify(newSpec))
+    delete currentSpecCopy.expire
+
+    const currentStr = JSON.stringify(currentSpecCopy)
+    const signedStr = JSON.stringify(signedSpecState.value)
+
+    // Compare current spec to what was actually signed (appSpecFormated at time of signing)
+    if (currentStr !== signedStr) {
+      console.log('⚠️ Spec changed after signing - clearing registration hash')
+
+      registrationHash.value = null
+      signature.value = null
+      testFinished.value = false
+      testError.value = false
+      signedSpecState.value = null
+    }
+  } catch (error) {
+    console.error('Error checking spec changes:', error)
+  }
+}, { deep: true })
+
+// Store what was actually signed when signature is created
+watch(signature, (newSignature) => {
+  if (newSignature && appSpecFormated.value) {
+    try {
+      // Store the FORMATTED spec that was actually signed
+      const signedCopy = JSON.parse(JSON.stringify(appSpecFormated.value))
+      delete signedCopy.expire
+      signedSpecState.value = signedCopy
+      console.log('📸 Stored signed spec state (appSpecFormated):', signedCopy)
+    } catch (error) {
+      console.error('Error storing signed spec state:', error)
+    }
+  } else if (!newSignature) {
+    signedSpecState.value = null
+  }
+})
+
 // 2️⃣  current remaining blocks based on the *original* value
 const originalExpireBlocks = computed(() => {
   if (!currentBlockHeight.value || typeof props.appSpec?.height !== 'number') return null
-  
+
   return props.appSpec.height + originalExpireSnapshot.value - currentBlockHeight.value
 })
 
@@ -2922,19 +3555,47 @@ watch(appDetails, val => {
   // Note: repoauth is handled per component, not globally
 
   if (renewalEnabled.value || props.newApp) {
-    props.appSpec.expire = renewalOptions[val.renewalIndex]?.value
+    const selectedExpire = renewalOptions[val.renewalIndex]?.value
+    props.appSpec.expire = selectedExpire
   } else {
     props.appSpec.expire = originalExpireSnapshot.value
   }
 }, { deep: true })
 
 watch(renewalEnabled, val => {
-
-
- 
+  // Update expire when renewal is toggled
+  if (val || props.newApp) {
+    const selectedExpire = renewalOptions[appDetails.value.renewalIndex]?.value
+    props.appSpec.expire = selectedExpire
+  } else {
+    props.appSpec.expire = originalExpireSnapshot.value
+  }
 })
 
+// Watch renewalIndex changes separately to ensure it updates
+watch(() => appDetails.value.renewalIndex, (newIndex) => {
+  if (renewalEnabled.value || props.newApp) {
+    const selectedExpire = renewalOptions[newIndex]?.value
+    props.appSpec.expire = selectedExpire
+  }
+})
 
+// Watch signature - auto-register when signature is set
+watch(signature, async (newSignature) => {
+  if (newSignature && isSigning.value && !registrationHash.value) {
+    isSigning.value = false
+    await propagateSignedMessage()
+  }
+})
+
+// Watch hasCalculatedPrice changes
+watch(hasCalculatedPrice, (newValue, oldValue) => {
+  console.log('💰 hasCalculatedPrice changed:', {
+    oldValue,
+    newValue,
+    appSpecPrice: appSpecPrice?.value
+  })
+})
 
 // Geolocation helpers (keep existing)
 function decodeGeolocation(existingGeolocation) {
@@ -3698,6 +4359,22 @@ function validatePort(component, idx, type) {
   }
 }
 
+// Copy text to clipboard
+async function copyToClipboard(text) {
+  if (!text) {
+    showToast('warning', 'Nothing to copy')
+    return
+  }
+
+  try {
+    await navigator.clipboard.writeText(text)
+    showToast('success', 'Copied to clipboard!')
+  } catch (err) {
+    showToast('error', 'Failed to copy to clipboard')
+    console.error('Failed to copy:', err)
+  }
+}
+
 // Add a new port pair
 function addPortPair(index) {
   const component = props.appSpec.compose[index]
@@ -3719,13 +4396,30 @@ function addPortPair(index) {
   ) {
     component.ports.push(ports.exposed)
     component.containerPorts.push(ports.container)
-    newPorts.value[index] = { exposed: null, container: null }
+
+    // Auto-increment exposed port by +1, clear container port
+    const nextExposed = ports.exposed + 1
+    newPorts.value[index] = {
+      exposed: nextExposed,
+      container: null
+    }
   } else {
     showToast("error",
       isDuplicateGlobal
         ? `Port ${ports.exposed} is already used in another component.`
         : 'Invalid or duplicate port values.',
     )
+  }
+}
+
+// Handle exposed port input - auto-suggest container port (enabled for all modes)
+function handleExposedPortInput(componentIndex) {
+  const ports = newPorts.value[componentIndex]
+  if (!ports) return
+
+  // Only auto-fill container port if it's empty
+  if (ports.exposed && !ports.container) {
+    newPorts.value[componentIndex].container = ports.exposed
   }
 }
 
@@ -3747,6 +4441,187 @@ function isValidPort(value) {
 // Clean up global event listener on component unmount
 onUnmounted(() => {
   document.removeEventListener('click', handleOutsideClick)
+
+  // Clean up payment monitoring intervals
+  if (paymentMonitoringInterval.value) {
+    clearInterval(paymentMonitoringInterval.value)
+    paymentMonitoringInterval.value = null
+  }
+  if (paymentMonitoringTimeout.value) {
+    clearTimeout(paymentMonitoringTimeout.value)
+    paymentMonitoringTimeout.value = null
+  }
+
+  // Clean up signing state
+  isSigning.value = false
+  if (websocket.value) {
+    websocket.value.close()
+    websocket.value = null
+  }
+
+  // Reset payment states
+  paymentProcessing.value = false
+  paymentConfirmed.value = false
+  paymentCompleted.value = false
+  paymentMethod.value = ''
+  paymentAmount.value = 0
+})
+
+// Watch for tab changes - clear state when leaving Test & Pay tab
+watch(tab, (newTab, oldTab) => {
+  console.log('🔀 TAB CHANGED', {
+    oldTab,
+    newTab,
+    isEnteringTestPay: newTab === 100,
+    isLeavingTestPay: oldTab === 100 && newTab !== 100
+  })
+
+  // Log all payment-related states when entering Test & Pay tab
+  if (newTab === 100) {
+    console.log('💳 ENTERING TEST & PAY - Payment UI States:', {
+      paymentProcessing: paymentProcessing?.value,
+      paymentConfirmed: paymentConfirmed?.value,
+      paymentCompleted: paymentCompleted?.value,
+      registrationHash: registrationHash?.value,
+      deploymentAddress: deploymentAddress?.value,
+      signature: signature?.value,
+      hasCalculatedPrice: hasCalculatedPrice?.value,
+      appSpecPrice: appSpecPrice?.value,
+      paymentMonitoringInterval: paymentMonitoringInterval?.value,
+      paymentMonitoringTimeout: paymentMonitoringTimeout?.value,
+      // Payment card visibility conditions:
+      testFinished: testFinished?.value,
+      testError: testError?.value,
+      renewalEnabled: renewalEnabled?.value,
+      specsHaveChanged: specsHaveChanged?.value,
+      newApp: props?.newApp
+    })
+
+    // If there's a registrationHash, determine what to show based on app type and price
+    if (registrationHash?.value && !paymentConfirmed?.value && !paymentMonitoringInterval?.value) {
+      // For free apps/updates, auto-start monitoring (no payment needed)
+      if (appSpecPrice?.value?.flux === 0) {
+        console.log('🆓 FREE APP/UPDATE DETECTED - Auto-starting deployment monitoring')
+
+        // Set testFinished to hide test section for free updates
+        testFinished.value = true
+        testError.value = false
+
+        startPaymentMonitoring()
+      }
+      // For paid apps/updates with unchanged specs, skip test and show payment section
+      else if (!props.newApp && !specsHaveChanged.value) {
+        console.log('💰 PAID UPDATE (unchanged specs) - Skipping test, showing payment section')
+        testFinished.value = true
+        testError.value = false
+      }
+      // For new apps or updates with changed specs, don't force testFinished
+      // Let the test section show so user can run the test
+      else {
+        console.log('💰 NEW APP or CHANGED SPECS - Test section should be visible')
+        // Don't set testFinished - let user run the test
+      }
+    }
+  }
+
+  // If leaving the Test & Pay tab (100)
+  if (oldTab === 100 && newTab !== 100) {
+    console.log('🚪 LEAVING TEST & PAY - Clearing payment states', {
+      hadSuccessfulDeployment: paymentConfirmed.value
+    })
+
+    // Check if deployment was successful BEFORE clearing payment states
+    const wasSuccessful = paymentConfirmed.value || paymentCompleted.value
+
+    // Clear monitoring intervals
+    if (paymentMonitoringInterval.value) {
+      clearInterval(paymentMonitoringInterval.value)
+      paymentMonitoringInterval.value = null
+    }
+    if (paymentMonitoringTimeout.value) {
+      clearTimeout(paymentMonitoringTimeout.value)
+      paymentMonitoringTimeout.value = null
+    }
+
+    // Reset payment states
+    paymentProcessing.value = false
+    paymentConfirmed.value = false
+    paymentCompleted.value = false
+    paymentMethod.value = ''
+    paymentAmount.value = 0
+
+    // Clear registration states if deployment was successful
+    // This allows user to register again if they change specs later
+    if (wasSuccessful) {
+      registrationHash.value = null
+      signature.value = null
+      deploymentAddress.value = null
+      console.log('🧹 Cleared registration states after leaving successful deployment screen')
+    }
+
+    console.log('✅ Payment states cleared')
+  }
+})
+
+// onMounted - always reset to first tab when component mounts
+// This handles the case when user navigates away and back to subscription tab
+onMounted(() => {
+  console.log('🚀 COMPONENT MOUNTED - Initial States:', {
+    tab: tab?.value,
+    signature: signature?.value,
+    registrationHash: registrationHash?.value,
+    paymentProcessing: paymentProcessing?.value,
+    paymentConfirmed: paymentConfirmed?.value,
+    deploymentAddress: deploymentAddress?.value,
+    hasCalculatedPrice: hasCalculatedPrice?.value,
+    appSpecPrice: appSpecPrice?.value,
+    newApp: props?.newApp
+  })
+
+  tab.value = 0
+
+  console.log('✅ Tab reset to 0 on mount')
+})
+
+// Watch resetTrigger - reset to first tab and disable renewal whenever it changes (skip initial value)
+watch(() => props.resetTrigger, (newTrigger, oldTrigger) => {
+  console.log('🔄 RESET TRIGGER FIRED', {
+    newTrigger,
+    oldTrigger,
+    willReset: oldTrigger && newTrigger && newTrigger !== oldTrigger
+  })
+
+  // Only reset if this is NOT the first time (oldTrigger exists)
+  if (oldTrigger && newTrigger && newTrigger !== oldTrigger) {
+    console.log('📊 STATE BEFORE RESET:', {
+      tab: tab?.value,
+      signature: signature?.value,
+      registrationHash: registrationHash?.value,
+      paymentProcessing: paymentProcessing?.value,
+      paymentConfirmed: paymentConfirmed?.value,
+      deploymentAddress: deploymentAddress?.value,
+      isSigning: isSigning?.value,
+      signingFailed: signingFailed?.value,
+      isPropagating: isPropagating?.value,
+      hasCalculatedPrice: hasCalculatedPrice?.value,
+      appSpecPrice: appSpecPrice?.value
+    })
+
+    tab.value = 0
+    // Disable renewal when revisiting subscription tab
+    if (!props.newApp) {
+      renewalEnabled.value = false
+    }
+
+    console.log('📊 STATE AFTER RESET (tab changed to 0):', {
+      tab: tab?.value,
+      signature: signature?.value,
+      registrationHash: registrationHash?.value,
+      paymentProcessing: paymentProcessing?.value,
+      paymentConfirmed: paymentConfirmed?.value,
+      renewalEnabled: renewalEnabled?.value
+    })
+  }
 })
 
 // Generate a random port between min and max
@@ -3756,25 +4631,25 @@ function generateRandomPort(min = 30000, max = 39999) {
 
 // Watch for compose length changes
 watch(() => props.appSpec?.compose?.length, newLength => {
-  // For new apps, generate a random port for each component
-  if (props.newApp && newLength > 0) {
+  // Generate random port for each component (enabled for all modes)
+  if (newLength > 0) {
     // Only initialize ports for new components that don't have ports yet
     if (!newPorts.value) {
       newPorts.value = []
     }
-    
+
     // Ensure the array has the right length and preserve existing values
     while (newPorts.value.length < newLength) {
       // Generate random port for each new component
       newPorts.value.push({ exposed: generateRandomPort(), container: null })
     }
-    
+
     // Trim if needed (in case components were removed)
     if (newPorts.value.length > newLength) {
       newPorts.value = newPorts.value.slice(0, newLength)
     }
   } else {
-    newPorts.value = Array.from({ length: newLength }, () => ({ exposed: null, container: null }))
+    newPorts.value = []
   }
 }, { immediate: true })
 
@@ -3957,10 +4832,18 @@ watch(
 )
 
 const expiryLabel = computed(() => {
-  const expire = props.appSpec?.expire ?? 22000
-  
-  // For new apps, just show the selected period duration
-  if (props.newApp) {
+  // For new apps OR renewal, use the selected renewal option directly
+  // For existing apps without renewal, use the original expire value
+  let expire
+  if (props.newApp || renewalEnabled.value) {
+    expire = renewalOptions[appDetails.value.renewalIndex]?.value ?? 22000
+  } else {
+    // Use original expire snapshot for existing apps when renewal is disabled
+    expire = originalExpireSnapshot.value ?? props.appSpec?.expire ?? 22000
+  }
+
+  // For new apps OR renewal, just show the selected period duration
+  if (props.newApp || renewalEnabled.value) {
     const totalMinutes = expire * 2
     const days = Math.floor(totalMinutes / 1440)
     const hours = Math.floor((totalMinutes % 1440) / 60)
@@ -3973,12 +4856,12 @@ const expiryLabel = computed(() => {
 
     return parts.join(', ')
   }
-  
-  // For existing apps
-  const height = renewalEnabled.value ? blockHeight.value : props.appSpec.height
-  const current = blockHeight.value
 
-  if (!height || !current) return ''
+  // For existing apps without renewal - show remaining time
+  const current = blockHeight.value
+  const height = props.appSpec.height
+
+  if (!current || !height) return ''
 
   const blocksToExpireLocal = height + expire - current
   if (blocksToExpireLocal < 1) return ''
@@ -3999,19 +4882,64 @@ const expiryLabel = computed(() => {
 // Auto-trigger logic when switching to tab 99
 watch(tab, async newVal => {
   if (newVal === 99) {
+    console.log('📝 ENTERING REVIEW & VALIDATE TAB', {
+      hasRegistrationHash: !!registrationHash.value,
+      hasAppSpecPrice: !!appSpecPrice.value,
+      hasCalculatedPrice: hasCalculatedPrice.value,
+      specsHaveChanged: specsHaveChanged.value,
+      isNewApp: props.newApp
+    })
+
+    // If already registered, don't reset states - just show what we have
+    // Once you have a registrationHash, it means you signed the current spec state
+    // We preserve it regardless of whether specs changed from the snapshot
+    if (registrationHash.value) {
+      console.log('✅ Already registered - keeping existing states', {
+        hasHash: !!registrationHash.value,
+        specsHaveChanged: specsHaveChanged.value,
+        testFinished: testFinished.value,
+        testError: testError.value
+      })
+      isVeryfitying.value = false
+
+      // For new apps, only set testFinished if test hasn't been attempted yet
+      // This preserves test failure states
+      if (props.newApp && !testFinished.value) {
+        // Test not run yet - allow payment section to show (user can pay without testing)
+        testFinished.value = true
+        testError.value = false
+      }
+      // For updates with unchanged specs, always set testFinished (skip testing)
+      else if (!props.newApp && !specsHaveChanged.value) {
+        testFinished.value = true
+        testError.value = false
+      }
+      // Otherwise, preserve existing test states (including failures)
+
+      // Auto-navigate to Test & Pay tab after 1 second
+      setTimeout(() => {
+        if (tab.value === 99) { // Only navigate if still on tab 99
+          tab.value = 100
+        }
+      }, 1000)
+
+      return
+    }
+
     // Spinner on
     isVeryfitying.value = true
-    appSpecFormated.value = null
-    signature.value = null
 
     // Reset all public state
+    // Only clear signature/hash if they don't exist
+    appSpecFormated.value = null
+    signature.value = null
+    registrationHash.value = null
     verifyAppSpecResponse.value = null
     verifyAppSpecError.value = null
     appSpecPrice.value = null
     blockHeight.value = null
     isExpiryValid.value = false
     blocksToExpire.value = null
-    registrationHash.value = null
     isPropagating.value = false
     testError.value = false
     testFinished.value = false
@@ -4058,6 +4986,11 @@ watch(tab, async newVal => {
     hasValidatedSpec.value = validated
     hasCheckedExpiry.value = checkedExpiry
     hasCalculatedPrice.value = calculatedPrice
+
+    // Auto-sign for SSO users after validation completes
+    if (loginType.value === 'sso' && calculatedPrice) {
+      await dataSign()
+    }
   }
 })
 
@@ -4222,14 +5155,165 @@ async function verifyAppSpec() {
   try {
     const appSpecTemp = JSON.parse(JSON.stringify(props.appSpec))
 
+    // ========================================================================
+    // VERSION-SPECIFIC STRUCTURE CLEANUP AND SYNC
+    // ========================================================================
+
+    console.log('[verifyAppSpec] Original appSpecTemp:', {
+      version: appSpecTemp.version,
+      _isV3Original: appSpecTemp._isV3Original,
+      hasCompose: !!appSpecTemp.compose,
+      composePath: appSpecTemp.compose?.[0],
+      flatPorts: appSpecTemp.ports,
+      flatContainerPorts: appSpecTemp.containerPorts,
+      flatEnvParams: appSpecTemp.enviromentParameters
+    })
+
+    // V3: Sync compose → flat fields and convert to V3 format
+    if (appSpecTemp._isV3Original && appSpecTemp.compose && appSpecTemp.compose[0]) {
+      console.log('[V3 Sync] BEFORE sync - compose[0] data:', {
+        name: appSpecTemp.compose[0].name,
+        ports: appSpecTemp.compose[0].ports,
+        portsType: typeof appSpecTemp.compose[0].ports[0],
+        containerPorts: appSpecTemp.compose[0].containerPorts,
+        environmentParameters: appSpecTemp.compose[0].environmentParameters,
+        repotag: appSpecTemp.compose[0].repotag
+      })
+      console.log('[V3 Sync] BEFORE sync - flat fields:', {
+        name: appSpecTemp.name,
+        ports: appSpecTemp.ports,
+        portsType: appSpecTemp.ports ? typeof appSpecTemp.ports[0] : 'undefined',
+        containerPorts: appSpecTemp.containerPorts,
+        enviromentParameters: appSpecTemp.enviromentParameters,
+        repotag: appSpecTemp.repotag
+      })
+
+      const component = appSpecTemp.compose[0]
+
+      // Sync component fields to flat structure
+      appSpecTemp.name = component.name
+      appSpecTemp.description = component.description
+      appSpecTemp.repotag = component.repotag
+      appSpecTemp.containerData = component.containerData
+      appSpecTemp.cpu = component.cpu
+      appSpecTemp.ram = component.ram
+      appSpecTemp.hdd = component.hdd
+
+      // CRITICAL: Convert ports back to STRINGS (V3 requirement)
+      const portsBeforeConversion = component.ports
+      const containerPortsBeforeConversion = component.containerPorts
+      appSpecTemp.ports = component.ports.map(p => String(p))
+      appSpecTemp.containerPorts = component.containerPorts.map(p => String(p))
+      console.log('[V3 Sync] Port conversion:', {
+        portsFrom: portsBeforeConversion,
+        portsTo: appSpecTemp.ports,
+        containerPortsFrom: containerPortsBeforeConversion,
+        containerPortsTo: appSpecTemp.containerPorts
+      })
+
+      // CRITICAL: Revert typo fix back to V3 format (enviromentParameters with typo)
+      appSpecTemp.enviromentParameters = component.environmentParameters
+      console.log('[V3 Sync] Environment parameters sync:', {
+        from: 'environmentParameters (no typo)',
+        to: 'enviromentParameters (with typo)',
+        value: appSpecTemp.enviromentParameters
+      })
+
+      // Sync array fields
+      appSpecTemp.commands = component.commands || []
+      appSpecTemp.domains = component.domains || []
+
+      // Force tiered = false (V3 requires boolean field)
+      appSpecTemp.tiered = false
+      console.log('[V3 Sync] Forced tiered = false (V3 requires boolean)')
+
+      // Remove V3-unsupported fields
+      const fieldsToDelete = ['compose', '_isV3Original', 'contacts', 'geolocation', 'expire', 'nodes', 'staticip', 'enterprise', 'repoauth']
+      console.log('[V3 Sync] Deleting unsupported fields:', fieldsToDelete)
+      delete appSpecTemp.compose  // V3 doesn't support compose field
+      delete appSpecTemp._isV3Original  // Remove adapter flag
+      delete appSpecTemp.contacts  // V5+
+      delete appSpecTemp.geolocation  // V5+
+      delete appSpecTemp.expire  // V6+
+      delete appSpecTemp.nodes  // V7+
+      delete appSpecTemp.staticip  // V7+
+      delete appSpecTemp.enterprise  // V8
+      delete appSpecTemp.repoauth  // Not at root level for V3
+
+      console.log('[V3 Sync] AFTER sync - Clean V3 flat structure:', {
+        version: appSpecTemp.version,
+        name: appSpecTemp.name,
+        ports: appSpecTemp.ports,
+        portsType: typeof appSpecTemp.ports[0],
+        containerPorts: appSpecTemp.containerPorts,
+        enviromentParameters: appSpecTemp.enviromentParameters,
+        tiered: appSpecTemp.tiered,
+        hasCompose: !!appSpecTemp.compose,
+        has_isV3Original: !!appSpecTemp._isV3Original
+      })
+      console.log('[V3 Sync] Complete V3 spec for validation:', JSON.stringify(appSpecTemp, null, 2))
+    }
+
+    // NOTE: V4-V7 specs keep their tiered fields and secrets when validating as-is
+    // These fields are only removed during spec version conversion (handled separately)
+
+    // V8: Ensure tiered fields don't exist in components
+    if (appSpecTemp.version >= 8) {
+      console.log('[V8 Cleanup] Ensuring no tiered fields in components')
+      if (appSpecTemp.compose && Array.isArray(appSpecTemp.compose)) {
+        const fieldsToCheck = ['tiered', 'cpubasic', 'rambasic', 'hddbasic', 'cpusuper', 'ramsuper', 'hddsuper', 'cpubamf', 'rambamf', 'hddbamf']
+
+        appSpecTemp.compose.forEach((component, index) => {
+          const foundTieredFields = fieldsToCheck.filter(field => component[field] !== undefined)
+          if (foundTieredFields.length > 0) {
+            console.log(`[V8 Cleanup] Component[${index}] found tiered fields (removing):`, foundTieredFields)
+          }
+
+          delete component.tiered
+          delete component.cpubasic
+          delete component.rambasic
+          delete component.hddbasic
+          delete component.cpusuper
+          delete component.ramsuper
+          delete component.hddsuper
+          delete component.cpubamf
+          delete component.rambamf
+          delete component.hddbamf
+        })
+      }
+    }
+
+    console.log('[verifyAppSpec] After version-specific cleanup:', {
+      version: appSpecTemp.version,
+      hasCompose: !!appSpecTemp.compose,
+      composeLength: appSpecTemp.compose?.length,
+      hasTiered: appSpecTemp.tiered !== undefined,
+      has_isV3Original: !!appSpecTemp._isV3Original
+    })
+
+    // ========================================================================
+    // END VERSION-SPECIFIC CLEANUP
+    // ========================================================================
+
     // Ensure required fields exist for version >= 5
     if (appSpecTemp.version >= 5) {
       if (!appSpecTemp.contacts) appSpecTemp.contacts = []
       if (!appSpecTemp.geolocation) appSpecTemp.geolocation = []
     }
 
-    if (blocksToExpire.value !== 'null' && !renewalEnabled.value){
+    // Recalculate expire for free updates (only for V6+ specs that support expire)
+    if (blocksToExpire.value !== 'null' && !renewalEnabled.value && appSpecTemp.version >= 6){
       appSpecTemp.expire = blocksToExpire.value
+      console.log(`[V${appSpecTemp.version}] Recalculated expire for free update:`, blocksToExpire.value)
+    }
+
+    // Check if this is a marketplace app with fixed priceUSD
+    const appName = appSpecTemp.name
+    const marketPlaceApp = marketPlaceApps.value.find(app => appName?.toLowerCase().startsWith(app.name.toLowerCase()))
+    if (marketPlaceApp && marketPlaceApp.priceUSD) {
+      console.log('Marketplace app with fixed price detected:', marketPlaceApp.name, 'Price:', marketPlaceApp.priceUSD)
+      // Add the marketplace fixed price to the app spec
+      appSpecTemp.priceUSD = marketPlaceApp.priceUSD
     }
     if (appSpecTemp.version >= 8) {
       console.log('Version 8+ app - checking enterprise mode')
@@ -4441,26 +5525,59 @@ async function verifyAppSpec() {
 
 async function priceForAppSpec() {
   try {
+    // Check if app is marketplace app
+    const appName = appSpecFormated.value?.name
+    const marketPlaceApp = marketPlaceApps.value.find(app => appName?.toLowerCase().startsWith(app.name.toLowerCase()))
+
+    console.log('=== Price Calculation Debug ===')
+    console.log('App name:', appName)
+    console.log('Marketplace apps loaded:', marketPlaceApps.value.length)
+    console.log('Is marketplace app:', !!marketPlaceApp)
+    if (marketPlaceApp) {
+      console.log('Marketplace app details:', marketPlaceApp)
+      console.log('Marketplace multiplier:', marketPlaceApp.multiplier)
+      console.log('Marketplace fixed priceUSD:', marketPlaceApp.priceUSD)
+    }
+
+    // Clone the app spec for price calculation
+    const appSpecForPrice = JSON.parse(JSON.stringify(appSpecFormated.value))
+
+    // Add marketplace fixed price if available
+    if (marketPlaceApp && marketPlaceApp.priceUSD) {
+      console.log('Adding marketplace fixed price to app spec:', marketPlaceApp.priceUSD)
+      appSpecForPrice.priceUSD = marketPlaceApp.priceUSD
+    }
+
+    console.log('App spec being sent:', appSpecForPrice)
 
     const response = await props.executeLocalCommand(
       '/apps/calculatefiatandfluxprice',
-      JSON.stringify(appSpecFormated.value),
+      JSON.stringify(appSpecForPrice),
       null,
       true,
     )
 
+    console.log('Price calculation response:', response.data)
+
     if (response.data?.status !== 'success') {
       appSpecPrice.value = null
-      
+
       return false
     }
 
     appSpecPrice.value = response.data.data
-    
+    console.log('Calculated price:', appSpecPrice.value)
+
+    // Update marketplace app flag for payment tracking
+    if (marketPlaceApp) {
+      isMarketplaceApp.value = true
+    }
+
     return true
   } catch (error) {
+    console.error('Price calculation error:', error)
     appSpecPrice.value = null
-    
+
     return false
   }
 }
@@ -4534,16 +5651,33 @@ async function dataSign() {
   if (marketPlaceApp) {
     isMarketplaceApp.value = true
   }
+  isSigning.value = true
+  signingFailed.value = false // Reset failed state when starting new sign attempt
   timestamp.value = Date.now()
   dataToSign.value = `${updatetype.value}${version}${JSON.stringify(appSpecFormated.value)}${timestamp.value}`
   await signMethod()
+}
+
+// Cancel signing process
+function cancelSigning() {
+  isSigning.value = false
+  // Close websocket if open
+  if (websocket.value) {
+    websocket.value.close()
+    websocket.value = null
+  }
+  // Disconnect wallet connect if connected
+  if (signClient.value) {
+    signClient.value = null
+  }
+  showToast('info', 'Signing cancelled')
 }
 
 // Propagate signed message
 async function propagateSignedMessage() {
   if (!signature.value) {
     showToast('error', 'No signature found. Please sign the message first.')
-    
+
     return
   }
 
@@ -4565,10 +5699,16 @@ async function propagateSignedMessage() {
 
     if (response.data?.status === 'success') {
       registrationHash.value = response.data.data
-      showToast('success', 'Application registered successfully! You can now test and pay for your app.')
+      showToast('success', 'Application registered successfully! Redirecting to Test & Pay...')
 
       // Fetch deployment information
       await getDeploymentInfo()
+
+      // Auto-navigate to Test & Pay tab after 2 seconds
+      // The tab watcher will handle auto-starting monitoring for free updates
+      setTimeout(() => {
+        tab.value = 100
+      }, 2000)
     } else {
       throw new Error(response.data?.data?.message || response.data?.data || 'Registration failed')
     }
@@ -4586,6 +5726,9 @@ async function propagateSignedMessage() {
     }
 
     showToast('error', errorMessage)
+    // Reset signature so user must sign again
+    signature.value = ''
+    signingFailed.value = true
   } finally {
     isPropagating.value = false
   }
@@ -4608,15 +5751,30 @@ async function getDeploymentInfo() {
 async function testAppInstall() {
   if (!registrationHash.value) {
     showToast('error', 'Please propagate the signed message first')
-    
+
     return
   }
 
-  testOutput.value = []
+  // Reset all test states and UI
   testError.value = false
   testFinished.value = false
   testRunning.value = true
-  
+
+  // Collapse logs first to hide old content
+  logsExpanded.value = false
+
+  // Clear the array
+  testOutput.value = []
+
+  // Wait for Vue to update the DOM and clear the old logs
+  await nextTick()
+
+  // Small additional delay to ensure rendering
+  await new Promise(resolve => setTimeout(resolve, 50))
+
+  // Now expand logs for new test
+  logsExpanded.value = true
+
   showToast('info', 'Starting application test installation...')
 
   // Add initial status message
@@ -4629,22 +5787,29 @@ async function testAppInstall() {
 
   try {
     const zelidauth = localStorage.getItem('zelidauth')
-    
+
     // Simulate streaming by breaking the test into phases
     await streamTestPhase('Preparing test environment...', 'info', 500)
-    await streamTestPhase('Downloading application specification...', 'info', 800)
+    await streamTestPhase('Connecting to Flux network...', 'info', 800)
     await streamTestPhase('Validating Docker image...', 'info', 1000)
-    
-    const response = await props.executeLocalCommand(
-      `/apps/testappinstall/${registrationHash.value}`,
-      null,
-      {
-        headers: {
-          zelidauth,
-        },
+
+    // Use registrationHash for testing - this is the message hash from registration/update
+    // The backend test API accepts either app name (for existing apps, requires owner auth)
+    // or message hash (for temporary messages, anyone can test)
+    console.log('Testing with hash:', registrationHash.value, 'isNewApp:', props.newApp)
+
+    // Use api.runonflux.io which automatically routes to available nodes
+    const url = `https://api.runonflux.io/apps/testappinstall/${registrationHash.value}`
+
+    const axiosConfig = {
+      headers: {
+        zelidauth,
       },
-      true,
-    )
+    }
+
+    console.log('Testing on Flux network via api.runonflux.io')
+
+    const response = await axios.get(url, axiosConfig)
 
     await streamTestPhase('Processing test results...', 'info', 300)
 
@@ -4910,8 +6075,8 @@ async function initStripePay(hash = null, name = null, price = null, description
         cancel_url: window.location.origin,
         kpi: {
           origin: 'FluxOS',
-          marketplace: false,
-          registration: true,
+          marketplace: isMarketplaceApp.value,
+          registration: props.newApp || props.isRedeploy,
         },
       },
     }
@@ -4948,27 +6113,86 @@ async function initStripePay(hash = null, name = null, price = null, description
     console.log('Stripe - appDetails:', appDetails)
     console.log('Stripe - registrationHash:', registrationHash.value)
     console.log('Stripe - appSpecPrice:', appSpecPrice.value)
-    const checkoutURL = await axios.post(`${paymentBridge}/api/v1/stripe/checkout/create`, data)
-    console.log('Stripe checkout response:', checkoutURL.data)
-    if (checkoutURL.data.status === 'error') {
-      console.error('Stripe checkout error:', checkoutURL.data)
-      showToast('error', `Stripe checkout failed: ${checkoutURL.data.message || checkoutURL.data.data || 'Unknown error'}`)
+
+    // Open popup immediately to avoid blocker (before API call)
+    const popup = window.open('about:blank', '_blank', 'width=800,height=600,scrollbars=yes,resizable=yes')
+
+    // Check if popup was blocked immediately
+    if (!popup || popup.closed || typeof popup.closed === 'undefined') {
+      console.warn('Stripe checkout popup was blocked by browser')
       checkoutLoading.value = false
-      
+
+      // Still make API call to get URL for manual opening
+      try {
+        const checkoutURL = await axios.post(`${paymentBridge}/api/v1/stripe/checkout/create`, data)
+        if (checkoutURL.data.status === 'success') {
+          popupBlockedDialog.value = true
+          blockedPaymentUrl.value = checkoutURL.data.data
+          blockedPaymentType.value = 'Stripe'
+        }
+      } catch (error) {
+        console.error('Stripe checkout error:', error)
+      }
       return
     }
-    fiatCheckoutURL.value = checkoutURL.data.data
-    checkoutLoading.value = false
-    
-    // Track payment attempt
-    paymentMethod.value = 'Stripe'
-    paymentAmount.value = finalPrice
-    
+
+    // Show loading message in popup while waiting for API
+    popup.document.write(`
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <title>Loading Stripe Checkout...</title>
+          <style>
+            body { margin: 0; padding: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+            .loader-container { text-align: center; color: white; }
+            .spinner { border: 4px solid rgba(255, 255, 255, 0.3); border-top: 4px solid white; border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; margin: 0 auto 20px; }
+            @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+            h2 { margin: 0 0 10px 0; font-weight: 600; }
+            p { margin: 0; opacity: 0.9; font-size: 14px; }
+          </style>
+        </head>
+        <body>
+          <div class="loader-container">
+            <div class="spinner"></div>
+            <h2>Redirecting to Stripe...</h2>
+            <p>Please wait while we prepare your checkout session</p>
+          </div>
+        </body>
+      </html>
+    `)
+
+    // Popup opened - now get the checkout URL
     try {
-      window.open(checkoutURL.data.data, '_blank', 'width=800,height=600,scrollbars=yes,resizable=yes')
+      const checkoutURL = await axios.post(`${paymentBridge}/api/v1/stripe/checkout/create`, data)
+      console.log('Stripe checkout response:', checkoutURL.data)
+
+      if (checkoutURL.data.status === 'error') {
+        console.error('Stripe checkout error:', checkoutURL.data)
+        showToast('error', `Stripe checkout failed: ${checkoutURL.data.message || checkoutURL.data.data || 'Unknown error'}`)
+        popup.close() // Close the blank popup
+        checkoutLoading.value = false
+        return
+      }
+
+      fiatCheckoutURL.value = checkoutURL.data.data
+      checkoutLoading.value = false
+
+      // Track payment attempt
+      paymentMethod.value = 'Stripe'
+      paymentAmount.value = finalPrice
+
+      // Navigate popup to Stripe checkout URL
+      popup.location.href = checkoutURL.data.data
+      popup.focus()
+
+      // Start monitoring
+      startPaymentMonitoring()
+      showToast('info', 'Stripe checkout opened. Complete payment in the new window.')
     } catch (error) {
-      console.log(error)
-      showToast('error', 'Failed to open Stripe checkout, pop-up blocked?')
+      console.error('Stripe API error:', error)
+      popup.close() // Close the blank popup
+      showToast('error', 'Failed to create Stripe checkout session')
+      checkoutLoading.value = false
     }
   } catch (error) {
     console.error('Stripe checkout network error:', error)
@@ -5035,12 +6259,12 @@ async function initPaypalPay(hash = null, name = null, price = null, description
         hash: hash || registrationHash.value,
         price: price || appSpecPrice.value?.usd || 0,
         productName: name || appDetails.name,
-        return_url: `${window.location.host}/successcheckout`,
-        cancel_url: window.location.host,
+        return_url: `${window.location.origin}/successcheckout`,
+        cancel_url: window.location.origin,
         kpi: {
           origin: 'FluxOS',
-          marketplace: false,
-          registration: true,
+          marketplace: isMarketplaceApp.value,
+          registration: props.newApp || props.isRedeploy,
         },
       },
     }
@@ -5077,27 +6301,86 @@ async function initPaypalPay(hash = null, name = null, price = null, description
     console.log('PayPal - appDetails:', appDetails)
     console.log('PayPal - registrationHash:', registrationHash.value)
     console.log('PayPal - appSpecPrice:', appSpecPrice.value)
-    const checkoutURL = await axios.post(`${paymentBridge}/api/v1/paypal/checkout/create`, data)
-    console.log('PayPal checkout response:', checkoutURL.data)
-    if (checkoutURL.data.status === 'error') {
-      console.error('PayPal checkout error:', checkoutURL.data)
-      showToast('error', `PayPal checkout failed: ${checkoutURL.data.message || checkoutURL.data.data || 'Unknown error'}`)
+
+    // Open popup immediately to avoid blocker (before API call)
+    const popup = window.open('about:blank', '_blank', 'width=800,height=600,scrollbars=yes,resizable=yes')
+
+    // Check if popup was blocked immediately
+    if (!popup || popup.closed || typeof popup.closed === 'undefined') {
+      console.warn('PayPal checkout popup was blocked by browser')
       checkoutLoading.value = false
-      
+
+      // Still make API call to get URL for manual opening
+      try {
+        const checkoutURL = await axios.post(`${paymentBridge}/api/v1/paypal/checkout/create`, data)
+        if (checkoutURL.data.status === 'success') {
+          popupBlockedDialog.value = true
+          blockedPaymentUrl.value = checkoutURL.data.data
+          blockedPaymentType.value = 'PayPal'
+        }
+      } catch (error) {
+        console.error('PayPal checkout error:', error)
+      }
       return
     }
-    fiatCheckoutURL.value = checkoutURL.data.data
-    checkoutLoading.value = false
-    
-    // Track payment attempt  
-    paymentMethod.value = 'PayPal'
-    paymentAmount.value = finalPrice
-    
+
+    // Show loading message in popup while waiting for API
+    popup.document.write(`
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <title>Loading PayPal Checkout...</title>
+          <style>
+            body { margin: 0; padding: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: linear-gradient(135deg, #0070ba 0%, #1546a0 100%); }
+            .loader-container { text-align: center; color: white; }
+            .spinner { border: 4px solid rgba(255, 255, 255, 0.3); border-top: 4px solid white; border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; margin: 0 auto 20px; }
+            @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+            h2 { margin: 0 0 10px 0; font-weight: 600; }
+            p { margin: 0; opacity: 0.9; font-size: 14px; }
+          </style>
+        </head>
+        <body>
+          <div class="loader-container">
+            <div class="spinner"></div>
+            <h2>Redirecting to PayPal...</h2>
+            <p>Please wait while we prepare your checkout session</p>
+          </div>
+        </body>
+      </html>
+    `)
+
+    // Popup opened - now get the checkout URL
     try {
-      window.open(checkoutURL.data.data, '_blank', 'width=800,height=600,scrollbars=yes,resizable=yes')
+      const checkoutURL = await axios.post(`${paymentBridge}/api/v1/paypal/checkout/create`, data)
+      console.log('PayPal checkout response:', checkoutURL.data)
+
+      if (checkoutURL.data.status === 'error') {
+        console.error('PayPal checkout error:', checkoutURL.data)
+        showToast('error', `PayPal checkout failed: ${checkoutURL.data.message || checkoutURL.data.data || 'Unknown error'}`)
+        popup.close() // Close the blank popup
+        checkoutLoading.value = false
+        return
+      }
+
+      fiatCheckoutURL.value = checkoutURL.data.data
+      checkoutLoading.value = false
+
+      // Track payment attempt
+      paymentMethod.value = 'PayPal'
+      paymentAmount.value = finalPrice
+
+      // Navigate popup to PayPal checkout URL
+      popup.location.href = checkoutURL.data.data
+      popup.focus()
+
+      // Start monitoring
+      startPaymentMonitoring()
+      showToast('info', 'PayPal checkout opened. Complete payment in the new window.')
     } catch (error) {
-      console.log(error)
-      showToast('error', 'Failed to open PayPal checkout, pop-up blocked?')
+      console.error('PayPal API error:', error)
+      popup.close() // Close the blank popup
+      showToast('error', 'Failed to create PayPal checkout session')
+      checkoutLoading.value = false
     }
   } catch (error) {
     console.error('PayPal checkout network error:', error)
@@ -5108,20 +6391,228 @@ async function initPaypalPay(hash = null, name = null, price = null, description
   }
 }
 
+// Payment monitoring function
+const startPaymentMonitoring = async () => {
+  console.log('🚀 START PAYMENT MONITORING', {
+    registrationHash: registrationHash.value,
+    isFreeUpdate: appSpecPrice.value?.flux === 0
+  })
+
+  // Clear any existing monitoring
+  if (paymentMonitoringInterval.value) {
+    clearInterval(paymentMonitoringInterval.value)
+  }
+  if (paymentMonitoringTimeout.value) {
+    clearTimeout(paymentMonitoringTimeout.value)
+  }
+
+  paymentProcessing.value = true
+  paymentConfirmed.value = false
+
+  console.log('✅ paymentProcessing set to true - monitoring UI should now be visible')
+
+  // Set a 30-minute timeout (payment validity period)
+  paymentMonitoringTimeout.value = setTimeout(() => {
+    if (paymentMonitoringInterval.value) {
+      clearInterval(paymentMonitoringInterval.value)
+      paymentMonitoringInterval.value = null
+    }
+    if (!paymentConfirmed.value) {
+      showToast('warning', 'Payment monitoring timed out. Please check your application status.')
+      paymentProcessing.value = false
+    }
+  }, 30 * 60 * 1000) // 30 minutes
+
+  // Poll for payment status every 30 seconds
+  paymentMonitoringInterval.value = setInterval(async () => {
+    // Get app name from correct source: appDetails for new apps, props.appSpec for updates
+    const appName = props.newApp ? appDetails.value.name : props.appSpec?.name
+
+    console.log('⏰ MONITORING CHECK - Polling for deployment status...', {
+      timestamp: new Date().toLocaleTimeString(),
+      appName: appName,
+      'appDetails.value.name': appDetails.value.name,
+      'props.appSpec?.name': props.appSpec?.name,
+      isNewApp: props.newApp,
+      registrationHash: registrationHash.value
+    })
+
+    try {
+      if (!appName) {
+        console.warn('⚠️ No app name available for monitoring')
+        return
+      }
+
+      if (props.newApp) {
+        // For new apps: Check if app location exists (app gets deployed)
+        const response = await AppsService.getAppLocation(appName)
+
+        if (response.data && response.data.status === 'success') {
+          const appLocation = response.data.data
+
+          console.log('🔍 Checking new app deployment:', {
+            appLocation: appLocation,
+            hasInstances: appLocation && appLocation.length > 0
+          })
+
+          // If app location exists and has running instances, deployment was successful!
+          if (appLocation && appLocation.length > 0) {
+            console.log('✅ NEW APP DEPLOYMENT DETECTED - App is running!')
+
+            // Clear monitoring
+            clearInterval(paymentMonitoringInterval.value)
+            clearTimeout(paymentMonitoringTimeout.value)
+            paymentMonitoringInterval.value = null
+            paymentMonitoringTimeout.value = null
+            paymentConfirmed.value = true
+            paymentProcessing.value = false
+            paymentCompleted.value = true
+
+            // Note: We don't clear registrationHash here to keep the success message visible
+            // It will be cleared when user navigates away from the tab
+            console.log('✅ Deployment successful - registrationHash kept for UI stability')
+
+            // Show success message
+            showToast('success', appSpecPrice.value?.flux === 0 ? 'Deployment successful! Your application is now running.' : 'Payment confirmed! Your application is now active and running.')
+          }
+        }
+      } else {
+        // For updating existing app: Check if app spec hash matches registered hash
+        const specResponse = await AppsService.getAppSpecifics(appName)
+
+        if (specResponse.data && specResponse.data.status === 'success') {
+          const currentAppSpec = specResponse.data.data
+
+          console.log('🔍 Checking update deployment:', {
+            currentHash: currentAppSpec?.hash,
+            registeredHash: registrationHash.value,
+            hashesMatch: currentAppSpec?.hash === registrationHash.value
+          })
+
+          // Check if the current spec hash matches our registered hash
+          if (currentAppSpec?.hash && registrationHash.value && currentAppSpec.hash === registrationHash.value) {
+            console.log('✅ UPDATE DETECTED - Hash matches!')
+
+            // Clear monitoring
+            clearInterval(paymentMonitoringInterval.value)
+            clearTimeout(paymentMonitoringTimeout.value)
+            paymentMonitoringInterval.value = null
+            paymentMonitoringTimeout.value = null
+            paymentConfirmed.value = true
+            paymentProcessing.value = false
+            paymentCompleted.value = true
+
+            // Update the original spec snapshot to the deployed spec (so future changes can be detected)
+            if (props.appSpec) {
+              const specCopy = JSON.parse(JSON.stringify(props.appSpec))
+              delete specCopy.expire
+              originalAppSpecSnapshot.value = specCopy
+              console.log('📸 Updated originalAppSpecSnapshot after successful deployment')
+            }
+
+            // Note: We don't clear registrationHash here to keep the success message visible
+            // It will be cleared when user changes specs or navigates away from the tab
+            console.log('✅ Deployment successful - registrationHash kept for UI stability')
+
+            // Show success message
+            showToast('success', appSpecPrice.value?.flux === 0 ? 'Update deployed successfully!' : 'Payment confirmed! Your application spec has been updated.')
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Error checking payment status:', error)
+    }
+  }, 30000) // Check every 30 seconds
+}
+
+// Open blocked payment URL
+const openBlockedPayment = () => {
+  if (blockedPaymentUrl.value) {
+    window.open(blockedPaymentUrl.value, '_blank')
+    popupBlockedDialog.value = false
+
+    // Start monitoring after user manually opens payment tab
+    startPaymentMonitoring()
+    showToast('info', `${blockedPaymentType.value} checkout opened. Complete payment in the new tab.`)
+  }
+}
+
+// Cancel payment monitoring
+const cancelPaymentMonitoring = () => {
+  // Clear monitoring intervals
+  if (paymentMonitoringInterval.value) {
+    clearInterval(paymentMonitoringInterval.value)
+    paymentMonitoringInterval.value = null
+  }
+  if (paymentMonitoringTimeout.value) {
+    clearTimeout(paymentMonitoringTimeout.value)
+    paymentMonitoringTimeout.value = null
+  }
+
+  // Reset payment status
+  paymentProcessing.value = false
+  paymentConfirmed.value = false
+  paymentMethod.value = ''
+  paymentAmount.value = 0
+
+  showToast('info', 'Payment monitoring cancelled')
+}
+
+// Emulate payment confirmed (for testing)
+const emulatePaymentConfirmed = () => {
+  // Clear monitoring intervals
+  if (paymentMonitoringInterval.value) {
+    clearInterval(paymentMonitoringInterval.value)
+    paymentMonitoringInterval.value = null
+  }
+  if (paymentMonitoringTimeout.value) {
+    clearTimeout(paymentMonitoringTimeout.value)
+    paymentMonitoringTimeout.value = null
+  }
+
+  // Set success state
+  paymentConfirmed.value = true
+  paymentProcessing.value = false
+  paymentCompleted.value = true
+
+  showToast('success', 'TEST: Payment confirmed! Your application is now active and running.')
+}
+
 async function initZelcorePay() {
   try {
+    // Validate price is available and greater than 0
+    const amount = appSpecPrice.value?.flux
+    if (!amount || amount <= 0) {
+      showToast('error', 'Invalid payment amount. Please validate your app specifications first.')
+      return
+    }
+
+    // Validate required fields
+    if (!deploymentAddress.value) {
+      showToast('error', 'Deployment address not available')
+      return
+    }
+
+    if (!registrationHash.value) {
+      showToast('error', 'Registration hash not available')
+      return
+    }
+
     // Track payment attempt
     paymentMethod.value = 'Zelcore'
-    paymentAmount.value = appSpecPrice.value?.flux || 0
+    paymentAmount.value = amount
 
     await payWithZelcore({
       address: deploymentAddress.value,
-      amount: appSpecPrice.value?.flux || 0,
+      amount: amount,
       message: registrationHash.value,
       coin: 'zelcash',
     })
 
     showToast('info', 'Zelcore payment initiated - please complete payment in Zelcore wallet')
+
+    // Start payment monitoring for crypto payment
+    startPaymentMonitoring()
   } catch (error) {
     showToast('error', 'Failed to open Zelcore')
   }
@@ -5129,13 +6620,31 @@ async function initZelcorePay() {
 
 async function initSSPPay() {
   try {
+    // Validate price is available and greater than 0
+    const amount = appSpecPrice.value?.flux
+    if (!amount || amount <= 0) {
+      showToast('error', 'Invalid payment amount. Please validate your app specifications first.')
+      return
+    }
+
+    // Validate required fields
+    if (!deploymentAddress.value) {
+      showToast('error', 'Deployment address not available')
+      return
+    }
+
+    if (!registrationHash.value) {
+      showToast('error', 'Registration hash not available')
+      return
+    }
+
     // Track payment attempt
     paymentMethod.value = 'SSP'
-    paymentAmount.value = appSpecPrice.value?.flux || 0
+    paymentAmount.value = amount
 
     const data = {
       message: registrationHash.value,
-      amount: (appSpecPrice.value?.flux || 0).toString(),
+      amount: amount.toString(),
       address: deploymentAddress.value,
       chain: 'flux',
     }
@@ -5144,6 +6653,8 @@ async function initSSPPay() {
     showToast('success', `SSP payment initiated: ${response.txid}`)
 
     // Note: For crypto payments, we show as "processing" since we need to wait for blockchain confirmation
+    // Start payment monitoring for crypto payment
+    startPaymentMonitoring()
   } catch (error) {
     showToast('error', error.message)
 
@@ -5199,7 +6710,8 @@ async function initSignFluxSSO() {
     const firebaseUser = getUser()
     if (!firebaseUser) {
       showToast('error', 'Not logged in as SSO')
-      
+      isSigning.value = false
+      signingFailed.value = true
       return
     }
 
@@ -5212,13 +6724,16 @@ async function initSignFluxSSO() {
     const res = await axios.post('https://service.fluxcore.ai/api/signMessage', { message }, { headers })
     if (res.data?.status !== 'success' || !res.data?.signature) {
       showToast('error', 'SSO signing failed')
-      
+      isSigning.value = false
+      signingFailed.value = true
       return
     }
 
     signature.value = res.data.signature
   } catch (err) {
     showToast('error', 'SSO error: ' + err.message)
+    isSigning.value = false
+    signingFailed.value = true
   }
 }
 
@@ -5255,6 +6770,8 @@ async function initiateSignWSUpdate() {
     await signWithZelcore(dataToSign.value, zelid, callbackValue.value, undefined, true)
   } catch (error) {
     showToast('error', `Zelcore sign error: ${error}`)
+    isSigning.value = false
+    signingFailed.value = true
   }
 }
 
@@ -5287,7 +6804,8 @@ async function initSignWalletConnect() {
     const account = getConnectedAccount()
     if (!account) {
       showToast('error', 'WalletConnect not connected. Please log into FluxOS first.')
-
+      isSigning.value = false
+      signingFailed.value = true
       return
     }
 
@@ -5297,6 +6815,8 @@ async function initSignWalletConnect() {
     signature.value = result
   } catch (err) {
     showToast('error', err.message)
+    isSigning.value = false
+    signingFailed.value = true
   }
 }
 
@@ -5304,7 +6824,12 @@ async function initSignWalletConnect() {
 async function initSignMetamask() {
   try {
     const ethereum = window.ethereum
-    if (!ethereum) return showToast('danger', 'Metamask not found')
+    if (!ethereum) {
+      showToast('danger', 'Metamask not found')
+      isSigning.value = false
+      signingFailed.value = true
+      return
+    }
 
     const account = ethereum.selectedAddress || (await ethereum.request({ method: 'eth_requestAccounts' }))[0]
     const msg = `0x${Buffer.from(dataToSign.value, 'utf8').toString('hex')}`
@@ -5317,6 +6842,8 @@ async function initSignMetamask() {
     signature.value = sign
   } catch (err) {
     showToast('error', err.message)
+    isSigning.value = false
+    signingFailed.value = true
   }
 }
 
@@ -5327,6 +6854,8 @@ async function initSignSSP() {
     signature.value = result.signature
   } catch (err) {
     showToast('error', err.message)
+    isSigning.value = false
+    signingFailed.value = true
   }
 }
 
@@ -5575,8 +7104,26 @@ async function signMethod() {
   border: 1px solid #ccc;
   border-radius: 8px;
   margin-bottom: 5px;
-  padding: 6px;
-  height: 54px;
+  padding: 8px 12px;
+  min-height: 48px;
+  height: auto;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.border-frame-title {
+  font-size: 1.125rem;
+  font-weight: 500;
+  line-height: 1.2;
+}
+
+.border-frame-btn {
+  height: 38px !important;
+  min-height: 38px !important;
+}
+
+.border-frame-btn.v-btn--icon {
+  width: 38px !important;
 }
 /* Dark theme (default) */
 .spec-row {
@@ -5606,6 +7153,15 @@ async function signMethod() {
   font-size: 14px;
 }
 
+.value-cell .v-icon {
+  margin-left: 6px;
+}
+
+.price-display {
+  display: inline-block;
+  text-align: right;
+}
+
 /* Light theme overrides */
 .v-theme--light .spec-row {
   border: 1px solid #e0e0e0;
@@ -5625,6 +7181,7 @@ async function signMethod() {
 .label-column {
   width: 110px;
   min-width: 110px;
+  flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: flex-start;
@@ -5634,6 +7191,7 @@ async function signMethod() {
   width: 85px;
   min-width: 85px;
   max-width: 85px;
+  flex-shrink: 0;
 }
 
 /* Hardware slider consistent sizing and spacing */
@@ -5641,6 +7199,55 @@ async function signMethod() {
   margin-left: 16px !important;
   margin-right: 20px !important;
   min-width: 150px;
+  flex-shrink: 1;
+}
+
+.hardware-resource-row {
+  max-width: 100%;
+  overflow: hidden;
+}
+
+.hardware-item {
+  display: flex;
+  align-items: center;
+  max-width: 100%;
+  overflow: hidden;
+}
+
+.hardware-label-box {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border: 1px solid rgba(var(--v-theme-on-surface), 0.12);
+  border-radius: 8px;
+  min-width: 110px;
+  flex-shrink: 0;
+  background: rgba(var(--v-theme-surface), 0.5);
+}
+
+.hardware-icon {
+  flex-shrink: 0;
+}
+
+.hardware-label-text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
+}
+
+.hardware-name {
+  font-weight: 500;
+  font-size: 14px;
+}
+
+.hardware-unit {
+  font-size: 11px;
+  opacity: 0.7;
+}
+
+.env-buttons-container {
+  margin-bottom: 1rem;
 }
 
 .hardware-slider :deep(.v-slider__thumb) {
@@ -5728,7 +7335,7 @@ async function signMethod() {
 
 /* Modern Payment Methods Styling */
 .payment-methods-container {
-  margin-top: 2rem;
+  margin-top: 0;
   padding: 0 1rem;
 }
 
@@ -5750,6 +7357,65 @@ async function signMethod() {
   border-color: rgba(var(--v-theme-primary), 0.2);
 }
 
+.payment-monitoring-card {
+  border-radius: 16px !important;
+  overflow: hidden;
+  border: 2px solid rgba(var(--v-theme-primary), 0.3) !important;
+}
+
+.deployment-success-card {
+  border-radius: 16px !important;
+  overflow: hidden;
+  border: 2px solid rgba(var(--v-theme-success), 0.5) !important;
+  background: linear-gradient(135deg, rgba(var(--v-theme-success), 0.05) 0%, rgba(var(--v-theme-success), 0.1) 100%);
+}
+
+.payment-monitoring-card .loading-container {
+  min-height: auto !important;
+  padding: 0 24px 24px 24px !important;
+  margin-top: 0 !important;
+}
+
+.payment-monitoring-card .loading-container h2 {
+  white-space: nowrap !important;
+  text-align: center !important;
+  display: inline-block !important;
+  width: 100% !important;
+}
+
+.payment-monitoring-card .loading-container h2 span {
+  white-space: nowrap !important;
+}
+
+.payment-monitoring-card .loading-container p {
+  text-align: center !important;
+  width: 100% !important;
+  margin: 0 auto !important;
+}
+
+.deployment-monitoring-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.deployment-message-box {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: -1.5rem;
+  padding: 0.75rem 1rem;
+  border: 2px solid rgba(var(--v-theme-warning), 0.5);
+  border-radius: 8px;
+  background: rgba(var(--v-theme-warning), 0.1);
+}
+
+.deployment-message-box span {
+  font-size: 0.875rem;
+  color: rgba(var(--v-theme-on-surface), 0.9);
+  text-align: left;
+}
+
 .payment-header {
   padding: 1.5rem !important;
   border-radius: 16px 16px 0 0 !important;
@@ -5769,39 +7435,23 @@ async function signMethod() {
 }
 
 .payment-icon-card {
-  border-radius: 16px !important;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 12px !important;
+  transition: all 0.2s ease;
   cursor: pointer;
-  width: 180px;
-  height: 120px;
-  flex: 0 0 180px;
+  flex: 1;
   position: relative;
   overflow: hidden;
+  border: 2px solid rgba(var(--v-theme-on-surface), 0.3) !important;
 }
 
-.payment-icon-card::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
-  transition: left 0.6s ease;
+.payment-icon-card .v-card-text {
+  min-height: 112px;
 }
 
 .payment-icon-card:hover {
-  transform: translateY(-4px) scale(1.02);
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.15);
-  border-width: 3px !important;
-}
-
-.payment-icon-card:hover::before {
-  left: 100%;
-}
-
-.payment-icon-card:active {
-  transform: translateY(-2px) scale(1.01);
+  transform: translateY(-2px);
+  border-color: rgba(var(--v-theme-success), 0.5) !important;
+  box-shadow: 0 8px 24px rgba(var(--v-theme-success), 0.3);
 }
 
 .payment-brand-icon {
@@ -5813,12 +7463,16 @@ async function signMethod() {
   filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.1));
   display: block;
   margin: 0 auto;
-  transform: translateY(-2px);
 }
 
 .payment-icon-card:hover .payment-brand-icon {
-  transform: translateY(-2px) scale(1.1);
   filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.2));
+}
+
+.payment-brand-icon-small {
+  height: 60px;
+  width: 140px;
+  object-fit: contain;
 }
 
 /* Wallet Icons Grid */
@@ -5833,45 +7487,148 @@ async function signMethod() {
   border-radius: 12px !important;
   transition: all 0.2s ease;
   cursor: pointer;
-  min-width: 140px;
-  min-height: 140px;
-  border: 2px solid rgba(var(--v-theme-outline), 0.2);
+  flex: 1;
+  border: 2px solid rgba(var(--v-theme-on-surface), 0.3) !important;
 }
 
 .wallet-icon-card:hover {
-  transform: scale(1.05);
-  border-color: rgba(var(--v-theme-warning), 0.5);
-  box-shadow: 0 8px 24px rgba(var(--v-theme-warning), 0.15);
+  transform: translateY(-2px);
+  border-color: rgba(var(--v-theme-warning), 0.5) !important;
+  box-shadow: 0 8px 24px rgba(var(--v-theme-warning), 0.3);
 }
 
 .wallet-brand-icon {
-  height: 72px;
-  width: 72px;
+  height: 64px;
+  width: 64px;
   object-fit: contain;
 }
 
+/* Professional Payment Field Container */
+.payment-field-container {
+  display: flex;
+  align-items: center;
+  border: 1px solid rgba(var(--v-border-color), var(--v-border-opacity));
+  border-radius: 8px;
+  overflow: hidden;
+  transition: all 0.2s ease;
+}
+
+.payment-field-container:hover {
+  border-color: rgba(var(--v-theme-primary), 0.5);
+}
+
+.payment-field-label {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 12px;
+  background: rgba(var(--v-theme-surface), 1);
+  border-right: 1px solid rgba(var(--v-border-color), var(--v-border-opacity));
+  font-size: 0.875rem;
+  font-weight: 600;
+  white-space: nowrap;
+  color: rgba(var(--v-theme-on-surface), 0.7);
+  flex-shrink: 0;
+}
+
+.payment-field-label .v-icon {
+  font-size: 18px !important;
+}
+
+.payment-field-value {
+  flex: 1;
+  padding: 10px 12px;
+  font-family: 'Courier New', monospace;
+  font-size: 0.8rem;
+  color: rgba(var(--v-theme-on-surface), 0.9);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-align: left;
+}
+
+.payment-field-copy {
+  border-radius: 0 !important;
+  height: 100% !important;
+  border-left: 1px solid rgba(var(--v-border-color), var(--v-border-opacity));
+  background-color: transparent !important;
+  color: grey !important;
+  transition: all 0.2s ease;
+}
+
+.payment-field-copy:hover {
+  background-color: transparent !important;
+  color: grey !important;
+  filter: drop-shadow(0 0 8px rgba(128, 128, 128, 0.6));
+}
+
+.payment-field-copy .v-btn__overlay,
+.payment-field-copy::before,
+.payment-field-copy::after {
+  display: none !important;
+}
+
+/* Payment Info List Compact Spacing */
+.payment-info-list .v-list-item {
+  min-height: 36px !important;
+}
+
+.payment-info-list .v-list-item + .v-list-item {
+  margin-top: 0 !important;
+}
+
+/* Payment Method Selection Label */
+.payment-method-selection-label {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 1rem 1.5rem;
+  border: 2px solid #e5e7eb;
+  border-radius: 16px;
+  background: rgba(var(--v-theme-surface), 0.5);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  width: 100%;
+}
+
+.v-theme--dark .payment-method-selection-label {
+  border-color: #4b5563;
+}
+
+.payment-method-selection-label span {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: rgba(var(--v-theme-on-surface), 0.95);
+  line-height: 1.4;
+}
+
 /* Responsive Design */
+
 @media (max-width: 960px) {
   .payment-methods-container {
     padding: 0 0.5rem;
   }
-  
+
   .payment-method-card {
     margin-bottom: 1rem;
   }
-  
+
   .payment-icons-grid,
   .wallet-icons-grid {
     gap: 0.75rem;
   }
-  
+
   .payment-icon-card {
-    width: 160px;
-    height: 110px;
-    flex: 0 0 160px;
+    flex: 1 1 auto;
+    min-width: 120px;
   }
-  
+
+  .payment-icon-card .v-card-text {
+    height: auto;
+  }
+
   .wallet-icon-card {
+    flex: 1 1 auto;
     min-width: 120px;
   }
 }
@@ -5880,39 +7637,35 @@ async function signMethod() {
   .payment-header {
     padding: 1rem !important;
   }
-  
-  .payment-icons-grid,
-  .wallet-icons-grid {
-    flex-direction: column;
-    align-items: center;
+
+  .payment-icons-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
     gap: 0.5rem;
   }
-  
+
+  .wallet-icons-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.5rem;
+  }
+
   .payment-icon-card {
     width: 100%;
-    max-width: 280px;
-    height: 100px;
-    flex: none;
   }
-  
+
   .payment-icon-card .v-card-text {
-    padding: 0.75rem !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    height: 100% !important;
-    box-sizing: border-box !important;
+    min-height: 64px;
   }
-  
+
   .payment-icon-card .payment-brand-icon {
     height: 60px !important;
     max-width: 150px !important;
     transform: translateY(2px) !important;
   }
-  
+
   .wallet-icon-card {
     width: 100%;
-    max-width: 200px;
   }
 }
 
@@ -5932,4 +7685,388 @@ async function signMethod() {
   box-shadow: 0 0 20px rgba(255, 255, 255, 0.9) !important;
   transform: scale(1.05);
 }
+
+/* Tooltip text visibility for both themes */
+/* Light theme = dark tooltip background, so use white text */
+.v-theme--light .tooltip-content {
+  color: rgba(255, 255, 255, 0.9);
+}
+
+/* Dark theme = light tooltip background, so use dark text */
+.v-theme--dark .tooltip-content {
+  color: rgba(0, 0, 0, 0.87);
+}
+
+/* Warning color - orange for both themes */
+.tooltip-warning {
+  color: #ff9800 !important;
+}
+
+/* Switch container styling */
+.switch-container {
+  border: 1px solid rgba(var(--v-border-color), var(--v-border-opacity));
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.switch-container:hover {
+  border-color: rgba(var(--v-theme-primary), 0.5);
+  background: rgba(var(--v-theme-on-surface), 0.02);
+}
+
+/* ============================================ */
+/* Mobile Optimizations */
+/* ============================================ */
+
+/* Mobile-specific styles (< 600px) */
+@media (max-width: 600px) {
+  /* Tab Navigation - Enable horizontal scrolling */
+  .mobile-scrollable-tabs .v-tabs__container {
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+  }
+
+  .mobile-scrollable-tabs .v-tabs__container::-webkit-scrollbar {
+    height: 4px;
+  }
+
+  .mobile-scrollable-tabs .v-tabs__container::-webkit-scrollbar-thumb {
+    background: rgba(var(--v-theme-primary), 0.5);
+    border-radius: 2px;
+  }
+
+  /* Touch Targets - Minimum 44x44px */
+  .mobile-delete-btn {
+    min-width: 44px !important;
+    min-height: 44px !important;
+    width: 44px !important;
+    height: 44px !important;
+  }
+
+  /* Hardware Section - Responsive widths */
+  .label-column {
+    width: 70px;
+    min-width: 70px;
+  }
+
+  .text-field-fixed {
+    width: 70px;
+    min-width: 70px;
+    max-width: 70px;
+  }
+
+  .hardware-slider {
+    margin-left: 8px !important;
+    margin-right: 12px !important;
+    min-width: 100px;
+  }
+
+  .hardware-label-box {
+    min-width: 85px;
+    padding: 6px 10px;
+    gap: 6px;
+  }
+
+  .hardware-icon {
+    font-size: 22px !important;
+  }
+
+  .hardware-name {
+    font-size: 13px;
+  }
+
+  .hardware-unit {
+    font-size: 10px;
+  }
+
+  /* Environment buttons - Full width on mobile */
+  .env-button-wrapper {
+    flex: 1 1 100%;
+  }
+
+  .env-button {
+    width: 100%;
+  }
+
+  /* Border Frame - Mobile adjustments */
+  .border-frame {
+    padding: 6px 8px;
+    min-height: 44px;
+  }
+
+  .border-frame-title {
+    font-size: 1rem;
+  }
+
+  .border-frame-btn {
+    height: 32px !important;
+    min-height: 32px !important;
+    font-size: 0.875rem !important;
+  }
+
+  .border-frame-btn.v-btn--icon {
+    width: 32px !important;
+  }
+
+  /* Discount chip - Match mobile font size */
+  .discount-chip {
+    font-size: 11px !important;
+  }
+
+  /* Review & Validate - 10% smaller text */
+  .value-cell,
+  .value-cell span,
+  .label-cell {
+    font-size: 0.9em;
+  }
+
+  /* Review & Validate - Smaller icons on mobile */
+  .value-cell .v-icon {
+    font-size: 18px !important;
+  }
+
+  /* Component Tab - Touch-friendly delete buttons */
+  .component-tab-delete-btn {
+    min-width: 44px !important;
+    min-height: 44px !important;
+  }
+
+  /* Payment methods */
+  .payment-method-card {
+    margin-bottom: 12px;
+  }
+
+  /* Spec row mobile */
+  .spec-row {
+    height: 40px;
+  }
+
+  .label-cell {
+    width: 140px;
+    min-width: 140px;
+    max-width: 140px;
+    flex-shrink: 0;
+    font-size: 13px;
+    padding: 8px 12px;
+  }
+
+  .value-cell {
+    font-size: 13px;
+    padding: 8px 12px;
+  }
+}
+
+/* Tablet styles (601px - 960px) */
+@media (min-width: 601px) and (max-width: 960px) {
+  .label-column {
+    width: 95px;
+    min-width: 95px;
+  }
+
+  .text-field-fixed {
+    width: 80px;
+    min-width: 80px;
+    max-width: 80px;
+  }
+
+  .hardware-slider {
+    margin-left: 12px !important;
+    margin-right: 16px !important;
+    min-width: 120px;
+  }
+
+  .border-frame-btn {
+    height: 34px !important;
+    min-height: 34px !important;
+  }
+
+  .border-frame-btn.v-btn--icon {
+    width: 34px !important;
+  }
+
+  .border-frame-title {
+    font-size: 1.0625rem;
+  }
+}
+</style>
+
+<style>
+/* Global tooltip styles (not scoped because tooltips render in portal) */
+/* Light theme = dark tooltip background, so use white text */
+.v-theme--light .tooltip-content {
+  color: rgba(255, 255, 255, 0.9) !important;
+}
+
+.v-theme--light .tooltip-content .text-caption {
+  color: rgba(255, 255, 255, 0.9) !important;
+}
+
+/* Dark theme = light tooltip background, so use dark text */
+.v-theme--dark .tooltip-content {
+  color: rgba(0, 0, 0, 0.87) !important;
+}
+
+.v-theme--dark .tooltip-content .text-caption {
+  color: rgba(0, 0, 0, 0.87) !important;
+}
+
+/* Warning color - orange for both themes */
+.tooltip-warning {
+  color: #ff9800 !important;
+}
+
+/* Popup dialog button styling */
+.popup-dialog-btn {
+  height: 56px !important;
+  font-size: 16px !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.5px !important;
+}
+
+/* ============================================ */
+/* Mobile Optimizations */
+/* ============================================ */
+
+/* Mobile-specific styles (< 600px to match Vuetify xs breakpoint) */
+@media (max-width: 599px) {
+  /* Mobile Circle Tabs - Main tabs as circular icon buttons */
+  .mobile-circle-tab {
+    min-width: 44px !important;
+    max-width: 44px !important;
+    width: 44px !important;
+    height: 44px !important;
+    border-radius: 50% !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+  }
+
+  /* Force VTab elements to be circular - Multiple selectors for specificity */
+  :deep(.v-tabs-pill .v-tab.mobile-circle-tab),
+  :deep(.v-tabs.v-tabs-pill .v-tab.mobile-circle-tab),
+  :deep(.mobile-scrollable-tabs .v-tab.mobile-circle-tab),
+  :deep(.v-tabs-pill.mobile-scrollable-tabs .v-tab.mobile-circle-tab) {
+    border-radius: 50% !important;
+    min-width: 44px !important;
+    max-width: 44px !important;
+    width: 44px !important;
+    height: 44px !important;
+  }
+
+  .mobile-circle-tab .tab-content {
+    justify-content: center !important;
+  }
+
+  /* Force circular shape on all tab states and child elements */
+  .mobile-circle-tab *,
+  .mobile-circle-tab::before,
+  .mobile-circle-tab::after,
+  .mobile-circle-tab .v-btn__overlay,
+  .mobile-circle-tab .v-btn__underlay,
+  .mobile-circle-tab .v-ripple__container,
+  .mobile-circle-tab .v-tab__slider {
+    border-radius: 50% !important;
+  }
+
+  /* Override v-tabs-pill selected and hover states with maximum specificity */
+  :deep(.v-tabs-pill .mobile-circle-tab.v-tab--selected),
+  :deep(.v-tabs-pill .mobile-circle-tab:hover),
+  :deep(.v-tabs-pill .mobile-circle-tab:focus),
+  :deep(.v-tabs-pill .mobile-circle-tab:active),
+  :deep(.v-tabs.v-tabs-pill .v-tab.mobile-circle-tab.v-tab--selected),
+  :deep(.v-tabs.v-tabs-pill .v-tab.mobile-circle-tab:hover),
+  :deep(.mobile-scrollable-tabs.v-tabs-pill .v-tab.mobile-circle-tab) {
+    border-radius: 50% !important;
+  }
+
+  /* Force circular shape on hover/focus overlays */
+  .mobile-circle-tab:hover *,
+  .mobile-circle-tab:focus *,
+  .mobile-circle-tab:active *,
+  .mobile-circle-tab:hover::before,
+  .mobile-circle-tab:hover::after {
+    border-radius: 50% !important;
+  }
+}
+
+/* Allow overflow for glow effect on tabs container only */
+.tabs-container-overflow {
+  overflow: visible !important;
+}
+
+.tabs-inner-overflow {
+  overflow: visible !important;
+}
+
+/* Allow overflow on VTabs for glow effect */
+:deep(.mobile-scrollable-tabs),
+:deep(.mobile-scrollable-tabs .v-tabs__container) {
+  overflow: visible !important;
+}
+
+/* Review button - remove overflow hidden to allow glow effect */
+.review-glow-btn.mobile-circle-tab {
+  overflow: visible !important;
+}
+
+/* Review button glowing effect when active (not disabled) */
+.v-btn:not(:disabled).review-glow-btn {
+  animation: reviewGlow 2s ease-in-out infinite;
+}
+
+@keyframes reviewGlow {
+  0%, 100% {
+    box-shadow: 0 0 5px rgba(var(--v-theme-success), 0.5),
+                0 0 10px rgba(var(--v-theme-success), 0.3),
+                0 0 15px rgba(var(--v-theme-success), 0.2);
+  }
+  50% {
+    box-shadow: 0 0 10px rgba(var(--v-theme-success), 0.8),
+                0 0 20px rgba(var(--v-theme-success), 0.5),
+                0 0 30px rgba(var(--v-theme-success), 0.3);
+  }
+}
+
+@media (max-width: 599px) {
+  /* Environment Buttons - Full width on mobile with aligned icons */
+  .env-buttons-container {
+    flex-direction: column !important;
+    gap: 8px !important;
+  }
+
+  .env-button-wrapper {
+    width: 100% !important;
+  }
+
+  .env-button.v-btn--block {
+    justify-content: flex-start !important;
+  }
+
+  .env-button.v-btn--block .v-btn__content {
+    display: flex !important;
+    align-items: center !important;
+    width: 100% !important;
+    justify-content: flex-start !important;
+  }
+
+  .env-button.v-btn--block .v-btn__prepend {
+    margin-right: 8px !important;
+  }
+
+  .env-button.v-btn--block .env-btn-text {
+    flex-grow: 0 !important;
+    flex-shrink: 0 !important;
+  }
+
+  .env-button.v-btn--block .v-spacer {
+    flex-grow: 1 !important;
+  }
+
+  .env-button.v-btn--block .env-info-icon {
+    flex: 0 0 auto !important;
+    margin-left: 0 !important;
+  }
+}
+
 </style>

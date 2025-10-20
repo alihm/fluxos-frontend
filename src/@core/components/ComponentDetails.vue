@@ -213,8 +213,7 @@
         >
           mdi-chart-box-outline
         </VIcon>
-        <span
-          class="ml-1 hardware-chip-text"
+        <span class="ml-1 hardware-chip-text"
         >Hardware Resources</span>
       </VChip>
     </div>
@@ -300,8 +299,9 @@ function getColorHex(color) {
   const colors = {
     success: '#4CAF50',
     warning: '#FF9800',
-    info: '#2196F3'
+    info: '#2196F3',
   }
+  
   return colors[color] || colors.success
 }
 
@@ -378,9 +378,10 @@ function buildResources(component) {
   const calculatePercentages = (value, max) => {
     const actualPercentage = (value / max) * 100
     const visualPercentage = value > 0 ? Math.max(actualPercentage, MIN_VISIBLE_PERCENTAGE) : 0
+    
     return {
       percentage: actualPercentage.toFixed(1),
-      visualPercentage: visualPercentage.toFixed(1)
+      visualPercentage: visualPercentage.toFixed(1),
     }
   }
 

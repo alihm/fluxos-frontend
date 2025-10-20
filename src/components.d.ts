@@ -115,6 +115,7 @@ declare module 'vue' {
     ThemeSwitcher: typeof import('./@core/components/ThemeSwitcher.vue')['default']
     TiptapEditor: typeof import('./@core/components/TiptapEditor.vue')['default']
     TwoFactorAuthDialog: typeof import('./components/dialogs/TwoFactorAuthDialog.vue')['default']
+    UpgradeSpecDialog: typeof import('./components/dialogs/UpgradeSpecDialog.vue')['default']
     UsageChips: typeof import('./@core/components/UsageChips.vue')['default']
     UserInfoEditDialog: typeof import('./components/dialogs/UserInfoEditDialog.vue')['default']
     UserUpgradePlanDialog: typeof import('./components/dialogs/UserUpgradePlanDialog.vue')['default']

@@ -573,6 +573,7 @@
 
                   <!-- File Icon / Thumbnail -->
                   <div class="mb-2">
+                    <!-- Image thumbnail -->
                     <VImg
                       v-if="isImageFile(item.mimetype) && item.thumbnail"
                       :src="`${ipfsHost}/ipfs/${item.thumbnail}`"
@@ -581,6 +582,20 @@
                       class="rounded mx-auto"
                       cover
                     />
+                    <!-- Video thumbnail -->
+                    <VImg
+                      v-else-if="isVideoFile(item) && videoThumbnails[item.hash]"
+                      :src="videoThumbnails[item.hash]"
+                      :width="48"
+                      :height="48"
+                      class="rounded mx-auto"
+                      cover
+                    >
+                      <div class="video-thumbnail-overlay">
+                        <VIcon icon="mdi-play-circle" size="20" color="white" />
+                      </div>
+                    </VImg>
+                    <!-- Other file icons (including videos without thumbnails) -->
                     <VIcon
                       v-else
                       :icon="item.isGoBack ? 'mdi-folder-arrow-up' : (item.isFolder ? 'mdi-folder' : getFileIcon(item.type))"
@@ -614,7 +629,7 @@
                   <!-- Version Badge (if file has versions) -->
                   <div
                     v-if="!item.isFolder && !item.isGoBack && item.versions?.length > 0"
-                    class="position-absolute"
+                    class="position-absolute version-badge"
                     style="top: 8px; right: 8px;"
                   >
                     <VChip
@@ -764,6 +779,18 @@
 
           <!-- Action buttons on the right -->
           <div class="d-flex gap-1">
+            <!-- Edit button for text files -->
+            <VBtn
+              v-if="isTextFile(previewingFile.mimetype, previewingFile.name)"
+              icon="mdi-pencil"
+              variant="text"
+              color="grey"
+              @click="openEditor(previewingFile)"
+            >
+              <VIcon icon="mdi-pencil" />
+              <VTooltip activator="parent" location="bottom">Edit</VTooltip>
+            </VBtn>
+
             <VBtn
               icon="mdi-download"
               variant="text"
@@ -853,6 +880,13 @@
                 Your browser does not support the audio tag.
               </audio>
             </div>
+          </div>
+          <div v-else-if="isPdfFile(previewingFile)" class="preview-container flex-grow-1 d-flex flex-column bg-black">
+            <iframe
+              :src="`${ipfsHost}/ipfs/${previewingFile.hash}`"
+              style="width: 100%; height: 100%; border: none;"
+              type="application/pdf"
+            />
           </div>
           <div v-else class="preview-container d-flex align-center justify-center" style="min-height: 400px;">
             <div class="text-center">
@@ -1509,6 +1543,83 @@
       </VCard>
     </VDialog>
 
+    <!-- Text Editor Dialog -->
+    <VDialog
+      v-model="showEditorDialog"
+      fullscreen
+      transition="dialog-bottom-transition"
+    >
+      <VCard>
+        <VToolbar color="primary" dark density="compact">
+          <VBtn
+            icon
+            size="small"
+            @click="showEditorDialog = false"
+          >
+            <VIcon>mdi-close</VIcon>
+          </VBtn>
+          <VToolbarTitle class="text-subtitle-1">
+            <div class="d-flex align-center">
+              <VIcon icon="mdi-file-edit" size="20" class="me-2" />
+              {{ editingFile?.name || 'Edit File' }}
+            </div>
+          </VToolbarTitle>
+          <VSpacer />
+          <VBtn
+            variant="flat"
+            color="error"
+            size="small"
+            class="me-2"
+            @click="showEditorDialog = false"
+          >
+            <VIcon icon="mdi-close" size="18" class="me-1" />
+            Cancel
+          </VBtn>
+          <VBtn
+            variant="flat"
+            color="success"
+            size="small"
+            class="me-4"
+            :loading="savingFile"
+            :disabled="!hasContentChanged || loadingContent"
+            @click="saveEditedFile"
+          >
+            <VIcon icon="mdi-content-save" size="18" class="me-1" />
+            Save
+          </VBtn>
+        </VToolbar>
+
+        <VCardText class="pa-0" style="height: calc(100vh - 48px); position: relative;">
+          <!-- Monaco editor for code/text files -->
+          <VueMonacoEditor
+            v-model:value="fileContent"
+            :language="getFileLanguage(editingFile?.name)"
+            theme="vs-dark"
+            :options="{
+              automaticLayout: true,
+              fontSize: 14,
+              minimap: { enabled: true },
+              scrollBeyondLastLine: false,
+              wordWrap: 'on',
+              tabSize: 2,
+            }"
+            style="height: 100%;"
+            @mount="editorMounted = true"
+          />
+
+          <!-- Loader overlay -->
+          <div v-show="loadingContent || !editorMounted" class="fluxdrive-editor-loader">
+            <LoadingSpinner
+              icon="mdi-file-document-edit"
+              :icon-size="50"
+              title="Loading file content..."
+              message=""
+            />
+          </div>
+        </VCardText>
+      </VCard>
+    </VDialog>
+
 
   </VContainer>
 
@@ -1528,10 +1639,13 @@
 </template>
 
 <script setup>
-import { computed, ref, watch, onMounted } from 'vue'
+import { computed, ref, watch, onMounted, nextTick } from 'vue'
 import { useFluxDrive } from '@/composables/useFluxDrive'
 import PricingPlans from '@/components/FluxDrive/PricingPlans.vue'
 import VersionsDialog from '@/components/FluxDrive/VersionsDialog.vue'
+import { VueMonacoEditor } from '@guolao/vue-monaco-editor'
+import ClipboardJS from 'clipboard'
+import LoadingSpinner from '@/components/Marketplace/LoadingSpinner.vue'
 
 // Define emit for FileManager
 const emit = defineEmits(['select-plan']) // Local state with persistence
@@ -1563,6 +1677,21 @@ const fileForAddVersion = ref(null)
 const versionComment = ref('')
 
 const renameText = ref('')
+
+// Editor dialog states
+const showEditorDialog = ref(false)
+const editingFile = ref(null)
+const fileContent = ref('')
+const originalFileContent = ref('')
+const loadingContent = ref(false)
+const savingFile = ref(false)
+const editorMounted = ref(false)
+
+// Check if file content has changed
+const hasContentChanged = computed(() => {
+  return fileContent.value !== originalFileContent.value
+})
+
 
 // Local upload progress tracking
 const currentUploadIndex = ref(0)
@@ -1649,7 +1778,7 @@ const handlePreviewFile = file => {
 }
 
 // Local copy link function with success message (files only)
-const handleCopyLink = async item => {
+const handleCopyLink = item => {
   try {
     let linkUrl = ''
 
@@ -1663,14 +1792,37 @@ const handleCopyLink = async item => {
       throw new Error('No link or hash available for this file')
     }
 
-    // Copy to clipboard
-    await navigator.clipboard.writeText(linkUrl)
+    // Create temporary button for ClipboardJS
+    const button = document.createElement('button')
+    button.setAttribute('data-clipboard-text', linkUrl)
+    document.body.appendChild(button)
 
-    showLocalMessage(
-      `Link for "${item.name}" copied to clipboard`,
-      'success',
-      'mdi-link',
-    )
+    // Initialize ClipboardJS
+    const clipboard = new ClipboardJS(button)
+
+    clipboard.on('success', () => {
+      showLocalMessage(
+        `Link for "${item.name}" copied to clipboard`,
+        'success',
+        'mdi-link',
+      )
+      clipboard.destroy()
+      document.body.removeChild(button)
+    })
+
+    clipboard.on('error', err => {
+      console.error('ClipboardJS error:', err)
+      showLocalMessage(
+        `Failed to copy link for "${item.name}"`,
+        'error',
+        'mdi-link-off',
+      )
+      clipboard.destroy()
+      document.body.removeChild(button)
+    })
+
+    // Trigger the click programmatically
+    button.click()
   } catch (error) {
     console.error('Copy link error:', error)
     showLocalMessage(
@@ -2207,7 +2359,7 @@ const {
   uploadData,
   uploadDataWithoutStateManagement,
   copyLink,
-  previewFile,
+  previewFile: previewFileFromComposable,
   closeModal,
   openFolder,
   navigateToFolder,
@@ -2215,6 +2367,7 @@ const {
   deleteFile: deleteFileFromComposable,
   getFileIcon,
   isImageFile,
+  isTextFile,
   convertSize,
   formatDate,
   bytesConversion,
@@ -2229,6 +2382,18 @@ const {
   clearError,
   uploadVersionToFluxCloud,
 } = useFluxDrive()
+
+// Override previewFile to automatically open editor for text files
+const previewFile = file => {
+  // Check if file is a text file
+  if (isTextFile(file.mimetype, file.name)) {
+    // Open in editor directly
+    openEditor(file)
+  } else {
+    // Use original preview for non-text files
+    previewFileFromComposable(file)
+  }
+}
 
 // Note: Upload success messages are handled in local upload handlers
 
@@ -2302,40 +2467,8 @@ const paginationRange = computed(() => {
 // Use snackbar
 // Removed showSnackbar - using unified local message system
 
-// Debug: Watch files array changes
-watch(files, newFiles => {
-  console.log('🔍 FileManager: Files changed:', {
-    length: newFiles?.length || 0,
-    files: newFiles?.slice(0, 5), // Show more files
-    isArray: Array.isArray(newFiles),
-    allFiles: newFiles, // Show complete array
-  })
-  console.log('🔍 FileManager: View type:', viewType.value)
-  console.log('🔍 FileManager: Has active subscription:', hasActiveSubscription.value)
-}, { immediate: true, deep: true })
-
-// Navigate to root helper
-const navigateToRoot = () => {
-  currentPage.value = 1 // Reset to first page when navigating
-  navigateToFolder({ path: '/' })
-}
-
-// Wrapper functions to reset page before navigation
-const handleOpenFolder = item => {
-  currentPage.value = 1 // Reset to first page when navigating
-  openFolder(item)
-}
-
-const handleNavigateToFolder = item => {
-  currentPage.value = 1 // Reset to first page when navigating
-  navigateToFolder(item)
-}
-
-// Item actions
-const openFile = item => {
-  // Open file in new tab
-  window.open(`${ipfsHost}/ipfs/${item.hash}`, '_blank')
-}
+// Store for generated video thumbnails
+const videoThumbnails = ref({})
 
 // Helper function to check if file is a video
 const isVideoFile = file => {
@@ -2357,6 +2490,70 @@ const isVideoFile = file => {
 
   // Check by type field
   if (file.type && file.type.toLowerCase().includes('video')) {
+    return true
+  }
+
+  return false
+}
+
+// Generate thumbnail from video
+const generateVideoThumbnail = async item => {
+  if (!item.hash || videoThumbnails.value[item.hash]) {
+    return videoThumbnails.value[item.hash]
+  }
+
+  return new Promise(resolve => {
+    const video = document.createElement('video')
+    video.crossOrigin = 'anonymous'
+    video.src = `${ipfsHost}/ipfs/${item.hash}`
+    video.currentTime = 1 // Capture frame at 1 second
+
+    video.addEventListener('loadeddata', () => {
+      const canvas = document.createElement('canvas')
+      canvas.width = 48
+      canvas.height = 48
+
+      const ctx = canvas.getContext('2d')
+      const scale = Math.max(canvas.width / video.videoWidth, canvas.height / video.videoHeight)
+      const x = (canvas.width / 2) - (video.videoWidth / 2) * scale
+      const y = (canvas.height / 2) - (video.videoHeight / 2) * scale
+
+      ctx.drawImage(video, x, y, video.videoWidth * scale, video.videoHeight * scale)
+
+      const thumbnail = canvas.toDataURL('image/jpeg', 0.7)
+      videoThumbnails.value[item.hash] = thumbnail
+      resolve(thumbnail)
+
+      video.remove()
+    })
+
+    video.addEventListener('error', () => {
+      resolve(null)
+      video.remove()
+    })
+  })
+}
+
+// Helper function to check if file is a PDF
+const isPdfFile = file => {
+  const pdfExtensions = ['pdf']
+  const pdfMimeTypes = ['application/pdf']
+
+  // Check by file extension
+  if (file.name) {
+    const extension = file.name.split('.').pop()?.toLowerCase()
+    if (extension && pdfExtensions.includes(extension)) {
+      return true
+    }
+  }
+
+  // Check by mime type
+  if (file.mimetype && pdfMimeTypes.includes(file.mimetype)) {
+    return true
+  }
+
+  // Check by type field
+  if (file.type && file.type.toLowerCase() === 'pdf') {
     return true
   }
 
@@ -2387,6 +2584,51 @@ const isAudioFile = file => {
   }
 
   return false
+}
+
+// Debug: Watch files array changes
+watch(files, newFiles => {
+  console.log('🔍 FileManager: Files changed:', {
+    length: newFiles?.length || 0,
+    files: newFiles?.slice(0, 5), // Show more files
+    isArray: Array.isArray(newFiles),
+    allFiles: newFiles, // Show complete array
+  })
+  console.log('🔍 FileManager: View type:', viewType.value)
+  console.log('🔍 FileManager: Has active subscription:', hasActiveSubscription.value)
+
+  // Generate video thumbnails automatically for grid view
+  if (viewType.value === 'grid' && Array.isArray(newFiles)) {
+    newFiles.forEach(file => {
+      if (isVideoFile(file) && file.hash && !videoThumbnails.value[file.hash]) {
+        // Generate thumbnail in background
+        generateVideoThumbnail(file)
+      }
+    })
+  }
+}, { immediate: true, deep: true })
+
+// Navigate to root helper
+const navigateToRoot = () => {
+  currentPage.value = 1 // Reset to first page when navigating
+  navigateToFolder({ path: '/' })
+}
+
+// Wrapper functions to reset page before navigation
+const handleOpenFolder = item => {
+  currentPage.value = 1 // Reset to first page when navigating
+  openFolder(item)
+}
+
+const handleNavigateToFolder = item => {
+  currentPage.value = 1 // Reset to first page when navigating
+  navigateToFolder(item)
+}
+
+// Item actions
+const openFile = item => {
+  // Open file in new tab
+  window.open(`${ipfsHost}/ipfs/${item.hash}`, '_blank')
 }
 
 const downloadFile = async item => {
@@ -2461,6 +2703,108 @@ const downloadFile = async item => {
     console.error('📥 Download error:', error)
     downloading.value = false
     showLocalMessage(`Failed to download ${item.name}: ${error.message}`, 'error', 'mdi-download-off')
+  }
+}
+
+// Open file in editor
+const openEditor = async file => {
+  console.log('📝 Opening editor for:', file.name)
+  editingFile.value = file
+  loadingContent.value = true
+  editorMounted.value = false
+  showEditorDialog.value = true
+
+  try {
+    // Fetch file content from IPFS
+    const response = await fetch(`${ipfsHost}/ipfs/${file.hash}`)
+    if (!response.ok) {
+      throw new Error(`Failed to fetch file: ${response.status}`)
+    }
+
+    // Handle plain text files
+    const text = await response.text()
+    fileContent.value = text
+    originalFileContent.value = text
+    console.log('✅ File content loaded, length:', text.length)
+  } catch (error) {
+    console.error('❌ Error loading file content:', error)
+    showToastMessage(`Failed to load file: ${error.message}`, 'error', 'mdi-file-alert')
+    showEditorDialog.value = false
+  } finally {
+    loadingContent.value = false
+  }
+}
+
+// Get file language for Monaco editor syntax highlighting
+const getFileLanguage = filename => {
+  if (!filename) return 'plaintext'
+
+  const ext = filename.split('.').pop()?.toLowerCase()
+  const languageMap = {
+    js: 'javascript',
+    jsx: 'javascript',
+    ts: 'typescript',
+    tsx: 'typescript',
+    json: 'json',
+    html: 'html',
+    css: 'css',
+    scss: 'scss',
+    sass: 'sass',
+    less: 'less',
+    md: 'markdown',
+    py: 'python',
+    java: 'java',
+    cpp: 'cpp',
+    c: 'c',
+    cs: 'csharp',
+    php: 'php',
+    rb: 'ruby',
+    go: 'go',
+    rs: 'rust',
+    sql: 'sql',
+    xml: 'xml',
+    yaml: 'yaml',
+    yml: 'yaml',
+    sh: 'shell',
+    bash: 'shell',
+    vue: 'html',
+    txt: 'plaintext',
+  }
+
+  return languageMap[ext] || 'plaintext'
+}
+
+// Save edited file
+const saveEditedFile = async () => {
+  if (!editingFile.value || !fileContent.value) return
+
+  console.log('💾 Saving edited file as new version:', editingFile.value.name)
+  savingFile.value = true
+
+  try {
+    // Plain text file
+    const blob = new Blob([fileContent.value], { type: editingFile.value.mimetype || 'text/plain' })
+    const file = new File([blob], editingFile.value.name, { type: editingFile.value.mimetype || 'text/plain' })
+
+    // Upload as new version using the file's hash
+    const existingFileHash = editingFile.value.hash
+    const comment = `Edited via FluxDrive editor on ${new Date().toLocaleString()}`
+
+    await uploadVersionToFluxCloud(existingFileHash, editingFile.value.name, file, comment)
+
+    showToastMessage(`${editingFile.value.name} saved as new version`, 'success', 'mdi-content-save')
+    showEditorDialog.value = false
+    editingFile.value = null
+    fileContent.value = ''
+    originalFileContent.value = ''
+
+    // Refresh file list to show updated file
+    await loadFiles(false)
+  } catch (error) {
+    console.error('❌ Error saving file:', error)
+    showToastMessage(`Failed to save file: ${error.message}`, 'error', 'mdi-content-save-alert')
+  } finally {
+    savingFile.value = false
   }
 }
 
@@ -2969,11 +3313,14 @@ onMounted(() => {
   console.log('📂 FileManager mounted')
   console.log('📂 hasActiveSubscription:', hasActiveSubscription.value)
   console.log('📂 Initial files:', files.value)
+  console.log('📂 loading:', loading.value)
 
-  // Try loading files if subscription is active and files haven't been loaded yet
-  if (hasActiveSubscription.value && files.value.length === 0) {
+  // Try loading files if subscription is active, files haven't been loaded yet, and not already loading
+  if (hasActiveSubscription.value && files.value.length === 0 && !loading.value) {
     console.log('📂 Calling loadFiles from FileManager...')
     loadFiles()
+  } else if (loading.value) {
+    console.log('📂 Files are already being loaded, skipping loadFiles call')
   } else if (hasActiveSubscription.value && files.value.length > 0) {
     console.log('📂 Files already loaded, skipping loadFiles call')
   }
@@ -3057,6 +3404,14 @@ const handleUpgradePlan = planId => {
 
 .file-grid-item:hover .grid-item-actions {
   opacity: 1;
+}
+
+.version-badge {
+  transition: opacity 0.3s ease;
+}
+
+.file-grid-item:hover .version-badge {
+  opacity: 0;
 }
 
 .file-list-table {
@@ -3203,6 +3558,48 @@ const handleUpgradePlan = planId => {
   white-space: nowrap !important;
 }
 
+/* FluxDrive Editor Loader Styles */
+.fluxdrive-editor-loader {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(var(--v-theme-surface), 0.95);
+  backdrop-filter: blur(10px);
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.fluxdrive-editor-loader :deep(.loading-container) {
+  min-height: auto !important;
+  margin-top: 0 !important;
+  padding: 24px !important;
+}
+
+.fluxdrive-editor-loader :deep(.modern-loader) {
+  width: 100px !important;
+  height: 100px !important;
+  margin-bottom: 16px !important;
+}
+
+.fluxdrive-editor-loader :deep(.loader-ring) {
+  width: 80px !important;
+  height: 80px !important;
+}
+
+.fluxdrive-editor-loader :deep(.icon-avatar) {
+  width: 50px !important;
+  height: 50px !important;
+}
+
+.fluxdrive-editor-loader :deep(h2) {
+  font-size: 1rem !important;
+  margin-bottom: 0 !important;
+}
+
 .file-list-table :deep(.v-data-table-rows-no-data) {
   white-space: nowrap !important;
 }
@@ -3232,6 +3629,24 @@ const handleUpgradePlan = planId => {
   to {
     transform: rotate(360deg);
   }
+}
+
+/* Video thumbnail styles */
+.video-thumbnail-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: inherit;
+}
+
+.video-thumbnail-placeholder {
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 /* Preview dialog styles */

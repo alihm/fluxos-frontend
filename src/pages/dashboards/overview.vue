@@ -56,14 +56,36 @@
                     Version Breakdown
                   </VChip>
                 </h4>
-                <ul style="font-size: 14px">
-                  <li
-                    v-for="(count, version) in versionLog"
+                <div
+                  v-if="Object.keys(versionLog).length > 0"
+                  class="d-flex flex-column"
+                  style="gap: 6px"
+                >
+                  <VCard
+                    v-for="(count, version, index) in versionLog"
                     :key="version"
+                    variant="outlined"
+                    class="pa-2 version-card"
+                    style="border-left: 3px solid; position: relative"
+                    :style="{ borderLeftColor: getVersionColor(version, index) }"
                   >
-                    <strong>{{ version }}:</strong> {{ count }}
-                  </li>
-                </ul>
+                    <div class="text-body-2 font-weight-medium">
+                      {{ version === 'legacy' ? 'Legacy' : version }}
+                    </div>
+                    <div class="text-body-2 font-weight-bold">
+                      {{ count }} <span class="text-caption text-medium-emphasis">nodes</span>
+                    </div>
+                    <VChip
+                      v-if="version !== 'legacy'"
+                      class="arcane-label"
+                      :class="theme === 'dark' ? 'arcane-glow-dark' : 'arcane-glow-light'"
+                      size="x-small"
+                      :color="theme === 'dark' ? 'white' : 'primary'"
+                    >
+                      Arcane OS
+                    </VChip>
+                  </VCard>
+                </div>
               </div>
             </VCol>
           </VRow>
@@ -153,13 +175,87 @@
             </VIcon>
           </VAvatar>
         </VCardTitle>
-        <VueApexCharts
-          type="donut"
-          height="280"
-          :options="lockedSupplyData.chartOptions"
-          :series="lockedSupplyData.series"
-          class="mb-2"
-        />
+        <VCardText>
+          <VRow>
+            <!-- Chart on the left, taking 2/3 width -->
+            <VCol
+              cols="12"
+              sm="8"
+            >
+              <VueApexCharts
+                type="donut"
+                height="280"
+                width="100%"
+                :options="lockedSupplyData.chartOptions"
+                :series="lockedSupplyData.series"
+              />
+            </VCol>
+
+            <!-- Legend on the right, taking 1/3 width -->
+            <VCol
+              cols="12"
+              sm="4"
+            >
+              <div class="px-2 pt-2">
+                <h4 class="mb-2">
+                  <VChip
+                    color="success"
+                    size="small"
+                  >
+                    Tier Breakdown
+                  </VChip>
+                </h4>
+                <div
+                  v-if="lockedSupplyData.series.length > 0"
+                  class="d-flex flex-column"
+                  style="gap: 6px"
+                >
+                  <VCard
+                    variant="outlined"
+                    class="pa-2"
+                    style="border-left: 3px solid"
+                    :style="{ borderLeftColor: lockedSupplyData.chartOptions.colors[0] }"
+                  >
+                    <div class="text-body-2 font-weight-medium">
+                      Cumulus
+                    </div>
+                    <div class="text-body-2 font-weight-bold">
+                      {{ beautifyValue(lockedSupplyData.series[0] || 0, 0) }} <span class="text-caption text-medium-emphasis">FLUX</span>
+                    </div>
+                  </VCard>
+
+                  <VCard
+                    variant="outlined"
+                    class="pa-2"
+                    style="border-left: 3px solid"
+                    :style="{ borderLeftColor: lockedSupplyData.chartOptions.colors[1] }"
+                  >
+                    <div class="text-body-2 font-weight-medium">
+                      Nimbus
+                    </div>
+                    <div class="text-body-2 font-weight-bold">
+                      {{ beautifyValue(lockedSupplyData.series[1] || 0, 0) }} <span class="text-caption text-medium-emphasis">FLUX</span>
+                    </div>
+                  </VCard>
+
+                  <VCard
+                    variant="outlined"
+                    class="pa-2"
+                    style="border-left: 3px solid"
+                    :style="{ borderLeftColor: lockedSupplyData.chartOptions.colors[2] }"
+                  >
+                    <div class="text-body-2 font-weight-medium">
+                      Stratus
+                    </div>
+                    <div class="text-body-2 font-weight-bold">
+                      {{ beautifyValue(lockedSupplyData.series[2] || 0, 0) }} <span class="text-caption text-medium-emphasis">FLUX</span>
+                    </div>
+                  </VCard>
+                </div>
+              </div>
+            </VCol>
+          </VRow>
+        </VCardText>
       </VCard>
     </VCol>
 
@@ -293,7 +389,7 @@ const versionChart = ref({
     labels: [],
     tooltip: {
       followCursor: true,
-      y: { formatter: value => beautifyValue(value, 0) }
+      y: { formatter: value => beautifyValue(value, 0) },
     },
   },
   series: [],
@@ -309,7 +405,7 @@ const nodeData = ref({
     colors: [tierColors.cumulus, tierColors.nimbus, tierColors.stratus],
     tooltip: {
       followCursor: true,
-      y: { formatter: value => beautifyValue(value, 0) }
+      y: { formatter: value => beautifyValue(value, 0) },
     },
   },
   series: [],
@@ -357,7 +453,7 @@ const lockedSupplyData = ref({
     colors: [tierColors.cumulus, tierColors.nimbus, tierColors.stratus],
     tooltip: {
       followCursor: true,
-      y: { formatter: value => beautifyValue(value, 0) }
+      y: { formatter: value => beautifyValue(value, 0) },
     },
   },
   series: [],
@@ -491,6 +587,16 @@ const getFluxVersionData = async () => {
   }
 }
 
+const getVersionColor = (version, index) => {
+  const colors = ['#6c757d', '#7c3aed', '#ec4899', '#f59e0b']
+  if (version === 'legacy') {
+    return colors[0] // Gray for legacy
+  }
+
+  // Assign purple, pink, or amber for ArcaneOS versions
+  return colors[(index % 3) + 1]
+}
+
 const fetchAllData = async () => {
   isLoading.value = true
   await nextTick()
@@ -517,5 +623,38 @@ onMounted(async () => {
 .overlay {
   backdrop-filter: blur(5px);
   -webkit-backdrop-filter: blur(5px);
+}
+
+.version-card {
+  overflow: visible;
+}
+
+.arcane-label {
+  position: absolute;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  font-size: 7px !important;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 4px 2px !important;
+  height: auto !important;
+  border-radius: 0 4px 4px 0 !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.arcane-glow-dark {
+  box-shadow: 0 0 4px rgba(255, 255, 255, 0.3),
+              0 0 8px rgba(255, 255, 255, 0.2) !important;
+}
+
+.arcane-glow-light {
+  box-shadow: 0 0 4px rgba(0, 0, 0, 0.3),
+              0 0 8px rgba(0, 0, 0, 0.15) !important;
 }
 </style>

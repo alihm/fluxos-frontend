@@ -221,7 +221,7 @@ class MarketplaceService {
       const app = allApps.find(a =>
         a.name === appId ||
         a.uuid === appId ||
-        a.name?.toLowerCase() === appId?.toLowerCase()
+        a.name?.toLowerCase() === appId?.toLowerCase(),
       )
 
       if (!app) {

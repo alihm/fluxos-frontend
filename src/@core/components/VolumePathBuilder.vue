@@ -6,6 +6,7 @@ const props = defineProps({
   modelValue: String,
   componentIndex: Number,
   newApp: Boolean,
+  specVersion: Number, // App specification version
 })
 
 const emit = defineEmits(['update:modelValue'])
@@ -230,6 +231,10 @@ function removeEntry(id) {
 watch(validationLogs, logs => {
   expandedPanels.value = logs.length > 0 ? [0] : []
 })
+
+const isUsingSMode = computed(() => {
+  return !props.newApp && props.modelValue && props.modelValue.includes('s:')
+})
 </script>
 
 
@@ -282,7 +287,7 @@ watch(validationLogs, logs => {
       v-if="showAddPath"
       @click="addEntry"
       prepend-icon="mdi-plus"
-      variant="tonal"
+      variant="flat"
       size="small"
       color="primary"
     >
@@ -327,8 +332,8 @@ watch(validationLogs, logs => {
         <VExpansionPanelText>
           <h4><strong>Sync Mode Differences:</strong></h4>
           <ul class="mb-4 ml-4" style="font-size: 13px">
-            <li><strong>Master-Master [<code>s</code>]:</strong> Full real-time two-way sync between all participants. Changes on any side are propagated to all others immediately.</li>
-            <li><strong>Phased Master-Master [<code>r</code>]:</strong> Similar to <code>s</code>, but syncing occurs in controlled phases during startup. The <code>r</code> mode prevents overwriting of existing data when a new instance is started.</li>
+            <li v-if="isUsingSMode"><strong>Master-Master [<code>s</code>]:</strong> Full real-time two-way sync between all participants. Changes on any side are propagated to all others immediately.</li>
+            <li><strong>Phased Master-Master [<code>r</code>]:</strong> Two-way sync between all participants where syncing occurs in controlled phases during startup. The <code>r</code> mode prevents overwriting of existing data when a new instance is started.</li>
             <li><strong>Master-Slave [<code>g</code>]:</strong> One-way sync from master to others. The base component is the source of truth, and others receive updates but do not modify the data.</li>
           </ul>
 

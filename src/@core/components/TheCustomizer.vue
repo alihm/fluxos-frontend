@@ -33,9 +33,32 @@ import { PerfectScrollbar } from 'vue3-perfect-scrollbar'
 import { useTheme } from 'vuetify'
 
 const isColorPickerActive = ref(false)
+
+// Use a persistent ref that survives component remounts
 const isNavDrawerOpen = ref(false)
+const isNavDrawerOpenPersisted = useStorage('customizer-drawer-open', false)
 const configStore = useConfigStore()
 const vuetifyTheme = useTheme()
+
+let lastLayoutChangeTime = 0
+
+// Sync persisted state with local state
+watch(isNavDrawerOpen, newVal => {
+  isNavDrawerOpenPersisted.value = newVal
+})
+
+// Restore state on mount
+onMounted(() => {
+  if (isNavDrawerOpenPersisted.value) {
+    isNavDrawerOpen.value = true
+  }
+})
+
+// Debug: watch for all changes to isNavDrawerOpen
+watch(isNavDrawerOpen, (newVal, oldVal) => {
+  console.log('🚪 Drawer state changed:', oldVal, '->', newVal)
+  console.trace('Stack trace')
+})
 
 const colors = [
   {
@@ -151,12 +174,31 @@ const selectedNavbarType = computed({
 })
 
 watch(currentLayout, () => {
+  console.log('🔄 Layout changing to:', currentLayout.value)
+  console.log('🚪 Drawer was open:', isNavDrawerOpen.value)
+
+  // Track layout change time to prevent drawer from closing
+  lastLayoutChangeTime = Date.now()
+
+  // Store drawer state before layout change
+  const wasDrawerOpen = isNavDrawerOpen.value
+
   if (currentLayout.value === 'collapsed') {
     configStore.isVerticalNavCollapsed = true
     configStore.appContentLayoutNav = AppContentLayoutNav.Vertical
   } else {
     configStore.isVerticalNavCollapsed = false
     configStore.appContentLayoutNav = currentLayout.value
+  }
+
+  console.log('⚙️ Config applied')
+
+  // Restore drawer state after layout change
+  if (wasDrawerOpen) {
+    nextTick(() => {
+      console.log('✅ Restoring drawer state')
+      isNavDrawerOpen.value = true
+    })
   }
 })
 watch(() => configStore.isVerticalNavCollapsed, () => {
@@ -277,8 +319,22 @@ const resetCustomizer = async () => {
 }
 
 const handleClickOutside = event => {
+  // Ignore synthetic/programmatic events
+  if (!event.isTrusted) return
+
+  // Ignore clicks for 500ms after layout changes
+  const now = Date.now()
+  if (now - lastLayoutChangeTime < 500) {
+    return
+  }
+
   const drawer = document.querySelector('.app-customizer')
-  if (drawer && isNavDrawerOpen.value && !isColorPickerActive.value && !drawer.contains(event.target)) {
+  const toggler = document.querySelector('.app-customizer-toggler')
+
+  // Don't close if clicking inside drawer, on toggler, or if color picker is active
+  if (drawer && isNavDrawerOpen.value && !isColorPickerActive.value &&
+      !drawer.contains(event.target) &&
+      (!toggler || !toggler.contains(event.target))) {
     isNavDrawerOpen.value = false
   }
 }

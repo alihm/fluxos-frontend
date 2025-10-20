@@ -93,13 +93,15 @@
                 </VCol>
               </VRow>
             </div>
-          
+
             <!-- Show registration form if logged in -->
-            <SubscriptionManager 
+            <SubscriptionManager
               v-else
-              :app-spec="newAppSpec" 
+              :app-spec="adaptedAppSpec"
               new-app
-              :execute-local-command="executeLocalCommand" 
+              :is-redeploy="isRedeploy"
+              :execute-local-command="executeLocalCommand"
+              @spec-converted="handleSpecConverted"
             />
           </VCardText>
         </VCard>
@@ -133,6 +135,7 @@ const isLoggedIn = computed(() => privilege.value !== 'none')
 // Create a new app specification with default values
 // Login dialog state
 const showLogin = ref(false)
+const isRedeploy = ref(false)
 
 const newAppSpec = ref({
   version: 8, // Use latest version
@@ -156,17 +159,93 @@ const newAppSpec = ref({
       domains: [],
       environmentParameters: [],
       commands: [],
-      containerPort: 80,
       containerData: '',
       cpu: 0.1,
       ram: 128,
       hdd: 1,
-      tiered: false,
       repoauth: '',
-      secrets: '',
     },
   ],
 })
+
+// Spec adapter for SubscriptionManager - creates a mutable reactive copy
+// For V3: converts flat format to compose format for UI compatibility
+const adaptedAppSpec = ref(null)
+
+// Watch newAppSpec and adapt specs as needed
+watch(newAppSpec, spec => {
+  console.log('[Spec Adapter] Input spec:', spec)
+
+  if (!spec) {
+    console.log('[Spec Adapter] No spec available')
+    adaptedAppSpec.value = null
+    return
+  }
+
+  console.log('[Spec Adapter] Spec version:', spec.version)
+  console.log('[Spec Adapter] Has compose?', !!spec.compose)
+  console.log('[Spec Adapter] Root name:', spec.name)
+  console.log('[Spec Adapter] Root description:', spec.description)
+  console.log('[Spec Adapter] Root owner:', spec.owner)
+
+  if (spec.version === 3 && !spec.compose) {
+    console.log('[Spec Adapter] Converting V3 flat to compose format')
+    console.log('[Spec Adapter] Original V3 spec:', JSON.parse(JSON.stringify(spec)))
+
+    // Create a deep mutable copy for SubscriptionManager to modify
+    adaptedAppSpec.value = {
+      ...JSON.parse(JSON.stringify(spec)),
+      compose: [{
+        name: spec.name,
+        description: spec.description,
+        repotag: spec.repotag,
+        ports: spec.ports?.map(p => parseInt(p, 10)) || [],
+        containerPorts: spec.containerPorts?.map(p => parseInt(p, 10)) || [],
+        domains: spec.domains || [],
+        environmentParameters: spec.enviromentParameters || [], // V3 typo: enviromentParameters
+        commands: spec.commands || [],
+        containerData: spec.containerData || '',
+        cpu: spec.cpu || 0.1,
+        ram: spec.ram || 100,
+        hdd: spec.hdd || 1,
+        tiered: false,
+        repoauth: spec.repoauth || '', // Preserve repository authentication
+      }],
+      _isV3Original: true,
+    }
+
+    console.log('[Spec Adapter] Adapted spec - root name:', adaptedAppSpec.value.name)
+    console.log('[Spec Adapter] Adapted spec - root description:', adaptedAppSpec.value.description)
+    console.log('[Spec Adapter] Adapted spec - root owner:', adaptedAppSpec.value.owner)
+    console.log('[Spec Adapter] Adapted spec - compose[0].name:', adaptedAppSpec.value.compose[0].name)
+    console.log('[Spec Adapter] Adapted spec with compose:', JSON.parse(JSON.stringify(adaptedAppSpec.value)))
+  } else {
+    console.log('[Spec Adapter] Returning deep copy of spec (not V3 or already has compose)')
+
+    // Create a deep copy for other versions too so SubscriptionManager can mutate it
+    adaptedAppSpec.value = JSON.parse(JSON.stringify(spec))
+  }
+}, { immediate: true, deep: true })
+
+// Handle spec conversion from SubscriptionManager
+function handleSpecConverted(convertedSpec) {
+  console.log('[handleSpecConverted] Received converted spec:', convertedSpec)
+  console.log('[handleSpecConverted] Original version:', newAppSpec.value?.version)
+  console.log('[handleSpecConverted] New version:', convertedSpec.version)
+
+  // Create a deep reactive copy and remove any adapter flags
+  const cleanSpec = JSON.parse(JSON.stringify(convertedSpec))
+  delete cleanSpec._isV3Original
+
+  console.log('[handleSpecConverted] Clean spec without flags:', cleanSpec)
+
+  // Update the app spec with the converted version
+  newAppSpec.value = cleanSpec
+
+  // The computed adapter will automatically re-run and update adaptedAppSpec
+  console.log('[handleSpecConverted] App specification updated to V' + convertedSpec.version)
+  console.log('[handleSpecConverted] Fields should now be editable')
+}
 
 // Execute local command function
 async function executeLocalCommand(
@@ -227,11 +306,11 @@ watch(isLoggedIn, newValue => {
   }
 })
 
-onMounted(() => {
-  // Restore authentication state and set owner
+onMounted(async () => {
+  // First restore authentication state
   const zelidauth = localStorage.getItem('zelidauth')
   console.log('zelidauth from localStorage:', zelidauth ? 'Present' : 'Missing')
-  
+
   if (zelidauth) {
     try {
       // Parse the zelidauth which is in query string format
@@ -239,30 +318,57 @@ onMounted(() => {
       const zelid = params.get('zelid')
       const privilege = params.get('privilege')
       const loginType = params.get('logintype')
-      
+
       console.log('Parsed auth data:', { zelid: zelid ? 'Present' : 'Missing', privilege, loginType })
-      
+
       if (zelid) {
         // Restore flux store state
         fluxStore.setZelid(zelid)
         if (privilege) fluxStore.setPrivilege(privilege)
         if (loginType) fluxStore.setLoginType(loginType)
-        
-        // Set as owner
-        newAppSpec.value.owner = zelid
-        console.log('Set newAppSpec.owner to:', zelid)
       }
     } catch (error) {
       console.warn('Failed to restore authentication state:', error)
     }
   }
-  
-  // Fallback: check flux store for zelid
-  if (!newAppSpec.value.owner && fluxStore.zelid) {
-    newAppSpec.value.owner = fluxStore.zelid
-    console.log('Set owner from flux store:', fluxStore.zelid)
+
+  // Then check for app specs passed through sessionStorage (from redeploy)
+  const redeployData = sessionStorage.getItem('redeploySpecs')
+  if (redeployData) {
+    try {
+      const parsed = JSON.parse(redeployData)
+      console.log('🔄 [REDEPLOY] Loading app spec from sessionStorage:', parsed)
+      console.log('🔄 [REDEPLOY] Full appspecs object:', JSON.stringify(parsed.appspecs, null, 2))
+
+      // Use nextTick to ensure the assignment happens after component is fully mounted
+      await nextTick()
+
+      // Directly assign the imported spec
+      newAppSpec.value = parsed.appspecs
+
+      // Check if this is a redeploy operation
+      if (parsed.isRedeploy) {
+        isRedeploy.value = true
+        console.log('🔄 [REDEPLOY] Redeploy mode enabled')
+      }
+
+      // Clear sessionStorage immediately after reading
+      sessionStorage.removeItem('redeploySpecs')
+      console.log('🔄 [REDEPLOY] App spec loaded and sessionStorage cleared')
+      console.log('🔄 [REDEPLOY] newAppSpec after assignment:', JSON.stringify(newAppSpec.value, null, 2))
+    } catch (error) {
+      console.error('❌ [REDEPLOY] Failed to load app spec:', error)
+      sessionStorage.removeItem('redeploySpecs')
+    }
+  } else {
+    // If no redeploy data, set owner from auth
+    const zelid = fluxStore.zelid || new URLSearchParams(zelidauth)?.get('zelid')
+    if (zelid) {
+      newAppSpec.value.owner = zelid
+      console.log('Set newAppSpec.owner to:', zelid)
+    }
   }
-  
+
   console.log('Final newAppSpec.owner:', newAppSpec.value.owner)
 })
 </script>

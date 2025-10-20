@@ -278,58 +278,166 @@
                             </VCard>
                           </div>
 
-                          <!-- Payment Address (when available) -->
-                          <div v-if="fluxPayment && fluxPayment.paymentAddr" class="mb-4">
-                            <VCard variant="outlined" class="pa-3">
-                              <div class="text-body-2 font-weight-medium mb-2">Payment Address:</div>
-                              <code class="text-caption text-primary">{{ fluxPayment.paymentAddr }}</code>
-                              <VBtn
-                                size="x-small"
-                                variant="text"
-                                icon="mdi-content-copy"
-                                @click="copyToClipboard(fluxPayment.paymentAddr)"
-                                class="ml-2"
-                              />
-                            </VCard>
+                          <!-- Manual Payment Details - Always visible, collapsed by default -->
+                          <div class="mb-3">
+                            <VExpansionPanels variant="accordion">
+                              <VExpansionPanel>
+                                <VExpansionPanelTitle class="py-2 px-3">
+                                  <div class="d-flex align-center text-caption">
+                                    <VIcon size="18" class="me-2">mdi-wallet-outline</VIcon>
+                                    <span>Manual Payment Details</span>
+                                  </div>
+                                </VExpansionPanelTitle>
+                                <VExpansionPanelText class="pt-2">
+                                  <template v-if="fluxPayment && fluxPayment.paymentAddr">
+                                    <!-- Address -->
+                                    <div class="d-flex align-center justify-space-between mb-1 px-2 py-1" style="background: rgba(var(--v-theme-on-surface), 0.05); border-radius: 4px;">
+                                      <div style="flex: 1; min-width: 0; overflow: hidden;">
+                                        <div class="text-caption" style="font-size: 0.65rem; opacity: 0.7;">Address</div>
+                                        <code class="text-caption" style="font-size: 0.7rem; word-break: break-all;">{{ fluxPayment.paymentAddr }}</code>
+                                      </div>
+                                      <VBtn
+                                        size="x-small"
+                                        variant="text"
+                                        color="secondary"
+                                        icon="mdi-content-copy"
+                                        class="copy-btn"
+                                        :data-clipboard-text="fluxPayment.paymentAddr"
+                                        style="flex-shrink: 0; margin-left: 4px;"
+                                      />
+                                    </div>
+
+                                    <!-- Amount & Message in one row -->
+                                    <div class="d-flex gap-1">
+                                      <!-- Amount -->
+                                      <div class="d-flex align-center justify-space-between mb-1 px-2 py-1" style="background: rgba(var(--v-theme-on-surface), 0.05); border-radius: 4px; flex: 1;">
+                                        <div>
+                                          <div class="text-caption" style="font-size: 0.65rem; opacity: 0.7;">Amount</div>
+                                          <code class="text-caption" style="font-size: 0.7rem;">{{ fluxPayment.amount }} FLUX</code>
+                                        </div>
+                                        <VBtn
+                                          size="x-small"
+                                          variant="text"
+                                          color="secondary"
+                                          icon="mdi-content-copy"
+                                          class="copy-btn"
+                                          :data-clipboard-text="fluxPayment.amount"
+                                          style="margin-left: 4px;"
+                                        />
+                                      </div>
+
+                                      <!-- Message -->
+                                      <div class="d-flex align-center justify-space-between mb-1 px-2 py-1" style="background: rgba(var(--v-theme-on-surface), 0.05); border-radius: 4px; flex: 1;">
+                                        <div style="flex: 1; min-width: 0; overflow: hidden;">
+                                          <div class="text-caption" style="font-size: 0.65rem; opacity: 0.7;">Message</div>
+                                          <code class="text-caption" style="font-size: 0.7rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">FLUXDRIVE{{ fluxPayment.subId }}</code>
+                                        </div>
+                                        <VBtn
+                                          size="x-small"
+                                          variant="text"
+                                          color="secondary"
+                                          icon="mdi-content-copy"
+                                          class="copy-btn"
+                                          :data-clipboard-text="'FLUXDRIVE' + fluxPayment.subId"
+                                          style="flex-shrink: 0; margin-left: 4px;"
+                                        />
+                                      </div>
+                                    </div>
+                                  </template>
+                                  <template v-else>
+                                    <!-- Loading state -->
+                                    <div class="text-center text-caption text-medium-emphasis py-2">
+                                      <VProgressCircular
+                                        v-if="loading"
+                                        indeterminate
+                                        size="20"
+                                        width="2"
+                                        color="primary"
+                                        class="me-2"
+                                      />
+                                      {{ loading ? 'Loading payment details...' : 'Payment details will appear here' }}
+                                    </div>
+                                  </template>
+                                </VExpansionPanelText>
+                              </VExpansionPanel>
+                            </VExpansionPanels>
                           </div>
 
 
                         </div>
 
+                        <!-- Payment Monitoring Spinner -->
+                        <div v-if="fluxPaymentProcessing" class="mb-4">
+                          <VCard variant="tonal" color="info" class="pa-4">
+                            <div class="d-flex flex-column align-center">
+                              <VProgressCircular
+                                indeterminate
+                                size="48"
+                                width="4"
+                                color="info"
+                                class="mb-3"
+                              />
+                              <div class="text-h6 mb-2 text-center">Monitoring Payment...</div>
+                              <div class="text-body-2 text-center text-medium-emphasis mb-3">
+                                Waiting for payment confirmation on the Flux blockchain.
+                              </div>
+                              <div class="d-flex align-center text-caption text-medium-emphasis">
+                                <VIcon color="warning" size="16" class="me-2">mdi-clock-alert</VIcon>
+                                <span>This can take up to 20 minutes</span>
+                              </div>
+                            </div>
+                          </VCard>
+                        </div>
+
                         <!-- Payment Actions -->
-                        <div class="d-flex flex-column gap-3">
-                          <VBtn
-                            v-if="!fluxPaymentProcessing"
-                            color="primary"
-                            size="large"
-                            block
-                            :loading="initializingFluxPayment"
-                            @click="initializeFluxPayment"
-                          >
-                            <VIcon icon="mdi-wallet" class="me-2" />
-                            Open ZelCore
-                          </VBtn>
+                        <div v-if="!fluxPaymentProcessing">
+                          <!-- Wallet Icons Grid -->
+                          <div class="wallet-icons-grid mb-4">
+                            <VCard
+                              variant="outlined"
+                              class="wallet-icon-card"
+                              @click="initZelcorePay"
+                              hover
+                            >
+                              <VCardText class="d-flex align-center justify-center pa-6">
+                                <img
+                                  class="wallet-brand-icon mr-3"
+                                  :src="FluxIDImg"
+                                  alt="Zelcore"
+                                />
+                                <span class="text-h6 font-weight-medium">Zelcore</span>
+                              </VCardText>
+                            </VCard>
 
-                          <VBtn
-                            v-else
-                            color="success"
-                            size="large"
-                            block
-                            loading
-                          >
-                            <VIcon icon="mdi-clock-outline" class="me-2" />
-                            Pending Payment
-                          </VBtn>
+                            <VCard
+                              variant="outlined"
+                              class="wallet-icon-card"
+                              @click="initSSPPay"
+                              hover
+                            >
+                              <VCardText class="d-flex align-center justify-center pa-6">
+                                <img
+                                  class="wallet-brand-icon mr-3"
+                                  :src="SSPLogoThemeImg"
+                                  alt="SSP"
+                                />
+                                <span class="text-h6 font-weight-medium">SSP</span>
+                              </VCardText>
+                            </VCard>
+                          </div>
+                        </div>
 
+                        <!-- Cancel Monitoring Button -->
+                        <div v-if="fluxPaymentProcessing">
                           <VBtn
-                            v-if="fluxPaymentProcessing"
                             variant="outlined"
                             color="error"
-                            size="large"
+                            size="default"
                             block
                             @click="cancelFluxPayment"
                           >
-                            Cancel
+                            <VIcon icon="mdi-close-circle" class="me-2" />
+                            Cancel Monitoring
                           </VBtn>
                         </div>
 
@@ -371,7 +479,7 @@
                           <VBtn
                             v-if="!cryptoPaymentProcessing"
                             color="primary"
-                            size="large"
+                            size="default"
                             block
                             :loading="initializingCryptoPayment"
                             @click="initializeCryptoComPayment"
@@ -384,7 +492,7 @@
                             v-if="cryptoPaymentProcessing"
                             variant="outlined"
                             color="warning"
-                            size="large"
+                            size="default"
                             block
                           >
                             <VIcon icon="mdi-clock-outline" class="me-2" />
@@ -395,7 +503,7 @@
                             v-if="cryptoPaymentProcessing"
                             variant="outlined"
                             color="error"
-                            size="large"
+                            size="default"
                             block
                             @click="cancelCryptoPayment"
                           >
@@ -430,10 +538,18 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, watch } from 'vue'
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import { useFluxStore } from '@/stores/flux'
 import { useSnackbar } from '@/composables/useSnackbar'
+import ClipboardJS from 'clipboard'
 import qs from 'qs'
+import { payWithSSP, payWithZelcore } from '@/utils/walletService'
+import { useTheme } from 'vuetify'
+
+// Import payment images
+import FluxIDImg from '@images/FluxID.svg?url'
+import SSPLogoBlackImg from '@images/ssp-logo-black.svg?url'
+import SSPLogoWhiteImg from '@images/ssp-logo-white.svg?url'
 
 // Props
 const props = defineProps({
@@ -468,6 +584,10 @@ const cleanupPaymentMonitoring = () => {
   fluxPaymentProcessing.value = false
   cryptoPaymentProcessing.value = false
 
+  // Clear payment data so new sub_id is generated on re-open
+  fluxPayment.value = null
+  console.log('🧹 Cleared payment data - new sub_id will be generated on re-open')
+
   // Hide any active payment-related snackbars
   hideSnackbar()
   console.log('🧹 Cleared payment-related snackbar notifications')
@@ -481,6 +601,12 @@ defineExpose({
 // Composables
 const fluxStore = useFluxStore()
 const { showSnackbar, hideSnackbar } = useSnackbar()
+const theme = useTheme()
+
+// Theme-aware SSP logo
+const SSPLogoThemeImg = computed(() => {
+  return theme.global.name.value === 'dark' ? SSPLogoWhiteImg : SSPLogoBlackImg
+})
 
 // State
 const loading = ref(true)
@@ -690,6 +816,8 @@ const loadPlanDetails = async () => {
       // Calculate estimated FLUX amount for FluxDrive plans
       estimatedFluxAmount.value = await getFluxPriceForPlan()
       console.log('Estimated FLUX amount:', estimatedFluxAmount.value)
+
+      // NOTE: Don't pre-initialize payment here - we need price_id from API first
     }
 
     // Always call API to get price_id (required for payments)
@@ -747,6 +875,20 @@ const loadPlanDetails = async () => {
           sub_id: apiPlan.sub_id,       // Get sub_id if available
         }
         console.log('Merged FluxDrive plan with API price_id:', selectedPlan.value.price_id)
+
+        // Wait for FLUX amount to be calculated before pre-initializing payment
+        if (!estimatedFluxAmount.value) {
+          console.log('⏳ Waiting for FLUX amount calculation...')
+          // Wait a moment for the FLUX price calculation to complete
+          await new Promise(resolve => setTimeout(resolve, 500))
+        }
+
+        // NOW pre-initialize payment data for manual section (after we have price_id AND FLUX amount)
+        if (estimatedFluxAmount.value) {
+          await preInitializeManualPaymentData()
+        } else {
+          console.log('⚠️ FLUX amount still not available, skipping pre-initialization')
+        }
       } else {
         selectedPlan.value = apiPlan
 
@@ -786,7 +928,7 @@ const getAuthFromStorage = () => {
     return {
       zelid: zelid,
       signature: auth.signature || auth.zelidauth || zelidauth,  // Use full zelidauth as signature if needed
-      loginPhrase: auth.loginPhrase || 'FluxDrive Subscription',
+      loginPhrase: auth.loginPhrase,
     }
   } catch (error) {
     console.error('Failed to parse zelidauth:', error)
@@ -795,15 +937,183 @@ const getAuthFromStorage = () => {
   }
 }
 
-const initializeFluxPayment = async () => {
+const preInitializeManualPaymentData = async () => {
+  // Pre-initialize payment data without opening wallet - just for displaying manual payment info
+  try {
+    const auth = getAuthFromStorage()
+    if (!auth.zelid || !auth.signature) {
+      console.log('⚠️ Cannot pre-initialize payment data - missing auth')
+      console.log('Auth check:', { hasZelid: !!auth.zelid, hasSignature: !!auth.signature, hasLoginPhrase: !!auth.loginPhrase })
+      return
+    }
+
+    if (!estimatedFluxAmount.value) {
+      console.log('⚠️ Cannot pre-initialize payment data - missing FLUX amount')
+      return
+    }
+
+    // Build payment payload
+    const paymentPayload = {
+      action: 'INITIALIZE',
+      plan_name: props.planId,
+      action_type: props.actionType,
+      zelid: auth.zelid || fluxStore.zelid,
+      signature: auth.signature,
+      loginPhrase: auth.loginPhrase,
+    }
+
+    console.log('🔄 Pre-initialization payload check:', {
+      hasZelid: !!paymentPayload.zelid,
+      hasSignature: !!paymentPayload.signature,
+      hasLoginPhrase: !!paymentPayload.loginPhrase,
+      planName: paymentPayload.plan_name,
+      actionType: paymentPayload.action_type,
+    })
+
+    // Generate sub_id
+    const generateSubId = (length, lowerOnly) => {
+      const characters = lowerOnly
+        ? "abcdefghijklmnopqrstuvwxyz0123456789"
+        : "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
+      let result = ""
+      for (let i = 0; i < length; i++) {
+        result += characters[Math.floor(Math.random() * characters.length)]
+      }
+      return result
+    }
+
+    paymentPayload.sub_id = generateSubId(24, true)
+
+    // Add price_id from subscription
+    if (selectedPlan.value?.price_id) {
+      paymentPayload.price_id = selectedPlan.value.price_id
+    }
+
+    // Calculate total_flux
+    if (estimatedFluxAmount.value) {
+      paymentPayload.total_flux = parseFloat(estimatedFluxAmount.value)
+    }
+
+    // Add payment address
+    paymentPayload.payment_addr = 't3NryfAQLGeFs9jEoeqsxmBN2QLRaRKFLUX'
+
+    console.log('🔄 Pre-initializing payment data for manual section:', paymentPayload)
+
+    const response = await fetch('https://jetpackbridge.runonflux.io/api/v1/fluxpay.php', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: new URLSearchParams(paymentPayload),
+    })
+
+    console.log('📡 Response status:', response.status, response.statusText)
+
+    const result = await response.json()
+    console.log('📡 API response:', result)
+
+    if (result.success) {
+      console.log('✅ Payment data pre-initialized successfully!')
+
+      // Store payment details for manual section display
+      fluxPayment.value = {
+        amount: estimatedFluxAmount.value,
+        usdValue: getPlanPrice(),
+        subId: result.sub_id,
+        endDate: result.enddate,
+        paymentAddr: paymentPayload.payment_addr,
+      }
+
+      console.log('✅ Manual payment section now has data:', fluxPayment.value)
+    } else {
+      console.log('⚠️ Failed to pre-initialize payment data:', result.error || result)
+    }
+  } catch (error) {
+    console.error('❌ Error pre-initializing payment data:', error)
+  }
+}
+
+const initZelcorePay = async () => {
+  // Initialize Flux payment with Zelcore wallet
+  await initializeFluxPayment('zelcore')
+}
+
+const initSSPPay = async () => {
+  // Initialize Flux payment with SSP wallet
+  await initializeFluxPayment('ssp')
+}
+
+const initializeFluxPayment = async (walletType = 'zelcore') => {
   try {
     initializingFluxPayment.value = true
     alertMessage.value = ''
 
+    // If we already have payment data from pre-initialization, reuse it
+    if (fluxPayment.value && fluxPayment.value.subId) {
+      console.log('✅ Reusing existing payment data from pre-initialization')
+      console.log('   - sub_id:', fluxPayment.value.subId)
+      console.log('   - amount:', fluxPayment.value.amount)
+      console.log('   - address:', fluxPayment.value.paymentAddr)
+
+      // Open wallet directly with existing data
+      const amount = parseFloat(fluxPayment.value.amount).toFixed(2)
+      const message = `FLUXDRIVE${fluxPayment.value.subId}`
+
+      if (walletType === 'ssp') {
+        // Use SSP wallet
+        console.log('Opening SSP wallet for payment')
+        try {
+          await payWithSSP({
+            message: message,
+            amount: amount,
+            address: fluxPayment.value.paymentAddr,
+            chain: 'flux',
+          })
+
+          // Set payment processing state and start monitoring
+          fluxPaymentProcessing.value = true
+          showSnackbar('SSP payment initiated, monitoring for confirmation...', 'info', 8000)
+
+          // Start monitoring payment status
+          monitorPayment(null, fluxPayment.value.subId, fluxPayment.value.paymentAddr, 'flux')
+        } catch (error) {
+          console.error('SSP payment error:', error)
+          showAlert(`SSP payment failed: ${error.message}`)
+        }
+      } else {
+        // Use Zelcore wallet
+        console.log('Opening Zelcore wallet for payment')
+        try {
+          await payWithZelcore({
+            address: fluxPayment.value.paymentAddr,
+            amount: amount,
+            message: message,
+            coin: 'flux',
+          })
+
+          // Set payment processing state and start monitoring
+          fluxPaymentProcessing.value = true
+          showSnackbar('Opening ZelCore wallet for payment...', 'info', 8000)
+
+          // Start monitoring payment status
+          monitorPayment(null, fluxPayment.value.subId, fluxPayment.value.paymentAddr, 'flux')
+        } catch (error) {
+          console.error('Zelcore payment error:', error)
+          showAlert(`Zelcore payment failed: ${error.message}`)
+        }
+      }
+
+      initializingFluxPayment.value = false
+      return
+    }
+
+    // No pre-initialized data, initialize new payment
+    console.log('⚠️ No pre-initialized payment data, creating new payment...')
+
     const auth = getAuthFromStorage()
     if (!auth.zelid || !auth.signature || !auth.loginPhrase) {
       showAlert('Authentication required. Please login again.')
-      
+
       return
     }
 
@@ -828,7 +1138,7 @@ const initializeFluxPayment = async () => {
       for (let i = 0; i < length; i++) {
         result += characters[Math.floor(Math.random() * characters.length)]
       }
-      
+
       return result
     }
 
@@ -895,27 +1205,53 @@ const initializeFluxPayment = async () => {
         paymentAddr: paymentPayload.payment_addr,
       }
 
-      // Open ZelCore wallet like FluxCloud does
-      const zelCoreAmount = parseFloat(estimatedFluxAmount.value).toFixed(2)
-      const zelCoreMessage = `FLUXDRIVE${result.sub_id}`
-      const zelCoreUrl = `zel:?action=pay&coin=flux&address=${paymentPayload.payment_addr}&amount=${zelCoreAmount}&message=${zelCoreMessage}`
+      // Open wallet based on type (Zelcore or SSP)
+      const amount = parseFloat(estimatedFluxAmount.value).toFixed(2)
+      const message = `FLUXDRIVE${result.sub_id}`
 
-      console.log('Opening ZelCore with URL:', zelCoreUrl)
+      if (walletType === 'ssp') {
+        // Use SSP wallet
+        console.log('Opening SSP wallet for payment')
+        try {
+          await payWithSSP({
+            message: message,
+            amount: amount,
+            address: paymentPayload.payment_addr,
+            chain: 'flux',
+          })
 
-      // Try to open ZelCore
-      try {
-        window.location.href = zelCoreUrl
-      } catch (error) {
-        console.log('Direct URL failed, trying window.open')
-        window.open(zelCoreUrl, '_self')
+          // Set payment processing state and start monitoring
+          fluxPaymentProcessing.value = true
+          showSnackbar('SSP payment initiated, monitoring for confirmation...', 'info', 8000)
+
+          // Start monitoring payment status
+          monitorPayment(null, result.sub_id, paymentPayload.payment_addr, 'flux')
+        } catch (error) {
+          console.error('SSP payment error:', error)
+          showAlert(`SSP payment failed: ${error.message}`)
+        }
+      } else {
+        // Use Zelcore wallet
+        console.log('Opening Zelcore wallet for payment')
+        try {
+          await payWithZelcore({
+            address: paymentPayload.payment_addr,
+            amount: amount,
+            message: message,
+            coin: 'flux',
+          })
+
+          // Set payment processing state and start monitoring
+          fluxPaymentProcessing.value = true
+          showSnackbar('Opening ZelCore wallet for payment...', 'info', 8000)
+
+          // Start monitoring payment status
+          monitorPayment(null, result.sub_id, paymentPayload.payment_addr, 'flux')
+        } catch (error) {
+          console.error('Zelcore payment error:', error)
+          showAlert(`Zelcore payment failed: ${error.message}`)
+        }
       }
-
-      // Set payment processing state and start monitoring
-      fluxPaymentProcessing.value = true
-      showSnackbar('Opening ZelCore wallet for payment...', 'info', 8000)
-
-      // Start monitoring payment status
-      monitorPayment(null, result.sub_id, paymentPayload.payment_addr, 'flux')
     } else {
       showAlert(result.error || 'Failed to initialize payment')
     }
@@ -935,7 +1271,7 @@ const initializeCryptoComPayment = async () => {
     const auth = getAuthFromStorage()
     if (!auth.zelid || !auth.signature || !auth.loginPhrase) {
       showAlert('Authentication required. Please login again.')
-      
+
       return
     }
 
@@ -1248,7 +1584,7 @@ const monitorPayment = async (paymentId, subId, paymentAddr, paymentType = 'flux
 }
 
 const cancelFluxPayment = () => {
-  console.log('🛑 Cancelling FluxPay payment and stopping monitoring')
+  console.log('🛑 Cancelling FluxPay payment monitoring (keeping payment data)')
 
   // Stop payment monitoring
   if (paymentMonitoringInterval) {
@@ -1264,8 +1600,8 @@ const cancelFluxPayment = () => {
   hideSnackbar()
 
   fluxPaymentProcessing.value = false
-  fluxPayment.value = null
-  showAlert('FluxPay payment cancelled', 'info')
+  // DON'T clear fluxPayment.value - keep manual payment data visible
+  showAlert('Payment monitoring cancelled. You can still pay manually using the details above.', 'info')
 }
 
 const cancelCryptoPayment = () => {
@@ -1634,14 +1970,8 @@ const getStorageDisplay = () => {
   return 'error GB'
 }
 
-const copyToClipboard = async text => {
-  try {
-    await navigator.clipboard.writeText(text)
-    showSnackbar('Address copied to clipboard', 'success', 8000)
-  } catch (err) {
-    showSnackbar('Failed to copy address', 'error', 8000)
-  }
-}
+// Clipboard.js instance
+let clipboard = null
 
 // Watch for plan ID changes
 watch(() => props.planId, newPlanId => {
@@ -1663,6 +1993,30 @@ onMounted(() => {
 
   if (props.planId) {
     loadPlanDetails()
+  }
+
+  // Initialize Clipboard.js
+  clipboard = new ClipboardJS('.copy-btn', {
+    text: trigger => {
+      return trigger.getAttribute('data-clipboard-text')
+    },
+  })
+
+  clipboard.on('success', e => {
+    showSnackbar('Copied to clipboard!', 'success', 2000, 'mdi-check-circle')
+    e.clearSelection()
+  })
+
+  clipboard.on('error', e => {
+    showSnackbar('Failed to copy', 'error', 2000, 'mdi-alert-circle')
+  })
+})
+
+// Cleanup on unmount
+onUnmounted(() => {
+  if (clipboard) {
+    clipboard.destroy()
+    clipboard = null
   }
 })
 </script>
@@ -1712,5 +2066,56 @@ onMounted(() => {
 
 .circular-icon:hover {
   transform: scale(0.95);
+}
+
+/* Manual Payment Card */
+.manual-payment-card {
+  border: 1px solid rgba(var(--v-theme-primary), 0.2) !important;
+  background: rgba(var(--v-theme-primary), 0.03) !important;
+}
+
+/* Wallet Icons Grid */
+.wallet-icons-grid {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.wallet-icon-card {
+  border-radius: 12px !important;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  flex: 0 1 auto;
+  border: 2px solid rgba(var(--v-theme-on-surface), 0.3) !important;
+}
+
+.wallet-icon-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(var(--v-theme-warning), 0.5) !important;
+  box-shadow: 0 8px 24px rgba(var(--v-theme-warning), 0.3);
+}
+
+.wallet-brand-icon {
+  height: 64px;
+  width: 64px;
+  object-fit: contain;
+}
+
+@media (max-width: 768px) {
+  .wallet-icons-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.5rem;
+  }
+
+  .wallet-icon-card {
+    width: 100%;
+  }
+
+  .wallet-brand-icon {
+    height: 48px;
+    width: 48px;
+  }
 }
 </style>

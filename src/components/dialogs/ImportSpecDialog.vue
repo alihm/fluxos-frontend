@@ -4,12 +4,13 @@
     max-width="600"
     persistent
   >
-    <VCard rounded="xl">
-      <VCardTitle class="bg-primary text-white dialog-title">
-        Import Application Specification
+    <VCard rounded="xl" class="d-flex flex-column import-dialog-card">
+      <VCardTitle class="bg-primary text-white dialog-title flex-shrink-0 d-flex align-center">
+        <VIcon>mdi-file-import</VIcon>
+        <span class="ml-2">Import Application Specification</span>
       </VCardTitle>
 
-      <VCardText class="pa-6">
+      <VCardText class="px-6 pt-4 pb-0 flex-grow-1 d-flex flex-column" style="overflow: hidden; min-height: 0;">
         <!-- File Upload Section (shown when no file loaded) -->
         <div v-if="!loadedSpec">
           <!-- Drop Zone (clickable) -->
@@ -45,14 +46,14 @@
         </div>
 
         <!-- Editor Section (shown when file loaded) -->
-        <div v-else>
+        <div v-else class="d-flex flex-column">
           <VAlert
             type="info"
             variant="tonal"
             density="compact"
             class="mb-3"
           >
-            Review and edit the specification before importing
+            Review and edit before importing
           </VAlert>
           <div class="monaco-editor-wrapper">
             <VueMonacoEditor
@@ -76,7 +77,7 @@
         </div>
       </VCardText>
 
-      <VCardActions class="dialog-actions">
+      <VCardActions class="dialog-actions flex-shrink-0">
         <VSpacer />
         <VBtn
           color="error"
@@ -414,6 +415,10 @@ async function processFile(file) {
 </script>
 
 <style scoped>
+.import-dialog-card {
+  max-height: 90vh;
+}
+
 .drop-zone {
   border: 2px dashed rgba(var(--v-theme-primary), 0.3);
   border-radius: 8px;
@@ -454,16 +459,23 @@ async function processFile(file) {
 }
 
 .monaco-editor-wrapper {
-  height: 450px;
   border: 1px solid rgba(var(--v-border-color), var(--v-border-opacity));
   border-radius: 4px;
   overflow: hidden;
   position: relative;
+  height: 450px;
+  flex-shrink: 0;
 }
 
 .monaco-editor {
   height: 100%;
   width: 100%;
+}
+
+@media (max-width: 959px) {
+  .monaco-editor-wrapper {
+    height: 350px;
+  }
 }
 
 .dialog-title {
@@ -475,8 +487,7 @@ async function processFile(file) {
 }
 
 .dialog-actions {
-  padding-left: 32px !important;
-  padding-right: 32px !important;
+  padding: 13px 32px 13px 32px !important;
 }
 
 .monaco-loader-overlay {
@@ -498,4 +509,5 @@ async function processFile(file) {
   margin-top: 0 !important;
   padding: 0 !important;
 }
+
 </style>

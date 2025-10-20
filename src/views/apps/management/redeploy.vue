@@ -41,12 +41,15 @@ const props = defineProps({
 const router = useRouter()
 
 function redeployApp(appSpecs, isFromActive = false) {
+  console.log('🚀 [REDEPLOY] Starting redeploy with appSpecs:', appSpecs)
+  console.log('🚀 [REDEPLOY] Full structure:', JSON.stringify(appSpecs, null, 2))
+
   const specs = { ...appSpecs }
 
-  if (isFromActive) {
-    specs.name += "XXX"
-    specs.name += Date.now().toString().slice(-5)
-  }
+  // Auto-generate new name: oldName + timestamp (last 5 digits)
+  const originalName = specs.name
+  specs.name = `${originalName}${Date.now().toString().slice(-5)}`
+  console.log('🚀 [REDEPLOY] Generated new name:', specs.name, 'from original:', originalName)
 
   const zelidauth = localStorage.getItem("zelidauth")
   const auth = qs.parse(zelidauth)
@@ -57,9 +60,17 @@ function redeployApp(appSpecs, isFromActive = false) {
     specs.owner = ""
   }
 
-  router.replace({
-    name: "apps-registerapp",
-    params: { appspecs: JSON.stringify(specs) },
-  })
+  console.log('🚀 [REDEPLOY] Processed specs to store:', JSON.stringify(specs, null, 2))
+
+  // Store in sessionStorage temporarily then navigate
+  sessionStorage.setItem('redeploySpecs', JSON.stringify({
+    appspecs: specs,
+    isRedeploy: true
+  }))
+
+  console.log('🚀 [REDEPLOY] Stored in sessionStorage, navigating to apps-register')
+
+  //Navigate to register page
+  router.push({ name: 'apps-register' })
 }
 </script>

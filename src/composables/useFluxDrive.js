@@ -148,7 +148,7 @@ export function useFluxDrive() {
         body: new URLSearchParams({
           zelid: authData.zelid || getZelid(),
           signature: authData.signature || '',
-          loginPhrase: authData.loginPhrase || '',
+          loginPhrase: authData.loginPhrase,
         }),
       })
 
@@ -225,7 +225,7 @@ export function useFluxDrive() {
         body: new URLSearchParams({
           zelid: authData.zelid || zelid,
           signature: authData.signature || '',
-          loginPhrase: authData.loginPhrase || '',
+          loginPhrase: authData.loginPhrase,
         }),
       })
 
@@ -553,7 +553,7 @@ export function useFluxDrive() {
         const requestParams = {
           zelid: parsedAuth.zelid || getZelid(),
           signature: parsedAuth.signature || '',
-          loginPhrase: parsedAuth.loginPhrase || '',
+          loginPhrase: parsedAuth.loginPhrase,
           page: '1',
           size: '100',
         }
@@ -634,7 +634,7 @@ export function useFluxDrive() {
         const requestParams = {
           zelid: parsedAuth.zelid || getZelid(),
           signature: parsedAuth.signature || '',
-          loginPhrase: parsedAuth.loginPhrase || '',
+          loginPhrase: parsedAuth.loginPhrase,
           page: '1',
           size: '1000',  // Large size to get all files
           // No currentFolder parameter - might return all files
@@ -667,7 +667,7 @@ export function useFluxDrive() {
           body: new URLSearchParams({
             zelid: parsedAuth.zelid || getZelid(),
             signature: parsedAuth.signature || '',
-            loginPhrase: parsedAuth.loginPhrase || '',
+            loginPhrase: parsedAuth.loginPhrase,
           }),
         })
 
@@ -688,7 +688,7 @@ export function useFluxDrive() {
                 body: new URLSearchParams({
                   zelid: parsedAuth.zelid || getZelid(),
                   signature: parsedAuth.signature || '',
-                  loginPhrase: parsedAuth.loginPhrase || '',
+                  loginPhrase: parsedAuth.loginPhrase,
                   currentFolder: folder.uuid || folder.name,
                   page: '1',
                   size: '1000',
@@ -732,7 +732,7 @@ export function useFluxDrive() {
             body: new URLSearchParams({
               zelid: parsedAuth.zelid || getZelid(),
               signature: parsedAuth.signature || '',
-              loginPhrase: parsedAuth.loginPhrase || '',
+              loginPhrase: parsedAuth.loginPhrase,
               q: term,
             }),
           })
@@ -773,7 +773,7 @@ export function useFluxDrive() {
         action: 'READ',
         zelid: parsedAuth.zelid || getZelid(),
         signature: parsedAuth.signature || '',
-        loginPhrase: parsedAuth.loginPhrase || '',
+        loginPhrase: parsedAuth.loginPhrase,
         gateway: gateway,
         plan_name: planName,
       }
@@ -826,7 +826,7 @@ export function useFluxDrive() {
         action: 'READ',
         zelid: parsedAuth.zelid || getZelid(),
         signature: parsedAuth.signature || '',
-        loginPhrase: parsedAuth.loginPhrase || '',
+        loginPhrase: parsedAuth.loginPhrase,
         gateway: gateway,
         plan_name: planName,
       }
@@ -983,7 +983,7 @@ export function useFluxDrive() {
       const requestParams = {
         zelid: authData.zelid || getZelid(),
         signature: authData.signature || '',
-        loginPhrase: authData.loginPhrase || '',
+        loginPhrase: authData.loginPhrase,
         page: '1',  // Always fetch from page 1 since we handle pagination on frontend
         size: '100',  // Increase size to see more files
         includeVersions: true,  // Request versions data
@@ -1287,7 +1287,7 @@ export function useFluxDrive() {
         body: new URLSearchParams({
           zelid: authData.zelid || getZelid(),
           signature: authData.signature || '',
-          loginPhrase: authData.loginPhrase || '',
+          loginPhrase: authData.loginPhrase,
           q: searchQuery.value,
         }),
       })
@@ -2459,15 +2459,100 @@ export function useFluxDrive() {
       pptx: 'mdi-file-powerpoint',
       zip: 'mdi-folder-zip',
       mp4: 'mdi-file-video',
+      webm: 'mdi-file-video',
+      ogg: 'mdi-file-video',
+      mov: 'mdi-file-video',
+      avi: 'mdi-file-video',
+      mkv: 'mdi-file-video',
+      m4v: 'mdi-file-video',
+      flv: 'mdi-file-video',
+      wmv: 'mdi-file-video',
       mp3: 'mdi-music',
       txt: 'mdi-file-document-outline',
     }
-    
+
     return icons[type?.toLowerCase()] || 'mdi-file'
   }
 
   const isImageFile = mimetype => {
     return ['image/jpeg', 'image/jpg', 'image/bmp', 'image/png', 'image/webp', 'image/gif'].includes(mimetype)
+  }
+
+  const isTextFile = (mimetype, filename) => {
+    // Check by mimetype first
+    const textMimeTypes = [
+      'text/plain',
+      'text/html',
+      'text/css',
+      'text/javascript',
+      'text/markdown',
+      'text/xml',
+      'application/json',
+      'application/javascript',
+      'application/xml',
+      'application/x-yaml',
+      'application/yaml',
+    ]
+
+    if (mimetype && textMimeTypes.includes(mimetype)) {
+      return true
+    }
+
+    // Check by file extension
+    if (filename) {
+      const extension = filename.split('.').pop().toLowerCase()
+      const textExtensions = [
+        'txt',
+        'md',
+        'json',
+        'js',
+        'jsx',
+        'ts',
+        'tsx',
+        'html',
+        'htm',
+        'css',
+        'scss',
+        'sass',
+        'less',
+        'xml',
+        'yaml',
+        'yml',
+        'toml',
+        'ini',
+        'conf',
+        'sh',
+        'bash',
+        'bat',
+        'cmd',
+        'ps1',
+        'py',
+        'rb',
+        'php',
+        'java',
+        'c',
+        'cpp',
+        'h',
+        'hpp',
+        'go',
+        'rs',
+        'swift',
+        'kt',
+        'scala',
+        'sql',
+        'graphql',
+        'vue',
+        'svelte',
+        'log',
+        'env',
+        'gitignore',
+        'dockerignore',
+      ]
+
+      return textExtensions.includes(extension)
+    }
+
+    return false
   }
 
   const convertSize = size => {
@@ -2619,6 +2704,7 @@ export function useFluxDrive() {
     deleteFile,
     getFileIcon,
     isImageFile,
+    isTextFile,
     convertSize,
     bytesConversion,
     formatDate,

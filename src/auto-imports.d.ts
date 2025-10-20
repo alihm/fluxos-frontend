@@ -9,6 +9,7 @@ declare global {
   const $api: typeof import('./utils/api.js')['$api']
   const COOKIE_MAX_AGE_1_YEAR: typeof import('./utils/constants.js')['COOKIE_MAX_AGE_1_YEAR']
   const EffectScope: typeof import('vue')['EffectScope']
+  const LATEST_SPEC_VERSION: typeof import('./utils/specConverter.js')['LATEST_SPEC_VERSION']
   const acceptHMRUpdate: typeof import('pinia')['acceptHMRUpdate']
   const alphaDashValidator: typeof import('./@core/utils/validators.js')['alphaDashValidator']
   const alphaValidator: typeof import('./@core/utils/validators.js')['alphaValidator']
@@ -33,6 +34,7 @@ declare global {
   const connectMetaMask: typeof import('./utils/walletService.js')['connectMetaMask']
   const controlledComputed: typeof import('@vueuse/core')['controlledComputed']
   const controlledRef: typeof import('@vueuse/core')['controlledRef']
+  const convertToLatestVersion: typeof import('./utils/specConverter.js')['convertToLatestVersion']
   const createApp: typeof import('vue')['createApp']
   const createEmailSSO: typeof import('./utils/firebase.js')['createEmailSSO']
   const createEventHook: typeof import('@vueuse/core')['createEventHook']
@@ -71,12 +73,14 @@ declare global {
   const formatDateToMonthShort: typeof import('./@core/utils/formatters.js')['formatDateToMonthShort']
   const geolocation: typeof import('./utils/geolocation.js')['default']
   const getActivePinia: typeof import('pinia')['getActivePinia']
+  const getAndConvertSpec: typeof import('./utils/specConverter.js')['getAndConvertSpec']
   const getConnectedAccount: typeof import('./utils/walletService.js')['getConnectedAccount']
   const getCurrentInstance: typeof import('vue')['getCurrentInstance']
   const getCurrentScope: typeof import('vue')['getCurrentScope']
   const getDetectedBackendURL: typeof import('./utils/backend.js')['getDetectedBackendURL']
   const getEnterprisePGPKeys: typeof import('./utils/enterpriseCrypto.js')['getEnterprisePGPKeys']
   const getMetaMaskSDK: typeof import('./utils/walletService.js')['getMetaMaskSDK']
+  const getSpecFromPermanentMessages: typeof import('./utils/specConverter.js')['getSpecFromPermanentMessages']
   const getUser: typeof import('./utils/firebase.js')['getUser']
   const h: typeof import('vue')['h']
   const hasWalletConnectSession: typeof import('./utils/walletService.js')['hasWalletConnectSession']
@@ -423,6 +427,7 @@ declare module 'vue' {
     readonly $api: UnwrapRef<typeof import('./utils/api.js')['$api']>
     readonly COOKIE_MAX_AGE_1_YEAR: UnwrapRef<typeof import('./utils/constants.js')['COOKIE_MAX_AGE_1_YEAR']>
     readonly EffectScope: UnwrapRef<typeof import('vue')['EffectScope']>
+    readonly LATEST_SPEC_VERSION: UnwrapRef<typeof import('./utils/specConverter.js')['LATEST_SPEC_VERSION']>
     readonly acceptHMRUpdate: UnwrapRef<typeof import('pinia')['acceptHMRUpdate']>
     readonly alphaDashValidator: UnwrapRef<typeof import('./@core/utils/validators.js')['alphaDashValidator']>
     readonly alphaValidator: UnwrapRef<typeof import('./@core/utils/validators.js')['alphaValidator']>
@@ -447,6 +452,7 @@ declare module 'vue' {
     readonly connectMetaMask: UnwrapRef<typeof import('./utils/walletService.js')['connectMetaMask']>
     readonly controlledComputed: UnwrapRef<typeof import('@vueuse/core')['controlledComputed']>
     readonly controlledRef: UnwrapRef<typeof import('@vueuse/core')['controlledRef']>
+    readonly convertToLatestVersion: UnwrapRef<typeof import('./utils/specConverter.js')['convertToLatestVersion']>
     readonly createApp: UnwrapRef<typeof import('vue')['createApp']>
     readonly createEmailSSO: UnwrapRef<typeof import('./utils/firebase.js')['createEmailSSO']>
     readonly createEventHook: UnwrapRef<typeof import('@vueuse/core')['createEventHook']>
@@ -485,12 +491,14 @@ declare module 'vue' {
     readonly formatDateToMonthShort: UnwrapRef<typeof import('./@core/utils/formatters.js')['formatDateToMonthShort']>
     readonly geolocation: UnwrapRef<typeof import('./utils/geolocation.js')['default']>
     readonly getActivePinia: UnwrapRef<typeof import('pinia')['getActivePinia']>
+    readonly getAndConvertSpec: UnwrapRef<typeof import('./utils/specConverter.js')['getAndConvertSpec']>
     readonly getConnectedAccount: UnwrapRef<typeof import('./utils/walletService.js')['getConnectedAccount']>
     readonly getCurrentInstance: UnwrapRef<typeof import('vue')['getCurrentInstance']>
     readonly getCurrentScope: UnwrapRef<typeof import('vue')['getCurrentScope']>
     readonly getDetectedBackendURL: UnwrapRef<typeof import('./utils/backend.js')['getDetectedBackendURL']>
     readonly getEnterprisePGPKeys: UnwrapRef<typeof import('./utils/enterpriseCrypto.js')['getEnterprisePGPKeys']>
     readonly getMetaMaskSDK: UnwrapRef<typeof import('./utils/walletService.js')['getMetaMaskSDK']>
+    readonly getSpecFromPermanentMessages: UnwrapRef<typeof import('./utils/specConverter.js')['getSpecFromPermanentMessages']>
     readonly getUser: UnwrapRef<typeof import('./utils/firebase.js')['getUser']>
     readonly h: UnwrapRef<typeof import('vue')['h']>
     readonly hasWalletConnectSession: UnwrapRef<typeof import('./utils/walletService.js')['hasWalletConnectSession']>

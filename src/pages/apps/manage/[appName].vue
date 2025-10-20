@@ -792,7 +792,7 @@
           </div>
 
           <div v-else-if="appSpecificationGlobal && tab.value === '10'">
-            <SubscriptionManager :app-spec="appSpecificationGlobal" :new-app="false" :execute-local-command="executeLocalCommand" />
+            <SubscriptionManager :app-spec="appSpecForSubscription" :new-app="false" :execute-local-command="executeLocalCommand" :reset-trigger="subscriptionResetTrigger" @spec-converted="handleSpecConverted" />
           </div>
 
           
@@ -848,6 +848,7 @@
 
 
 <script setup>
+import { ref, computed, watch } from "vue"
 import { useRouter, useRoute } from "vue-router"
 import { eventBus } from "@/utils/eventBus"
 import axios from "axios"
@@ -888,6 +889,7 @@ const changesResult = ref([])
 const route = useRoute()
 const fluxStore = useFluxStore()
 const currentTab = ref("0")
+const subscriptionResetTrigger = ref(Date.now())
 const router = useRouter()
 const appName = ref(useRoute().params.appName)
 const selectedIp = ref('')
@@ -902,6 +904,72 @@ const snackbarMessage = ref("")
 const snackbarColor = ref("success")
 const appSpecification = ref(null)
 const appSpecificationGlobal = ref(null)
+
+// Spec adapter for SubscriptionManager - creates a mutable reactive copy
+// For V3: converts flat format to compose format for UI compatibility
+const appSpecForSubscription = ref(null)
+
+// Watch appSpecificationGlobal and adapt specs as needed
+watch(appSpecificationGlobal, spec => {
+  console.log('[Spec Adapter] Input spec:', spec)
+
+  if (!spec) {
+    console.log('[Spec Adapter] No spec available')
+    appSpecForSubscription.value = null
+
+    return
+  }
+
+  console.log('[Spec Adapter] Spec version:', spec.version)
+  console.log('[Spec Adapter] Has compose?', !!spec.compose)
+
+  if (spec.version === 3) {
+    console.log('[Spec Adapter] Converting V3 flat to compose format')
+    console.log('[Spec Adapter] Original V3 spec:', JSON.parse(JSON.stringify(spec)))
+
+    // Create a deep mutable copy for SubscriptionManager to modify
+    appSpecForSubscription.value = {
+      ...JSON.parse(JSON.stringify(spec)),
+      compose: [{
+        name: spec.name,
+        description: spec.description,
+        repotag: spec.repotag,
+        ports: spec.ports?.map(p => parseInt(p, 10)) || [],
+        containerPorts: spec.containerPorts?.map(p => parseInt(p, 10)) || [],
+        domains: spec.domains || [],
+        environmentParameters: spec.enviromentParameters || [],
+        commands: spec.commands || [],
+        containerData: spec.containerData || '',
+        cpu: spec.cpu || 0.1,
+        ram: spec.ram || 100,
+        hdd: spec.hdd || 1,
+        tiered: false,  // Tiered support intentionally disabled
+      }],
+      _isV3Original: true,
+    }
+
+    console.log('[Spec Adapter] Adapted spec with compose:', JSON.parse(JSON.stringify(appSpecForSubscription.value)))
+  } else {
+    console.log('[Spec Adapter] Returning deep copy of spec (not V3)')
+
+    // Create a deep copy for other versions too so SubscriptionManager can mutate it
+    appSpecForSubscription.value = JSON.parse(JSON.stringify(spec))
+  }
+}, { immediate: true })
+
+// Handle spec conversion from SubscriptionManager
+function handleSpecConverted(convertedSpec) {
+  console.log('[handleSpecConverted] Received converted spec:', convertedSpec)
+  console.log('[handleSpecConverted] Original version:', appSpecificationGlobal.value?.version)
+  console.log('[handleSpecConverted] New version:', convertedSpec.version)
+
+  // Update the global spec with the converted version
+  appSpecificationGlobal.value = convertedSpec
+
+  // The watch will automatically update appSpecForSubscription
+  console.log('[handleSpecConverted] App specification updated to V' + convertedSpec.version)
+}
+
 const applicationManagementAndStatus = ref([])
 const currentBlockHeight = ref(-1)
 const activeTabLocalIndexSpec = ref(0)
@@ -1075,9 +1143,20 @@ watchEffect(() => {
   }
 })
 
-watch(currentTab, newVal => {
+watch(currentTab, async (newVal, oldVal) => {
   if (newVal === '9') {
     runningInstancesKey.value++
+  }
+
+  // Update reset trigger when switching to Subscription tab
+  if (newVal === '10') {
+    subscriptionResetTrigger.value = Date.now()
+  }
+
+  // Reload spec when leaving Subscription tab to reset any live changes
+  if (oldVal === '10' && newVal !== '10') {
+    console.log('🔄 Left subscription tab - reloading original spec from API')
+    await getGlobalApplicationSpecifics(true) // Reload from API silently
   }
 })
 
@@ -1231,6 +1310,7 @@ async function executeLocalCommand(
   postObject = null,
   axiosConfigAux = null,
   skipCache = false,
+  suppressErrorAlert = false,
 ) {
   try {
     const zelidauth = localStorage.getItem("zelidauth")
@@ -1267,7 +1347,9 @@ async function executeLocalCommand(
       ? await axios.post(queryUrl, postObject, axiosConfig)
       : await axios.get(queryUrl, axiosConfig)
   } catch (error) {
-    apiError.value = true
+    if (!suppressErrorAlert) {
+      apiError.value = true
+    }
     console.error("executeLocalCommand error:", error)
     throw error
   }

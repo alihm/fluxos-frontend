@@ -26,6 +26,11 @@ const props = defineProps({
     required: false,
     default: false,
   },
+  menuIndex: {
+    type: Number,
+    required: false,
+    default: -1,
+  },
 })
 
 defineOptions({
@@ -36,6 +41,28 @@ const route = useRoute()
 const router = useRouter()
 const configStore = useLayoutConfigStore()
 const isGroupActive = ref(false)
+
+// Inject the onMenuOpen handler from parent
+const onMenuOpen = inject('onMenuOpen', null)
+const popperRef = ref(null)
+
+// Notify parent when this menu opens
+const handleMenuOpen = () => {
+  if (onMenuOpen && props.menuIndex !== -1) {
+    onMenuOpen(props.menuIndex)
+  }
+}
+
+// Expose method to close this menu
+const hideContentImmediately = () => {
+  if (popperRef.value && popperRef.value.hideContentImmediately) {
+    popperRef.value.hideContentImmediately()
+  }
+}
+
+defineExpose({
+  hideContentImmediately,
+})
 
 /*Watch for route changes, more specifically route path. Do note that this won't trigger if route's query is updated.
 
@@ -51,6 +78,7 @@ watch(() => route.path, () => {
 <template>
   <HorizontalNavPopper
     v-if="canViewNavMenuGroup(item)"
+    ref="popperRef"
     :is-rtl="configStore.isAppRTL"
     class="nav-group"
     tag="li"
@@ -62,6 +90,7 @@ watch(() => route.path, () => {
       'disabled': item.disable,
     }]"
     :popper-inline-end="childrenAtEnd"
+    @mouseenter="handleMenuOpen"
   >
     <div class="nav-group-label">
       <Component

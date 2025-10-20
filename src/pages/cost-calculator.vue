@@ -114,20 +114,34 @@
                     variant="tonal"
                     size="small"
                     rounded
-                    class="mr-2"
+                    style="width: 85px; justify-content: center;"
                   >
                     {{ formData.cpu }} vCores
                   </VChip>
                 </div>
-                <VSlider
-                  v-model="formData.cpu"
-                  :min="0.1"
-                  :max="15.0"
-                  :step="0.1"
-                  color="primary"
-                  :thumb-label="false"
-                  @update:model-value="calculateCost"
-                />
+                <div class="d-flex align-center gap-3">
+                  <VSlider
+                    v-model="formData.cpu"
+                    :min="0.1"
+                    :max="15.0"
+                    :step="0.1"
+                    color="primary"
+                    :thumb-label="false"
+                    class="flex-grow-1"
+                    @update:model-value="calculateCost"
+                  />
+                  <VTextField
+                    v-model.number="formData.cpu"
+                    type="number"
+                    :min="0.1"
+                    :max="15.0"
+                    :step="0.1"
+                    density="compact"
+                    hide-details
+                    style="max-width: 85px;"
+                    @update:model-value="calculateCost"
+                  />
+                </div>
               </div>
 
               <!-- Memory -->
@@ -144,20 +158,34 @@
                     variant="tonal"
                     size="small"
                     rounded
-                    class="mr-2"
+                    style="width: 85px; justify-content: center;"
                   >
                     {{ formData.memory }} MB
                   </VChip>
                 </div>
-                <VSlider
-                  v-model="formData.memory"
-                  :min="100"
-                  :max="59000"
-                  :step="100"
-                  color="primary"
-                  :thumb-label="false"
-                  @update:model-value="calculateCost"
-                />
+                <div class="d-flex align-center gap-3">
+                  <VSlider
+                    v-model="formData.memory"
+                    :min="100"
+                    :max="59000"
+                    :step="100"
+                    color="primary"
+                    :thumb-label="false"
+                    class="flex-grow-1"
+                    @update:model-value="calculateCost"
+                  />
+                  <VTextField
+                    v-model.number="formData.memory"
+                    type="number"
+                    :min="100"
+                    :max="59000"
+                    :step="100"
+                    density="compact"
+                    hide-details
+                    style="max-width: 85px;"
+                    @update:model-value="calculateCost"
+                  />
+                </div>
               </div>
 
               <!-- Storage -->
@@ -174,20 +202,34 @@
                     variant="tonal"
                     size="small"
                     rounded
-                    class="mr-2"
+                    style="width: 85px; justify-content: center;"
                   >
                     {{ formData.storage }} GB
                   </VChip>
                 </div>
-                <VSlider
-                  v-model="formData.storage"
-                  :min="1"
-                  :max="820"
-                  :step="1"
-                  color="primary"
-                  :thumb-label="false"
-                  @update:model-value="calculateCost"
-                />
+                <div class="d-flex align-center gap-3">
+                  <VSlider
+                    v-model="formData.storage"
+                    :min="1"
+                    :max="820"
+                    :step="1"
+                    color="primary"
+                    :thumb-label="false"
+                    class="flex-grow-1"
+                    @update:model-value="calculateCost"
+                  />
+                  <VTextField
+                    v-model.number="formData.storage"
+                    type="number"
+                    :min="1"
+                    :max="820"
+                    :step="1"
+                    density="compact"
+                    hide-details
+                    style="max-width: 85px;"
+                    @update:model-value="calculateCost"
+                  />
+                </div>
               </div>
             </div>
 

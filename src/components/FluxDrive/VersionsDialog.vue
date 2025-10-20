@@ -310,6 +310,7 @@
 import { ref, computed } from 'vue'
 import { useFluxDrive } from '@/composables/useFluxDrive'
 import { useSnackbar } from '@/composables/useSnackbar'
+import ClipboardJS from 'clipboard'
 
 const props = defineProps({
   modelValue: {
@@ -616,40 +617,38 @@ const downloadVersion = async version => {
   }
 }
 
-const copyFileLink = async hash => {
+const copyFileLink = hash => {
   const link = `https://ipfs.runonflux.io/ipfs/${hash}`
   console.log('📋 Copying link to clipboard:', link)
 
   try {
-    await navigator.clipboard.writeText(link)
-    console.log('✅ Link copied successfully')
-    showMessage('Link copied to clipboard', 'success')
-  } catch (error) {
-    console.error('Clipboard API failed, trying fallback:', error)
-    try {
-      // Fallback: try to create a temporary text area for older browsers
-      const textArea = document.createElement('textarea')
-      textArea.value = link
-      textArea.style.position = 'fixed'
-      textArea.style.left = '-999999px'
-      textArea.style.top = '-999999px'
-      document.body.appendChild(textArea)
-      textArea.focus()
-      textArea.select()
-      const successful = document.execCommand('copy')
-      document.body.removeChild(textArea)
+    // Create temporary button for ClipboardJS
+    const button = document.createElement('button')
+    button.setAttribute('data-clipboard-text', link)
+    document.body.appendChild(button)
 
-      if (successful) {
-        console.log('✅ Link copied via fallback method')
-        showMessage('Link copied to clipboard', 'success')
-      } else {
-        console.error('❌ Fallback copy failed')
-        showMessage('Failed to copy link to clipboard', 'error')
-      }
-    } catch (fallbackError) {
-      console.error('❌ All copy methods failed:', fallbackError)
+    // Initialize ClipboardJS
+    const clipboard = new ClipboardJS(button)
+
+    clipboard.on('success', () => {
+      console.log('✅ Link copied successfully')
+      showMessage('Link copied to clipboard', 'success')
+      clipboard.destroy()
+      document.body.removeChild(button)
+    })
+
+    clipboard.on('error', err => {
+      console.error('❌ ClipboardJS error:', err)
       showMessage('Failed to copy link to clipboard', 'error')
-    }
+      clipboard.destroy()
+      document.body.removeChild(button)
+    })
+
+    // Trigger the click programmatically
+    button.click()
+  } catch (error) {
+    console.error('❌ Copy link error:', error)
+    showMessage('Failed to copy link to clipboard', 'error')
   }
 }
 </script>

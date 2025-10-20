@@ -16,6 +16,7 @@ export default [
         icon: { icon: 'mdi-fingerprint', size: 20 },
         privilege: ['admin', 'fluxteam'],
       },
+
       // {
       //   title: 'menu.administration.dockerEvents',
       //   to: 'administration-docker-events',

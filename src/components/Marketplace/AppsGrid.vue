@@ -93,7 +93,7 @@
 
       <div v-else class="apps-container">
         <div class="apps-content">
-          <Transition name="slide">
+          <Transition :name="slideDirection === 'next' ? 'slide-next' : 'slide-prev'">
             <div :key="currentPage" class="apps-grid" :class="gridClass">
               <AppCard
                 v-for="app in paginatedApps"
@@ -201,6 +201,7 @@ const search = ref(props.searchQuery)
 const category = ref(props.selectedCategory)
 const sort = ref(props.sortBy)
 const currentPage = ref(1)
+const slideDirection = ref('next') // Track animation direction: 'next' or 'prev'
 
 // Sort options (matching FluxCloud)
 const sortOptions = [
@@ -315,6 +316,8 @@ const updateSort = value => {
 
 const changePage = newPage => {
   if (newPage >= 1 && newPage <= totalPages.value) {
+    // Determine slide direction based on page navigation
+    slideDirection.value = newPage > currentPage.value ? 'next' : 'prev'
     currentPage.value = newPage
   }
 }
@@ -484,7 +487,9 @@ watch(() => props.sortBy, val => { sort.value = val })
 }
 
 /* Modern slide transition with blur and scale effects */
-.slide-enter-active {
+/* Slide Next (forward) - enters from right, leaves to left */
+.slide-next-enter-active,
+.slide-next-leave-active {
   transition: all 800ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
   position: absolute;
   top: 0;
@@ -493,34 +498,50 @@ watch(() => props.sortBy, val => { sort.value = val })
   width: 100%;
 }
 
-.slide-leave-active {
-  transition: all 800ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  width: 100%;
-}
-
-.slide-enter-from {
+.slide-next-enter-from {
   transform: translateX(100%) scale(0.95);
   opacity: 0;
   filter: blur(4px);
 }
 
-.slide-leave-to {
+.slide-next-leave-to {
   transform: translateX(-100%) scale(0.95);
   opacity: 0;
   filter: blur(4px);
 }
 
-.slide-enter-to {
+.slide-next-enter-to,
+.slide-next-leave-from {
   transform: translateX(0) scale(1);
   opacity: 1;
   filter: blur(0px);
 }
 
-.slide-leave-from {
+/* Slide Prev (backward) - enters from left, leaves to right */
+.slide-prev-enter-active,
+.slide-prev-leave-active {
+  transition: all 800ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
+}
+
+.slide-prev-enter-from {
+  transform: translateX(-100%) scale(0.95);
+  opacity: 0;
+  filter: blur(4px);
+}
+
+.slide-prev-leave-to {
+  transform: translateX(100%) scale(0.95);
+  opacity: 0;
+  filter: blur(4px);
+}
+
+.slide-prev-enter-to,
+.slide-prev-leave-from {
   transform: translateX(0) scale(1);
   opacity: 1;
   filter: blur(0px);

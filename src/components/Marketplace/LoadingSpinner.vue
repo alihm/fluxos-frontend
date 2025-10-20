@@ -103,11 +103,18 @@ const props = defineProps({
   -webkit-text-fill-color: transparent;
   font-weight: 700;
   animation: pulse 2s ease-in-out infinite;
+  white-space: nowrap;
+  text-align: center;
+}
+
+.loading-container h2 span {
+  white-space: nowrap;
 }
 
 .loading-container p {
   opacity: 0.85;
   font-size: 1.125rem;
+  text-align: center;
 }
 
 @keyframes pulse {

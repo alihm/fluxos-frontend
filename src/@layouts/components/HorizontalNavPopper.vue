@@ -111,15 +111,39 @@ NOTE: This issue starts from third level children (Top Level > Sub item > Sub it
 })
 
 const isContentShown = ref(false)
+let hideTimeout = null
 
 const showContent = () => {
+  // Clear any pending hide timeout
+  if (hideTimeout) {
+    clearTimeout(hideTimeout)
+    hideTimeout = null
+  }
   isContentShown.value = true
   updatePopper()
 }
 
 const hideContent = () => {
+  // Add a delay before hiding to allow mouse to move to content
+  hideTimeout = setTimeout(() => {
+    isContentShown.value = false
+    hideTimeout = null
+  }, 300)
+}
+
+const hideContentImmediately = () => {
+  // Clear any pending timeout and hide immediately
+  if (hideTimeout) {
+    clearTimeout(hideTimeout)
+    hideTimeout = null
+  }
   isContentShown.value = false
 }
+
+// Expose hideContentImmediately for parent components
+defineExpose({
+  hideContentImmediately,
+})
 
 onMounted(updatePopper)
 

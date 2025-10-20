@@ -86,8 +86,8 @@ const handleInstall = () => {
   padding: 24px;
   background: rgba(var(--v-theme-surface), 1);
   border-radius: 16px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-top: 3px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(var(--v-theme-on-surface), 0.12);
+  border-top: 3px solid rgba(var(--v-theme-on-surface), 0.12);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
   overflow: visible;
@@ -126,7 +126,7 @@ const handleInstall = () => {
 
 .card-header {
   padding-bottom: 16px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  border-bottom: 1px solid rgba(var(--v-theme-on-surface), 0.12);
   padding-right: 100px; /* Space for price badge */
 }
 
@@ -134,7 +134,7 @@ const handleInstall = () => {
   font-size: 1.25rem;
   font-weight: 600;
   margin: 0;
-  color: rgba(255, 255, 255, 0.95);
+  color: rgb(var(--v-theme-on-surface));
 }
 
 .price-amount {
@@ -148,7 +148,7 @@ const handleInstall = () => {
   font-size: 0.7rem;
   font-weight: 500;
   opacity: 0.7;
-  color: rgba(255, 255, 255, 0.8);
+  color: rgb(var(--v-theme-on-surface));
 }
 
 .config-resources {
@@ -164,13 +164,13 @@ const handleInstall = () => {
   align-items: center;
   gap: 12px;
   padding: 8px 12px;
-  background: rgba(255, 255, 255, 0.03);
+  background: rgba(var(--v-theme-on-surface), 0.05);
   border-radius: 10px;
   transition: all 0.2s ease;
 }
 
 .resource-row:hover {
-  background: rgba(255, 255, 255, 0.06);
+  background: rgba(var(--v-theme-on-surface), 0.08);
   transform: translateX(4px);
 }
 
@@ -197,13 +197,14 @@ const handleInstall = () => {
   opacity: 0.7;
   text-transform: uppercase;
   letter-spacing: 0.5px;
+  color: rgb(var(--v-theme-on-surface));
 }
 
 .resource-value {
   font-size: 0.95rem;
   font-weight: 600;
   text-align: right;
-  color: rgba(255, 255, 255, 0.95);
+  color: rgb(var(--v-theme-on-surface));
 }
 
 .install-btn {

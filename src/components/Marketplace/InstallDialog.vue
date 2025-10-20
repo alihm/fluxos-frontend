@@ -83,6 +83,24 @@
           <VWindowItem v-if="!isWordPress" :value="0">
             <div class="step-container">
 
+              <!-- Terms Acceptance Alert -->
+              <VAlert
+                v-if="!termsAccepted"
+                type="warning"
+                variant="tonal"
+                prominent
+                border="start"
+                class="mb-4"
+              >
+                <template #prepend>
+                  <VIcon icon="mdi-alert-circle" size="32" />
+                </template>
+                <div class="d-flex flex-column">
+                  <span class="text-subtitle-1 font-weight-medium mb-1">Terms Acceptance Required</span>
+                  <span class="text-body-2">Please scroll down and accept the Terms of Use to continue with the installation.</span>
+                </div>
+              </VAlert>
+
               <!-- Selected Configuration Display (for games) -->
               <div v-if="selectedConfig && appIcon && !imageError" class="selected-config-logo-container">
                 <img :src="appIcon" :alt="app.displayName || app.name" class="selected-config-logo" @error="imageError = true" />
@@ -106,12 +124,12 @@
                       <span class="hardware-label">CPU Cores</span>
                       <div class="hardware-control">
                         <VBtn
+                          v-if="!isCpuLocked"
                           icon="mdi-minus"
                           size="x-small"
                           variant="tonal"
                           color="success"
                           class="control-btn"
-                          :disabled="isCpuLocked"
                           @click="config.cpu = Math.max((app.compose?.[0]?.cpu || 1), (parseFloat(config.cpu) - 0.1)).toFixed(1)"
                         />
                         <div class="hardware-value-display">
@@ -124,12 +142,12 @@
                           />
                         </div>
                         <VBtn
+                          v-if="!isCpuLocked"
                           icon="mdi-plus"
                           size="x-small"
                           variant="tonal"
                           color="success"
                           class="control-btn"
-                          :disabled="isCpuLocked"
                           @click="config.cpu = (parseFloat(config.cpu) + 0.1).toFixed(1)"
                         />
                       </div>
@@ -145,12 +163,12 @@
                       <span class="hardware-label">Memory (MB)</span>
                       <div class="hardware-control">
                         <VBtn
+                          v-if="!isRamLocked"
                           icon="mdi-minus"
                           size="x-small"
                           variant="tonal"
                           color="info"
                           class="control-btn"
-                          :disabled="isRamLocked"
                           @click="config.ram = Math.max((app.compose?.[0]?.ram || 512), config.ram - 100)"
                         />
                         <div class="hardware-value-display">
@@ -163,12 +181,12 @@
                           />
                         </div>
                         <VBtn
+                          v-if="!isRamLocked"
                           icon="mdi-plus"
                           size="x-small"
                           variant="tonal"
                           color="info"
                           class="control-btn"
-                          :disabled="isRamLocked"
                           @click="config.ram = parseInt(config.ram) + 100"
                         />
                       </div>
@@ -184,12 +202,12 @@
                       <span class="hardware-label">Storage (GB)</span>
                       <div class="hardware-control">
                         <VBtn
+                          v-if="!isStorageLocked"
                           icon="mdi-minus"
                           size="x-small"
                           variant="tonal"
                           color="warning"
                           class="control-btn"
-                          :disabled="isStorageLocked"
                           @click="config.storage = Math.max((app.compose?.[0]?.hdd || 1), config.storage - 1)"
                         />
                         <div class="hardware-value-display">
@@ -202,12 +220,12 @@
                           />
                         </div>
                         <VBtn
+                          v-if="!isStorageLocked"
                           icon="mdi-plus"
                           size="x-small"
                           variant="tonal"
                           color="warning"
                           class="control-btn"
-                          :disabled="isStorageLocked"
                           @click="config.storage = parseInt(config.storage) + 1"
                         />
                       </div>
@@ -1079,7 +1097,7 @@
                           <span v-if="!paymentConfirmed">
                             Please complete the payment in your {{ paymentMethod === 'flux' ? 'ZelCore' : 'SSP' }} wallet.<br>
                             Payment will be confirmed automatically.<br>
-                            <span class="text-warning">This can take up to 15 minutes.</span>
+                            <span class="text-warning">This can take up to 45 minutes.</span>
                           </span>
                           <span v-else-if="redirectCountdown > 0" class="text-success">
                             Advancing to deployment summary in {{ redirectCountdown }} seconds...
@@ -1114,8 +1132,29 @@
                       <h5>{{ paymentMethod === 'stripe' ? 'Stripe' : 'PayPal' }} Payment</h5>
                     </div>
 
-                    <!-- Payment Details (hidden during monitoring) -->
-                    <div v-if="!paymentProcessing" class="payment-details-content">
+                    <!-- Maintenance UI (shown when payment bridge has errors) -->
+                    <div v-if="paymentBridgeMaintenance" class="maintenance-content">
+                      <div class="d-flex flex-column align-center justify-center pa-6">
+                        <VIcon icon="mdi-wrench" size="64" color="warning" class="mb-4" />
+                        <div class="text-h6 mb-2">Payment Service Maintenance</div>
+                        <div class="text-body-2 text-center mb-4 text-medium-emphasis">
+                          The payment service is currently under maintenance.<br>
+                          Please try again later or use crypto payment options (ZelCore or SSP).
+                        </div>
+                        <VBtn
+                          variant="flat"
+                          color="primary"
+                          @click="paymentBridgeMaintenance = false"
+                          class="text-none"
+                        >
+                          <VIcon start icon="mdi-refresh" size="24" />
+                          Try Again
+                        </VBtn>
+                      </div>
+                    </div>
+
+                    <!-- Payment Details (hidden during monitoring or maintenance) -->
+                    <div v-else-if="!paymentProcessing" class="payment-details-content">
                       <VCard class="mb-3" variant="tonal" color="primary">
                         <VCardText class="d-flex align-center pa-3">
                           <VIcon :icon="paymentMethod === 'stripe' ? 'mdi-shield-check' : 'mdi-security'" size="20" class="mr-2" />
@@ -1152,7 +1191,7 @@
                         <div class="text-body-2 text-center mb-4 text-medium-emphasis">
                           Complete the payment in the {{ paymentMethod === 'stripe' ? 'Stripe' : 'PayPal' }} checkout window.<br>
                           Payment will be confirmed automatically.<br>
-                          <span class="text-warning">This can take up to 15 minutes.</span>
+                          <span class="text-warning">This can take up to 45 minutes.</span>
                         </div>
                         <VBtn
                           variant="outlined"
@@ -1274,6 +1313,20 @@
                       {{ subscriptionEndDate }}
                     </VChip>
                   </div>
+                </div>
+
+                <VDivider class="mt-4 mb-2" />
+
+                <div class="d-flex justify-center mb-3">
+                  <VBtn
+                    color="primary"
+                    variant="flat"
+                    size="default"
+                    :to="`/apps/manage/${app.name}`"
+                  >
+                    <VIcon start icon="mdi-cog" size="20" />
+                    Manage Application
+                  </VBtn>
                 </div>
 
               </div>
@@ -2108,8 +2161,8 @@ const fetchPricingFromAPI = async () => {
         tiered: false,
       }]
     } else {
-      // Regular apps/games: Use calculated price and first component
-      monthlyPrice = parseFloat(estimatedCost.value) || 0
+      // Regular apps/games: Use API price from app spec
+      monthlyPrice = props.app.price || 0
       appSpecCompose = [{
         ...composeArray[0],
         cpu: parseFloat(config.value.cpu),
@@ -2138,36 +2191,28 @@ const fetchPricingFromAPI = async () => {
     const response = await AppsService.appPriceUSDandFlux(appSpec)
 
     if (response.data && response.data.status === 'success') {
-      // Store monthly prices from API - we'll multiply by months when displaying
-      // For WordPress and Games with fixed config prices: use fixed USD price, calculate Flux manually
-      // For regular apps: use API's calculated USD and Flux prices
-      const hasFixedPrice = isWordPress.value || (props.selectedConfig && props.selectedConfig.price)
-      const fixedUsdPrice = isWordPress.value ? (props.app.price || 0) : (props.selectedConfig?.price || 0)
+      // Get the API's USD and FLUX prices (based on the resources sent)
+      const apiCalculatedUsd = response.data.data.usd || 0
+      const apiFlux = response.data.data.flux || 0
 
-      if (hasFixedPrice) {
-        // For fixed-price apps, calculate Flux using multiplier (matching FluxCloud)
-        // FluxCloud: multiplier = fixedUsd / apiUsd; flux = apiFlux * multiplier
-        const apiCalculatedUsd = response.data.data.usd || 0
-        const apiFlux = response.data.data.flux || 0
+      // Calculate the ratio/multiplier from API (how much FLUX per 1 USD)
+      const fluxPerUsd = apiCalculatedUsd > 0 ? (apiFlux / apiCalculatedUsd) : 0
 
-        // Calculate multiplier to adjust API's Flux to match our fixed USD price
-        const multiplier = apiCalculatedUsd > 0 ? (fixedUsdPrice / apiCalculatedUsd) : 0
+      // Determine the correct USD price to use:
+      // 1. For games with selectedConfig, use the config's price
+      // 2. For WordPress or regular apps, use the app's price
+      let appUsdPrice = props.app.price || 0
+      if (props.selectedConfig && props.selectedConfig.price) {
+        appUsdPrice = props.selectedConfig.price
+      }
 
-        // Apply multiplier to API's Flux price
-        const correctedFlux = apiFlux * multiplier
+      // Calculate FLUX price using the API's ratio and the app's USD price
+      const calculatedFlux = appUsdPrice * fluxPerUsd
 
-        apiPricing.value = {
-          usd: fixedUsdPrice,
-          flux: correctedFlux,
-          fluxDiscount: response.data.data.fluxDiscount || 0,
-        }
-      } else {
-        // For dynamic-price apps, use API's calculated values
-        apiPricing.value = {
-          usd: response.data.data.usd || 0,
-          flux: response.data.data.flux || 0,
-          fluxDiscount: response.data.data.fluxDiscount || 0,
-        }
+      apiPricing.value = {
+        usd: appUsdPrice,
+        flux: calculatedFlux,
+        fluxDiscount: response.data.data.fluxDiscount || 0,
       }
     } else {
       console.error('API pricing request failed:', response.data)
@@ -2250,21 +2295,26 @@ const calculateMarketplacePrice = computed(() => {
   const appRam = baseCompose.ram || 1000
   const appHdd = baseCompose.hdd || 10
 
-  // Get base price (monthly price for default configuration)
-  const basePrice = props.app.price || 10
-
-  // Calculate base proportions (how much each resource contributes to price)
-  // In FluxCloud, these come from network pricing, but we'll calculate them
-  const totalResourceUnits = appCores + (appRam / 1000) + (appHdd / 10)
-  const baseCores = appCores / totalResourceUnits
-  const baseRam = (appRam / 1000) / totalResourceUnits
-  const baseHdd = (appHdd / 10) / totalResourceUnits
-
   // Get current user-selected resources
   const currentCores = config.value.cpu || appCores
   const currentRam = config.value.ram || appRam
   const currentHdd = config.value.storage || appHdd
   const instances = config.value.instances || 3
+
+  // If using default resources and 3 instances, return API price directly (price for 1 month)
+  const usingDefaults = currentCores === appCores && currentRam === appRam && currentHdd === appHdd && instances === 3
+  if (usingDefaults) {
+    return props.app.price || 0
+  }
+
+  // Get base price (monthly price for default configuration)
+  const basePrice = props.app.price || 10
+
+  // Calculate base proportions (how much each resource contributes to price)
+  const totalResourceUnits = appCores + (appRam / 1000) + (appHdd / 10)
+  const baseCores = appCores / totalResourceUnits
+  const baseRam = (appRam / 1000) / totalResourceUnits
+  const baseHdd = (appHdd / 10) / totalResourceUnits
 
   // EXACT FluxCloud formula from app_price.dart
   // var newCoresPrice = app.baseCores * (cores / app.cores) * app.price;
@@ -2290,8 +2340,8 @@ const monthlyPrice = computed(() => {
     return props.selectedConfig.price
   }
 
-  // Otherwise calculate based on hardware
-  return calculateMarketplacePrice.value
+  // Otherwise use the app's API price directly (all apps have pricing from API)
+  return props.app.price || 0
 })
 
 // USD pricing - NO DISCOUNTS for fiat payments
@@ -2346,6 +2396,7 @@ const paymentHash = ref('') // Will be generated after signing/registration
 const paymentMonitoringInterval = ref(null)
 const paymentMonitoringTimeout = ref(null)
 const paymentConfirmed = ref(false)
+const paymentBridgeMaintenance = ref(false)
 const showLoginDialog = ref(false)
 const popupBlockedDialog = ref(false)
 const blockedPaymentUrl = ref('')
@@ -2712,6 +2763,7 @@ const handlePreviousStep = () => {
         // Going back from Deploy to Payment - reset payment state
         paymentHash.value = ''
         paymentConfirmed.value = false
+        paymentBridgeMaintenance.value = false
       }
 
       currentStep.value = currentStep.value - 1
@@ -2823,6 +2875,7 @@ const resetSigningState = () => {
   // Reset payment state
   paymentProcessing.value = false
   paymentConfirmed.value = false
+  paymentBridgeMaintenance.value = false
 }
 
 // FluxOS-compatible signing methods using existing signing infrastructure
@@ -3703,6 +3756,7 @@ const resetDialog = () => {
   signatureError.value = ''
   paymentProcessing.value = false
   paymentConfirmed.value = false
+  paymentBridgeMaintenance.value = false
   paymentMethod.value = isWalletUser.value ? 'flux' : 'stripe'
   showLoginDialog.value = false // Reset login dialog state
 
@@ -3892,7 +3946,7 @@ const processStripePayment = async () => {
         hash: paymentHash.value,
         price: parseFloat(estimatedCost.value),
         productName: props.app.name,
-        success_url: `${window.location.origin}/marketplace?payment=success`,
+        success_url: `${window.location.origin}/successcheckout`,
         cancel_url: `${window.location.origin}/marketplace`,
         kpi: {
           origin: 'FluxOS',
@@ -3914,8 +3968,8 @@ const processStripePayment = async () => {
     // Start monitoring before opening window
     await startPaymentMonitoring()
 
-    // Open Stripe checkout in new tab
-    const win = window.open(checkoutURL.data.data, '_blank')
+    // Open Stripe checkout in popup window
+    const win = window.open(checkoutURL.data.data, '_blank', 'width=600,height=800,resizable=yes,scrollbars=yes')
 
     if (!win || win.closed || typeof win.closed === 'undefined') {
       // Popup blocked - show dialog
@@ -3924,15 +3978,23 @@ const processStripePayment = async () => {
       blockedPaymentType.value = 'Stripe'
     } else {
       win.focus()
-      showSnackbar('Stripe checkout opened. Complete payment in the new tab.', 'info', 5000)
+      showSnackbar('Stripe checkout opened. Complete payment in the popup window.', 'info', 5000)
     }
   } catch (error) {
     console.error('Stripe payment failed:', error)
-    console.error('Stripe error response data:', error.response?.data)
-    console.error('Stripe error status:', error.response?.status)
-    paymentProcessing.value = false
-    const errorMsg = error.response?.data?.message || error.response?.data?.data || error.message || 'Failed to initialize Stripe payment'
-    showSnackbar(errorMsg, 'error')
+
+    // Check if it's a payment bridge error (HTTP error, network error, or timeout)
+    if (error.response?.status >= 400 || error.code === 'ERR_NETWORK' || error.code === 'ECONNABORTED') {
+      // Stop monitoring and show maintenance UI
+      cancelPaymentMonitoring()
+      paymentBridgeMaintenance.value = true
+      paymentProcessing.value = false
+      console.log('🔧 Payment bridge maintenance mode activated')
+    } else {
+      paymentProcessing.value = false
+      const errorMsg = error.response?.data?.message || error.response?.data?.data || error.message || 'Failed to initialize Stripe payment'
+      showSnackbar(errorMsg, 'error')
+    }
   }
 }
 
@@ -3971,7 +4033,7 @@ const processPayPalPayment = async () => {
         hash: paymentHash.value,
         price: parseFloat(estimatedCost.value),
         productName: props.app.name,
-        return_url: `${window.location.origin}/marketplace?payment=success`,
+        return_url: `${window.location.origin}/successcheckout`,
         cancel_url: `${window.location.origin}/marketplace`,
         kpi: {
           origin: 'FluxOS',
@@ -3980,7 +4042,6 @@ const processPayPalPayment = async () => {
         },
       },
     }
-
 
     const checkoutURL = await axios.post(`${paymentBridge}/api/v1/paypal/checkout/create`, data)
 
@@ -3993,8 +4054,8 @@ const processPayPalPayment = async () => {
     // Start monitoring before opening window
     await startPaymentMonitoring()
 
-    // Open PayPal checkout in new tab
-    const win = window.open(checkoutURL.data.data, '_blank')
+    // Open PayPal checkout in popup window
+    const win = window.open(checkoutURL.data.data, '_blank', 'width=600,height=800,resizable=yes,scrollbars=yes')
 
     if (!win || win.closed || typeof win.closed === 'undefined') {
       // Popup blocked - show dialog
@@ -4003,15 +4064,23 @@ const processPayPalPayment = async () => {
       blockedPaymentType.value = 'PayPal'
     } else {
       win.focus()
-      showSnackbar('PayPal checkout opened. Complete payment in the new tab.', 'info', 5000)
+      showSnackbar('PayPal checkout opened. Complete payment in the popup window.', 'info', 5000)
     }
   } catch (error) {
     console.error('PayPal payment failed:', error)
-    console.error('PayPal error response data:', error.response?.data)
-    console.error('PayPal error status:', error.response?.status)
-    paymentProcessing.value = false
-    const errorMsg = error.response?.data?.message || error.response?.data?.data || error.message || 'Failed to initialize PayPal payment'
-    showSnackbar(errorMsg, 'error')
+
+    // Check if it's a payment bridge error (HTTP error, network error, or timeout)
+    if (error.response?.status >= 400 || error.code === 'ERR_NETWORK' || error.code === 'ECONNABORTED') {
+      // Stop monitoring and show maintenance UI
+      cancelPaymentMonitoring()
+      paymentBridgeMaintenance.value = true
+      paymentProcessing.value = false
+      console.log('🔧 Payment bridge maintenance mode activated')
+    } else {
+      paymentProcessing.value = false
+      const errorMsg = error.response?.data?.message || error.response?.data?.data || error.message || 'Failed to initialize PayPal payment'
+      showSnackbar(errorMsg, 'error')
+    }
   }
 }
 
@@ -4071,6 +4140,7 @@ const cancelPaymentMonitoring = () => {
   // Reset payment state
   paymentProcessing.value = false
   paymentConfirmed.value = false
+  paymentBridgeMaintenance.value = false
 
   showSnackbar('Payment monitoring cancelled', 'info')
 }
@@ -5542,6 +5612,28 @@ watch(() => props.modelValue, newValue => {
     0 2px 8px rgba(var(--v-theme-primary), 0.2) !important;
 }
 
+/* Selected Configuration Logo */
+.selected-config-logo-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 24px;
+  width: 100%;
+  padding: 24px;
+  background: rgba(var(--v-theme-on-surface), 0.05);
+  border-radius: 16px;
+  border: 1px solid rgba(var(--v-theme-on-surface), 0.12);
+}
+
+.selected-config-logo {
+  width: 300px;
+  height: auto;
+  max-height: 180px;
+  object-fit: contain;
+  display: block;
+  filter: drop-shadow(0 2px 8px rgba(var(--v-theme-on-surface), 0.2));
+}
+
 /* Hardware Section Styling */
 .hardware-section {
   background: linear-gradient(135deg,
@@ -5610,9 +5702,19 @@ watch(() => props.modelValue, newValue => {
 
 .hardware-card--disabled {
   opacity: 0.6;
+  pointer-events: none;
+}
+
+/* Dark theme - original styling */
+.v-theme--dark .hardware-card--disabled {
   border-color: rgba(var(--v-theme-outline), 0.2) !important;
   background: rgba(0, 0, 0, 0.3) !important;
-  pointer-events: none;
+}
+
+/* Light theme - more contrast */
+.v-theme--light .hardware-card--disabled {
+  border: 2px solid rgba(0, 0, 0, 0.3) !important;
+  background: rgba(0, 0, 0, 0.04) !important;
 }
 
 .hardware-card--disabled:hover {
@@ -6332,23 +6434,6 @@ watch(() => props.modelValue, newValue => {
   .alert-list {
     padding-left: 12px;
   }
-}
-
-/* Selected Configuration Logo */
-.selected-config-logo-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  margin-bottom: 24px;
-  width: 100%;
-}
-
-.selected-config-logo {
-  width: 300px;
-  height: auto;
-  max-height: 180px;
-  object-fit: contain;
-  display: block;
 }
 </style>
 

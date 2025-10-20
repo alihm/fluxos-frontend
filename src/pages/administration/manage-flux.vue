@@ -41,283 +41,283 @@
       <!-- Settings Tab -->
       <VWindowItem value="settings">
         <!-- System Updates Section -->
-    <VCard class="mb-3" elevation="1">
-      <VCardTitle class="d-flex align-center pa-4 bg-surface">
-        <VAvatar color="primary" variant="flat" size="28" class="mr-2">
-          <VIcon icon="mdi-update" size="18" color="white" />
-        </VAvatar>
-        <span class="text-body-1">System Updates</span>
-      </VCardTitle>
-      <VDivider />
-      <VCardText class="pa-3">
-        <VCard variant="tonal" color="primary">
+        <VCard class="mb-3" elevation="1">
+          <VCardTitle class="d-flex align-center pa-4 bg-surface">
+            <VAvatar color="primary" variant="flat" size="28" class="mr-2">
+              <VIcon icon="mdi-update" size="18" color="white" />
+            </VAvatar>
+            <span class="text-body-1">System Updates</span>
+          </VCardTitle>
+          <VDivider />
           <VCardText class="pa-3">
-            <div class="d-flex align-center mb-3">
-              <VAvatar color="primary" variant="flat" size="36" class="mr-2">
-                <VIcon icon="mdi-cloud-sync" size="22" />
-              </VAvatar>
-              <div>
-                <h3 class="text-body-1 mb-1">Flux Update</h3>
-                <p class="text-body-2 text-medium-emphasis mb-0">Standard update process</p>
-              </div>
-            </div>
-            <p class="text-body-2 mb-3">
-              Update your Flux to the latest version. Every Flux has to run the newest version to stay on par with the network.
-            </p>
-            <VBtn
-              block
-              color="primary"
-              variant="flat"
-              size="default"
-              @click="updateFluxDialog = true"
-            >
-              <VIcon icon="mdi-download" size="20" class="mr-2" />
-              Update Flux
-            </VBtn>
-          </VCardText>
-        </VCard>
-      </VCardText>
-    </VCard>
-
-    <!-- Node Configuration Section -->
-    <VCard class="mb-3" elevation="1">
-      <VCardTitle class="d-flex align-center pa-4 bg-surface">
-        <VAvatar color="primary" variant="flat" size="28" class="mr-2">
-          <VIcon icon="mdi-cog-outline" size="18" color="white" />
-        </VAvatar>
-        <span class="text-body-1">Node Configuration</span>
-      </VCardTitle>
-      <VDivider />
-      <VCardText class="pa-3">
-        <VRow>
-          <!-- Router IP -->
-          <VCol cols="12" lg="6">
-            <VCard variant="outlined" class="h-100">
+            <VCard variant="tonal" color="primary">
               <VCardText class="pa-3">
-                <div class="d-flex align-center mb-4">
-                  <VAvatar color="primary" variant="flat" size="28" class="mr-2">
-                    <VIcon icon="mdi-router-wireless" size="18" color="white" />
-                  </VAvatar>
-                  <div class="flex-grow-1">
-                    <h3 class="text-body-1 font-weight-bold">Router IP</h3>
-                    <p class="text-caption text-medium-emphasis mb-0">Network configuration</p>
-                  </div>
-                  <VTooltip location="top">
-                    <template #activator="{ props }">
-                      <VIcon v-bind="props" icon="mdi-information-outline" size="20" color="grey" />
-                    </template>
-                    <span>Configure your router's IP address for UPNP port forwarding. Leave blank if not using UPNP.</span>
-                  </VTooltip>
-                </div>
-                <VTextField
-                  v-model="routerIPInput"
-                  label="Router IP Address"
-                  prepend-inner-icon="mdi-ip-network"
-                  variant="outlined"
-                  density="comfortable"
-                  class="mb-3"
-                  hint="Leave blank if not using UPNP"
-                  persistent-hint
-                  placeholder="192.168.1.1"
-                />
-                <VBtn
-                  block
-                  color="info"
-                  variant="flat"
-                  size="default"
-                  @click="adjustRouterIPDialog = true"
-                >
-                  <VIcon icon="mdi-check-circle" size="20" class="mr-2" />
-                  Update Router IP
-                </VBtn>
-              </VCardText>
-            </VCard>
-          </VCol>
-
-          <!-- API Port -->
-          <VCol cols="12" lg="6">
-            <VCard variant="outlined" class="h-100">
-              <VCardText class="pa-3">
-                <div class="d-flex align-center mb-4">
-                  <VAvatar color="primary" variant="flat" size="28" class="mr-2">
-                    <VIcon icon="mdi-ethernet" size="18" color="white" />
-                  </VAvatar>
-                  <div class="flex-grow-1">
-                    <h3 class="text-body-1 font-weight-bold">API Port</h3>
-                    <p class="text-caption text-medium-emphasis mb-0">Service port configuration</p>
-                  </div>
-                  <VTooltip location="top">
-                    <template #activator="{ props }">
-                      <VIcon v-bind="props" icon="mdi-information-outline" size="20" color="grey" />
-                    </template>
-                    <span>Configure the port number for FluxOS API service. Default is 16127.</span>
-                  </VTooltip>
-                </div>
-                <VTextField
-                  v-model.number="apiPortInput"
-                  label="API Port"
-                  prepend-inner-icon="mdi-ethernet"
-                  type="number"
-                  variant="outlined"
-                  density="comfortable"
-                  class="mb-3"
-                  hint="Default: 16127"
-                  persistent-hint
-                />
-                <VBtn
-                  block
-                  color="secondary"
-                  variant="flat"
-                  size="default"
-                  @click="adjustAPIPortDialog = true"
-                >
-                  <VIcon icon="mdi-check-circle" size="20" class="mr-2" />
-                  Update API Port
-                </VBtn>
-              </VCardText>
-            </VCard>
-          </VCol>
-
-          <!-- FluxOS Restart -->
-          <VCol cols="12" lg="6">
-            <VCard variant="outlined" class="h-100">
-              <VCardText class="pa-3">
-                <div class="d-flex align-center mb-4">
-                  <VAvatar color="primary" variant="flat" size="28" class="mr-2">
-                    <VIcon icon="mdi-restart" size="18" color="white" />
+                <div class="d-flex align-center mb-3">
+                  <VAvatar color="primary" variant="flat" size="36" class="mr-2">
+                    <VIcon icon="mdi-cloud-sync" size="22" />
                   </VAvatar>
                   <div>
-                    <h3 class="text-body-1 font-weight-bold">Restart FluxOS</h3>
-                    <p class="text-caption text-medium-emphasis mb-0">Restart application</p>
+                    <h3 class="text-body-1 mb-1">Flux Update</h3>
+                    <p class="text-body-2 text-medium-emphasis mb-0">Standard update process</p>
                   </div>
                 </div>
-                <VAlert type="info" variant="tonal" class="mb-3" density="compact">
-                  <div class="text-caption">
-                    Restarting will close and immediately restart FluxOS. You'll need to refresh and log in again.
-                  </div>
-                </VAlert>
-                <VBtn
-                  block
-                  color="error"
-                  variant="flat"
-                  size="default"
-                  @click="restartFluxOSDialog = true"
-                >
-                  <VIcon icon="mdi-restart" size="20" class="mr-2" />
-                  Restart FluxOS
-                </VBtn>
-              </VCardText>
-            </VCard>
-          </VCol>
-        </VRow>
-      </VCardText>
-    </VCard>
-
-    <!-- Security & Access Control Section -->
-    <VCard class="mb-3" elevation="1">
-      <VCardTitle class="d-flex align-center pa-4 bg-surface">
-        <VAvatar color="primary" variant="flat" size="28" class="mr-2">
-          <VIcon icon="mdi-shield-lock" size="18" color="white" />
-        </VAvatar>
-        <span class="text-body-1">Security & Access Control</span>
-      </VCardTitle>
-      <VDivider />
-      <VCardText class="pa-3">
-        <VRow>
-          <!-- Blocked Ports -->
-          <VCol cols="12" lg="6">
-            <VCard variant="outlined" class="h-100">
-              <VCardText class="pa-3">
-                <div class="d-flex align-center mb-4">
-                  <VAvatar color="primary" variant="flat" size="28" class="mr-2">
-                    <VIcon icon="mdi-shield-lock-outline" size="18" color="white" />
-                  </VAvatar>
-                  <div class="flex-grow-1">
-                    <h3 class="text-body-1 font-weight-bold">Blocked Ports</h3>
-                    <p class="text-caption text-medium-emphasis mb-0">Port access control</p>
-                  </div>
-                  <VTooltip location="top">
-                    <template #activator="{ props }">
-                      <VIcon v-bind="props" icon="mdi-information-outline" size="20" color="grey" />
-                    </template>
-                    <span>Block specific ports from being used by applications. You can add up to 100 ports.</span>
-                  </VTooltip>
-                </div>
-                <VCombobox
-                  v-model="blockedPortsInput"
-                  label="Blocked Ports"
-                  prepend-inner-icon="mdi-lock"
-                  variant="outlined"
-                  chips
-                  multiple
-                  closable-chips
-                  class="mb-3"
-                  hint="Press Enter to add port (up to 100)"
-                  persistent-hint
-                  placeholder="Type port number and press Enter"
-                />
+                <p class="text-body-2 mb-3">
+                  Update your Flux to the latest version. Every Flux has to run the newest version to stay on par with the network.
+                </p>
                 <VBtn
                   block
                   color="primary"
                   variant="flat"
                   size="default"
-                  @click="adjustBlockedPortsDialog = true"
+                  @click="updateFluxDialog = true"
                 >
-                  <VIcon icon="mdi-shield-lock" size="20" class="mr-2" />
-                  Update Blocked Ports
+                  <VIcon icon="mdi-download" size="20" class="mr-2" />
+                  Update Flux
                 </VBtn>
               </VCardText>
             </VCard>
-          </VCol>
+          </VCardText>
+        </VCard>
 
-          <!-- Blocked Repositories -->
-          <VCol cols="12" lg="6">
-            <VCard variant="outlined" class="h-100">
-              <VCardText class="pa-3">
-                <div class="d-flex align-center mb-4">
-                  <VAvatar color="primary" variant="flat" size="28" class="mr-2">
-                    <VIcon icon="mdi-docker" size="18" color="white" />
-                  </VAvatar>
-                  <div class="flex-grow-1">
-                    <h3 class="text-body-1 font-weight-bold">Blocked Repositories</h3>
-                    <p class="text-caption text-medium-emphasis mb-0">Repository restrictions</p>
-                  </div>
-                  <VTooltip location="top">
-                    <template #activator="{ props }">
-                      <VIcon v-bind="props" icon="mdi-information-outline" size="20" color="grey" />
-                    </template>
-                    <span>Exclude specific Docker repositories from being deployed on your node.</span>
-                  </VTooltip>
-                </div>
-                <VCombobox
-                  v-model="blockedRepositoriesInput"
-                  label="Blocked Repositories"
-                  prepend-inner-icon="mdi-docker"
-                  variant="outlined"
-                  chips
-                  multiple
-                  closable-chips
-                  class="mb-3"
-                  hint="Press Enter to add repository"
-                  persistent-hint
-                  placeholder="Type repository name and press Enter"
-                />
-                <VBtn
-                  block
-                  color="primary"
-                  variant="flat"
-                  size="default"
-                  @click="adjustBlockedRepositoriesDialog = true"
-                >
-                  <VIcon icon="mdi-docker" size="20" class="mr-2" />
-                  Update Blocked Repos
-                </VBtn>
-              </VCardText>
-            </VCard>
-          </VCol>
-        </VRow>
-      </VCardText>
-    </VCard>
+        <!-- Node Configuration Section -->
+        <VCard class="mb-3" elevation="1">
+          <VCardTitle class="d-flex align-center pa-4 bg-surface">
+            <VAvatar color="primary" variant="flat" size="28" class="mr-2">
+              <VIcon icon="mdi-cog-outline" size="18" color="white" />
+            </VAvatar>
+            <span class="text-body-1">Node Configuration</span>
+          </VCardTitle>
+          <VDivider />
+          <VCardText class="pa-3">
+            <VRow>
+              <!-- Router IP -->
+              <VCol cols="12" lg="6">
+                <VCard variant="outlined" class="h-100">
+                  <VCardText class="pa-3">
+                    <div class="d-flex align-center mb-4">
+                      <VAvatar color="primary" variant="flat" size="28" class="mr-2">
+                        <VIcon icon="mdi-router-wireless" size="18" color="white" />
+                      </VAvatar>
+                      <div class="flex-grow-1">
+                        <h3 class="text-body-1 font-weight-bold">Router IP</h3>
+                        <p class="text-caption text-medium-emphasis mb-0">Network configuration</p>
+                      </div>
+                      <VTooltip location="top">
+                        <template #activator="{ props }">
+                          <VIcon v-bind="props" icon="mdi-information-outline" size="20" color="grey" />
+                        </template>
+                        <span>Configure your router's IP address for UPNP port forwarding. Leave blank if not using UPNP.</span>
+                      </VTooltip>
+                    </div>
+                    <VTextField
+                      v-model="routerIPInput"
+                      label="Router IP Address"
+                      prepend-inner-icon="mdi-ip-network"
+                      variant="outlined"
+                      density="comfortable"
+                      class="mb-3"
+                      hint="Leave blank if not using UPNP"
+                      persistent-hint
+                      placeholder="192.168.1.1"
+                    />
+                    <VBtn
+                      block
+                      color="info"
+                      variant="flat"
+                      size="default"
+                      @click="adjustRouterIPDialog = true"
+                    >
+                      <VIcon icon="mdi-check-circle" size="20" class="mr-2" />
+                      Update Router IP
+                    </VBtn>
+                  </VCardText>
+                </VCard>
+              </VCol>
+
+              <!-- API Port -->
+              <VCol cols="12" lg="6">
+                <VCard variant="outlined" class="h-100">
+                  <VCardText class="pa-3">
+                    <div class="d-flex align-center mb-4">
+                      <VAvatar color="primary" variant="flat" size="28" class="mr-2">
+                        <VIcon icon="mdi-ethernet" size="18" color="white" />
+                      </VAvatar>
+                      <div class="flex-grow-1">
+                        <h3 class="text-body-1 font-weight-bold">API Port</h3>
+                        <p class="text-caption text-medium-emphasis mb-0">Service port configuration</p>
+                      </div>
+                      <VTooltip location="top">
+                        <template #activator="{ props }">
+                          <VIcon v-bind="props" icon="mdi-information-outline" size="20" color="grey" />
+                        </template>
+                        <span>Configure the port number for FluxOS API service. Default is 16127.</span>
+                      </VTooltip>
+                    </div>
+                    <VTextField
+                      v-model.number="apiPortInput"
+                      label="API Port"
+                      prepend-inner-icon="mdi-ethernet"
+                      type="number"
+                      variant="outlined"
+                      density="comfortable"
+                      class="mb-3"
+                      hint="Default: 16127"
+                      persistent-hint
+                    />
+                    <VBtn
+                      block
+                      color="secondary"
+                      variant="flat"
+                      size="default"
+                      @click="adjustAPIPortDialog = true"
+                    >
+                      <VIcon icon="mdi-check-circle" size="20" class="mr-2" />
+                      Update API Port
+                    </VBtn>
+                  </VCardText>
+                </VCard>
+              </VCol>
+
+              <!-- FluxOS Restart -->
+              <VCol cols="12" lg="6">
+                <VCard variant="outlined" class="h-100">
+                  <VCardText class="pa-3">
+                    <div class="d-flex align-center mb-4">
+                      <VAvatar color="primary" variant="flat" size="28" class="mr-2">
+                        <VIcon icon="mdi-restart" size="18" color="white" />
+                      </VAvatar>
+                      <div>
+                        <h3 class="text-body-1 font-weight-bold">Restart FluxOS</h3>
+                        <p class="text-caption text-medium-emphasis mb-0">Restart application</p>
+                      </div>
+                    </div>
+                    <VAlert type="info" variant="tonal" class="mb-3" density="compact">
+                      <div class="text-caption">
+                        Restarting will close and immediately restart FluxOS. You'll need to refresh and log in again.
+                      </div>
+                    </VAlert>
+                    <VBtn
+                      block
+                      color="error"
+                      variant="flat"
+                      size="default"
+                      @click="restartFluxOSDialog = true"
+                    >
+                      <VIcon icon="mdi-restart" size="20" class="mr-2" />
+                      Restart FluxOS
+                    </VBtn>
+                  </VCardText>
+                </VCard>
+              </VCol>
+            </VRow>
+          </VCardText>
+        </VCard>
+
+        <!-- Security & Access Control Section -->
+        <VCard class="mb-3" elevation="1">
+          <VCardTitle class="d-flex align-center pa-4 bg-surface">
+            <VAvatar color="primary" variant="flat" size="28" class="mr-2">
+              <VIcon icon="mdi-shield-lock" size="18" color="white" />
+            </VAvatar>
+            <span class="text-body-1">Security & Access Control</span>
+          </VCardTitle>
+          <VDivider />
+          <VCardText class="pa-3">
+            <VRow>
+              <!-- Blocked Ports -->
+              <VCol cols="12" lg="6">
+                <VCard variant="outlined" class="h-100">
+                  <VCardText class="pa-3">
+                    <div class="d-flex align-center mb-4">
+                      <VAvatar color="primary" variant="flat" size="28" class="mr-2">
+                        <VIcon icon="mdi-shield-lock-outline" size="18" color="white" />
+                      </VAvatar>
+                      <div class="flex-grow-1">
+                        <h3 class="text-body-1 font-weight-bold">Blocked Ports</h3>
+                        <p class="text-caption text-medium-emphasis mb-0">Port access control</p>
+                      </div>
+                      <VTooltip location="top">
+                        <template #activator="{ props }">
+                          <VIcon v-bind="props" icon="mdi-information-outline" size="20" color="grey" />
+                        </template>
+                        <span>Block specific ports from being used by applications. You can add up to 100 ports.</span>
+                      </VTooltip>
+                    </div>
+                    <VCombobox
+                      v-model="blockedPortsInput"
+                      label="Blocked Ports"
+                      prepend-inner-icon="mdi-lock"
+                      variant="outlined"
+                      chips
+                      multiple
+                      closable-chips
+                      class="mb-3"
+                      hint="Press Enter to add port (up to 100)"
+                      persistent-hint
+                      placeholder="Type port number and press Enter"
+                    />
+                    <VBtn
+                      block
+                      color="primary"
+                      variant="flat"
+                      size="default"
+                      @click="adjustBlockedPortsDialog = true"
+                    >
+                      <VIcon icon="mdi-shield-lock" size="20" class="mr-2" />
+                      Update Blocked Ports
+                    </VBtn>
+                  </VCardText>
+                </VCard>
+              </VCol>
+
+              <!-- Blocked Repositories -->
+              <VCol cols="12" lg="6">
+                <VCard variant="outlined" class="h-100">
+                  <VCardText class="pa-3">
+                    <div class="d-flex align-center mb-4">
+                      <VAvatar color="primary" variant="flat" size="28" class="mr-2">
+                        <VIcon icon="mdi-docker" size="18" color="white" />
+                      </VAvatar>
+                      <div class="flex-grow-1">
+                        <h3 class="text-body-1 font-weight-bold">Blocked Repositories</h3>
+                        <p class="text-caption text-medium-emphasis mb-0">Repository restrictions</p>
+                      </div>
+                      <VTooltip location="top">
+                        <template #activator="{ props }">
+                          <VIcon v-bind="props" icon="mdi-information-outline" size="20" color="grey" />
+                        </template>
+                        <span>Exclude specific Docker repositories from being deployed on your node.</span>
+                      </VTooltip>
+                    </div>
+                    <VCombobox
+                      v-model="blockedRepositoriesInput"
+                      label="Blocked Repositories"
+                      prepend-inner-icon="mdi-docker"
+                      variant="outlined"
+                      chips
+                      multiple
+                      closable-chips
+                      class="mb-3"
+                      hint="Press Enter to add repository"
+                      persistent-hint
+                      placeholder="Type repository name and press Enter"
+                    />
+                    <VBtn
+                      block
+                      color="primary"
+                      variant="flat"
+                      size="default"
+                      @click="adjustBlockedRepositoriesDialog = true"
+                    >
+                      <VIcon icon="mdi-docker" size="20" class="mr-2" />
+                      Update Blocked Repos
+                    </VBtn>
+                  </VCardText>
+                </VCard>
+              </VCol>
+            </VRow>
+          </VCardText>
+        </VCard>
       </VWindowItem>
 
       <!-- Logs Tab -->
@@ -1702,15 +1702,16 @@ const fetchBenchmarkLogs = async () => {
   }
 }
 
-const formatFileSize = (bytes) => {
+const formatFileSize = bytes => {
   if (bytes === 0) return '0 Bytes'
   const k = 1024
   const sizes = ['Bytes', 'KB', 'MB', 'GB']
   const i = Math.floor(Math.log(bytes) / Math.log(k))
+  
   return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + ' ' + sizes[i]
 }
 
-const downloadFullLogFile = async (type) => {
+const downloadFullLogFile = async type => {
   try {
     // Reset all progress values first
     downloadProgress.value = 0
@@ -1731,7 +1732,7 @@ const downloadFullLogFile = async (type) => {
         'error': '/flux/errorlog',
         'warn': '/flux/warnlog',
         'info': '/flux/infolog',
-        'debug': '/flux/debuglog'
+        'debug': '/flux/debuglog',
       }
       endpoint = logTypeMap[selectedFluxLogType.value] || '/flux/debuglog'
       filename = `flux-${selectedFluxLogType.value}_${timestamp}.log`
@@ -1769,7 +1770,7 @@ const downloadFullLogFile = async (type) => {
     const response = await axios.get(fullURL, {
       responseType: 'blob',
       headers,
-      onDownloadProgress: (progressEvent) => {
+      onDownloadProgress: progressEvent => {
         const currentTime = Date.now()
         const timeDiff = (currentTime - lastUpdateTime) / 1000 // seconds
 
@@ -1779,6 +1780,7 @@ const downloadFullLogFile = async (type) => {
         if (timeDiff >= 0.2) { // Update speed every 200ms for stability
           const bytesDiff = progressEvent.loaded - lastBytes
           const instantSpeed = bytesDiff / timeDiff
+
           // Smooth the speed using exponential moving average
           if (downloadSpeed.value === 0) {
             downloadSpeed.value = Math.round(instantSpeed)
@@ -1798,10 +1800,11 @@ const downloadFullLogFile = async (type) => {
         } else {
           // Server didn't send Content-Length - use indeterminate mode
           downloadIndeterminate.value = true
+
           // Show a pulsing progress to indicate activity
           downloadProgress.value = 0
         }
-      }
+      },
     })
 
     // Create blob and trigger download
@@ -1887,7 +1890,7 @@ const stopBenchmark = async () => {
 }
 
 // Helper functions for formatting
-const formatKey = (key) => {
+const formatKey = key => {
   return key
     .replace(/([A-Z])/g, ' $1')
     .replace(/_/g, ' ')
@@ -1897,7 +1900,7 @@ const formatKey = (key) => {
     .join(' ')
 }
 
-const formatValue = (value) => {
+const formatValue = value => {
   if (value === null || value === undefined) return 'N/A'
   if (typeof value === 'boolean') return value ? 'Yes' : 'No'
   if (typeof value === 'object') return JSON.stringify(value)
@@ -1906,12 +1909,14 @@ const formatValue = (value) => {
     if (value > 0 && value < 0.01) {
       return value.toString()
     }
+    
     return value.toLocaleString()
   }
+  
   return String(value)
 }
 
-const getDaemonIcon = (key) => {
+const getDaemonIcon = key => {
   const iconMap = {
     version: 'mdi-numeric',
     protocolversion: 'mdi-shield-check',
@@ -1927,12 +1932,13 @@ const getDaemonIcon = (key) => {
     keypoolsize: 'mdi-key-chain',
     paytxfee: 'mdi-currency-usd',
     relayfee: 'mdi-swap-horizontal',
-    errors: 'mdi-alert-circle'
+    errors: 'mdi-alert-circle',
   }
+  
   return iconMap[key.toLowerCase()] || 'mdi-information'
 }
 
-const getDaemonChipColor = (key) => {
+const getDaemonChipColor = key => {
   const colorMap = {
     version: 'info',
     protocolversion: 'success',
@@ -1948,8 +1954,9 @@ const getDaemonChipColor = (key) => {
     keypoolsize: 'success',
     paytxfee: 'teal',
     relayfee: 'cyan',
-    errors: 'error'
+    errors: 'error',
   }
+  
   return colorMap[key.toLowerCase()] || 'secondary'
 }
 
@@ -1957,10 +1964,21 @@ const getOtherDaemonFields = () => {
   if (!daemonInfoParsed.value) return []
 
   const knownFields = [
-    'version', 'protocolversion', 'walletversion',
-    'connections', 'blocks', 'difficulty', 'timeoffset', 'testnet',
-    'balance', 'keypoolsize', 'keypoololdest', 'paytxfee', 'relayfee',
-    'errors', 'proxy'
+    'version',
+    'protocolversion',
+    'walletversion',
+    'connections',
+    'blocks',
+    'difficulty',
+    'timeoffset',
+    'testnet',
+    'balance',
+    'keypoolsize',
+    'keypoololdest',
+    'paytxfee',
+    'relayfee',
+    'errors',
+    'proxy',
   ]
 
   return Object.entries(daemonInfoParsed.value)
@@ -1968,7 +1986,7 @@ const getOtherDaemonFields = () => {
     .map(([key, value]) => ({ key, value }))
 }
 
-const getBenchmarkIcon = (key) => {
+const getBenchmarkIcon = key => {
   const iconMap = {
     status: 'mdi-check-circle',
     benchmarking: 'mdi-timer-sand',
@@ -1983,25 +2001,28 @@ const getBenchmarkIcon = (key) => {
     time: 'mdi-clock',
     speed: 'mdi-speedometer',
     error: 'mdi-alert',
-    eps: 'mdi-flash-circle'
+    eps: 'mdi-flash-circle',
   }
+  
   return iconMap[key.toLowerCase()] || 'mdi-chart-box'
 }
 
-const getStatusColor = (status) => {
+const getStatusColor = status => {
   const statusColors = {
     'CUMULUS': 'info',
     'NIMBUS': 'success',
     'STRATUS': 'warning',
     'OFFLINE': 'error',
-    'FAILED': 'error'
+    'FAILED': 'error',
   }
+  
   return statusColors[status?.toUpperCase()] || 'grey'
 }
 
-const formatTimestamp = (timestamp) => {
+const formatTimestamp = timestamp => {
   if (!timestamp) return 'N/A'
   const date = new Date(timestamp * 1000)
+  
   return date.toLocaleString()
 }
 
@@ -2057,7 +2078,7 @@ const fetchBenchmarkInfo = async () => {
 }
 
 // Watch for main tab changes to load logs when logs tab is opened
-watch(currentTab, (newTab) => {
+watch(currentTab, newTab => {
   if (newTab === 'logs') {
     // Auto-load logs based on current logs sub-tab
     if (logsTab.value === 'flux' && !fluxLogs.value) {
@@ -2071,7 +2092,7 @@ watch(currentTab, (newTab) => {
 })
 
 // Watch for logs sub-tab changes
-watch(logsTab, (newTab) => {
+watch(logsTab, newTab => {
   if (currentTab.value === 'logs') {
     if (newTab === 'flux' && !fluxLogs.value) {
       fetchFluxLogs()
@@ -2091,7 +2112,6 @@ onMounted(() => {
   fetchDaemonInfo()
   fetchBenchmarkInfo()
 })
-
 </script>
 
 <route lang="yaml">

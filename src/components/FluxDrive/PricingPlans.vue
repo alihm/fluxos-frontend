@@ -19,7 +19,7 @@
       </p>
     </div>
 
-    <VRow class="justify-center pricing-grid d-flex justify-center">
+    <VRow class="justify-center pricing-grid d-flex justify-center" no-gutters>
       <VCol
         v-for="plan in fluxDrivePlans"
         :key="plan.id"
@@ -275,7 +275,8 @@ const handleSelectPlan = planId => {
 }
 
 .pricing-grid {
-  row-gap: 20px;
+  row-gap: 40px;
+  column-gap: 8px;
   justify-content: center !important;
   display: flex !important;
   flex-wrap: wrap !important;
@@ -413,21 +414,28 @@ const handleSelectPlan = planId => {
 /* Mobile optimizations */
 @media (max-width: 600px) {
   .pricing-grid {
-    row-gap: 16px !important;
+    row-gap: 32px !important;
     justify-content: center !important;
+    padding-bottom: 40px !important;
   }
 
   .pricing-col {
-    max-width: 85% !important;
-    flex: 0 0 85% !important;
+    max-width: 100% !important;
+    flex: 0 0 100% !important;
+  }
+
+  .pricing-col:last-child {
+    margin-bottom: 0 !important;
   }
 
   .pricing-card-wrapper {
     margin-bottom: 0 !important;
-    max-width: 100% !important;
+    max-width: 340px !important;
     width: 100% !important;
     margin-left: auto !important;
     margin-right: auto !important;
+    will-change: transform;
+    backface-visibility: hidden;
   }
 
   .pricing-chip-small,
@@ -499,17 +507,6 @@ const handleSelectPlan = planId => {
 }
 
 @media (max-width: 960px) and (min-width: 601px) {
-  .pricing-grid {
-    row-gap: 24px;
-    justify-content: center !important;
-  }
-
-  .pricing-card-wrapper {
-    max-width: 85%;
-    margin-left: auto;
-    margin-right: auto;
-  }
-
   .pricing-col {
     display: flex !important;
     justify-content: center !important;
@@ -524,19 +521,30 @@ const handleSelectPlan = planId => {
 
 /* 2-card layout optimization */
 @media (min-width: 600px) and (max-width: 1199px) {
+  .pricing-grid {
+    column-gap: 40px !important;
+    max-width: 840px !important;
+    margin: 0 auto !important;
+  }
+
   .pricing-col {
-    flex: 1 1 45% !important;
-    max-width: 500px !important;
-    margin: 0 12px !important;
+    flex: 0 0 calc(50% - 20px) !important;
+    max-width: 400px !important;
+    margin: 0 !important;
+  }
+
+  .pricing-card-wrapper {
+    max-width: 100% !important;
+    width: 100% !important;
   }
 }
 
 /* 4-card layout optimization for large screens */
 @media (min-width: 1200px) {
   .pricing-col {
-    flex: 1 1 22% !important;
-    max-width: 300px !important;
-    margin: 0 8px !important;
+    flex: 1 1 24% !important;
+    max-width: 260px !important;
+    margin: 0 !important;
   }
 }
 

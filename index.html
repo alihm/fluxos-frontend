@@ -40,27 +40,43 @@
     // Convert hex to RGB for glow effects
     function hexToRgb(hex) {
       const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-      return result ? 
-        `${parseInt(result[1], 16)}, ${parseInt(result[2], 16)}, ${parseInt(result[3], 16)}` : 
+      return result ?
+        `${parseInt(result[1], 16)}, ${parseInt(result[2], 16)}, ${parseInt(result[3], 16)}` :
         '115, 103, 240';
     }
+
+    // Apply background color immediately to prevent theme flash
+    document.body.style.backgroundColor = loaderColor
+    document.documentElement.style.backgroundColor = loaderColor
 
     document.documentElement.style.setProperty('--initial-loader-bg', loaderColor)
     document.documentElement.style.setProperty('--initial-loader-color', primaryColor)
     document.documentElement.style.setProperty('--initial-loader-color-rgb', hexToRgb(primaryColor))
-    window.addEventListener('app-ready', () => {
-      setTimeout(() => {
-        requestAnimationFrame(() => {
+
+    // Check if page path should skip loader
+    const skipLoaderPaths = ['/successcheckout']
+    const shouldSkipLoader = skipLoaderPaths.some(path => window.location.pathname === path)
+
+    if (shouldSkipLoader) {
+      // Remove loader immediately for specific pages
+      const loader = document.getElementById('loading-bg')
+      if (loader) loader.remove()
+    } else {
+      // Normal loader behavior for other pages
+      window.addEventListener('app-ready', () => {
+        setTimeout(() => {
           requestAnimationFrame(() => {
-            const loader = document.getElementById('loading-bg')
-            if (loader) {
-              loader.classList.add('fade-out')
-              setTimeout(() => loader.remove(), 800)
-            }
+            requestAnimationFrame(() => {
+              const loader = document.getElementById('loading-bg')
+              if (loader) {
+                loader.classList.add('fade-out')
+                setTimeout(() => loader.remove(), 800)
+              }
+            })
           })
-        })
-      }, 2000)
-    })
+        }, 2000)
+      })
+    }
   </script>
 </body>
 

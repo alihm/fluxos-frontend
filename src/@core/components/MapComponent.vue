@@ -12,24 +12,14 @@
         {{ tierDisplay }}
       </div>
 
-      <Transition name="fade">
-        <div
-          v-if="loading"
-          class="v-loader"
-        >
-          <div class="v-loader-inner">
-            <div class="v-loader-content">
-              <VProgressCircular
-                indeterminate
-                size="40"
-              />
-              <div class="loading-text">
-                Loading...
-              </div>
-            </div>
-          </div>
-        </div>
-      </Transition>
+      <LoadingSpinner
+        v-if="loading"
+        icon="mdi-map-marker-multiple"
+        icon-size="40"
+        title="Loading..."
+        title-class="text-h3 font-weight-bold mb-3"
+        class="map-loading-overlay"
+      />
     </div>
   </VCard>
 </template>
@@ -41,6 +31,7 @@ import { MarkerClusterGroup } from "leaflet.markercluster"
 import axios from "axios"
 import { useConfigStore } from "@core/stores/config"
 import { storeToRefs } from "pinia"
+import LoadingSpinner from "@/components/Marketplace/LoadingSpinner.vue"
 
 import "leaflet/dist/leaflet.css"
 import "leaflet.markercluster/dist/MarkerCluster.css"
@@ -321,15 +312,15 @@ function initMap() {
     detectRetina: true,
   })
 
-  tileLayer.on('tileloadstart', (e) => {
+  tileLayer.on('tileloadstart', e => {
     console.log('Tile load start:', e.coords)
   })
 
-  tileLayer.on('tileload', (e) => {
+  tileLayer.on('tileload', e => {
     console.log('Tile loaded:', e.coords)
   })
 
-  tileLayer.on('tileerror', (e) => {
+  tileLayer.on('tileerror', e => {
     console.error('Tile error:', e)
   })
 
@@ -370,13 +361,14 @@ onMounted(async () => {
 
   setTimeout(() => {
     loading.value = false
+
     // Invalidate after loader is hidden
     nextTick(() => {
       if (leafletMap) {
         leafletMap.invalidateSize()
       }
     })
-  }, 200)
+  }, 500)
 
   // Modern solution: Use ResizeObserver to auto-detect container size changes
   if (mapContainer.value) {
@@ -452,43 +444,24 @@ onUnmounted(() => {
   max-width: 100%;
   box-sizing: border-box;
 }
-.v-loader {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgb(var(--v-theme-surface));
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1000;
+.map-loading-overlay {
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  background-color: rgb(var(--v-theme-surface)) !important;
+  z-index: 1000 !important;
+  min-height: 450px !important;
+  margin-top: 0 !important;
 }
-.v-loader-inner {
-  display: flex;
-  align-items: center;
-  justify-content: center;
+
+.map-loading-overlay :deep(.loading-container) {
+  min-height: 450px !important;
+  margin-top: 0 !important;
+  padding: 0 !important;
 }
-.v-loader-content {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-  flex-direction: row;
-}
-.loading-text {
-  font-size: 1.2rem;
-  font-weight: 500;
-  color: rgb(var(--v-theme-on-surface));
-}
-.fade-enter-active,
-.fade-leave-active {
-  transition: opacity 0.5s;
-}
-.fade-enter-from,
-.fade-leave-to {
-  opacity: 0;
-}
+
 .leaflet-dark {
   filter: invert(90%) hue-rotate(180deg);
 }

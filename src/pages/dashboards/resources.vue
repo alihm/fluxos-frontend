@@ -1,6 +1,6 @@
 <template>
   <div>
-    <VRow>
+    <VRow v-if="hasValidData">
       <VCol
         cols="12"
         sm="12"
@@ -313,6 +313,7 @@
         </VBtn>
       </template>
     </VSnackbar>
+
   </div>
 </template>
 
@@ -356,6 +357,7 @@ const timeoptions = {
 const fluxListLoading = ref(true)
 const historyStatsLoading = ref(true)
 const showError = ref(false)
+const hasValidData = ref(true)
 const fluxList = ref([])
 const totalCores = ref(0)
 const totalRAM = ref(0)
@@ -383,7 +385,7 @@ const hoveredSegment = ref({
   cpu: null,
   ram: null,
   ssd: null,
-  hdd: null
+  hdd: null,
 })
 
 // Segment glow plugin for Chart.js - draws glow only on hovered segment
@@ -424,14 +426,14 @@ const segmentGlowPlugin = {
 
       ctx.restore()
     }
-  }
+  },
 }
 
 // Center text plugin for Chart.js
 const centerTextPlugin = {
   id: 'centerText',
   beforeDraw(chart) {
-    const { ctx } = chart
+    const { ctx, width, height } = chart
 
     // Get the actual center from the chart's dataset metadata
     const meta = chart.getDatasetMeta(0)
@@ -440,6 +442,15 @@ const centerTextPlugin = {
     const firstArc = meta.data[0]
     const centerX = firstArc.x
     const centerY = firstArc.y
+
+    // Clear the center area to prevent text overlap
+    const radius = 80
+    ctx.save()
+    ctx.globalCompositeOperation = 'destination-out'
+    ctx.beginPath()
+    ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI)
+    ctx.fill()
+    ctx.restore()
 
     ctx.save()
     ctx.textAlign = 'center'
@@ -514,11 +525,11 @@ const centerTextPlugin = {
     }
 
     ctx.restore()
-  }
+  },
 }
 
 // Create base chart options
-const createChartOptions = (chartType) => ({
+const createChartOptions = chartType => ({
   responsive: true,
   maintainAspectRatio: false,
   cutout: '70%',
@@ -527,18 +538,18 @@ const createChartOptions = (chartType) => ({
       top: 25,
       bottom: 25,
       left: 25,
-      right: 25
-    }
+      right: 25,
+    },
   },
   plugins: {
     legend: {
-      display: false
+      display: false,
     },
     tooltip: {
-      enabled: false
+      enabled: false,
     },
     segmentGlow: {},
-    centerText: {}
+    centerText: {},
   },
   events: ['mousemove', 'mouseout', 'click', 'touchstart', 'touchmove'],
   onHover: (event, activeElements, chart) => {
@@ -548,6 +559,7 @@ const createChartOptions = (chartType) => ({
         hoveredSegment.value[chartType] = null
         chart.update('none')
       }
+      
       return
     }
 
@@ -572,8 +584,8 @@ const createChartOptions = (chartType) => ({
   },
   interaction: {
     mode: 'nearest',
-    intersect: true
-  }
+    intersect: true,
+  },
 })
 
 // CPU Chart Data
@@ -587,8 +599,8 @@ const cpuChartData = computed(() => ({
     borderWidth: 2,
     hoverBorderWidth: 0,
     hoverOffset: 0,
-    _chartType: 'cpu'
-  }]
+    _chartType: 'cpu',
+  }],
 }))
 
 const cpuChartOptions = computed(() => createChartOptions('cpu'))
@@ -604,8 +616,8 @@ const ramChartData = computed(() => ({
     borderWidth: 2,
     hoverBorderWidth: 0,
     hoverOffset: 0,
-    _chartType: 'ram'
-  }]
+    _chartType: 'ram',
+  }],
 }))
 
 const ramChartOptions = computed(() => createChartOptions('ram'))
@@ -621,8 +633,8 @@ const ssdChartData = computed(() => ({
     borderWidth: 2,
     hoverBorderWidth: 0,
     hoverOffset: 0,
-    _chartType: 'ssd'
-  }]
+    _chartType: 'ssd',
+  }],
 }))
 
 const ssdChartOptions = computed(() => createChartOptions('ssd'))
@@ -638,8 +650,8 @@ const hddChartData = computed(() => ({
     borderWidth: 2,
     hoverBorderWidth: 0,
     hoverOffset: 0,
-    _chartType: 'hdd'
-  }]
+    _chartType: 'hdd',
+  }],
 }))
 
 const hddChartOptions = computed(() => createChartOptions('hdd'))
@@ -925,11 +937,49 @@ const generateResources = async () => {
   try {
     fluxListLoading.value = true
 
+    // Reset all values to 0
+    cumulusCpuValue.value = 0
+    nimbusCpuValue.value = 0
+    stratusCpuValue.value = 0
+    cumulusRamValue.value = 0
+    nimbusRamValue.value = 0
+    stratusRamValue.value = 0
+    cumulusSSDStorageValue.value = 0
+    cumulusHDDStorageValue.value = 0
+    nimbusSSDStorageValue.value = 0
+    nimbusHDDStorageValue.value = 0
+    stratusSSDStorageValue.value = 0
+    stratusHDDStorageValue.value = 0
+
     const fluxTierBench = await axios.get(
       "https://stats.runonflux.io/fluxinfo?projection=tier,benchmark",
     )
 
+    // Check if API returned an error response
+    if (fluxTierBench.data.status === 'error') {
+      console.error('API returned error:', fluxTierBench.data.data)
+      hasValidData.value = false
+      fluxListLoading.value = false
+      
+      return
+    }
+
     const fluxTierBenchList = fluxTierBench.data.data
+
+    // Check if fluxTierBenchList is an array before using forEach
+    if (!Array.isArray(fluxTierBenchList)) {
+      console.error('fluxTierBenchList is not an array:', fluxTierBenchList)
+      console.log('Full API response:', fluxTierBench.data)
+      hasValidData.value = false
+      fluxListLoading.value = false
+      
+      return
+    }
+
+    // If we got here, data is valid
+    hasValidData.value = true
+
+    console.log('Number of nodes in fluxTierBenchList:', fluxTierBenchList.length)
 
     fluxTierBenchList.forEach(node => {
       if (node.tier === "CUMULUS" && node.benchmark && node.benchmark.bench) {
@@ -986,6 +1036,8 @@ const generateResources = async () => {
     fluxListLoading.value = false
   } catch (error) {
     console.error(error)
+    hasValidData.value = false
+    fluxListLoading.value = false
   }
 }
 
@@ -1013,7 +1065,7 @@ const getHistoryStats = async () => {
 }
 
 // Watch theme changes for history charts only (doughnut charts are reactive via computed)
-watch(theme, (newTheme) => {
+watch(theme, newTheme => {
   console.log('Theme watcher triggered, new theme:', newTheme)
 
   // Update history charts tooltips
@@ -1037,18 +1089,23 @@ const clearHoverStates = () => {
     cpu: null,
     ram: null,
     ssd: null,
-    hdd: null
+    hdd: null,
   }
 }
 
 onMounted(async () => {
-  // Register custom Chart.js plugins only once
-  if (!ChartJS.defaults.plugins.segmentGlow) {
-    ChartJS.register(segmentGlowPlugin)
+  // Always re-register custom Chart.js plugins to ensure they work after navigation
+  // First unregister if they exist
+  if (ChartJS.defaults.plugins.segmentGlow) {
+    ChartJS.unregister(segmentGlowPlugin)
   }
-  if (!ChartJS.defaults.plugins.centerText) {
-    ChartJS.register(centerTextPlugin)
+  if (ChartJS.defaults.plugins.centerText) {
+    ChartJS.unregister(centerTextPlugin)
   }
+
+  // Then register them fresh
+  ChartJS.register(segmentGlowPlugin)
+  ChartJS.register(centerTextPlugin)
 
   // Initialize hover states to null
   clearHoverStates()
@@ -1064,6 +1121,14 @@ onUnmounted(() => {
   // Clean up
   clearHoverStates()
   window.removeEventListener('resize', clearHoverStates)
+
+  // Unregister plugins to prevent memory leaks
+  if (ChartJS.defaults.plugins.segmentGlow) {
+    ChartJS.unregister(segmentGlowPlugin)
+  }
+  if (ChartJS.defaults.plugins.centerText) {
+    ChartJS.unregister(centerTextPlugin)
+  }
 })
 </script>
 
