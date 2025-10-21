@@ -446,6 +446,8 @@
                   <AppDetailsCard
                     :app="item"
                     :active-apps-tab="activeAppsTab"
+                    :is-marketplace="isMarketplace"
+                    :show-general-section="true"
                     :get-new-expire-label="labelForExpire(item.expire, item.height)"
                     class="mt-4"
                   />
@@ -611,6 +613,10 @@ const props = defineProps({
   loggedIn: Boolean,
   currentBlockHeight: Number,
   activeAppsTab: Boolean,
+  isMarketplace: {
+    type: Boolean,
+    default: false,
+  },
   manage: {
     type: Boolean,
     default: false,

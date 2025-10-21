@@ -1,5 +1,47 @@
 <template>
-  <div v-if="app">
+  <div v-if="app" class="app-details-wrapper">
+    <!-- General Section Header -->
+    <h3 v-if="showGeneralSection" class="d-flex align-center justify-start mb-3 general-header">
+      <VChip
+        color="info"
+        variant="tonal"
+        class="general-chip"
+      >
+        <VIcon
+          size="22"
+          class="ml-1"
+        >
+          mdi-information-outline
+        </VIcon>
+        <span class="ml-1">General</span>
+      </VChip>
+
+      <!-- Copy Specification Button -->
+      <VBtn
+        v-if="activeAppsTab && !isMarketplace && !isMarketplaceApp(app.name)"
+        icon
+        variant="text"
+        color="info"
+        size="x-small"
+        class="export-btn-icon"
+        @click="exportSpec"
+      >
+        <VIcon size="16">mdi-content-copy</VIcon>
+        <VTooltip activator="parent" location="left">
+          Copy Specification
+        </VTooltip>
+      </VBtn>
+    </h3>
+
+    <!-- Snackbar for notifications -->
+    <VSnackbar
+      v-model="snackbar.show"
+      :color="snackbar.color"
+      :timeout="snackbar.timeout"
+      location="top"
+    >
+      {{ snackbar.message }}
+    </VSnackbar>
     <ListEntry
       title="Name"
       :data="app.name"
@@ -132,12 +174,58 @@
 </template>
 
 <script setup>
+import { ref } from 'vue'
 import geolocations from "@/utils/geolocation"
 
 const props = defineProps({
   app: Object,
   getNewExpireLabel: [String, Number, Function],
+  activeAppsTab: {
+    type: Boolean,
+    default: false,
+  },
+  isMarketplace: {
+    type: Boolean,
+    default: false,
+  },
+  showGeneralSection: {
+    type: Boolean,
+    default: false,
+  },
 })
+
+const snackbar = ref({
+  show: false,
+  message: '',
+  color: 'success',
+  timeout: 3000,
+})
+
+function isMarketplaceApp(name) {
+  if (!name || name.length < 14) return false
+  const possibleDateString = name.substring(name.length - 13)
+  const possibleDate = Number(possibleDateString)
+  return !isNaN(possibleDate)
+}
+
+async function exportSpec() {
+  try {
+    // Create a clean JSON specification
+    const spec = JSON.stringify(props.app, null, 2)
+
+    // Use native clipboard API
+    await navigator.clipboard.writeText(spec)
+
+    snackbar.value.message = 'Application specification copied to clipboard!'
+    snackbar.value.color = 'success'
+    snackbar.value.show = true
+  } catch (error) {
+    console.error('Failed to copy specification:', error)
+    snackbar.value.message = 'Failed to copy specification'
+    snackbar.value.color = 'error'
+    snackbar.value.show = true
+  }
+}
 
 function getGeolocation(geo) {
   if (!geo) return "Worldwide"
@@ -255,6 +343,41 @@ function isExpiringSoon(label) {
 </script>
 
 <style scoped>
+.app-details-wrapper {
+  overflow: visible !important;
+}
+
+.general-header {
+  position: relative;
+  overflow: visible !important;
+}
+
+.general-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-start;
+  width: 100%;
+  padding: 8px 16px;
+  border-radius: 15px;
+  font-family: monospace;
+  font-size: 18px;
+  overflow: visible !important;
+}
+
+.export-btn-icon {
+  position: absolute !important;
+  right: 8px !important;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+  height: 24px !important;
+  width: 24px !important;
+  z-index: 10 !important;
+}
+
+.export-btn-icon:hover {
+  background-color: rgba(var(--v-theme-info), 0.1) !important;
+}
+
 .kbd-list kbd {
   display: inline-block;
   margin-bottom: 0.25rem;
@@ -303,5 +426,9 @@ function isExpiringSoon(label) {
   white-space: normal;
   word-break: break-word;
   line-height: 1.5;
+}
+
+.app-details-wrapper:has(.general-header) :deep(.grid-row dt) {
+  margin-left: 0.75rem;
 }
 </style>

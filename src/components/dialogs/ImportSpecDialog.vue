@@ -7,12 +7,40 @@
     <VCard rounded="xl" class="d-flex flex-column import-dialog-card">
       <VCardTitle class="bg-primary text-white dialog-title flex-shrink-0 d-flex align-center">
         <VIcon>mdi-file-import</VIcon>
-        <span class="ml-2">Import Application Specification</span>
+        <span class="ml-2 flex-grow-1">Import Application Specification</span>
+        <VBtn
+          icon="mdi-close"
+          variant="text"
+          size="small"
+          @click="closeDialog"
+          class="close-title-btn"
+        />
       </VCardTitle>
 
-      <VCardText class="px-6 pt-4 pb-0 flex-grow-1 d-flex flex-column" style="overflow: hidden; min-height: 0;">
-        <!-- File Upload Section (shown when no file loaded) -->
-        <div v-if="!loadedSpec">
+      <VCardText class="px-6 pt-4 pb-6 flex-grow-1 d-flex flex-column" style="overflow: hidden; min-height: 0;">
+        <!-- Mode Toggle (shown when no file loaded) -->
+        <div v-if="!loadedSpec" class="mb-3">
+          <VBtnToggle
+            v-model="importMode"
+            color="primary"
+            variant="outlined"
+            mandatory
+            density="compact"
+            class="w-100 mode-toggle"
+          >
+            <VBtn value="file" class="flex-grow-1">
+              <VIcon start>mdi-file-upload</VIcon>
+              Upload File
+            </VBtn>
+            <VBtn value="paste" class="flex-grow-1">
+              <VIcon start>mdi-content-paste</VIcon>
+              Paste Specification
+            </VBtn>
+          </VBtnToggle>
+        </div>
+
+        <!-- File Upload Section (shown when no file loaded and mode is 'file') -->
+        <div v-if="!loadedSpec && importMode === 'file'">
           <!-- Drop Zone (clickable) -->
           <div
             class="drop-zone"
@@ -25,7 +53,7 @@
             <VIcon size="48" color="grey" class="mb-4">mdi-file-import</VIcon>
             <div class="text-h6 mb-2">Drop file here or click to browse</div>
             <div class="text-caption text-medium-emphasis">
-              Application specification (JSON/YAML) or Docker Compose
+              Application specification or Docker Compose (JSON/YAML)
             </div>
           </div>
 
@@ -45,15 +73,84 @@
           </div>
         </div>
 
-        <!-- Editor Section (shown when file loaded) -->
-        <div v-else class="d-flex flex-column">
+        <!-- Paste Mode Section (shown when no file loaded and mode is 'paste') -->
+        <div v-if="!loadedSpec && importMode === 'paste'" class="d-flex flex-column" style="min-height: 0;">
           <VAlert
             type="info"
             variant="tonal"
             density="compact"
             class="mb-3"
           >
-            Review and edit before importing
+            Paste application specification or Docker Compose (JSON/YAML)
+          </VAlert>
+          <div class="monaco-editor-wrapper paste-mode-editor">
+            <VueMonacoEditor
+              v-model:value="pastedJson"
+              language="yaml"
+              :options="editorOptions"
+              :theme="editorTheme"
+              class="monaco-editor"
+              @mount="pasteEditorMounted = true"
+            />
+            <!-- Floating Paste Button  -->
+            <VBtn
+              icon
+              variant="text"
+              color="secondary"
+              class="floating-paste-btn"
+              size="small"
+              @click="handleClipboardPaste"
+            >
+              <VIcon size="18">mdi-clipboard-arrow-down</VIcon>
+              <VTooltip activator="parent" location="left">
+                Paste from Clipboard
+              </VTooltip>
+            </VBtn>
+            <!-- Custom loader overlay -->
+            <div v-show="!pasteEditorMounted" class="monaco-loader-overlay">
+              <LoadingSpinner
+                icon="mdi-content-paste"
+                :icon-size="50"
+                title="Loading editor..."
+                message=""
+              />
+            </div>
+          </div>
+          <VBtn
+            color="primary"
+            variant="flat"
+            class="mt-3"
+            :disabled="!pastedJson.trim()"
+            @click="handlePasteLoad"
+          >
+            <VIcon start size="20">mdi-file-check</VIcon>
+            Load Specification
+          </VBtn>
+        </div>
+
+        <!-- Editor Section (shown when file loaded) -->
+        <div v-if="loadedSpec" class="d-flex flex-column">
+          <VAlert
+            variant="tonal"
+            density="compact"
+            color="info"
+            class="mb-3 review-alert"
+          >
+            <template #prepend>
+              <VIcon color="info" class="align-self-center">mdi-information</VIcon>
+            </template>
+            <div class="d-flex align-center w-100 flex-grow-1">
+              <span class="flex-grow-1">Review and edit before importing</span>
+              <VBtn
+                icon
+                variant="text"
+                color="secondary"
+                size="default"
+                @click="handleBack"
+              >
+                <VIcon size="24">mdi-arrow-left-circle</VIcon>
+              </VBtn>
+            </div>
           </VAlert>
           <div class="monaco-editor-wrapper">
             <VueMonacoEditor
@@ -77,17 +174,9 @@
         </div>
       </VCardText>
 
-      <VCardActions class="dialog-actions flex-shrink-0">
+      <VCardActions v-if="loadedSpec" class="dialog-actions flex-shrink-0 pt-4 pb-4">
         <VSpacer />
         <VBtn
-          color="error"
-          variant="text"
-          @click="closeDialog"
-        >
-          Cancel
-        </VBtn>
-        <VBtn
-          v-if="loadedSpec"
           color="primary"
           variant="flat"
           @click="handleImport"
@@ -122,6 +211,7 @@ import { useTheme } from 'vuetify'
 import yaml from 'js-yaml'
 import { VueMonacoEditor } from '@guolao/vue-monaco-editor'
 import LoadingSpinner from '@/components/Marketplace/LoadingSpinner.vue'
+import { convertToLatestVersion } from '@/utils/specConverter'
 
 const props = defineProps({
   modelValue: {
@@ -140,6 +230,9 @@ const fileInput = ref(null)
 const loadedSpec = ref(null)
 const specJson = ref('')
 const editorMounted = ref(false)
+const importMode = ref('file') // 'file' or 'paste'
+const pastedJson = ref('')
+const pasteEditorMounted = ref(false)
 const snackbar = ref({
   show: false,
   message: '',
@@ -165,6 +258,9 @@ const editorOptions = {
   folding: true,
   lineDecorationsWidth: 0,
   lineNumbersMinChars: 3,
+  contextmenu: true,
+  readOnly: false,
+  domReadOnly: false,
 }
 
 watch(() => props.modelValue, newValue => {
@@ -180,6 +276,9 @@ watch(isOpen, newValue => {
       loadedSpec.value = null
       specJson.value = ''
       editorMounted.value = false
+      importMode.value = 'file'
+      pastedJson.value = ''
+      pasteEditorMounted.value = false
     }, 300)
   }
 })
@@ -193,6 +292,72 @@ function closeDialog() {
   isOpen.value = false
 
   // State will be reset by the watcher after dialog is closed
+}
+
+function handleBack() {
+  // Reset loaded spec to go back to upload/paste mode
+  loadedSpec.value = null
+  specJson.value = ''
+  editorMounted.value = false
+}
+
+async function handleClipboardPaste() {
+  try {
+    const text = await navigator.clipboard.readText()
+    pastedJson.value = text
+    snackbar.value.message = 'Content pasted from clipboard!'
+    snackbar.value.color = 'success'
+    snackbar.value.icon = 'mdi-check-circle'
+    snackbar.value.show = true
+  } catch (error) {
+    console.error('Failed to read clipboard:', error)
+    snackbar.value.message = 'Failed to read clipboard. Please use Ctrl+V to paste.'
+    snackbar.value.color = 'error'
+    snackbar.value.icon = 'mdi-alert-circle'
+    snackbar.value.show = true
+  }
+}
+
+function handlePasteLoad() {
+  try {
+    let spec
+
+    // Try to parse as JSON first, then YAML
+    try {
+      spec = JSON.parse(pastedJson.value)
+    } catch {
+      spec = yaml.load(pastedJson.value)
+    }
+
+    // Check if it's a Docker Compose file and convert to FluxOS format
+    const fluxOSSpec = convertDockerComposeToFluxOS(spec)
+    if (fluxOSSpec) {
+      spec = fluxOSSpec
+    } else if (spec.version && spec.version < 8) {
+      // Convert older FluxOS versions (v1-v7) to v8 using the converter utility
+      spec = convertToLatestVersion(spec)
+    }
+
+    // Validate that the spec has required fields
+    if (!spec.name || typeof spec.name !== 'string') {
+      throw new Error('Invalid specification: "name" field is required and must be a string')
+    }
+    if (!spec.compose || !Array.isArray(spec.compose)) {
+      throw new Error('Invalid specification: "compose" field is required and must be an array')
+    }
+    if (spec.compose.length === 0) {
+      throw new Error('Invalid specification: "compose" array cannot be empty')
+    }
+
+    // Store the loaded spec and show it for editing
+    loadedSpec.value = spec
+    specJson.value = JSON.stringify(spec, null, 2)
+    editorMounted.value = false
+  } catch (error) {
+    console.error('Error parsing pasted content:', error)
+    snackbar.value.message = error.message
+    snackbar.value.show = true
+  }
 }
 
 function handleImport() {
@@ -387,6 +552,9 @@ async function processFile(file) {
     const fluxOSSpec = convertDockerComposeToFluxOS(spec)
     if (fluxOSSpec) {
       spec = fluxOSSpec
+    } else if (spec.version && spec.version < 8) {
+      // Convert older FluxOS versions (v1-v7) to v8 using the converter utility
+      spec = convertToLatestVersion(spec)
     }
 
     // Validate that the spec has required fields
@@ -508,6 +676,92 @@ async function processFile(file) {
   min-height: auto !important;
   margin-top: 0 !important;
   padding: 0 !important;
+}
+
+.paste-mode-editor {
+  height: 280px;
+}
+
+@media (max-width: 959px) {
+  .paste-mode-editor {
+    height: 220px;
+  }
+}
+
+.floating-paste-btn {
+  position: absolute !important;
+  top: 21px !important;
+  right: 21px !important;
+  z-index: 100 !important;
+  background-color: transparent !important;
+  color: rgba(var(--v-theme-secondary), 0.8) !important;
+}
+
+.floating-paste-btn:hover {
+  background-color: transparent !important;
+  color: rgb(var(--v-theme-secondary)) !important;
+  transform: scale(1.1);
+}
+
+.mode-toggle {
+  gap: 4px !important;
+  display: flex !important;
+}
+
+.mode-toggle :deep(.v-btn) {
+  height: 36px !important;
+  min-height: 36px !important;
+  font-size: 0.875rem;
+  padding: 0 12px !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+  border-radius: 4px !important;
+  border: 1px solid rgba(var(--v-border-color), var(--v-border-opacity)) !important;
+}
+
+.mode-toggle :deep(.v-btn:not(:first-child)) {
+  margin-left: 4px !important;
+}
+
+.mode-toggle :deep(.v-btn--active) {
+  border-color: rgb(var(--v-theme-primary)) !important;
+}
+
+.mode-toggle :deep(.v-icon) {
+  font-size: 18px;
+  margin-right: 4px !important;
+}
+
+.review-alert {
+  display: flex;
+  align-items: center !important;
+}
+
+.review-alert :deep(.v-alert__content) {
+  width: 100%;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+.review-alert :deep(.v-alert__prepend) {
+  margin-inline-end: 12px !important;
+  align-self: center !important;
+}
+
+.review-alert :deep(.v-alert__close) {
+  margin: 0 !important;
+}
+
+.close-title-btn {
+  color: white !important;
+}
+
+.close-title-btn:hover {
+  background-color: rgba(244, 67, 54, 0.2) !important;
+}
+
+.close-title-btn:hover :deep(.v-icon) {
+  color: #f44336 !important;
 }
 
 </style>

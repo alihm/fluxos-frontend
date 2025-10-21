@@ -57,7 +57,7 @@
           />
         </div>
       </VWindowItem>
-  
+
       <VWindowItem>
         <div>
           <MyAppsTab
@@ -66,6 +66,7 @@
             :logged-in="loggedIn"
             :current-block-height="daemonBlockCount"
             active-apps-tab
+            is-marketplace
             :api-error="apiError"
             privilege="none"
           />

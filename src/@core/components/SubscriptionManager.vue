@@ -2138,7 +2138,7 @@
                             </div>
                             <div class="d-flex align-center">
                               <VIcon color="warning" size="20" class="mr-2">mdi-clock-alert</VIcon>
-                              <span>This can take up to 15 minutes.</span>
+                              <span>This can take up to 45 minutes.</span>
                             </div>
                           </div>
                           <VBtn
@@ -2150,16 +2150,6 @@
                           >
                             <VIcon start size="20">mdi-close-circle</VIcon>
                             Cancel Monitoring
-                          </VBtn>
-                          <VBtn
-                            variant="outlined"
-                            color="success"
-                            class="mt-2"
-                            block
-                            @click="emulatePaymentConfirmed"
-                          >
-                            <VIcon start size="20">mdi-check-circle</VIcon>
-                            Test: Emulate Success
                           </VBtn>
                         </div>
                       </div>
@@ -7188,9 +7178,9 @@ async function signMethod() {
 }
 
 .text-field-fixed {
-  width: 85px;
-  min-width: 85px;
-  max-width: 85px;
+  width: 90px;
+  min-width: 90px;
+  max-width: 90px;
   flex-shrink: 0;
 }
 
@@ -7752,9 +7742,9 @@ async function signMethod() {
   }
 
   .text-field-fixed {
-    width: 70px;
-    min-width: 70px;
-    max-width: 70px;
+    width: 75px;
+    min-width: 75px;
+    max-width: 75px;
   }
 
   .hardware-slider {
@@ -7866,9 +7856,9 @@ async function signMethod() {
   }
 
   .text-field-fixed {
-    width: 80px;
-    min-width: 80px;
-    max-width: 80px;
+    width: 85px;
+    min-width: 85px;
+    max-width: 85px;
   }
 
   .hardware-slider {
