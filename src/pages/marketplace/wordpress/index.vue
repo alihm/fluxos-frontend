@@ -5,16 +5,15 @@
       v-if="loadingPlans && !apiError"
       icon="mdi-wordpress"
       :icon-size="56"
-      title="Loading WordPress Plans..."
+      :title="t('pages.marketplace.wordpress.loadingTitle')"
     />
 
     <!-- Maintenance Mode -->
     <MaintenanceCard
       v-else-if="apiError"
-      title="WordPress Marketplace
-Under Maintenance"
-      subtitle="We're currently experiencing technical difficulties with the WordPress marketplace. Our team is working to resolve this issue as quickly as possible."
-      description="Please check back later or contact support if you need immediate assistance."
+      :title="t('pages.marketplace.wordpress.maintenanceTitle')"
+      :subtitle="t('pages.marketplace.wordpress.maintenanceSubtitle')"
+      :description="t('pages.marketplace.wordpress.maintenanceDescription')"
       :loading="loadingPlans"
       @retry="loadPlans"
     />
@@ -25,7 +24,7 @@ Under Maintenance"
         <VCard>
           <VCardTitle class="d-flex align-center gap-3 bg-primary text-white px-4 py-3">
             <VIcon icon="mdi-wordpress" size="32" />
-            <span class="text-h5">WordPress Hosting on Flux</span>
+            <span class="text-h5" style="color: white;">{{ t('pages.marketplace.wordpress.pageTitle') }}</span>
           </VCardTitle>
 
           <VCardText class="px-6 pt-4 pb-6">
@@ -34,17 +33,17 @@ Under Maintenance"
               <VCol cols="12" md="6">
                 <label class="text-body-1 font-weight-medium mb-2 d-flex align-center">
                   <VIcon icon="mdi-application-outline" size="20" color="grey" class="mr-2" />
-                  <span>WordPress Dapp Name</span>
+                  <span>{{ t('pages.marketplace.wordpress.form.dappName') }}</span>
                   <VTooltip location="top">
                     <template #activator="{ props }">
                       <VIcon v-bind="props" icon="mdi-information-outline" size="16" color="grey-lighten-1" class="ml-1" />
                     </template>
-                    <span>Display name for your WordPress site. A unique Flux app name will be generated automatically.</span>
+                    <span>{{ t('pages.marketplace.wordpress.form.dappNameTooltip') }}</span>
                   </VTooltip>
                 </label>
                 <VTextField
                   v-model="formData.appName"
-                  placeholder="Enter Dapp Name"
+                  :placeholder="t('pages.marketplace.wordpress.form.dappNamePlaceholder')"
                   density="compact"
                   variant="outlined"
                   :error-messages="errors.appName"
@@ -54,17 +53,17 @@ Under Maintenance"
               <VCol cols="12" md="6">
                 <label class="text-body-1 font-weight-medium mb-2 d-flex align-center">
                   <VIcon icon="mdi-email-outline" size="20" color="grey" class="mr-2" />
-                  <span>Email Address</span>
+                  <span>{{ t('pages.marketplace.wordpress.form.email') }}</span>
                   <VTooltip location="top">
                     <template #activator="{ props }">
                       <VIcon v-bind="props" icon="mdi-information-outline" size="16" color="grey-lighten-1" class="ml-1" />
                     </template>
-                    <span>Contact email for notifications and updates</span>
+                    <span>{{ t('pages.marketplace.wordpress.form.emailTooltip') }}</span>
                   </VTooltip>
                 </label>
                 <VTextField
                   v-model="formData.email"
-                  placeholder="your@email.com"
+                  :placeholder="t('pages.marketplace.wordpress.form.emailPlaceholder')"
                   density="compact"
                   variant="outlined"
                   type="email"
@@ -79,17 +78,17 @@ Under Maintenance"
               <VCol cols="12" md="6">
                 <label class="text-body-1 font-weight-medium mb-2 d-flex align-center">
                   <VIcon icon="mdi-web" size="20" color="grey" class="mr-2" />
-                  <span>Domain Name</span>
+                  <span>{{ t('pages.marketplace.wordpress.form.domainName') }}</span>
                   <VTooltip location="top">
                     <template #activator="{ props }">
                       <VIcon v-bind="props" icon="mdi-information-outline" size="16" color="grey-lighten-1" class="ml-1" />
                     </template>
-                    <span>Custom domain for your WordPress site (optional)</span>
+                    <span>{{ t('pages.marketplace.wordpress.form.domainNameTooltip') }}</span>
                   </VTooltip>
                 </label>
                 <VTextField
                   v-model="formData.domainName"
-                  placeholder="yourdomain.com"
+                  :placeholder="t('pages.marketplace.wordpress.form.domainNamePlaceholder')"
                   density="compact"
                   variant="outlined"
                   :error-messages="errors.domainName"
@@ -99,12 +98,12 @@ Under Maintenance"
               <VCol cols="12" md="6">
                 <label class="text-body-1 font-weight-medium mb-2 d-flex align-center">
                   <VIcon icon="mdi-calendar-clock" size="20" color="grey" class="mr-2" />
-                  <span>Subscription</span>
+                  <span>{{ t('pages.marketplace.wordpress.form.subscription') }}</span>
                   <VTooltip location="top">
                     <template #activator="{ props }">
                       <VIcon v-bind="props" icon="mdi-information-outline" size="16" color="grey-lighten-1" class="ml-1" />
                     </template>
-                    <span>Select the billing period for your WordPress hosting</span>
+                    <span>{{ t('pages.marketplace.wordpress.form.subscriptionTooltip') }}</span>
                   </VTooltip>
                 </label>
                 <VSelect
@@ -124,18 +123,18 @@ Under Maintenance"
               <VCol cols="12">
                 <label class="text-body-1 font-weight-medium mb-2 d-flex align-center">
                   <VIcon icon="mdi-shield-lock-outline" size="20" color="grey" class="mr-2" />
-                  <span>Whitelist IP</span>
+                  <span>{{ t('pages.marketplace.wordpress.form.whitelistIp') }}</span>
                   <VTooltip location="top">
                     <template #activator="{ props }">
                       <VIcon v-bind="props" icon="mdi-information-outline" size="16" color="grey-lighten-1" class="ml-1" />
                     </template>
-                    <span>Whitelist IP for Backup/Restore (Optional)</span>
+                    <span>{{ t('pages.marketplace.wordpress.form.whitelistIpLabel') }}</span>
                   </VTooltip>
                 </label>
                 <div class="d-flex gap-2 align-center">
                   <VTextField
                     v-model="newWhitelistIP"
-                    placeholder="Enter IP address"
+                    :placeholder="t('pages.marketplace.wordpress.form.whitelistIpPlaceholder')"
                     density="compact"
                     variant="outlined"
                     @keyup.enter="addWhitelistIP"
@@ -145,7 +144,7 @@ Under Maintenance"
                     size="small"
                     @click="addWhitelistIP"
                   >
-                    Add
+                    {{ t('pages.marketplace.wordpress.actions.add') }}
                   </VBtn>
                 </div>
                 <div v-if="formData.whitelist.length > 0" class="mt-1">
@@ -167,12 +166,12 @@ Under Maintenance"
               <VCol cols="12">
                 <label class="text-body-1 font-weight-medium mb-2 d-flex align-center">
                   <VIcon icon="mdi-server" size="20" color="grey" class="mr-2" />
-                  <span>Performance Plan</span>
+                  <span>{{ t('pages.marketplace.wordpress.form.performancePlan') }}</span>
                   <VTooltip location="top">
                     <template #activator="{ props }">
                       <VIcon v-bind="props" icon="mdi-information-outline" size="16" color="grey-lighten-1" class="ml-1" />
                     </template>
-                    <span>Choose server resources (CPU, RAM, SSD) for your WordPress site</span>
+                    <span>{{ t('pages.marketplace.wordpress.form.performancePlanTooltip') }}</span>
                   </VTooltip>
                 </label>
                 <VSelect
@@ -197,7 +196,7 @@ Under Maintenance"
                       <VListItemTitle class="font-weight-bold mb-1">
                         {{ item.raw.name }}
                         <VChip size="x-small" color="success" class="ml-2">
-                          {{ item.raw.instances }} Instances
+                          {{ item.raw.instances }} {{ getInstancesLabel(item.raw.instances) }}
                         </VChip>
                       </VListItemTitle>
                       <VListItemSubtitle class="d-flex align-center gap-3 mb-1">
@@ -215,12 +214,12 @@ Under Maintenance"
                         </span>
                       </VListItemSubtitle>
                       <VListItemSubtitle class="text-caption text-medium-emphasis">
-                        {{ item.raw.description }}
+                        {{ translateDescription(item.raw) }}
                       </VListItemSubtitle>
                       <template #append>
                         <div class="text-h6 font-weight-bold" style="color: #10b981;">
                           ${{ item.raw.usd.toFixed(2) }}
-                          <div class="text-caption text-medium-emphasis font-weight-regular">/month</div>
+                          <div class="text-caption text-medium-emphasis font-weight-regular">{{ t('pages.marketplace.wordpress.form.perMonth') }}</div>
                         </div>
                       </template>
                     </VListItem>
@@ -251,12 +250,12 @@ Under Maintenance"
               <VCol cols="12">
                 <label class="text-body-1 font-weight-medium mb-2 d-flex align-center">
                   <VIcon icon="mdi-map-marker-outline" size="20" color="grey" class="mr-2" />
-                  <span>Deployment Location</span>
+                  <span>{{ t('pages.marketplace.wordpress.form.deploymentLocation') }}</span>
                   <VTooltip location="top">
                     <template #activator="{ props }">
                       <VIcon v-bind="props" icon="mdi-information-outline" size="16" color="grey-lighten-1" class="ml-1" />
                     </template>
-                    <span>Select a geographic region to deploy your WordPress site. Choose Global for automatic selection.</span>
+                    <span>{{ t('pages.marketplace.wordpress.form.deploymentLocationTooltip') }}</span>
                   </VTooltip>
                 </label>
                 <VChipGroup
@@ -303,7 +302,7 @@ Under Maintenance"
       <VCol cols="12" lg="5">
         <VCard>
           <VCardTitle class="pa-4">
-            <span class="text-h6">Order Summary</span>
+            <span class="text-h6">{{ t('pages.marketplace.wordpress.summary.title') }}</span>
           </VCardTitle>
 
           <VDivider />
@@ -325,7 +324,7 @@ Under Maintenance"
                 </VChip>
               </div>
               <div v-if="loadingPricing" class="text-body-2 text-medium-emphasis">
-                Calculating pricing...
+                {{ t('pages.marketplace.wordpress.actions.calculatingPricing') }}
               </div>
             </div>
 
@@ -338,9 +337,9 @@ Under Maintenance"
             >
               <template #label>
                 <span class="text-body-2">
-                  I have read and agree to the
+                  {{ t('pages.marketplace.wordpress.termsOfService.agreement') }}
                   <a href="#" style="text-decoration: underline; color: inherit;" @click.prevent="showTermsDialog = true">
-                    Terms of Service
+                    {{ t('pages.marketplace.wordpress.termsOfService.link') }}
                   </a>
                 </span>
               </template>
@@ -356,7 +355,7 @@ Under Maintenance"
               @click="openInstallDialog"
             >
               <VIcon start icon="mdi-rocket-launch" />
-              Install WordPress Site
+              {{ t('pages.marketplace.wordpress.summary.install') }}
             </VBtn>
           </VCardText>
         </VCard>
@@ -369,7 +368,7 @@ Under Maintenance"
         <VCardTitle class="d-flex align-center justify-space-between px-4 py-2 bg-primary">
           <div class="d-flex align-center gap-2">
             <VIcon icon="mdi-file-document-outline" size="28" color="white" />
-            <span class="text-h5" style="color: white;">Terms of Service</span>
+            <span class="text-h5" style="color: white;">{{ t('pages.marketplace.wordpress.termsOfService.title') }}</span>
           </div>
           <VBtn
             icon="mdi-close"
@@ -416,7 +415,7 @@ Under Maintenance"
         <VCardTitle class="d-flex align-center justify-space-between px-4 py-2 bg-primary">
           <div class="d-flex align-center gap-2">
             <VIcon icon="mdi-lightbulb-outline" size="28" color="white" />
-            <span class="text-h5" style="color: white;">Best Practices</span>
+            <span class="text-h5" style="color: white;">{{ t('pages.marketplace.wordpress.bestPractices.title') }}</span>
           </div>
           <VBtn
             icon="mdi-close"
@@ -435,42 +434,42 @@ Under Maintenance"
               <template #prepend>
                 <VIcon icon="mdi-clock-outline" color="info" class="mr-3" />
               </template>
-              <VListItemTitle class="text-wrap">Allow up to 2 hours after registering for Propagation</VListItemTitle>
+              <VListItemTitle class="text-wrap">{{ t('pages.marketplace.wordpress.setup.stepPropagation') }}</VListItemTitle>
             </VListItem>
 
             <VListItem class="px-0 mb-2">
               <template #prepend>
                 <VIcon icon="mdi-play-circle-outline" color="success" class="mr-3" />
               </template>
-              <VListItemTitle class="text-wrap">Immediately start the install process after propagation</VListItemTitle>
+              <VListItemTitle class="text-wrap">{{ t('pages.marketplace.wordpress.setup.stepInstall') }}</VListItemTitle>
             </VListItem>
 
             <VListItem class="px-0 mb-2">
               <template #prepend>
                 <VIcon icon="mdi-web" color="info" class="mr-3" />
               </template>
-              <VListItemTitle class="text-wrap">Connect your Custom Domain using a DNS Provider</VListItemTitle>
+              <VListItemTitle class="text-wrap">{{ t('pages.marketplace.wordpress.setup.stepDomain') }}</VListItemTitle>
             </VListItem>
 
             <VListItem class="px-0 mb-2">
               <template #prepend>
                 <VIcon icon="mdi-shield-off-outline" color="warning" class="mr-3" />
               </template>
-              <VListItemTitle class="text-wrap">Disable DNS proxy for 2 hours to allow cert issuance by FDMs</VListItemTitle>
+              <VListItemTitle class="text-wrap">{{ t('pages.marketplace.wordpress.setup.stepDnsProxy') }}</VListItemTitle>
             </VListItem>
 
             <VListItem class="px-0 mb-2">
               <template #prepend>
                 <VIcon icon="mdi-rocket-launch-outline" color="success" class="mr-3" />
               </template>
-              <VListItemTitle class="text-wrap">Activate the pre-installed caching plugin</VListItemTitle>
+              <VListItemTitle class="text-wrap">{{ t('pages.marketplace.wordpress.setup.stepCaching') }}</VListItemTitle>
             </VListItem>
 
             <VListItem class="px-0 mb-2">
               <template #prepend>
                 <VIcon icon="mdi-shield-alert-outline" color="error" class="mr-3" />
               </template>
-              <VListItemTitle class="text-wrap">Don't install malicious plugins or themes</VListItemTitle>
+              <VListItemTitle class="text-wrap">{{ t('pages.marketplace.wordpress.setup.stepSecurity') }}</VListItemTitle>
             </VListItem>
 
             <VListItem class="px-0 mb-2">
@@ -497,7 +496,7 @@ Under Maintenance"
         <VCardTitle class="d-flex align-center justify-space-between px-4 py-2 bg-primary">
           <div class="d-flex align-center gap-2">
             <VIcon icon="mdi-help-circle-outline" size="28" color="white" />
-            <span class="text-h5" style="color: white;">Frequently Asked Questions</span>
+            <span class="text-h5" style="color: white;">{{ t('pages.marketplace.wordpress.faq.title') }}</span>
           </div>
           <VBtn
             icon="mdi-close"
@@ -517,8 +516,8 @@ Under Maintenance"
                 <VIcon icon="mdi-application-outline" color="info" size="20" class="mr-2 mr-sm-3 mt-1" />
               </template>
               <div class="d-flex flex-column">
-                <VListItemTitle class="font-weight-bold mb-1 text-body-1">WordPress Dapp Name</VListItemTitle>
-                <VListItemSubtitle class="text-wrap text-body-2">Internal nick name, not used externally.</VListItemSubtitle>
+                <VListItemTitle class="font-weight-bold mb-1 text-body-1">{{ t('pages.marketplace.wordpress.summary.dappNameTitle') }}</VListItemTitle>
+                <VListItemSubtitle class="text-wrap text-body-2">{{ t('pages.marketplace.wordpress.summary.dappNameHelp') }}</VListItemSubtitle>
               </div>
             </VListItem>
 
@@ -527,8 +526,8 @@ Under Maintenance"
                 <VIcon icon="mdi-email-outline" color="warning" size="20" class="mr-2 mr-sm-3 mt-1" />
               </template>
               <div class="d-flex flex-column">
-                <VListItemTitle class="font-weight-bold mb-1 text-body-1">Email for Alerts</VListItemTitle>
-                <VListItemSubtitle class="text-wrap text-body-2">We'll send you alerts when your WordPress Dapp is due for renewal.</VListItemSubtitle>
+                <VListItemTitle class="font-weight-bold mb-1 text-body-1">{{ t('pages.marketplace.wordpress.summary.emailTitle') }}</VListItemTitle>
+                <VListItemSubtitle class="text-wrap text-body-2">{{ t('pages.marketplace.wordpress.summary.emailHelp') }}</VListItemSubtitle>
               </div>
             </VListItem>
 
@@ -537,8 +536,8 @@ Under Maintenance"
                 <VIcon icon="mdi-web" color="info" size="20" class="mr-2 mr-sm-3 mt-1" />
               </template>
               <div class="d-flex flex-column">
-                <VListItemTitle class="font-weight-bold mb-1 text-body-1">Domain Name</VListItemTitle>
-                <VListItemSubtitle class="text-wrap text-body-2">After you add it here, you need to also configure it with a DNS provider.</VListItemSubtitle>
+                <VListItemTitle class="font-weight-bold mb-1 text-body-1">{{ t('pages.marketplace.wordpress.summary.domainTitle') }}</VListItemTitle>
+                <VListItemSubtitle class="text-wrap text-body-2">{{ t('pages.marketplace.wordpress.summary.domainHelp') }}</VListItemSubtitle>
               </div>
             </VListItem>
 
@@ -547,8 +546,8 @@ Under Maintenance"
                 <VIcon icon="mdi-ip-network" color="warning" size="20" class="mr-2 mr-sm-3 mt-1" />
               </template>
               <div class="d-flex flex-column">
-                <VListItemTitle class="font-weight-bold mb-1 text-body-1">Whitelist IP</VListItemTitle>
-                <VListItemSubtitle class="text-wrap text-body-2">Explicitly set your IP address as the only device that can access your WordPress database. Advanced users only.</VListItemSubtitle>
+                <VListItemTitle class="font-weight-bold mb-1 text-body-1">{{ t('pages.marketplace.wordpress.summary.whitelistIpTitle') }}</VListItemTitle>
+                <VListItemSubtitle class="text-wrap text-body-2">{{ t('pages.marketplace.wordpress.summary.whitelistIpHelp') }}</VListItemSubtitle>
               </div>
             </VListItem>
 
@@ -557,8 +556,8 @@ Under Maintenance"
                 <VIcon icon="mdi-speedometer" color="success" size="20" class="mr-2 mr-sm-3 mt-1" />
               </template>
               <div class="d-flex flex-column">
-                <VListItemTitle class="font-weight-bold mb-1 text-body-1">Performance</VListItemTitle>
-                <VListItemSubtitle class="text-wrap text-body-2">Standard spec offers the best performance and ensures good stability.</VListItemSubtitle>
+                <VListItemTitle class="font-weight-bold mb-1 text-body-1">{{ t('pages.marketplace.wordpress.summary.performanceTitle') }}</VListItemTitle>
+                <VListItemSubtitle class="text-wrap text-body-2">{{ t('pages.marketplace.wordpress.summary.performanceHelp') }}</VListItemSubtitle>
               </div>
             </VListItem>
 
@@ -567,8 +566,8 @@ Under Maintenance"
                 <VIcon icon="mdi-map-marker-outline" color="info" size="20" class="mr-2 mr-sm-3 mt-1" />
               </template>
               <div class="d-flex flex-column">
-                <VListItemTitle class="font-weight-bold mb-1 text-body-1">Deployment Location</VListItemTitle>
-                <VListItemSubtitle class="text-wrap text-body-2">Geographic region the WordPress site will be deployed in. For optimum performance, all nodes must be in the same region.</VListItemSubtitle>
+                <VListItemTitle class="font-weight-bold mb-1 text-body-1">{{ t('pages.marketplace.wordpress.summary.deploymentLocationTitle') }}</VListItemTitle>
+                <VListItemSubtitle class="text-wrap text-body-2">{{ t('pages.marketplace.wordpress.summary.deploymentLocationHelp') }}</VListItemSubtitle>
               </div>
             </VListItem>
           </VList>
@@ -590,6 +589,7 @@ Under Maintenance"
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useFluxStore } from '@/stores/flux'
 import { storeToRefs } from 'pinia'
 import { useWordPress } from '@/composables/useWordPress'
@@ -597,6 +597,34 @@ import AppsService from '@/services/AppsService'
 import LoadingSpinner from '@/components/Marketplace/LoadingSpinner.vue'
 import MaintenanceCard from '@/components/Marketplace/MaintenanceCard.vue'
 import InstallDialog from '@/components/Marketplace/InstallDialog.vue'
+
+const { t, locale, te } = useI18n()
+
+// Helper function to get correct Polish plural form for instances
+const getInstancesLabel = count => {
+  if (locale.value !== 'pl') {
+    return t('pages.marketplace.wordpress.form.instances')
+  }
+
+  if (count === 1) {
+    return t('pages.marketplace.wordpress.form.instance')
+  } else if (count % 10 >= 2 && count % 10 <= 4 && (count % 100 < 10 || count % 100 >= 20)) {
+    return t('pages.marketplace.wordpress.form.instancesPlural')
+  } else {
+    return t('pages.marketplace.wordpress.form.instances')
+  }
+}
+
+// Helper function to translate plan descriptions
+const translateDescription = plan => {
+  if (!plan || !plan.name) return plan?.description || ''
+
+  // Use the plan name as the translation key
+  const key = `pages.marketplace.wordpress.form.planDescriptions.${plan.name}`
+
+  // Check if translation exists, if not return original description
+  return te(key) ? t(key) : plan.description
+}
 
 const { fetchPlans, fetchConfig } = useWordPress()
 
@@ -645,24 +673,24 @@ const loadingPricing = ref(false)
 const plans = ref([])
 
 // Payment durations
-const paymentDurations = [
-  { title: '1 Month', months: 1 },
-  { title: '2 Months', months: 2 },
-  { title: '3 Months', months: 3 },
-  { title: '6 Months', months: 6 },
-  { title: '12 Months', months: 12 },
-]
+const paymentDurations = computed(() => [
+  { title: t('pages.marketplace.wordpress.durations.oneMonth'), months: 1 },
+  { title: t('pages.marketplace.wordpress.durations.twoMonths'), months: 2 },
+  { title: t('pages.marketplace.wordpress.durations.threeMonths'), months: 3 },
+  { title: t('pages.marketplace.wordpress.durations.sixMonths'), months: 6 },
+  { title: t('pages.marketplace.wordpress.durations.twelveMonths'), months: 12 },
+])
 
 // Deployment locations
-const deploymentLocations = [
-  { title: 'Global', continentCode: '', icon: 'mdi-earth' },
-  { title: 'North America', continentCode: 'NA', icon: 'mdi-map-marker' },
-  { title: 'Europe', continentCode: 'EU', icon: 'mdi-map-marker' },
-  { title: 'Asia', continentCode: 'AS', icon: 'mdi-map-marker' },
-  { title: 'Oceania', continentCode: 'OC', icon: 'mdi-map-marker' },
-  { title: 'South America', continentCode: 'SA', icon: 'mdi-map-marker' },
-  { title: 'Africa', continentCode: 'AF', icon: 'mdi-map-marker' },
-]
+const deploymentLocations = computed(() => [
+  { title: t('pages.marketplace.wordpress.locations.global'), continentCode: '', icon: 'mdi-earth' },
+  { title: t('pages.marketplace.wordpress.locations.northAmerica'), continentCode: 'NA', icon: 'mdi-map-marker' },
+  { title: t('pages.marketplace.wordpress.locations.europe'), continentCode: 'EU', icon: 'mdi-map-marker' },
+  { title: t('pages.marketplace.wordpress.locations.asia'), continentCode: 'AS', icon: 'mdi-map-marker' },
+  { title: t('pages.marketplace.wordpress.locations.oceania'), continentCode: 'OC', icon: 'mdi-map-marker' },
+  { title: t('pages.marketplace.wordpress.locations.southAmerica'), continentCode: 'SA', icon: 'mdi-map-marker' },
+  { title: t('pages.marketplace.wordpress.locations.africa'), continentCode: 'AF', icon: 'mdi-map-marker' },
+])
 
 // API pricing response with fiat, flux, and discount info
 const apiPricing = ref({
@@ -686,8 +714,8 @@ const pricing = computed(() => {
 })
 
 const formattedPrice = computed(() => {
-  if (!pricing.value.usd) return 'Select a plan'
-  
+  if (!pricing.value.usd) return t('pages.marketplace.wordpress.summary.selectPlan')
+
   return `$${pricing.value.usd.toFixed(2)} USD`
 })
 
@@ -899,11 +927,11 @@ const launchWordPress = async () => {
     // const response = await addWordPressApp(payload)
 
     // For now, just log the payload
-    alert('WordPress launch functionality to be implemented with API integration')
+    alert(t('pages.marketplace.wordpress.errors.launchNotImplemented'))
 
   } catch (error) {
     console.error('Failed to launch WordPress:', error)
-    alert('Failed to launch WordPress site. Please try again.')
+    alert(t('pages.marketplace.wordpress.errors.launchFailed'))
   } finally {
     launching.value = false
   }
@@ -1052,7 +1080,7 @@ const loadTOS = async () => {
     tosHtmlContent.value = html
   } catch (error) {
     console.error('Failed to load TOS:', error)
-    tosHtmlContent.value = '<p>Failed to load Terms of Service. Please visit <a href="https://runonflux.io/terms" target="_blank">https://runonflux.io/terms</a></p>'
+    tosHtmlContent.value = `<p>${t('pages.marketplace.wordpress.errors.tosLoadFailed')} <a href="https://runonflux.io/terms" target="_blank">https://runonflux.io/terms</a></p>`
   }
 }
 

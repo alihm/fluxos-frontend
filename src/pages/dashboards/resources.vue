@@ -29,7 +29,7 @@
               </VIcon>
             </VAvatar>
             <h2 class="text-h5 ml-2">
-              vCores
+              {{ t('pages.dashboard.resources.vCores') }}
             </h2>
           </div>
           <VCardText class="pa-4" style="overflow: visible !important; height: 100%;">
@@ -72,7 +72,7 @@
               </VIcon>
             </VAvatar>
             <h2 class="text-h5 ml-2">
-              RAM
+              {{ t('pages.dashboard.resources.ram') }}
             </h2>
           </div>
           <VCardText class="pa-4" style="overflow: visible !important; height: 100%;">
@@ -115,7 +115,7 @@
               </VIcon>
             </VAvatar>
             <h2 class="text-h5 ml-2">
-              SSD
+              {{ t('pages.dashboard.resources.ssd') }}
             </h2>
           </div>
           <VCardText class="pa-4" style="overflow: visible !important; height: 100%;">
@@ -158,7 +158,7 @@
               </VIcon>
             </VAvatar>
             <h2 class="text-h5 ml-2">
-              HDD
+              {{ t('pages.dashboard.resources.hdd') }}
             </h2>
           </div>
           <VCardText class="pa-4" style="overflow: visible !important; height: 100%;">
@@ -202,7 +202,7 @@
               </VIcon>
             </VAvatar>
             <h2 class="mt-2 text-h5 d-inline-block ml-2">
-              CPU History
+              {{ t('pages.dashboard.resources.cpuHistory') }}
             </h2>
           </VCardText>
           <VueApexCharts
@@ -242,7 +242,7 @@
               </VIcon>
             </VAvatar>
             <h2 class="mt-2 text-h5 d-inline-block ml-2">
-              RAM History
+              {{ t('pages.dashboard.resources.ramHistory') }}
             </h2>
           </VCardText>
           <VueApexCharts
@@ -282,7 +282,7 @@
               </VIcon>
             </VAvatar>
             <h2 class="mt-2 text-h5 d-inline-block ml-2">
-              Storage History
+              {{ t('pages.dashboard.resources.storageHistory') }}
             </h2>
           </VCardText>
           <VueApexCharts
@@ -303,13 +303,13 @@
       color="error"
       timeout="3000"
     >
-      Unable to fetch history stats
+      {{ t('pages.dashboard.resources.errorFetchHistory') }}
       <template #actions>
         <VBtn
           color="white"
           @click="showError = false"
         >
-          Close
+          {{ t('pages.dashboard.resources.close') }}
         </VBtn>
       </template>
     </VSnackbar>
@@ -326,8 +326,11 @@ import { useConfigStore } from "@core/stores/config"
 import { useDisplay, useTheme } from 'vuetify'
 import { Doughnut } from 'vue-chartjs'
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js'
+import { useI18n } from 'vue-i18n'
 
 ChartJS.register(ArcElement, Tooltip, Legend)
+
+const { t } = useI18n()
 
 const configStore = useConfigStore()
 const { theme } = storeToRefs(configStore)
@@ -501,16 +504,16 @@ const centerTextPlugin = {
 
       if (chartType === 'cpu') {
         valueText = beautifyValue(totalCores.value, 0)
-        labelText = 'Total vCores'
+        labelText = t('pages.dashboard.resources.totalVCores')
       } else if (chartType === 'ram') {
         valueText = `${beautifyValue(totalRAM.value / 1024, 2)} TB`
-        labelText = 'Total RAM'
+        labelText = t('pages.dashboard.resources.totalRam')
       } else if (chartType === 'ssd') {
         valueText = `${beautifyValue(totalSSD.value / 1000000, 2)} PB`
-        labelText = 'Total SSD'
+        labelText = t('pages.dashboard.resources.totalSsd')
       } else if (chartType === 'hdd') {
         valueText = `${beautifyValue(totalHDD.value / 1000, 2)} TB`
-        labelText = 'Total HDD'
+        labelText = t('pages.dashboard.resources.totalHdd')
       }
 
       // Draw total label (smaller font, top)
@@ -590,7 +593,7 @@ const createChartOptions = chartType => ({
 
 // CPU Chart Data
 const cpuChartData = computed(() => ({
-  labels: ['Cumulus', 'Nimbus', 'Stratus'],
+  labels: [t('pages.dashboard.resources.tierCumulus'), t('pages.dashboard.resources.tierNimbus'), t('pages.dashboard.resources.tierStratus')],
   datasets: [{
     data: [cumulusCpuValue.value, nimbusCpuValue.value, stratusCpuValue.value],
     backgroundColor: [tierColors.cumulus, tierColors.nimbus, tierColors.stratus],
@@ -607,7 +610,7 @@ const cpuChartOptions = computed(() => createChartOptions('cpu'))
 
 // RAM Chart Data
 const ramChartData = computed(() => ({
-  labels: ['Cumulus', 'Nimbus', 'Stratus'],
+  labels: [t('pages.dashboard.resources.tierCumulus'), t('pages.dashboard.resources.tierNimbus'), t('pages.dashboard.resources.tierStratus')],
   datasets: [{
     data: [cumulusRamValue.value, nimbusRamValue.value, stratusRamValue.value],
     backgroundColor: [tierColors.cumulus, tierColors.nimbus, tierColors.stratus],
@@ -624,7 +627,7 @@ const ramChartOptions = computed(() => createChartOptions('ram'))
 
 // SSD Chart Data
 const ssdChartData = computed(() => ({
-  labels: ['Cumulus', 'Nimbus', 'Stratus'],
+  labels: [t('pages.dashboard.resources.tierCumulus'), t('pages.dashboard.resources.tierNimbus'), t('pages.dashboard.resources.tierStratus')],
   datasets: [{
     data: [cumulusSSDStorageValue.value, nimbusSSDStorageValue.value, stratusSSDStorageValue.value],
     backgroundColor: [tierColors.cumulus, tierColors.nimbus, tierColors.stratus],
@@ -641,7 +644,7 @@ const ssdChartOptions = computed(() => createChartOptions('ssd'))
 
 // HDD Chart Data
 const hddChartData = computed(() => ({
-  labels: ['Cumulus', 'Nimbus', 'Stratus'],
+  labels: [t('pages.dashboard.resources.tierCumulus'), t('pages.dashboard.resources.tierNimbus'), t('pages.dashboard.resources.tierStratus')],
   datasets: [{
     data: [cumulusHDDStorageValue.value, nimbusHDDStorageValue.value, stratusHDDStorageValue.value],
     backgroundColor: [tierColors.cumulus, tierColors.nimbus, tierColors.stratus],
@@ -915,9 +918,9 @@ const generateHistory = async (
   }
 
   return [
-    { name: "Cumulus", data: cumulusData },
-    { name: "Nimbus", data: nimbusData },
-    { name: "Stratus", data: stratusData },
+    { name: t('pages.dashboard.resources.tierCumulus'), data: cumulusData },
+    { name: t('pages.dashboard.resources.tierNimbus'), data: nimbusData },
+    { name: t('pages.dashboard.resources.tierStratus'), data: stratusData },
   ]
 }
 

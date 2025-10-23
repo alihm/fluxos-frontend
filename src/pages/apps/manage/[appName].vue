@@ -191,8 +191,8 @@
             <SmartChip
               v-model="status"
               icon="mdi-cube-outline"
-              text-on="Local Specyfication"
-              text-off="Global Specyfication"
+              :text-on="t('pages.apps.manage.specification.local')"
+              :text-off="t('pages.apps.manage.specification.global')"
               icon-after-true="mdi-wifi"
               icon-after-false="mdi-wifi-off"
               color="info"
@@ -221,7 +221,7 @@
                   <span
                     class="ml-1"
                     style="font-size: 18px"
-                  >Composition</span>
+                  >{{ t('pages.apps.manage.composition') }}</span>
                 </VChip>
               </div>
 
@@ -278,7 +278,7 @@
             <JsonViewer
               v-if="inspectResult.length > 0"
               :data="inspectResult"
-              title="Inspect Details"
+              :title="t('pages.apps.manage.titles.inspectDetails')"
             />
             <VProgressLinear
               v-else-if="!apiError && inspectResult.length === 0"
@@ -297,9 +297,9 @@
             <JsonViewer
               v-if="changesResult.length > 0"
               :data="changesResult"
-              title="File Changes"
+              :title="t('pages.apps.manage.titles.fileChanges')"
               icon="mdi-file-arrow-left-right-outline"
-              message="File changes inside Docker container (Kind: 0 = Modified, Kind: 1 = Added, Kind: 2 = Deleted)"
+              :message="t('pages.apps.manage.messages.fileChangesDescription')"
             />
             <VProgressLinear
               v-else-if="!apiError && changesResult.length === 0"
@@ -341,7 +341,7 @@
                     <VSwitch
                       v-model="enableHistoryStatistics"
                       class="mr-1"
-                      label="History Statistics"
+                      :label="t('pages.apps.manage.labels.historyStatistics')"
                       inset
                       @change="enableHistoryStatisticsChange"
                     />
@@ -370,7 +370,7 @@
                   <VSelect
                     v-model="selectedContainerMonitoring"
                     :items="appSpecification.compose?.map((c) => c.name)"
-                    :label="selectedContainerMonitoring ? 'Component' : 'Select component'"
+                    :label="selectedContainerMonitoring ? t('pages.apps.manage.labels.component') : t('pages.apps.manage.labels.selectComponent')"
                     density="comfortable"
                     style="max-width: 320px;"
                     :disabled="isComposeSingle"
@@ -418,7 +418,7 @@
                   v-if="!enableHistoryStatistics"
                   v-model="selectedPoints"
                   :items="pointsOptions"
-                  label="Points"
+                  :label="t('pages.apps.manage.labels.points')"
                   density="comfortable"
                   style="max-width: 110px;"
                 >
@@ -435,7 +435,7 @@
                   v-if="!enableHistoryStatistics"
                   v-model="refreshRateMonitoring"
                   :items="refreshOptions"
-                  label="Refresh Rate"
+                  :label="t('pages.apps.manage.labels.refreshRate')"
                   density="comfortable"
                   style="max-width: 110px;"
                 >
@@ -452,7 +452,7 @@
                   v-if="enableHistoryStatistics"
                   v-model="selectedTimeRange"
                   :items="timeOptions"
-                  label="Time Range"
+                  :label="t('pages.apps.manage.labels.timeRange')"
                   density="comfortable"
                   style="max-width: 140px;"
                   @update:model-value="fetchStats"
@@ -680,7 +680,7 @@
                   </div>
                   <VTextField
                     v-model="search"
-                    placeholder="Search processes..."
+                    :placeholder="t('pages.apps.manage.placeholders.searchProcesses')"
                     class="mb-2"
                   >
                     <template #append-inner>
@@ -702,7 +702,7 @@
                       class="table-monitoring"
                       :items-per-page="perPage"
                       hide-default-footer
-                      no-data-text="No records available."
+                      :no-data-text="t('pages.apps.manage.messages.noRecordsAvailable')"
                     />
                   </VSheet>
                   <VRow class="align-center justify-space-between mt-2">
@@ -720,7 +720,7 @@
                       cols="auto"
                       class="d-flex align-center"
                     >
-                      <span class="mr-2">Items per page:</span>
+                      <span class="mr-2">{{ t('pages.apps.manage.labels.itemsPerPage') }}:</span>
                       <VSelect
                         v-model="perPage"
                         :items="perPageOptions"
@@ -862,6 +862,7 @@ import qs from "qs"
 import DaemonService from "@/services/DaemonService"
 import { storeToRefs } from "pinia"
 import { useConfigStore } from "@core/stores/config"
+import { useI18n } from 'vue-i18n'
 import {
   Chart, LineController, LineElement, CategoryScale, LinearScale, PointElement, Tooltip, Legend, Title, Filler,
 } from 'chart.js'
@@ -878,6 +879,7 @@ Chart.register(
 )
 
 
+const { t } = useI18n()
 const configStore = useConfigStore()
 const { theme } = storeToRefs(configStore)
 
@@ -979,7 +981,7 @@ const InstalledApiError = ref(false)
 const apiError = ref(false)
 const runningInstancesKey = ref(0)
 const { privilege } = storeToRefs(fluxStore)
-const alertMessageText = ref("We couldn't retrieve the data. Please try again later or switch to a different backend instance.")
+const alertMessageText = ref(t('pages.apps.manage.messages.dataRetrievalError'))
 
 const zelidauthOwner = ref([])
 
@@ -1017,18 +1019,18 @@ const refreshOptions = [
   { value: 30000, title: "30s" },
 ]
 
-const timeOptions = [
-  { value: 15 * 60 * 1000, title: "Last 15 Minutes" },
-  { value: 30 * 60 * 1000, title: "Last 30 Minutes" },
-  { value: 1 * 60 * 60 * 1000, title: "Last 1 Hour" },
-  { value: 2 * 60 * 60 * 1000, title: "Last 2 Hours" },
-  { value: 3 * 60 * 60 * 1000, title: "Last 3 Hours" },
-  { value: 5 * 60 * 60 * 1000, title: "Last 5 Hours" },
-  { value: 1 * 24 * 60 * 60 * 1000, title: "Last 1 Day" },
-  { value: 2 * 24 * 60 * 60 * 1000, title: "Last 2 Days" },
-  { value: 3 * 24 * 60 * 60 * 1000, title: "Last 3 Days" },
-  { value: 7 * 24 * 60 * 60 * 1000, title: "Last 7 Days" },
-]
+const timeOptions = computed(() => [
+  { value: 15 * 60 * 1000, title: t('pages.apps.manage.timeRange.last15Minutes') },
+  { value: 30 * 60 * 1000, title: t('pages.apps.manage.timeRange.last30Minutes') },
+  { value: 1 * 60 * 60 * 1000, title: t('pages.apps.manage.timeRange.last1Hour') },
+  { value: 2 * 60 * 60 * 1000, title: t('pages.apps.manage.timeRange.last2Hours') },
+  { value: 3 * 60 * 60 * 1000, title: t('pages.apps.manage.timeRange.last3Hours') },
+  { value: 5 * 60 * 60 * 1000, title: t('pages.apps.manage.timeRange.last5Hours') },
+  { value: 1 * 24 * 60 * 60 * 1000, title: t('pages.apps.manage.timeRange.last1Day') },
+  { value: 2 * 24 * 60 * 60 * 1000, title: t('pages.apps.manage.timeRange.last2Days') },
+  { value: 3 * 24 * 60 * 60 * 1000, title: t('pages.apps.manage.timeRange.last3Days') },
+  { value: 7 * 24 * 60 * 60 * 1000, title: t('pages.apps.manage.timeRange.last7Days') },
+])
 
 const noInstanceAvailable = ref(false)
 const selectedPoints = ref(500)
@@ -1062,19 +1064,19 @@ const isComposeApp = computed(() =>
 const isOwnerZelidauth = computed(() => zelidauthOwner.value.includes(appSpecificationGlobal.value?.owner))
 
 const tabs = computed(() => [
-  { label: "Specifications", value: "1" },
-  { label: "Information", value: "2" },
-  { label: "File Changes", value: "3" },
-  { label: "Monitoring", value: "4" },
-  { label: "Logs", value: "5" },
-  { label: "Terminal", value: "6" },
-  { label: "Control", value: "7" },
+  { label: t('pages.apps.manage.tabs.specifications'), value: "1" },
+  { label: t('pages.apps.manage.tabs.information'), value: "2" },
+  { label: t('pages.apps.manage.tabs.fileChanges'), value: "3" },
+  { label: t('pages.apps.manage.tabs.monitoring'), value: "4" },
+  { label: t('pages.apps.manage.tabs.logs'), value: "5" },
+  { label: t('pages.apps.manage.tabs.terminal'), value: "6" },
+  { label: t('pages.apps.manage.tabs.control'), value: "7" },
   (privilege.value !== 'fluxteam' && isComposeApp.value) && {
-    label: "Backup/Restore",
+    label: t('pages.apps.manage.tabs.backupRestore'),
     value: "8",
   },
-  { label: "Instances", value: "9" },
-  isOwnerZelidauth.value && { label: "Subscription", value: "10" },
+  { label: t('pages.apps.manage.tabs.instances'), value: "9" },
+  isOwnerZelidauth.value && { label: t('pages.apps.manage.tabs.subscription'), value: "10" },
 ].filter(Boolean)) // removes `false` if condition fails
 
 const callResponse = ref({ status: null, data: null })
@@ -1111,7 +1113,7 @@ let pollingInProgress = false
 
 // Computed Section
 const overviewTitle = computed(() =>
-  enableHistoryStatistics.value ? "History Stats Overview" : "Stats & Processes Overview",
+  enableHistoryStatistics.value ? t('pages.apps.manage.titles.historyStatsOverview') : t('pages.apps.manage.titles.statsProcessesOverview'),
 )
 
 const isSynced = computed(() => {
@@ -1268,9 +1270,9 @@ function getComponentInfo(apps, appName) {
     name: appName.includes("_")
       ? appName.substring(0, appName.lastIndexOf("_"))
       : appName,
-    state: match.State ?? "N/A",
-    status: match.Status?.toLowerCase() ?? "N/A",
-    image: match.Image ?? "N/A",
+    state: match.State ?? t('common.notAvailable'),
+    status: match.Status?.toLowerCase() ?? t('common.notAvailable'),
+    image: match.Image ?? t('common.notAvailable'),
   }
 }
 
@@ -1287,11 +1289,11 @@ function showToast(type, message) {
 }
 
 function labelForExpire(expire, height) {
-  if (!height) return "Application Expired"
-  if (currentBlockHeight.value === -1) return "Not possible to calculate expiration"
+  if (!height) return t('pages.apps.manage.messages.applicationExpired')
+  if (currentBlockHeight.value === -1) return t('pages.apps.manage.messages.cannotCalculateExpiration')
   const expires = expire || 22000
   const blocksToExpire = height + expires - currentBlockHeight.value
-  if (blocksToExpire < 1) return "Application Expired"
+  if (blocksToExpire < 1) return t('pages.apps.manage.messages.applicationExpired')
   const minutes = blocksToExpire * 2
   const units = { day: 1440, hour: 60, minute: 1 }
   const result = []
@@ -1330,10 +1332,10 @@ async function executeLocalCommand(
     const [host, port = 16127] = selectedIp.value?.split(":") || []
 
     if (!host) {
-      alertMessageText.value = 'Instance not found. It may be initializing. Please refresh or try again later.'
+      alertMessageText.value = t('pages.apps.manage.messages.instanceNotFound')
       throw new Error("Instance not found with deployed application.")
     } else {
-      alertMessageText.value = "We couldn't retrieve the data. Please try again later or switch to a different backend instance."
+      alertMessageText.value = t('pages.apps.manage.messages.dataRetrievalError')
     }
 
     const queryHost = host.replace(/\./g, "-")
@@ -1401,7 +1403,7 @@ async function getInstancesForDropDown() {
 
     let fdmData = await axios.get(url).catch(error => {
       errorFdm = true
-      masterIP.value = "Failed to Check"
+      masterIP.value = t('pages.apps.manage.messages.failedToCheck')
       console.error(`UImasterSlave: Failed to reach FDM:`, error)
     })
 
@@ -1433,7 +1435,7 @@ async function getInstancesForDropDown() {
       }
     }
 
-    if (!masterIP.value) masterIP.value = "Defining New Primary In Progress"
+    if (!masterIP.value) masterIP.value = t('pages.apps.manage.messages.definingNewPrimary')
     if (!selectedIp.value) selectedIp.value = instances.value.data[0]?.ip
   } else if (!selectedIp.value) {
     selectedIp.value = instances.value.data[0]?.ip
@@ -1507,7 +1509,7 @@ async function logout() {
   }
 
   console.log("Session expired, logging out...")
-  showToast("warning", "Session expired, logging out...")
+  showToast("warning", t('pages.apps.manage.messages.sessionExpired'))
 
   try {
     await firebase.auth().signOut()
@@ -2301,7 +2303,7 @@ function initCharts() {
       labels: [],
       datasets: [
         {
-          label: "Bind",
+          label: t('pages.apps.manage.charts.bind'),
           data: [],
           fill: true,
           backgroundColor: "rgba(119,255,132,0.3)",
@@ -2309,7 +2311,7 @@ function initCharts() {
           tension: 0.4,
         },
         {
-          label: "Volume",
+          label: t('pages.apps.manage.charts.volume'),
           data: [],
           borderColor: "rgba(155,99,132,1)",
           borderDash: [5, 5],
@@ -2385,7 +2387,7 @@ function initCharts() {
       labels: [],
       datasets: [
         {
-          label: "File System (RootFS)",
+          label: t('pages.apps.manage.charts.fileSystem'),
           data: [],
           fill: true,
           backgroundColor: "rgba(159,155,132,0.3)",
@@ -2431,7 +2433,7 @@ function initCharts() {
       labels: [],
       datasets: [
         {
-          label: "Memory Allocated",
+          label: t('pages.apps.manage.charts.memoryAllocated'),
           data: [],
           fill: true,
           backgroundColor: "rgba(151,187,205,0.4)",
@@ -2442,7 +2444,7 @@ function initCharts() {
           tension: 0.4,
         },
         {
-          label: "Memory Utilization (%)",
+          label: t('pages.apps.manage.charts.memoryUtilization'),
           data: [],
           fill: false,
           borderColor: "rgba(255,99,132,1)",
@@ -2517,7 +2519,7 @@ function initCharts() {
       labels: [],
       datasets: [
         {
-          label: "CPU Allocated",
+          label: t('pages.apps.manage.charts.cpuAllocated'),
           data: [],
           fill: true,
           backgroundColor: "rgba(255,99,132,0.4)",
@@ -2525,7 +2527,7 @@ function initCharts() {
           tension: 0.4,
         },
         {
-          label: "CPU Utilization (%)",
+          label: t('pages.apps.manage.charts.cpuUtilization'),
           fill: false,
           borderColor: "rgba(255,99,132,1)",
           borderDash: [5, 5],
@@ -2589,7 +2591,7 @@ function initCharts() {
       labels: [],
       datasets: [
         {
-          label: "RX on eth0",
+          label: t('pages.apps.manage.charts.networkRx'),
           data: [],
           fill: true,
           backgroundColor: "rgba(99,255,132,0.4)",
@@ -2597,7 +2599,7 @@ function initCharts() {
           tension: 0.4,
         },
         {
-          label: "TX on eth0",
+          label: t('pages.apps.manage.charts.networkTx'),
           data: [],
           fill: false,
           borderColor: "rgba(132,99,255,1)",
@@ -2639,14 +2641,14 @@ function initCharts() {
       labels: [],
       datasets: [
         {
-          label: "Read",
+          label: t('pages.apps.manage.charts.ioRead'),
           data: [],
           fill: false,
           borderColor: "rgba(99,132,255,0.6)",
           tension: 0.4,
         },
         {
-          label: "Write",
+          label: t('pages.apps.manage.charts.ioWrite'),
           data: [],
           fill: true,
           backgroundColor: "rgba(255,132,99,0.4)",

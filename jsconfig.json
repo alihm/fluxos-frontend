@@ -3,7 +3,7 @@
     "./vite.config.*",
     "./src/**/*",
     "./src/**/*.vue",
-    "./themeConfig.js",
+    "./themeConfig.js"
   ],
   "exclude": [
     "dist__",

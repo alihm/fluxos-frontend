@@ -11,7 +11,7 @@
       size="large"
       variant="flat"
     >
-      Starting at ${{ getMinimumPrice(game) }} / month
+      {{ t('components.marketplace.gameCard.startingAt', { price: getMinimumPrice(game) }) }}
     </VChip>
 
     <!-- Content -->
@@ -36,7 +36,7 @@
         @click.stop="navigateToGame"
       >
         <VIcon size="18" class="mr-1">mdi-eye</VIcon>
-        View Details
+        {{ t('components.marketplace.gameCard.viewDetails') }}
       </VBtn>
     </div>
   </div>
@@ -45,6 +45,7 @@
 <script setup>
 import { computed } from 'vue'
 import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { useGameUtils } from '@/composables/useGameUtils'
 
 const props = defineProps({
@@ -53,6 +54,9 @@ const props = defineProps({
     required: true,
   },
 })
+
+const { t } = useI18n()
+
 const router = useRouter()
 const { getMinimumPrice, parseLandingImage } = useGameUtils()
 

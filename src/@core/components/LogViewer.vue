@@ -18,7 +18,7 @@
                 mdi-file-search-outline
               </VIcon>
             </VAvatar>
-            <span class="text-h5">Logs Management</span>
+            <span class="text-h5">{{ t('core.logViewer.title') }}</span>
           </div>
         </div>
       </VCol>
@@ -39,7 +39,7 @@
               v-if="props?.appSpecification"
               v-model="selectedApp"
               :items="componentOptions"
-              :label="selectedApp ? 'Component' : 'Select component'"
+              :label="selectedApp ? t('core.logViewer.component') : t('core.logViewer.selectComponent')"
               :disabled="isComposeSingle"
               dense
               density="comfortable"
@@ -71,7 +71,7 @@
           <VTextField
             v-model="lineCount"
             type="number"
-            label="Line Count"
+            :label="t('core.logViewer.lineCount')"
             dense
             density="comfortable"
             hide-details
@@ -88,7 +88,7 @@
           </VTextField>
           <VTextField
             v-model="sinceTimestamp"
-            label="Logs Since"
+            :label="t('core.logViewer.logsSince')"
             type="datetime-local"
             dense
             density="comfortable"
@@ -106,11 +106,11 @@
       <VCol cols="12" md="4">
         <VTextField
           v-model="filterKeyword"
-          label="Filter Logs"
+          :label="t('core.logViewer.filterLogs')"
           dense
           density="comfortable"
           hide-details
-          placeholder="Enter keywords..."
+          :placeholder="t('core.logViewer.enterKeywords')"
           clearable
           @click:clear="filterKeyword = ''"
         >
@@ -126,7 +126,7 @@
                 size="20"
                 class="mr-1"
               />
-              Advance Options
+              {{ t('core.logViewer.advanceOptions') }}
             </VExpansionPanelTitle>
             <VExpansionPanelText>
               <div class="d-flex flex-column">
@@ -138,7 +138,7 @@
                   @change="togglePolling"
                 >
                   <template #label>
-                    <span class="text-caption">Auto-refresh</span>
+                    <span class="text-caption">{{ t('core.logViewer.autoRefresh') }}</span>
                   </template>
                 </VSwitch>
 
@@ -150,7 +150,7 @@
                   @change="manualFetchLogs"
                 >
                   <template #label>
-                    <span class="text-caption">Display all logs</span>
+                    <span class="text-caption">{{ t('core.logViewer.displayAllLogs') }}</span>
                   </template>
                 </VSwitch>
 
@@ -161,7 +161,7 @@
                   inset
                 >
                   <template #label>
-                    <span class="text-caption">Display timestamp</span>
+                    <span class="text-caption">{{ t('core.logViewer.displayTimestamp') }}</span>
                   </template>
                 </VSwitch>
 
@@ -172,7 +172,7 @@
                   inset
                 >
                   <template #label>
-                    <span class="text-caption">Line selection</span>
+                    <span class="text-caption">{{ t('core.logViewer.lineSelection') }}</span>
                   </template>
                 </VSwitch>
 
@@ -183,7 +183,7 @@
                   inset
                 >
                   <template #label>
-                    <span class="text-caption">Auto-scroll</span>
+                    <span class="text-caption">{{ t('core.logViewer.autoScroll') }}</span>
                   </template>
                 </VSwitch>
               </div>
@@ -210,7 +210,7 @@
         <VIcon>
           {{ copied ? 'mdi-check' : 'mdi-content-copy' }}
         </VIcon>
-        {{ copied ? 'Copied!' : 'Copy' }}
+        {{ copied ? t('core.logViewer.copied') : t('core.logViewer.copy') }}
       </VBtn>
       <VBtn
         v-if="isLineByLineMode && selectedLog.length"
@@ -221,7 +221,7 @@
       >
         <VIcon start>
           mdi-arrange-send-backward
-        </VIcon> Unselect
+        </VIcon> {{ t('core.logViewer.unselect') }}
       </VBtn>
       <VBtn
         v-if="filteredLogs.length > 0"
@@ -235,7 +235,7 @@
         <VIcon start>
           mdi-download
         </VIcon>
-        Download
+        {{ t('core.logViewer.download') }}
       </VBtn>
       <!-- Log entries -->
       <template v-if="filteredLogs.length > 0">
@@ -254,13 +254,13 @@
           v-if="filterKeyword.trim() !== ''"
           class="log-entry"
         >
-          No log lines matching “{{ filterKeyword }}”
+          {{ t('core.logViewer.noMatchingLogs', { keyword: filterKeyword }) }}
         </div>
         <div
           v-else-if="noLogs"
           class="no-matches"
         >
-          No log records found.
+          {{ t('core.logViewer.noLogsFound') }}
         </div>
       </template>
     </div>
@@ -269,13 +269,16 @@
   
 <script setup>
 import { ref, computed, nextTick, onBeforeUnmount } from 'vue'
+import { useI18n } from 'vue-i18n'
 import ClipboardJS from 'clipboard'
 import AnsiToHtml from 'ansi-to-html'
-  
+
 const props = defineProps({
   appSpecification: { type: Object, required: true },
   executeLocalCommand: { type: Function, required: true },
 })
+  
+const { t } = useI18n()
   
 const logs = ref([])
 const selectedApp = ref(null)
@@ -516,7 +519,7 @@ async function downloadApplicationLog(appName) {
     }
 
     if (!Array.isArray(logText) || logText.length === 0) {
-      throw new Error('No logs available to download.')
+      throw new Error(t('core.logViewer.errors.noLogsToDownload'))
     }
 
     const ansiRegex = /\u001b\[[0-9;]*[a-z]/gi

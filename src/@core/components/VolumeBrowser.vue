@@ -17,7 +17,7 @@
                   mdi-server
                 </VIcon>
               </VAvatar>
-              <span class="text-h5">Volume Browser</span>
+              <span class="text-h5">{{ t('core.volumeBrowser.title') }}</span>
             </div>
           </div>
           <!-- Right: Progress Bar with max width -->
@@ -46,7 +46,7 @@
       v-model="selectedAppVolume"
       :items="appSpecification.compose.map(c => c.name)"
       :disabled="isComposeSingle"
-      label="Select Component"
+      :label="t('core.volumeBrowser.selectComponent')"
       class="mb-4"
       style="max-width: 280px;"
       @update:model-value="refreshFolderSwitch"
@@ -64,10 +64,10 @@
             size="20"
             class="mr-2"
             color="success"
-          /> Downloading...
+          /> {{ t('core.volumeBrowser.downloading') }}
         </span>
         <span v-else>
-          Download Completed
+          {{ t('core.volumeBrowser.downloadCompleted') }}
         </span>
       </h5>
   
@@ -96,7 +96,7 @@
       >
         <VTextField
           v-model="inputPathValue"
-          label="Path"
+          :label="t('core.volumeBrowser.path')"
           prepend-inner-icon="mdi-home"
           dense
           class="flex-grow-1 mr-2"
@@ -139,7 +139,7 @@
         :headers="fields"
         fixed-header
         :loading="loadingFolder"
-        :no-data-text="t('files.emptyDirectory')"
+        :no-data-text="t('core.volumeBrowser.files.emptyDirectory')"
         item-value="name"
         class="elevation-1 no-wrap-table"
         density="compact"
@@ -223,7 +223,7 @@
           >
             <VBtnGroup density="compact" variant="flat" rounded="0">
               <!-- Download -->
-              <VTooltip :text="item.isDirectory ? 'Download Folder as Archive' : 'Download File'" location="top">
+              <VTooltip :text="item.isDirectory ? t('core.volumeBrowser.downloadFolderAsArchive') : t('core.volumeBrowser.downloadFile')" location="top">
                 <template #activator="{ props }">
                   <VBtn
                     v-bind="props"
@@ -240,7 +240,7 @@
               </VTooltip>
 
               <!-- Rename -->
-              <VTooltip text="Rename" location="top">
+              <VTooltip :text="t('core.volumeBrowser.rename')" location="top">
                 <template #activator="{ props }">
                   <VBtn
                     v-bind="props"
@@ -257,7 +257,7 @@
               </VTooltip>
 
               <!-- Edit -->
-              <VTooltip text="Edit" location="top" v-if="item.isFile">
+              <VTooltip :text="t('core.volumeBrowser.edit')" location="top" v-if="item.isFile">
                 <template #activator="{ props }">
                   <VBtn
                     v-bind="props"
@@ -274,7 +274,7 @@
               </VTooltip>
 
               <!-- Delete -->
-              <VTooltip text="Delete" location="top">
+              <VTooltip :text="t('core.volumeBrowser.delete')" location="top">
                 <template #activator="{ props }">
                   <VBtn
                     v-bind="props"
@@ -327,11 +327,11 @@
       max-width="500px"
     >
       <VCard>
-        <VCardTitle>Create Folder</VCardTitle>
+        <VCardTitle>{{ t('core.volumeBrowser.createFolder') }}</VCardTitle>
         <VCardText>
           <VTextField
             v-model="newDirName"
-            label="Folder Name"
+            :label="t('core.volumeBrowser.folderName')"
           />
         </VCardText>
         <VCardActions>
@@ -340,7 +340,7 @@
             color="primary"
             @click="createFolder(newDirName)"
           >
-            Create
+            {{ t('core.volumeBrowser.create') }}
           </VBtn>
         </VCardActions>
       </VCard>
@@ -352,7 +352,7 @@
     >
       <VCard>
         <VCardTitle class="bg-primary text-white">
-          Upload Files
+          {{ t('core.volumeBrowser.uploadFiles') }}
         </VCardTitle>
         <VCardText>
           <FileUpload
@@ -368,7 +368,7 @@
             text
             @click="refreshFolder(); uploadFilesDialog = false"
           >
-            Close
+            {{ t('core.volumeBrowser.close') }}
           </VBtn>
         </VCardActions>
       </VCard>
@@ -379,11 +379,11 @@
       max-width="500px"
     >
       <VCard>
-        <VCardTitle>Rename</VCardTitle>
+        <VCardTitle>{{ t('core.volumeBrowser.rename') }}</VCardTitle>
         <VCardText>
           <VTextField
             v-model="newName"
-            label="New Name"
+            :label="t('core.volumeBrowser.newName')"
           />
         </VCardText>
         <VCardActions>
@@ -392,7 +392,7 @@
             color="primary"
             @click="confirmRename"
           >
-            Rename
+            {{ t('core.volumeBrowser.rename') }}
           </VBtn>
         </VCardActions>
       </VCard>
@@ -405,7 +405,7 @@
     >
       <VCard>
         <VCardTitle class="bg-primary text-white d-flex align-center justify-space-between">
-          <span class="text-truncate">Editing: {{ currentEditFile }}</span>
+          <span class="text-truncate">{{ t('core.volumeBrowser.editing', { file: currentEditFile }) }}</span>
           <VSelect
             v-model="editorLanguage"
             :items="supportedLanguages"
@@ -433,7 +433,7 @@
             variant="flat"
             @click="closeEditor"
           >
-            Close
+            {{ t('core.volumeBrowser.close') }}
           </VBtn>
           <VBtn
             class="mr-2"
@@ -448,10 +448,10 @@
                 size="18"
                 class="mr-2"
               />
-              Saving...
+              {{ t('core.volumeBrowser.saving') }}
             </template>
             <template v-else>
-              Save
+              {{ t('core.volumeBrowser.save') }}
             </template>
           </VBtn>
         </VCardActions>
@@ -550,19 +550,19 @@ const { t } = useI18n()
 
 const fields = computed(() => {
   const base = [
-    { title: 'Name', key: 'name', sortable: false },
-    { title: 'Size', key: 'size', sortable: false },
+    { title: t('core.volumeBrowser.name'), key: 'name', sortable: false },
+    { title: t('core.volumeBrowser.size'), key: 'size', sortable: false },
     { title: '', key: 'actions', sortable: false },
   ]
 
   if (!smAndDown.value) {
     base.splice(2, 0, {
-      title: 'Modified At',
+      title: t('core.volumeBrowser.modifiedAt'),
       key: 'modifiedAt',
       sortable: false,
     })
   }
-  
+
   return base
 })
 
@@ -906,12 +906,12 @@ async function createFolder(path) {
 
     if (response.data.status === 'error') {
       if (response.data.data.code === 'EEXIST') {
-        showToast('danger', `Folder ${path} already exists`)
+        showToast('danger', t('core.volumeBrowser.folderAlreadyExists', { folder: path }))
       } else {
         showToast('danger', response.data.data.message || response.data.data)
       }
     } else {
-      showToast('success', `Folder ${path} created!`)
+      showToast('success', t('core.volumeBrowser.folderCreated', { folder: path }))
       await loadFolder(currentFolder.value, true)
     }
   } catch (error) {
@@ -1020,9 +1020,9 @@ async function confirmRename() {
       showToast('danger', response.data.data.message || response.data.data)
     } else {
       if (oldpath.includes('/')) {
-        showToast('success', `${oldpath.split('/').pop()} renamed to ${newname}`)
+        showToast('success', t('core.volumeBrowser.renamedSuccess', { oldName: oldpath.split('/').pop(), newName: newname }))
       } else {
-        showToast('success', `${oldpath} renamed to ${newname}`)
+        showToast('success', t('core.volumeBrowser.renamedSuccess', { oldName: oldpath, newName: newname }))
       }
       loadFolder(currentFolder.value, true)
     }
@@ -1044,7 +1044,7 @@ async function deleteFile(name) {
       showToast('danger', response.data.data.message || response.data.data)
     } else {
       loadFolder(currentFolder.value, true)
-      showToast('success', `${name} deleted`)
+      showToast('success', t('core.volumeBrowser.deleted', { name }))
     }
   } catch (error) {
     showToast('danger', error.message || error)
@@ -1093,7 +1093,7 @@ async function download(name, isFolder = false, silent = false) {
     }
 
     if (!silent && isFolder) {
-      showToast('info', 'Directory download initiated. Please wait...')
+      showToast('info', t('core.volumeBrowser.directoryDownloadInitiated'))
     }
 
     const route = isFolder ? 'downloadfolder' : 'downloadfile'
@@ -1201,12 +1201,12 @@ async function openEditDialog(fileName, size) {
   const maxEditSize = 1024 * 1024 * 4 // 4MB default
 
   if (maxEditSize < size) {
-    showToast('warning', 'The file exceeds the maximum size for browser-based editing. Please use a terminal-based editor.')
-    
+    showToast('warning', t('core.volumeBrowser.fileTooLarge'))
+
     return
   }
-  operationTitle.value = 'Initializing...'
-  optionalInfoMessage.value = `Loading ${fileName}... `
+  operationTitle.value = t('core.volumeBrowser.initializing')
+  optionalInfoMessage.value = t('core.volumeBrowser.loadingFile', { file: fileName })
   progressVisable.value = true
   currentEditFile.value = fileName
 
@@ -1237,7 +1237,7 @@ async function openEditDialog(fileName, size) {
         operationTitle.value = ''
       }, 2000)
       console.error('Error loading file for editing:', err)
-      showToast('danger', 'Error loading file for editing')
+      showToast('danger', t('core.volumeBrowser.errorLoadingFile'))
     })
 }
 
@@ -1262,7 +1262,7 @@ function closeEditor() {
       contentLoaded.value = false
     } catch (err) {
       console.error('Error during closeEditor:', err)
-      showToast('danger', 'Failed to close editor cleanly.')
+      showToast('danger', t('core.volumeBrowser.errorClosingEditor'))
     }
   })
 }
@@ -1285,9 +1285,9 @@ async function saveContent() {
     console.log('[SAVE] Got model value')
   } catch (err) {
     console.error('[SAVE] Error getting editor content:', err)
-    showToast('danger', 'Editor is not ready. Please reopen the file.')
+    showToast('danger', t('core.volumeBrowser.editorNotReady'))
     saving.value = false
-    
+
     return
   }
 
@@ -1300,10 +1300,10 @@ async function saveContent() {
   try {
     console.log('[SAVE] Uploading...')
     await upload(fileToUpload, true)
-    showToast('success', 'File updated successfully!')
+    showToast('success', t('core.volumeBrowser.fileUpdated'))
   } catch (error) {
     console.error('[SAVE] Upload failed:', error)
-    showToast('danger', `Error saving file: ${error.message}`)
+    showToast('danger', t('core.volumeBrowser.errorSavingFile', { error: error.message }))
   } finally {
     hasChanged.value = false
     saving.value = false

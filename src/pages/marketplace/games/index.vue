@@ -12,9 +12,9 @@
             />
           </div>
           <div class="text-compact">
-            <h1 class="title-modern">Level Up Your Gaming</h1>
+            <h1 class="title-modern">{{ t('pages.marketplace.games.index.title') }}</h1>
             <p class="subtitle-modern">
-              Premium game hosting with global servers, lightning-fast connections, and flexible plans for every gamer.
+              {{ t('pages.marketplace.games.index.subtitle') }}
             </p>
           </div>
         </div>
@@ -26,15 +26,14 @@
           <LoadingSpinner
             icon="mdi-gamepad-variant"
             :icon-size="56"
-            title="Loading Games..."
+            :title="t('pages.marketplace.games.index.loading')"
           />
         </div>
 
         <MaintenanceCard
           v-else-if="!games.length"
-          title="Games Marketplace
-Under Maintenance"
-          subtitle="We're currently experiencing technical difficulties with the games marketplace. Our team is working to resolve this issue as quickly as possible."
+          :title="t('pages.marketplace.games.index.maintenanceTitle')"
+          :subtitle="t('pages.marketplace.games.index.maintenanceSubtitle')"
           :loading="loading"
           margin-top="-150px"
           @retry="fetchGames"
@@ -55,10 +54,13 @@ Under Maintenance"
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useTheme } from 'vuetify'
+import { useI18n } from 'vue-i18n'
 import { useMarketplace } from '@/composables/useMarketplace'
 import LoadingSpinner from '@/components/Marketplace/LoadingSpinner.vue'
 import MaintenanceCard from '@/components/Marketplace/MaintenanceCard.vue'
 import GameCard from '@/components/Marketplace/GameCard.vue'
+
+const { t } = useI18n()
 
 const theme = useTheme()
 const { games, loading, fetchGames } = useMarketplace()

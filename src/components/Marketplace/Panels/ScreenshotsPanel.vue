@@ -47,7 +47,7 @@
 
     <div v-else class="no-screenshots">
       <VIcon size="64" color="grey">mdi-image-off-outline</VIcon>
-      <p>No screenshots available</p>
+      <p>{{ t('components.marketplace.panels.screenshotsPanel.noScreenshots') }}</p>
     </div>
 
     <!-- Fullscreen Dialog -->
@@ -70,6 +70,7 @@
 
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useGameUtils } from '@/composables/useGameUtils'
 
 const props = defineProps({
@@ -83,6 +84,7 @@ const props = defineProps({
   },
 })
 
+const { t } = useI18n()
 const { shuffleArray, parseLandingImage } = useGameUtils()
 
 const currentSlide = ref(0)

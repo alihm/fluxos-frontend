@@ -38,7 +38,7 @@
 
       <!-- Developer -->
       <div class="app-developer">
-        {{ app.developer || 'Unknown' }}
+        {{ app.developer || t('components.marketplace.marketplaceAppCard.unknown') }}
       </div>
 
       <!-- Stats Row -->
@@ -74,7 +74,7 @@
         variant="flat"
         class="price-tag"
       >
-        {{ app.price ? `$${app.price}` : 'Free' }}
+        {{ app.price ? `$${app.price}` : t('components.marketplace.marketplaceAppCard.free') }}
       </VChip>
     </div>
 
@@ -88,7 +88,7 @@
         @click.stop="$emit('deploy', app)"
       >
         <VIcon icon="mdi-rocket-launch" size="16" class="me-1" />
-        Install
+        {{ t('components.marketplace.marketplaceAppCard.install') }}
       </VBtn>
     </VCardActions>
   </VCard>
@@ -97,6 +97,7 @@
 <script setup>
 import { computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { useMarketplace } from '@/composables/useMarketplace'
 import { useMarketplaceUtils } from '@/composables/useMarketplaceUtils'
 
@@ -110,21 +111,25 @@ const props = defineProps({
     default: false,
   },
 })
+
 const emit = defineEmits(['deploy'])
+
+const { t } = useI18n()
+
 const router = useRouter()
 const { categoryMap } = useMarketplace()
 const { formatNumber, getCategoryColor } = useMarketplaceUtils()
 
 const truncatedDescription = computed(() => {
-  if (!props.app.description) return 'No description available'
-  
+  if (!props.app.description) return t('components.marketplace.marketplaceAppCard.noDescription')
+
   return props.app.description.length > 100
     ? props.app.description.substring(0, 100) + '...'
     : props.app.description
 })
 
 const getCategoryName = categoryUuid => {
-  return categoryMap.value.get(categoryUuid) || 'Other'
+  return categoryMap.value.get(categoryUuid) || t('components.marketplace.marketplaceAppCard.other')
 }
 
 const getAppColor = app => {

@@ -300,6 +300,7 @@ module.exports = {
     "useKeyModifier": true,
     "useLastChanged": true,
     "useLocalStorage": true,
+    "useLoginSheet": true,
     "useMagicKeys": true,
     "useManualRefHistory": true,
     "useMarketplace": true,

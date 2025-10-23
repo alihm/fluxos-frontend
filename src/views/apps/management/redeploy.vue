@@ -1,6 +1,6 @@
 <template>
   <div class="d-flex flex-nowrap align-end justify-end">
-    <VTooltip text="Redeploy">
+    <VTooltip :text="t('pages.apps.redeploy.tooltip')">
       <template #activator="{ props: redeployBtnProps }">
         <VBtn
           v-bind="redeployBtnProps"
@@ -20,7 +20,7 @@
 
     <ConfirmCustomDialog
       :target="`redeploy-installed-app-${row.item.name}`"
-      confirm-button="Redeploy"
+      :confirm-button="t('pages.apps.redeploy.confirmButton')"
       @confirm="() => redeployApp(row.item)"
     />
   </div>
@@ -29,6 +29,7 @@
 <script setup>
 import { useRouter } from "vue-router"
 import { ref } from "vue"
+import { useI18n } from "vue-i18n"
 import qs from "qs"
 
 const props = defineProps({
@@ -37,6 +38,8 @@ const props = defineProps({
     required: true,
   },
 })
+
+const { t } = useI18n()
 
 const router = useRouter()
 
@@ -65,7 +68,7 @@ function redeployApp(appSpecs, isFromActive = false) {
   // Store in sessionStorage temporarily then navigate
   sessionStorage.setItem('redeploySpecs', JSON.stringify({
     appspecs: specs,
-    isRedeploy: true
+    isRedeploy: true,
   }))
 
   console.log('🚀 [REDEPLOY] Stored in sessionStorage, navigating to apps-register')

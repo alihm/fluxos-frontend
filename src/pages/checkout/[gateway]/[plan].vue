@@ -569,7 +569,7 @@ const monitorPayment = async paymentId => {
 
       if (result.status === 'completed') {
         paymentProcessing.value = false
-        showSnackbar('Payment successful! Redirecting...', 'success')
+        showSnackbar(t('pages.checkoutContent.messages.paymentSuccessfulRedirecting'), 'success')
 
         // Refresh user data and redirect to FluxDrive
         await fluxStore.refreshUserData()

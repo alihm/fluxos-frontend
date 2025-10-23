@@ -46,10 +46,10 @@
             </span>
           </template>
           <span>{{
-            isNewBackendVersion ? t("status.updateAvailable") : t("status.upToDate")
+            isNewBackendVersion ? t("core.statusBar.updateAvailable") : t("core.statusBar.upToDate")
           }}</span>
         </VTooltip>
-        <span>{{ t("status.backend") }}: {{ fluxVersion }}</span>
+        <span>{{ t("core.statusBar.backend") }}: {{ fluxVersion }}</span>
       </div>
 
       <!-- Frontend -->
@@ -83,10 +83,10 @@
             </span>
           </template>
           <span>{{
-            isNewFrontendVersion ? t("status.updateAvailable") : t("status.upToDate")
+            isNewFrontendVersion ? t("core.statusBar.updateAvailable") : t("core.statusBar.upToDate")
           }}</span>
         </VTooltip>
-        <span>{{ t("status.frontend") }}: {{ frontendVersion }}</span>
+        <span>{{ t("core.statusBar.frontend") }}: {{ frontendVersion }}</span>
       </div>
 
       <!-- Node Status -->
@@ -122,9 +122,9 @@
           <span>{{ getNodeStatusResponse.message }}</span>
         </VTooltip>
         <span class="d-inline-flex align-center">
-          {{ t("status.statusMessage") }}:
+          {{ t("core.statusBar.statusMessage") }}:
           <VProgressCircular
-            v-if="getNodeStatusResponse.nodeStatus === t('status.checkingStatus')"
+            v-if="getNodeStatusResponse.nodeStatus === t('core.statusBar.checkingStatus')"
             color="primary"
             :size="14"
             :width="2"
@@ -169,9 +169,9 @@ watch(
 
 
 const getNodeStatusResponse = reactive({
-  nodeStatus: t("status.checkingStatus"),
+  nodeStatus: t("core.statusBar.checkingStatus"),
   class: "primary",
-  message: t("status.checkingStatusMessage"),
+  message: t("core.statusBar.checkingStatusMessage"),
 })
 
 const nodeStatus = async () => {
@@ -181,9 +181,9 @@ const nodeStatus = async () => {
   ])
 
   if (!res || !info) {
-    getNodeStatusResponse.nodeStatus = t("status.unreachable")
+    getNodeStatusResponse.nodeStatus = t("core.statusBar.unreachable")
     getNodeStatusResponse.class = "error"
-    getNodeStatusResponse.message = t("status.unreachable")
+    getNodeStatusResponse.message = t("core.statusBar.unreachable")
 
     return
   }
@@ -196,25 +196,25 @@ const nodeStatus = async () => {
   getNodeStatusResponse.data = node
 
   if (chain?.headers > 0 && chain?.blocks > 0 && blocksBehind > 3) {
-    getNodeStatusResponse.nodeStatus = t("status.notSynced")
+    getNodeStatusResponse.nodeStatus = t("core.statusBar.notSynced")
     getNodeStatusResponse.class = "warning"
-    getNodeStatusResponse.message = t("status.notSyncedMessage", {
+    getNodeStatusResponse.message = t("core.statusBar.notSyncedMessage", {
       blocks: chain?.blocks,
       headers: chain?.headers,
       blocksBehind,
     })
   } else if (node.status === "CONFIRMED" || node.location === "CONFIRMED") {
-    getNodeStatusResponse.nodeStatus = t("status.connected")
+    getNodeStatusResponse.nodeStatus = t("core.statusBar.connected")
     getNodeStatusResponse.class = "success"
-    getNodeStatusResponse.message = t("status.connectedMessage")
+    getNodeStatusResponse.message = t("core.statusBar.connectedMessage")
   } else if (node.status === "STARTED" || node.location === "STARTED") {
-    getNodeStatusResponse.nodeStatus = t("status.connecting")
+    getNodeStatusResponse.nodeStatus = t("core.statusBar.connecting")
     getNodeStatusResponse.class = "warning"
-    getNodeStatusResponse.message = t("status.connectingMessage")
+    getNodeStatusResponse.message = t("core.statusBar.connectingMessage")
   } else {
-    getNodeStatusResponse.nodeStatus = t("status.disconnected")
+    getNodeStatusResponse.nodeStatus = t("core.statusBar.disconnected")
     getNodeStatusResponse.class = "error"
-    getNodeStatusResponse.message = t("status.disconnectedMessage")
+    getNodeStatusResponse.message = t("core.statusBar.disconnectedMessage")
   }
 }
 

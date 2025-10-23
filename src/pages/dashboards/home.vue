@@ -1,42 +1,11 @@
 <template>
   <StatusBar />
-  <div
-    fluid
-    class="mb-6"
-  >
-    <VRow justify="center">
-      <VCol
-        v-for="section in sections"
-        :key="section.title"
-        cols="12"
-        sm="6"
-        md="6"
-        lg="3"
-      >
-        <VCard class="responsive-card rounded-xl elevation-4 pa-4 hover-scale">
-          <div class="d-flex flex-column align-center text-center">
-            <VIcon
-              :icon="section.icon"
-              size="64"
-              color="primary"
-              class="mb-3"
-            />
-            <div class="text-h6 font-weight-medium mb-2">
-              {{ section.title }}
-            </div>
-            <div class="text-body-2 text-secondary">
-              {{ section.description }}
-            </div>
-          </div>
-        </VCard>
-      </VCol>
-    </VRow>
-  </div>
-  <Login />
+  <BannerSlider />
 </template>
 
 <script setup>
 import StatusBar from "@core/components/StatusBar.vue"
+import BannerSlider from "@/components/BannerSlider.vue"
 import { useI18n } from "vue-i18n"
 
 const { t } = useI18n()
@@ -58,9 +27,9 @@ const sections = computed(() => [
     description: t("sections.administration.description"),
   },
   {
-    title: t("sections.flux_xdao.title"),
+    title: t("sections.fluxXdao.title"),
     icon: "mdi-account-group",
-    description: t("sections.flux_xdao.description"),
+    description: t("sections.fluxXdao.description"),
   },
 ])
 </script>

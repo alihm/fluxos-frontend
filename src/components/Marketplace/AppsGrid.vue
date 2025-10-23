@@ -6,14 +6,14 @@
         <div class="header-top">
           <h2 class="section-title">
             <VIcon start color="secondary">mdi-apps</VIcon>
-            Flux Applications
+            {{ labels.title }}
           </h2>
         </div>
 
         <div class="controls-row">
           <VTextField
             v-model="search"
-            placeholder="Search apps..."
+            :placeholder="labels.searchPlaceholder"
             variant="outlined"
             density="compact"
             clearable
@@ -29,7 +29,7 @@
           <VSelect
             v-model="category"
             :items="categoryItems"
-            label="Category"
+            :label="labels.category"
             variant="outlined"
             density="compact"
             hide-details
@@ -41,7 +41,7 @@
           <VSelect
             v-model="sort"
             :items="sortOptions"
-            label="Sort by"
+            :label="labels.sortBy"
             variant="outlined"
             density="compact"
             hide-details
@@ -59,26 +59,26 @@
           <div class="loader-ring"></div>
           <div class="loader-ring"></div>
         </div>
-        <p>Loading marketplace apps...</p>
+        <p>{{ labels.loadingApps }}</p>
       </div>
 
       <div v-else-if="!paginatedApps.length" class="empty-state">
         <template v-if="search || category">
           <VIcon size="64" color="grey">mdi-magnify-close</VIcon>
-          <h3>No apps found</h3>
-          <p>Try adjusting your search or filters</p>
+          <h3>{{ labels.noAppsFound }}</h3>
+          <p>{{ labels.adjustFilters }}</p>
           <VBtn
             variant="flat"
             color="primary"
             @click="resetFilters"
           >
-            Reset Filters
+            {{ labels.resetFilters }}
           </VBtn>
         </template>
         <template v-else>
           <VIcon size="64" color="grey">mdi-store-off-outline</VIcon>
-          <h3 class="mt-1 mb-0">No apps available</h3>
-          <p class="text-body-1 mb-0">The marketplace is currently empty</p>
+          <h3 class="mt-1 mb-0">{{ labels.noAppsAvailable }}</h3>
+          <p class="text-body-1 mb-0">{{ labels.marketplaceEmpty }}</p>
           <VBtn
             variant="flat"
             color="primary"
@@ -86,7 +86,7 @@
             @click="refreshApps"
           >
             <VIcon start>mdi-refresh</VIcon>
-            Refresh
+            {{ labels.refresh }}
           </VBtn>
         </template>
       </div>
@@ -118,7 +118,7 @@
         @click="changePage(currentPage - 1)"
       >
         <VIcon start>mdi-arrow-left</VIcon>
-        Previous
+        {{ labels.previous }}
       </VBtn>
 
       <div class="page-numbers">
@@ -141,7 +141,7 @@
         :disabled="currentPage >= totalPages"
         @click="changePage(currentPage + 1)"
       >
-        Next
+        {{ labels.next }}
         <VIcon end>mdi-arrow-right</VIcon>
       </VBtn>
     </div>
@@ -151,6 +151,7 @@
 <script setup>
 import { ref, computed, watch } from 'vue'
 import { useDisplay } from 'vuetify'
+import { useI18n } from 'vue-i18n'
 import AppCard from '@/components/Marketplace/AppCard.vue'
 import { useMarketplaceUtils } from '@/composables/useMarketplaceUtils'
 
@@ -192,7 +193,11 @@ const props = defineProps({
     default: false,
   },
 })
+
 const emit = defineEmits(['update:search', 'update:category', 'update:sort', 'deploy', 'refresh'])
+
+const { t } = useI18n()
+
 const { width } = useDisplay()
 const { debounce } = useMarketplaceUtils()
 
@@ -204,15 +209,32 @@ const currentPage = ref(1)
 const slideDirection = ref('next') // Track animation direction: 'next' or 'prev'
 
 // Sort options (matching FluxCloud)
-const sortOptions = [
-  { title: 'Default', value: null },
-  { title: 'Date', value: 'date' },
-  { title: 'Name', value: 'name' },
-]
+const sortOptions = computed(() => [
+  { title: t('components.marketplace.appsGrid.sortDefault'), value: null },
+  { title: t('components.marketplace.appsGrid.sortDate'), value: 'date' },
+  { title: t('components.marketplace.appsGrid.sortName'), value: 'name' },
+])
+
+const labels = computed(() => ({
+  title: t('components.marketplace.appsGrid.title'),
+  searchPlaceholder: t('components.marketplace.appsGrid.searchPlaceholder'),
+  category: t('components.marketplace.appsGrid.category'),
+  sortBy: t('components.marketplace.appsGrid.sortBy'),
+  allCategories: t('components.marketplace.appsGrid.allCategories'),
+  loadingApps: t('components.marketplace.appsGrid.loadingApps'),
+  noAppsFound: t('components.marketplace.appsGrid.noAppsFound'),
+  adjustFilters: t('components.marketplace.appsGrid.adjustFilters'),
+  resetFilters: t('components.marketplace.appsGrid.resetFilters'),
+  noAppsAvailable: t('components.marketplace.appsGrid.noAppsAvailable'),
+  marketplaceEmpty: t('components.marketplace.appsGrid.marketplaceEmpty'),
+  refresh: t('components.marketplace.appsGrid.refresh'),
+  previous: t('components.marketplace.appsGrid.previous'),
+  next: t('components.marketplace.appsGrid.next'),
+}))
 
 // Category items
 const categoryItems = computed(() => [
-  { title: 'All Categories', value: null },
+  { title: labels.value.allCategories, value: null },
   ...props.categories,
 ])
 

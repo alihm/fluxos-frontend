@@ -1,4 +1,8 @@
 <script setup>
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
+
 const bufferValue = ref(20)
 const progressValue = ref(10)
 const isFallbackState = ref(false)

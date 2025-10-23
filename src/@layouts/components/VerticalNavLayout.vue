@@ -74,6 +74,9 @@ const verticalNavAttrs = computed(() => {
         <template #before-nav-items>
           <slot name="before-vertical-nav-items" />
         </template>
+        <template #after-nav-items="{ isHovered }">
+          <slot name="after-vertical-nav-items" :is-hovered="isHovered" />
+        </template>
       </VerticalNav>
     </component>
     <div class="layout-content-wrapper">

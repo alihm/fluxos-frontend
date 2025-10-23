@@ -73,6 +73,7 @@ export default defineConfig(({ mode }) => {
       VueI18nPlugin({
         runtimeOnly: true,
         compositionOnly: true,
+        strictMessage: false,
         include: [
           fileURLToPath(new URL('./src/plugins/i18n/locales/**', import.meta.url)),
         ],

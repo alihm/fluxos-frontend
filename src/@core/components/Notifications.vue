@@ -1,5 +1,6 @@
 <script setup>
 import { PerfectScrollbar } from "vue3-perfect-scrollbar"
+import { useI18n } from 'vue-i18n'
 
 const props = defineProps({
   notifications: {
@@ -19,6 +20,8 @@ const props = defineProps({
 })
 
 const emit = defineEmits(["read", "unread", "remove", "removeAll", "click:notification"])
+
+const { t } = useI18n()
 
 const isAllMarkRead = computed(() => {
   return props.notifications.some(item => item.isSeen === false)
@@ -66,7 +69,7 @@ const removeAllNotifications = () => {
           <!-- 👉 Header -->
           <VCardItem class="notification-section">
             <VCardTitle class="text-h6">
-              Notifications
+              {{ t('core.notifications.notifications') }}
             </VCardTitle>
 
             <template #append>
@@ -76,7 +79,7 @@ const removeAllNotifications = () => {
                 color="primary"
                 class="me-2"
               >
-                {{ totalUnseenNotifications }} New
+                {{ t('core.notifications.newCount', { count: totalUnseenNotifications }) }}
               </VChip>
               <IconBtn
                 v-show="props.notifications.length"
@@ -93,7 +96,7 @@ const removeAllNotifications = () => {
                   activator="parent"
                   location="start"
                 >
-                  {{ !isAllMarkRead ? "Mark all as unread" : "Mark all as read" }}
+                  {{ !isAllMarkRead ? t('core.notifications.markAllAsUnread') : t('core.notifications.markAllAsRead') }}
                 </VTooltip>
               </IconBtn>
             </template>
@@ -190,7 +193,7 @@ const removeAllNotifications = () => {
                 class="text-center text-medium-emphasis"
                 style="block-size: 56px"
               >
-                <VListItemTitle>No Notification Found!</VListItemTitle>
+                <VListItemTitle>{{ t('core.notifications.noNotificationFound') }}</VListItemTitle>
               </VListItem>
             </VList>
           </PerfectScrollbar>
@@ -209,7 +212,7 @@ const removeAllNotifications = () => {
               variant="tonal"
               @click="removeAllNotifications"
             >
-              Remove All Notifications
+              {{ t('core.notifications.removeAllNotifications') }}
             </VBtn>
           </VCardText>
         </VCard>

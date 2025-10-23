@@ -2,7 +2,7 @@
   <div class="config-card-wrapper">
     <div class="config-card" :style="cardStyle">
       <div class="config-price-badge">
-        <span class="price-amount">${{ config.price.toFixed(2) }}</span><span class="price-period">/mo</span>
+        <span class="price-amount">${{ config.price.toFixed(2) }}</span><span class="price-period">{{ labels.perMonth }}</span>
       </div>
       <div class="card-header">
         <h3 class="config-name">{{ config.name }}</h3>
@@ -11,17 +11,17 @@
       <div class="config-resources">
         <div v-if="resources.cpu" class="resource-row">
           <VIcon class="resource-icon cpu-icon">mdi-cpu-64-bit</VIcon>
-          <span class="resource-label">CPU</span>
-          <span class="resource-value">{{ Number(resources.cpu.toFixed(2)) }} Core{{ resources.cpu > 1 ? 's' : '' }}</span>
+          <span class="resource-label">{{ labels.cpu }}</span>
+          <span class="resource-value">{{ Number(resources.cpu.toFixed(2)) }} {{ resources.cpu > 1 ? labels.cores : labels.core }}</span>
         </div>
         <div v-if="resources.ram" class="resource-row">
           <VIcon class="resource-icon ram-icon">mdi-memory</VIcon>
-          <span class="resource-label">RAM</span>
+          <span class="resource-label">{{ labels.ram }}</span>
           <span class="resource-value">{{ Number(resources.ram.toFixed(0)) }} MB</span>
         </div>
         <div v-if="resources.hdd" class="resource-row">
           <VIcon class="resource-icon hdd-icon">mdi-harddisk</VIcon>
-          <span class="resource-label">Storage</span>
+          <span class="resource-label">{{ labels.storage }}</span>
           <span class="resource-value">{{ Number(resources.hdd.toFixed(0)) }} GB</span>
         </div>
       </div>
@@ -35,7 +35,7 @@
         @click="handleInstall"
       >
         <VIcon start>mdi-download</VIcon>
-        Install Now
+        {{ labels.installNow }}
       </VBtn>
     </div>
   </div>
@@ -43,6 +43,7 @@
 
 <script setup>
 import { computed } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useGameUtils } from '@/composables/useGameUtils'
 
 const props = defineProps({
@@ -58,6 +59,8 @@ const props = defineProps({
 
 const emit = defineEmits(['install'])
 
+const { t } = useI18n()
+
 const { getConfigResources } = useGameUtils()
 
 const resources = computed(() => getConfigResources(props.config))
@@ -71,6 +74,16 @@ const cardStyle = computed(() => ({
 const handleInstall = () => {
   emit('install', { app: props.app, config: props.config })
 }
+
+const labels = computed(() => ({
+  cpu: t('components.marketplace.appConfigCard.cpu'),
+  ram: t('components.marketplace.appConfigCard.ram'),
+  storage: t('components.marketplace.appConfigCard.storage'),
+  installNow: t('components.marketplace.appConfigCard.installNow'),
+  perMonth: t('components.marketplace.appConfigCard.perMonth'),
+  core: t('components.marketplace.appConfigCard.core'),
+  cores: t('components.marketplace.appConfigCard.cores'),
+}))
 </script>
 
 <style scoped>
@@ -79,7 +92,7 @@ const handleInstall = () => {
 }
 
 .config-card {
-  height: 100%;
+  height: 380px;
   display: flex;
   flex-direction: column;
   gap: 20px;
@@ -102,8 +115,8 @@ const handleInstall = () => {
 }
 
 .config-card:hover .config-price-badge {
-  background: linear-gradient(135deg, rgba(var(--v-theme-primary), 0.3) 0%, rgba(var(--v-theme-primary), 0.2) 100%);
-  border-color: rgba(var(--v-theme-primary), 0.5);
+  background: linear-gradient(135deg, rgba(var(--v-theme-success), 0.3) 0%, rgba(var(--v-theme-success), 0.2) 100%);
+  border-color: rgba(var(--v-theme-success), 0.5);
 }
 
 .config-price-badge {
@@ -113,12 +126,12 @@ const handleInstall = () => {
   display: flex;
   flex-direction: row;
   align-items: baseline;
-  gap: 4px;
-  padding: 12px 16px;
-  background: linear-gradient(135deg, rgba(var(--v-theme-primary), 0.2) 0%, rgba(var(--v-theme-primary), 0.1) 100%);
+  gap: 3px;
+  padding: 8px 12px;
+  background: linear-gradient(135deg, rgba(var(--v-theme-success), 0.2) 0%, rgba(var(--v-theme-success), 0.1) 100%);
   border-radius: 0 16px 0 16px;
-  border-left: 1px solid rgba(var(--v-theme-primary), 0.3);
-  border-bottom: 1px solid rgba(var(--v-theme-primary), 0.3);
+  border-left: 1px solid rgba(var(--v-theme-success), 0.3);
+  border-bottom: 1px solid rgba(var(--v-theme-success), 0.3);
   backdrop-filter: blur(10px);
   z-index: 2;
   transition: all 0.3s ease;
@@ -135,17 +148,19 @@ const handleInstall = () => {
   font-weight: 600;
   margin: 0;
   color: rgb(var(--v-theme-on-surface));
+  white-space: nowrap;
+  overflow: visible;
 }
 
 .price-amount {
-  font-size: 1.5rem;
+  font-size: 1.1rem;
   font-weight: 700;
-  color: rgb(var(--v-theme-primary));
+  color: rgb(var(--v-theme-success));
   line-height: 1;
 }
 
 .price-period {
-  font-size: 0.7rem;
+  font-size: 0.6rem;
   font-weight: 500;
   opacity: 0.7;
   color: rgb(var(--v-theme-on-surface));
@@ -156,6 +171,7 @@ const handleInstall = () => {
   flex-direction: column;
   gap: 12px;
   flex: 1;
+  min-height: 150px;
 }
 
 .resource-row {
@@ -213,9 +229,21 @@ const handleInstall = () => {
   letter-spacing: 0.5px;
   text-transform: none;
   font-size: 1rem;
+  height: 40px !important;
+  min-height: 40px !important;
+  max-height: 40px !important;
+  padding: 0 16px !important;
   transition: all 0.3s ease;
   position: relative;
   overflow: hidden;
+}
+
+.install-btn :deep(.v-btn__content) {
+  height: 40px !important;
+}
+
+.install-btn :deep(.v-btn__overlay) {
+  height: 40px !important;
 }
 
 .install-btn::before {

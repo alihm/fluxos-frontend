@@ -148,7 +148,7 @@ const hideTitleAndIcon = configStore.isVerticalNavMini(isHovered)
         />
       </PerfectScrollbar>
     </slot>
-    <slot name="after-nav-items" />
+    <slot name="after-nav-items" :is-hovered="isHovered" />
   </Component>
 </template>
 
@@ -169,11 +169,11 @@ const hideTitleAndIcon = configStore.isVerticalNavMini(isHovered)
 
 .logo-wrapper {
   max-height: 60px;
-  max-width: 140px;
+  max-width: 200px;
   display: flex;
   align-items: center;
   justify-content: center;
-  overflow: hidden;
+  overflow: visible;
 
   svg {
     height: auto;

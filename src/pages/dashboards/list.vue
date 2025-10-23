@@ -17,7 +17,7 @@
         <VSelect
           v-model="options.itemsPerPage"
           :items="pageOptions"
-          label="Per page"
+          :label="t('pages.dashboard.list.perPage')"
           density="compact"
           variant="outlined"
           style="min-width: 100px"
@@ -29,8 +29,8 @@
       >
         <VTextField
           v-model="filter"
-          label="Filter"
-          placeholder="Type to Search"
+          :label="t('pages.dashboard.list.filter')"
+          :placeholder="t('pages.dashboard.list.filterPlaceholder')"
           density="compact"
           variant="outlined"
           clearable
@@ -54,7 +54,7 @@
           <VDataTable
             :items="paginatedItems"
             :items-per-page="options.itemsPerPage"
-            :headers="headers"
+            :headers="translatedHeaders"
             :sort-by="sortBy"
             hover
             striped
@@ -64,11 +64,11 @@
             @update:sort-by="sortBy = $event"
           >
             <template #item.lastpaid="{ item }">
-              {{ item.lastpaid ? formatLastPaid(item.lastpaid) : "N/A" }}
+              {{ item.lastpaid ? formatLastPaid(item.lastpaid) : t('pages.dashboard.list.notAvailable') }}
             </template>
             <template #item.location="{ item }">
               {{
-                item.location ? `${item.location.country} / ${item.location.org}` : "N/A"
+                item.location ? `${item.location.country} / ${item.location.org}` : t('pages.dashboard.list.notAvailable')
               }}
             </template>
           </VDataTable>
@@ -93,8 +93,11 @@
 
 <script setup>
 import { ref, computed, onMounted, watch } from "vue"
+import { useI18n } from "vue-i18n"
 import axios from "axios"
 import DashboardService from "@/services/DashboardService"
+
+const { t } = useI18n()
 
 const timeoptions = {
   year: "numeric",
@@ -136,25 +139,34 @@ const options = ref({
 
 const headers = ref([
   { title: "IP Address", key: "ip", sortable: true },
-  { title: "Address", key: "payment_address", sortable: true },
+  { title: "Address", key: "payment_address", sortable: true, translationKey: "paymentAddress" },
   {
     title: "Country",
     key: "location.country",
     sortable: true,
     value: item => formatTableEntry(item.location?.country),
+    translationKey: "locationCountry",
   },
   {
     title: "Provider",
     key: "location.org",
     sortable: true,
     value: item => formatTableEntry(item.location?.org),
+    translationKey: "locationOrg",
   },
   { title: "Last Paid", key: "lastpaid", sortable: true },
   { title: "Tier", key: "tier", sortable: true },
 ])
 
+const translatedHeaders = computed(() => {
+  return headers.value.map(header => ({
+    ...header,
+    title: t(`pages.dashboard.list.columns.${header.translationKey || header.key.replace('.', '_')}`),
+  }))
+})
+
 function formatTableEntry(value) {
-  return value || "Unknown"
+  return value || t('pages.dashboard.list.unknown')
 }
 
 function formatLastPaid(value) {
@@ -226,8 +238,8 @@ async function getFluxList() {
     const locationMap = locations.reduce((map, location) => {
       const ip = location.geolocation?.ip || location.ip
       if (ip) {
-        const country = location.country || location.geolocation?.country || "Unknown"
-        const org = location.org || location.geolocation?.org || "Unknown"
+        const country = location.country || location.geolocation?.country || t('pages.dashboard.list.unknown')
+        const org = location.org || location.geolocation?.org || t('pages.dashboard.list.unknown')
 
         const simplifiedLocation = {
           ip,
@@ -259,7 +271,7 @@ async function getFluxList() {
     items.value = adjustedFluxList
     fluxListLoading.value = false
   } catch (error) {
-    console.log("Error loading flux list:", error)
+    console.log(t('pages.dashboard.list.errorLoading'), error)
     fluxListLoading.value = false
   }
 }

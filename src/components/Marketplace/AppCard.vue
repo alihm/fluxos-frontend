@@ -38,7 +38,7 @@
               class="install-btn"
               @click.stop="deploy"
             >
-              Install
+              {{ t('components.marketplace.appCard.install') }}
             </VBtn>
             <VBtn
               color="primary"
@@ -47,7 +47,7 @@
               class="view-btn"
               @click.stop="viewDetails"
             >
-              View
+              {{ t('components.marketplace.appCard.view') }}
             </VBtn>
           </div>
         </div>
@@ -82,7 +82,7 @@
         <!-- Description section (flexible height) -->
         <div class="app-description-section">
           <p class="app-description">
-            {{ app.description || 'No description available' }}
+            {{ app.description || t('components.marketplace.appCard.noDescription') }}
           </p>
         </div>
       </div>
@@ -100,6 +100,7 @@
 <script setup>
 import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import AppIcon from '@/components/Marketplace/AppIcon.vue'
 import InstallDialog from '@/components/Marketplace/InstallDialog.vue'
 import { useMarketplaceUtils } from '@/composables/useMarketplaceUtils'
@@ -114,7 +115,11 @@ const props = defineProps({
     default: () => [],
   },
 })
+
 const emit = defineEmits(['deploy'])
+
+const { t } = useI18n()
+
 const router = useRouter()
 const { formatNumber, formatPrice } = useMarketplaceUtils()
 
@@ -122,12 +127,12 @@ const hovered = ref(false)
 const showInstallDialog = ref(false)
 
 const categoryName = computed(() => {
-  if (!props.app.category) return 'Apps'
+  if (!props.app.category) return t('components.marketplace.appCard.defaultCategory')
 
   // Find category by UUID
   const category = props.marketplaceCategories.find(cat => cat.uuid === props.app.category)
-  
-  return category ? category.name : 'Apps'
+
+  return category ? category.name : t('components.marketplace.appCard.defaultCategory')
 })
 
 const navigateToApp = () => {
@@ -355,10 +360,11 @@ const handleDeploySuccess = deployedApp => {
   color: rgba(var(--v-theme-on-surface), 0.8);
   margin: 0;
   display: -webkit-box;
-  -webkit-line-clamp: 6;
+  -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
   text-overflow: ellipsis;
+  word-break: break-word;
 }
 
 /* Mobile adjustments */

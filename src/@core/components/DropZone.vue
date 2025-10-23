@@ -4,6 +4,9 @@ import {
   useFileDialog,
   useObjectUrl,
 } from '@vueuse/core'
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
 
 const dropZoneRef = ref()
 const fileData = ref([])
@@ -12,9 +15,9 @@ function onDrop(DroppedFiles) {
   DroppedFiles?.forEach(file => {
     if (file.type.slice(0, 6) !== 'image/') {
 
-       
-      alert('Only image files are allowed')
-      
+
+      alert(t('core.dropZone.onlyImageFiles'))
+
       return
     }
     fileData.value.push({
@@ -55,15 +58,15 @@ useDropZone(dropZoneRef, onDrop)
             <VIcon icon="tabler-upload" />
           </IconBtn>
           <h4 class="text-h4">
-            Drag and drop your image here.
+            {{ t('core.dropZone.dragAndDropImage') }}
           </h4>
-          <span class="text-disabled">or</span>
+          <span class="text-disabled">{{ t('core.dropZone.or') }}</span>
 
           <VBtn
             variant="tonal"
             size="small"
           >
-            Browse Images
+            {{ t('core.dropZone.browseImages') }}
           </VBtn>
         </div>
 
@@ -106,7 +109,7 @@ useDropZone(dropZoneRef, onDrop)
                       block
                       @click.stop="fileData.splice(index, 1)"
                     >
-                      Remove File
+                      {{ t('core.dropZone.removeFile') }}
                     </VBtn>
                   </VCardActions>
                 </VCard>

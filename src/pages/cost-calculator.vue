@@ -22,10 +22,10 @@
           </VAvatar>
           <div>
             <h1 class="text-h4 text-sm-h3 font-weight-bold mb-2">
-              Cost Calculator
+              {{ t('pages.costCalculator.title') }}
             </h1>
             <p class="text-body-1 text-sm-h6 text-medium-emphasis mb-0">
-              Calculate deployment costs for your Flux applications
+              {{ t('pages.costCalculator.subtitle') }}
             </p>
           </div>
         </div>
@@ -39,7 +39,7 @@
         md="6"
       >
         <VCard>
-          <VCardTitle class="bg-primary text-white">Configuration</VCardTitle>
+          <VCardTitle class="bg-primary text-white">{{ t('pages.costCalculator.configuration') }}</VCardTitle>
           <VCardText class="pt-6">
             <!-- Instances -->
             <div class="mb-6">
@@ -47,10 +47,10 @@
                 <VIcon icon="mdi-server-network" color="primary" size="28" class="mr-3" />
                 <div>
                   <div class="text-h6 font-weight-bold">
-                    How many instances will you be running?
+                    {{ t('pages.costCalculator.instancesQuestion') }}
                   </div>
                   <p class="text-body-2 text-medium-emphasis mb-0 mt-1">
-                    (min 3 / max 100) 1 Instance = 1 Node
+                    {{ t('pages.costCalculator.instancesHint') }}
                   </p>
                 </div>
               </div>
@@ -60,11 +60,11 @@
                 :min="3"
                 :max="100"
                 :rules="[
-                  v => !!v || 'Instances is required',
-                  v => v >= 3 || 'Minimum 3 instances required',
-                  v => v <= 100 || 'Maximum 100 instances allowed'
+                  v => !!v || t('pages.costCalculator.validation.instancesRequired'),
+                  v => v >= 3 || t('pages.costCalculator.validation.instancesMin'),
+                  v => v <= 100 || t('pages.costCalculator.validation.instancesMax')
                 ]"
-                placeholder="3"
+                :placeholder="t('pages.costCalculator.instancesPlaceholder')"
                 @input="calculateCost"
               />
             </div>
@@ -75,10 +75,10 @@
                 <VIcon icon="mdi-calendar-clock" color="primary" size="28" class="mr-3" />
                 <div>
                   <div class="text-h6 font-weight-bold">
-                    Renewal period
+                    {{ t('pages.costCalculator.renewalPeriod') }}
                   </div>
                   <p class="text-body-2 text-medium-emphasis mb-0 mt-1">
-                    (Manual renewal required)
+                    {{ t('pages.costCalculator.renewalHint') }}
                   </p>
                 </div>
               </div>
@@ -96,17 +96,17 @@
               <div class="d-flex align-center mb-4">
                 <VIcon icon="mdi-memory" color="primary" size="32" class="mr-3" />
                 <h4 class="text-h5 font-weight-bold mb-0">
-                  Hardware Resources
+                  {{ t('pages.costCalculator.hardwareResources') }}
                 </h4>
               </div>
               
               <!-- CPU Cores -->
               <div class="mb-4 ml-2">
                 <div class="text-h6 font-weight-bold">
-                  How many cores do you require?
+                  {{ t('pages.costCalculator.cpuQuestion') }}
                 </div>
                 <div class="text-body-2 text-medium-emphasis">
-                  (min 0.1 / max 15.0)
+                  {{ t('pages.costCalculator.cpuRange') }}
                 </div>
                 <div class="d-flex justify-end" style="transform: translateY(-8px);">
                   <VChip
@@ -147,10 +147,10 @@
               <!-- Memory -->
               <div class="mb-4 ml-2">
                 <div class="text-h6 font-weight-bold">
-                  How much memory will your app need?
+                  {{ t('pages.costCalculator.memoryQuestion') }}
                 </div>
                 <div class="text-body-2 text-medium-emphasis">
-                  (min 100 MB / max 59000 MB)
+                  {{ t('pages.costCalculator.memoryRange') }}
                 </div>
                 <div class="d-flex justify-end" style="transform: translateY(-8px);">
                   <VChip
@@ -191,10 +191,10 @@
               <!-- Storage -->
               <div class="mb-4 ml-2">
                 <div class="text-h6 font-weight-bold">
-                  How much storage would you like?
+                  {{ t('pages.costCalculator.storageQuestion') }}
                 </div>
                 <div class="text-body-2 text-medium-emphasis">
-                  (min 1 GB / max 820 GB)
+                  {{ t('pages.costCalculator.storageRange') }}
                 </div>
                 <div class="d-flex justify-end" style="transform: translateY(-8px);">
                   <VChip
@@ -241,15 +241,15 @@
               <div class="d-flex align-center mb-4">
                 <VIcon icon="mdi-ethernet" color="primary" size="32" class="mr-3" />
                 <h4 class="text-h5 font-weight-bold mb-0">
-                  Exposed Ports
+                  {{ t('pages.costCalculator.exposedPorts') }}
                 </h4>
               </div>
-              
+
               <div class="mb-4 ml-2">
                 <VTextField
                   v-model="newPortInput"
-                  label="Add Exposed Port"
-                  placeholder="Enter port number and press Enter"
+                  :label="t('pages.costCalculator.addExposedPort')"
+                  :placeholder="t('pages.costCalculator.portPlaceholder')"
                   @keypress="handlePortInputKeypress"
                   clearable
                   class="mb-3 no-spinners"
@@ -274,21 +274,21 @@
                         class="mr-1"
                       />
                       {{ port }}
-                      <span v-if="isPortEnterprise(port)" class="ml-1 text-caption">+fee</span>
+                      <span v-if="isPortEnterprise(port)" class="ml-1 text-caption">{{ t('pages.costCalculator.portFee') }}</span>
                     </VChip>
                   </div>
                 </div>
-                
+
                 <p class="text-body-2 text-medium-emphasis">
                   <template v-if="enterprisePortCount > 0">
-                    <span class="text-warning font-weight-medium">{{ enterprisePortCount }} enterprise port{{ enterprisePortCount > 1 ? 's' : '' }}</span> detected<br>
-                    Additional fees apply for ports 0-1023, 8080, 8081, 8443, 6667
+                    <span class="text-warning font-weight-medium">{{ enterprisePortCount }} {{ t('pages.costCalculator.enterprisePort', enterprisePortCount) }}</span> {{ t('pages.costCalculator.enterprisePortDetected') }}<br>
+                    {{ t('pages.costCalculator.enterprisePortInfo') }}
                   </template>
                   <template v-else-if="parsedPorts.length > 0">
-                    Standard ports - no additional fees
+                    {{ t('pages.costCalculator.standardPorts') }}
                   </template>
                   <template v-else>
-                    Add ports your application will expose to the public
+                    {{ t('pages.costCalculator.addPortsHint') }}
                   </template>
                 </p>
               </div>
@@ -301,7 +301,7 @@
               <div class="d-flex align-center mb-4">
                 <VIcon icon="mdi-tune-variant" color="primary" size="32" class="mr-3" />
                 <h4 class="text-h5 font-weight-bold mb-0">
-                  Additional Options
+                  {{ t('pages.costCalculator.additionalOptions') }}
                 </h4>
               </div>
               
@@ -310,18 +310,18 @@
                 <VCheckbox
                   :model-value="formData.enterprise === 'enterprise'"
                   :disabled="!isEnterpriseAvailable"
-                  label="Enterprise Application"
+                  :label="t('pages.costCalculator.enterpriseApplication')"
                   @update:model-value="(val) => { formData.enterprise = val ? 'enterprise' : ''; console.log('Enterprise changed:', val, 'to:', formData.enterprise); calculateCost(); }"
                 />
                 <p class="text-body-2 ml-8" :class="isEnterpriseAvailable ? 'text-medium-emphasis' : 'text-error'">
                   <template v-if="isEnterpriseAvailable">
-                    Enterprise applications run on Arcane OS with enhanced privacy protection, encrypted data handling, and priority deployment on specialized nodes
+                    {{ t('pages.costCalculator.enterpriseDescription') }}
                   </template>
                   <template v-else-if="!isWebCryptoAvailable()">
-                    Enterprise applications require HTTPS or localhost. Please use a secure connection to access enterprise features.
+                    {{ t('pages.costCalculator.enterpriseHttpsRequired') }}
                   </template>
                   <template v-else>
-                    Enterprise applications require authentication. Please log in to access enterprise features.
+                    {{ t('pages.costCalculator.enterpriseAuthRequired') }}
                   </template>
                 </p>
               </div>
@@ -330,11 +330,11 @@
               <div class="mb-4">
                 <VCheckbox
                   v-model="formData.staticip"
-                  label="Static IP Address"
+                  :label="t('pages.costCalculator.staticIp')"
                   @change="() => { console.log('Static IP changed:', formData.staticip); calculateCost(); }"
                 />
                 <p class="text-body-2 text-medium-emphasis ml-8">
-                  Assign a dedicated static IP address to your application
+                  {{ t('pages.costCalculator.staticIpDescription') }}
                 </p>
               </div>
 
@@ -342,18 +342,18 @@
               <div class="mb-4">
                 <VCheckbox
                   v-model="syncEnabled"
-                  label="Synchronize data across instances"
+                  :label="t('pages.costCalculator.syncData')"
                   @change="calculateCost"
                 />
                 <p class="text-body-2 text-medium-emphasis ml-8">
-                  Enable data sync using Phased Master-Master (r) or Master-Slave (g) modes with shared storage. When disabled, each instance uses its own isolated persistent storage
+                  {{ t('pages.costCalculator.syncDataDescription') }}
                 </p>
               </div>
             </div>
 
             <!-- Cost Display -->
-            <VCard 
-              variant="tonal" 
+            <VCard
+              variant="tonal"
               color="primary"
               class="mb-6"
             >
@@ -361,7 +361,7 @@
                 <div class="d-flex justify-space-between align-center">
                   <div>
                     <h3 class="text-h6 font-weight-bold">
-                      Estimated Deployment Cost
+                      {{ t('pages.costCalculator.estimatedCost') }}
                     </h3>
                   </div>
                   <div class="text-end">
@@ -369,19 +369,19 @@
                       <template v-if="calculating">
                         <div class="d-flex align-center justify-end">
                           <VIcon icon="tabler-loader" class="spinning-icon me-1" size="24" />
-                          Calculating...
+                          {{ t('pages.costCalculator.calculating') }}
                         </div>
                       </template>
                       <template v-else>
-                        {{ costResult.usd ? `$${costResult.usd} USD` : 'Calculating...' }}
+                        {{ costResult.usd ? `$${costResult.usd} USD` : t('pages.costCalculator.calculating') }}
                       </template>
                     </div>
                     <div v-if="!calculating" class="text-body-2">
                       {{ costResult.flux ? `${costResult.flux} FLUX` : '' }}
-                      {{ costResult.discount ? `with ${costResult.discount}% discount` : '' }}
+                      {{ costResult.discount ? t('pages.costCalculator.withDiscount', { discount: costResult.discount }) : '' }}
                     </div>
                     <!-- Retry button for errors -->
-                    <div 
+                    <div
                       v-if="(typeof costResult.flux === 'string' && (costResult.flux.includes('unavailable') || costResult.flux.includes('error')))"
                       class="mt-2"
                     >
@@ -393,7 +393,7 @@
                         @click="calculateCost(0)"
                       >
                         <VIcon icon="tabler-refresh" class="me-1" />
-                        Retry
+                        {{ t('pages.costCalculator.retry') }}
                       </VBtn>
                     </div>
                   </div>
@@ -404,11 +404,11 @@
             <!-- Help Section -->
             <VCard variant="outlined">
               <VCardTitle>
-                <VIcon 
-                  icon="tabler-help" 
-                  class="me-2" 
+                <VIcon
+                  icon="tabler-help"
+                  class="me-2"
                 />
-                Help
+                {{ t('pages.costCalculator.helpTitle') }}
               </VCardTitle>
               <VCardText>
                 <VList class="pa-0">
@@ -434,7 +434,7 @@
         md="6"
       >
         <VCard>
-          <VCardTitle class="bg-primary text-white">Preset Configurations</VCardTitle>
+          <VCardTitle class="bg-primary text-white">{{ t('pages.costCalculator.presetConfigurations') }}</VCardTitle>
           <VCardText class="pt-6">
             <VTable 
               class="preset-table border"
@@ -443,11 +443,11 @@
             >
               <thead>
                 <tr>
-                  <th class="text-no-wrap">Nodes</th>
-                  <th class="text-no-wrap">CPU</th>
-                  <th class="text-no-wrap">RAM</th>
-                  <th class="text-no-wrap">SSD</th>
-                  <th class="text-no-wrap d-none d-sm-table-cell">Cost</th>
+                  <th class="text-no-wrap">{{ t('pages.costCalculator.nodes') }}</th>
+                  <th class="text-no-wrap">{{ t('pages.costCalculator.cpu') }}</th>
+                  <th class="text-no-wrap">{{ t('pages.costCalculator.ram') }}</th>
+                  <th class="text-no-wrap">{{ t('pages.costCalculator.ssd') }}</th>
+                  <th class="text-no-wrap d-none d-sm-table-cell">{{ t('pages.costCalculator.cost') }}</th>
                   <th class="text-no-wrap"></th>
                 </tr>
               </thead>
@@ -461,11 +461,16 @@
                   <td class="text-no-wrap">{{ preset.ram }}GB</td>
                   <td class="text-no-wrap">{{ preset.ssd }}GB</td>
                   <td class="text-no-wrap d-none d-sm-table-cell">
-                    <div class="text-body-2 text-primary">
+                    <div class="text-caption text-primary">
                       <template v-if="preset.flux === '...'">...</template>
-                      <template v-else>{{ preset.flux }} FLUX</template>
+                      <template v-else>
+                        {{ typeof preset.flux === 'number'
+                            ? preset.flux.toFixed(2)
+                            : preset.flux
+                        }} FLUX
+                      </template>
                     </div>
-                    <div 
+                    <div
                       v-if="preset.usd && typeof preset.usd === 'number'"
                       class="text-caption text-medium-emphasis text-success"
                     >
@@ -478,18 +483,18 @@
                       size="x-small"
                       @click="selectPreset(preset)"
                     >
-                      Select
+                      {{ t('pages.costCalculator.select') }}
                     </VBtn>
                   </td>
                 </tr>
               </tbody>
             </VTable>
 
-            <div 
+            <div
               v-if="fluxUsdRate"
               class="mt-4 text-caption text-medium-emphasis"
             >
-              *Estimated 1 Flux = ${{ fluxUsdRate.toFixed(2) }} USD
+              {{ t('pages.costCalculator.estimatedRate', { rate: fluxUsdRate.toFixed(2) }) }}
             </div>
           </VCardText>
         </VCard>
@@ -555,12 +560,12 @@
             rounded
             @click="helpDialog.show = false"
           >
-            <VIcon 
-              icon="tabler-check" 
-              size="16" 
+            <VIcon
+              icon="tabler-check"
+              size="16"
               class="me-2"
             />
-            Got it
+            {{ t('pages.costCalculator.gotIt') }}
           </VBtn>
         </VCardActions>
       </VCard>
@@ -587,10 +592,13 @@
 
 <script setup>
 import { ref, onMounted, reactive, computed } from 'vue'
+import { useI18n } from 'vue-i18n'
 import Api from '@/services/ApiClient'
 import axios from 'axios'
 import { encryptEnterpriseWithAes, encryptAesKeyWithRsaKey, importRsaPublicKey, isWebCryptoAvailable } from '@/utils/enterpriseCrypto'
 import AppsService from '@/services/AppsService'
+
+const { t } = useI18n()
 
 // Reactive form data
 const formData = reactive({
@@ -733,14 +741,14 @@ const handlePortInputKeypress = event => {
 }
 
 // Renewal period options
-const renewalOptions = [
-  { title: '1 Week', value: 7 },
-  { title: '2 Weeks', value: 14 },
-  { title: '1 Month', value: 30 },
-  { title: '3 Months', value: 90 },
-  { title: '6 Months', value: 180 },
-  { title: '12 Months', value: 360 },
-]
+const renewalOptions = computed(() => [
+  { title: t('pages.costCalculator.renewalOptions.oneWeek'), value: 7 },
+  { title: t('pages.costCalculator.renewalOptions.twoWeeks'), value: 14 },
+  { title: t('pages.costCalculator.renewalOptions.oneMonth'), value: 30 },
+  { title: t('pages.costCalculator.renewalOptions.threeMonths'), value: 90 },
+  { title: t('pages.costCalculator.renewalOptions.sixMonths'), value: 180 },
+  { title: t('pages.costCalculator.renewalOptions.twelveMonths'), value: 360 },
+])
 
 // Preset configurations
 const presets = ref([
@@ -803,68 +811,28 @@ const presets = ref([
 ])
 
 // Help items
-const helpItems = [
+const helpItems = computed(() => [
   {
-    question: 'What is an instance?',
-    answer: `An instance is a Flux Node, which is like a Docker Container, holding a copy of your application. 
-      We deploy to 3 instances minimum on the Flux network to ensure service continuity of your application using load balancing. 
-      If one node goes down, another will automatically spin up and replicate your app, seamlessly in the background, 
-      without end users noticing any loss of service or change.`,
+    question: t('pages.costCalculator.help.instanceQuestion'),
+    answer: t('pages.costCalculator.help.instanceAnswer'),
   },
   {
-    question: 'Can I change the specs later?',
-    answer: `Yes, you can always increase or decrease any of the parameters as you see fit! This is all managed
-      via FluxOS <a href="https://home.runonflux.io" target="_blank">home.runonflux.io</a>`,
+    question: t('pages.costCalculator.help.changeSpecsQuestion'),
+    answer: t('pages.costCalculator.help.changeSpecsAnswer'),
   },
   {
-    question: 'What is a component?',
-    answer: `<p>A component is one Docker image. If your project has two docker images, 
-      for example, a front end (node.js, html, css) and a backend (mongodb) that is classed as two components.</p>
-      <p>Therefore the estimated component cost should be multiplied by how many docker images your project uses.</p>`,
+    question: t('pages.costCalculator.help.componentQuestion'),
+    answer: t('pages.costCalculator.help.componentAnswer'),
   },
   {
-    question: 'What does "Synchronize data across instances" mean?',
-    answer: `<p><strong>"Synchronize data across instances"</strong> enables data synchronization across all instances of your application using either Phased Master-Master (r) or Master-Slave (g) mode.</p>
-      <p><strong>When enabled (g:/data):</strong></p>
-      <ul>
-        <li><strong>Phased Master-Master (r):</strong> Controlled two-way sync that prevents data overwrites during startup</li>
-        <li><strong>Master-Slave (g):</strong> One-way sync from master instance to others for consistent read-only data</li>
-        <li>Shared persistent storage that survives instance restarts</li>
-        <li>Perfect for applications that need shared state, configuration, or file storage</li>
-      </ul>
-      <br>
-      <p><strong>When disabled (/tmp):</strong></p>
-      <ul>
-        <li>Each instance has its own isolated persistent storage</li>
-        <li>No data sharing between instances</li>
-        <li>Each node maintains its own independent data that persists across restarts</li>
-        <li>Better for applications where instances should operate independently</li>
-      </ul>`,
+    question: t('pages.costCalculator.help.syncDataQuestion'),
+    answer: t('pages.costCalculator.help.syncDataAnswer'),
   },
   {
-    question: 'What are exposed ports and enterprise port fees?',
-    answer: `<p><strong>Exposed ports</strong> are the public ports that external users can access your application through. These are different from internal container ports.</p>
-      <p><strong>Enterprise ports</strong> are privileged or commonly-used exposed ports that require additional fees:</p>
-      <p><strong>Enterprise Port Ranges:</strong></p>
-      <ul>
-        <li><strong>Ports 0-1023:</strong> Well-known ports (HTTP, HTTPS, SSH, FTP, etc.)</li>
-        <li><strong>Port 8080:</strong> Alternative HTTP port</li>
-        <li><strong>Port 8081:</strong> Alternative HTTP port</li>
-        <li><strong>Port 8443:</strong> Alternative HTTPS port</li>
-        <li><strong>Port 6667:</strong> IRC (Internet Relay Chat)</li>
-      </ul>
-      <br>
-      <p><strong>Why the extra cost?</strong></p>
-      <ul>
-        <li>Well-known ports require special network privileges to bind</li>
-        <li>These ports are in high demand and limited in availability</li>
-        <li>Additional security and compliance measures are needed</li>
-        <li>Network infrastructure costs are higher for privileged ports</li>
-      </ul>
-      <br>
-      <p><strong>Standard exposed ports</strong> (like 3000, 4000, 5000) have no additional fees. Your container can still use any internal ports - only the exposed/public ports affect pricing.</p>`,
+    question: t('pages.costCalculator.help.portsQuestion'),
+    answer: t('pages.costCalculator.help.portsAnswer'),
   },
-]
+])
 
 // Methods
 const calculateCost = async (retryCount = 0) => {
@@ -873,14 +841,14 @@ const calculateCost = async (retryCount = 0) => {
   
   if (calculating.value) {
     console.log('Already calculating, returning early')
-    
+
     return
   }
-  
+
   const startTime = Date.now() // Capture start time for minimum display duration
-  
+
   calculating.value = true
-  costResult.flux = 'Calculating...'
+  costResult.flux = t('pages.costCalculator.calculating')
   costResult.usd = ''
   costResult.discount = ''
 
@@ -896,14 +864,14 @@ const calculateCost = async (retryCount = 0) => {
       if (!isWebCryptoAvailable()) {
         // Gracefully disable enterprise mode and show warning instead of blocking
         console.warn('WebCrypto API is not available. Enterprise mode disabled. Please use HTTPS or localhost for enterprise applications.')
-        
+
         // Show user-friendly toast instead of error in cost display
-        showToast('warning', 'Enterprise features require HTTPS or localhost. Please access this application using a secure connection.')
-        
+        showToast('warning', t('pages.costCalculator.messages.enterpriseHttpsWarning'))
+
         // Reset enterprise mode and continue with normal calculation
         formData.enterprise = '' // Reset to standard mode
         enterpriseValue = ''
-        
+
         // Small delay to ensure toast is visible before continuing
         await new Promise(resolve => setTimeout(resolve, 100))
 
@@ -1022,24 +990,24 @@ const calculateCost = async (retryCount = 0) => {
     if (error.code === 'ERR_NETWORK' || error.response?.status === 504 || error.response?.status >= 500) {
       // Network or server error - try retry
       if (retryCount < 2) {
-        costResult.flux = `Retrying... (${retryCount + 1}/3)`
+        costResult.flux = t('pages.costCalculator.messages.retrying', { count: retryCount + 1 })
         calculating.value = false
         setTimeout(() => calculateCost(retryCount + 1), 2000) // Retry after 2 seconds
-        
+
         return
       } else {
-        showToast('error', 'API server unavailable. Please try again later.')
+        showToast('error', t('pages.costCalculator.messages.apiUnavailable'))
       }
     } else if (error.response?.status === 400) {
-      showToast('warning', 'Invalid configuration. Please check your settings.')
+      showToast('warning', t('pages.costCalculator.messages.invalidConfig'))
     } else {
-      showToast('error', 'Calculation error. Please try again.')
+      showToast('error', t('pages.costCalculator.messages.calculationError'))
     }
-    
+
     // Keep previous values or show empty if no previous calculation
-    if (!costResult.flux || costResult.flux === 'Calculating...') {
+    if (!costResult.flux || costResult.flux === t('pages.costCalculator.calculating')) {
       costResult.flux = '- FLUX'
-      costResult.usd = '- USD' 
+      costResult.usd = '- USD'
       costResult.discount = ''
     }
   } finally {
@@ -1187,7 +1155,7 @@ onMounted(async () => {
     if (!isHttps && !isLocalhost) {
       // Show warning toast about enterprise feature limitations on HTTP
       setTimeout(() => {
-        showToast('warning', 'Enterprise features require HTTPS. Only standard deployments available on HTTP.')
+        showToast('warning', t('pages.costCalculator.messages.httpsWarning'))
       }, 1000) // Delay to let page load completely
     }
   }

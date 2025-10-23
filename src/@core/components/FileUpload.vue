@@ -20,9 +20,9 @@
         <VIcon size="64">
           mdi-cloud-upload
         </VIcon>
-        <p>Drop files here or <em>click to upload</em></p>
+        <p>{{ t('core.fileUpload.dropFilesHere') }} <em>{{ t('core.fileUpload.clickToUpload') }}</em></p>
         <p class="upload-footer">
-          (File size is limited to 5GB)
+          {{ t('core.fileUpload.fileSizeLimit') }}
         </p>
       </VCardText>
     </VCard>
@@ -66,7 +66,7 @@
           :disabled="!filesToUpload"
           @click="startUpload"
         >
-          Upload Files
+          {{ t('core.fileUpload.uploadFiles') }}
         </VBtn>
       </VCol>
     </VRow>
@@ -84,11 +84,14 @@
 
 <script setup>
 import { ref, computed, reactive } from 'vue'
+import { useI18n } from 'vue-i18n'
 
 const props = defineProps({
   uploadFolder: { type: String, required: true },
   headers: { type: Object, required: true },
 })
+
+const { t } = useI18n()
 
 // ✅ Make the array reactive
 const files = reactive([])
@@ -149,7 +152,7 @@ const addFile = e => {
 const addFiles = list => {
   for (const f of list) {
     if (files.some(file => file.file.name === f.name)) {
-      showToast(`'${f.name}' is already in the upload queue`, 'warning')
+      showToast(t('core.fileUpload.alreadyInQueue', { fileName: f.name }), 'warning')
     } else {
       files.push({
         file: f,
@@ -192,18 +195,18 @@ const upload = file => {
     if (xhr.status >= 200 && xhr.status < 300) {
       file.uploaded = true
       file.progress = 100
-      showToast(`'${file.file.name}' has been uploaded`, 'success')
+      showToast(t('core.fileUpload.uploadSuccess', { fileName: file.file.name }), 'success')
       setTimeout(() => {
         removeFile(file)
       }, 1500)
     } else {
-      showToast(`Error uploading '${file.file.name}': status ${xhr.status}`, 'error')
+      showToast(t('core.fileUpload.uploadError', { fileName: file.file.name, status: xhr.status }), 'error')
     }
   }
 
   xhr.onerror = () => {
     file.uploading = false
-    showToast(`Upload failed for '${file.file.name}'`, 'error')
+    showToast(t('core.fileUpload.uploadFailed', { fileName: file.file.name }), 'error')
     removeFile(file)
   }
 

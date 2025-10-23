@@ -13,7 +13,7 @@
         >
           mdi-information-outline
         </VIcon>
-        <span class="ml-1">General</span>
+        <span class="ml-1">{{ t('core.appDetailsCard.general') }}</span>
       </VChip>
 
       <!-- Copy Specification Button -->
@@ -28,7 +28,7 @@
       >
         <VIcon size="16">mdi-content-copy</VIcon>
         <VTooltip activator="parent" location="left">
-          Copy Specification
+          {{ t('core.appDetailsCard.copySpecification') }}
         </VTooltip>
       </VBtn>
     </h3>
@@ -43,14 +43,14 @@
       {{ snackbar.message }}
     </VSnackbar>
     <ListEntry
-      title="Name"
+      :title="t('core.appDetailsCard.name')"
       :data="app.name"
       title-icon="mdi-package-variant"
       title-icon-scale="1.3"
       kbd-variant="secondary"
     />
     <ListEntry
-      title="Description"
+      :title="t('core.appDetailsCard.description')"
       :data="app.description"
       title-icon="mdi-text-box-outline"
       title-icon-scale="1.3"
@@ -58,14 +58,14 @@
       hide-if-empty
     />
     <ListEntry
-      title="Owner"
+      :title="t('core.appDetailsCard.owner')"
       :data="app.owner"
       title-icon="mdi-account"
       title-icon-scale="1.3"
       kbd-variant="secondary"
     />
     <ListEntry
-      title="Hash"
+      :title="t('core.appDetailsCard.hash')"
       :data="app.hash"
       title-icon="mdi-pound-box"
       title-icon-scale="1.3"
@@ -73,7 +73,7 @@
     />
     <ListEntry
       v-if="app?.contacts && app.contacts.length > 0"
-      title="Contacts"
+      :title="t('core.appDetailsCard.contacts')"
       :data="sanitized(app.contacts)"
       :title-icon="contactIcon(sanitized(app.contacts))"
       title-icon-scale="1.3"
@@ -81,7 +81,7 @@
       hide-if-empty
     />
     <ListEntry
-      title="Geolocation"
+      :title="t('core.appDetailsCard.geolocation')"
       title-icon="mdi-earth"
       title-icon-scale="1.3"
       kbd-variant="secondary"
@@ -91,7 +91,7 @@
           <div
             v-for="(location, index) in app?.geolocation && app.geolocation.length > 0
               ? app.geolocation
-              : ['Worldwide']"
+              : [t('core.appDetailsCard.worldwide')]"
             :key="index"
             class="d-inline-block"
             style="margin-right: 5px"
@@ -119,21 +119,21 @@
       </template>
     </ListEntry>
     <ListEntry
-      title="Instances"
+      :title="t('core.appDetailsCard.instances')"
       :data="app?.instances || 3"
       title-icon="mdi-map-marker"
       title-icon-scale="1.3"
       kbd-variant="success"
     />
     <ListEntry
-      title="Specifications version"
+      :title="t('core.appDetailsCard.specificationsVersion')"
       :data="app.version"
       title-icon="mdi-file-code"
       title-icon-scale="1.3"
       kbd-variant="success"
     />
     <ListEntry
-      title="Registered on Blockheight"
+      :title="t('core.appDetailsCard.registeredOnBlockheight')"
       :data="app.height"
       title-icon="mdi-calendar-check"
       title-icon-scale="1.2"
@@ -141,30 +141,30 @@
     />
     <ListEntry
       v-if="app.hash && app.hash.length === 64"
-      title="Expires on Blockheight"
+      :title="t('core.appDetailsCard.expiresOnBlockheight')"
       :data="app.height + (app.expire || 22000)"
       title-icon="mdi-hourglass"
       title-icon-scale="1.2"
       kbd-variant="success"
     />
     <ListEntry
-      title="Expires in"
+      :title="t('core.appDetailsCard.expiresIn')"
       :data="getNewExpireLabel"
       title-icon="mdi-clock-outline"
       title-icon-scale="1.2"
       :kbd-variant="isExpiringSoon(getNewExpireLabel) ? 'danger' : 'success'"
     />
     <ListEntry
-      title="Enterprise Nodes"
-      :data="app?.nodes && app?.nodes.length > 0 ? app.nodes.join(', ') : 'Not scoped'"
+      :title="t('core.appDetailsCard.enterpriseNodes')"
+      :data="app?.nodes && app?.nodes.length > 0 ? app.nodes.join(', ') : t('core.appDetailsCard.notScoped')"
       title-icon="mdi-server-network"
       title-icon-scale="1.2"
       kbd-variant="secondary"
     />
     <ListEntry
-      title="Static IP"
+      :title="t('core.appDetailsCard.staticIp')"
       :data="
-        app.staticip ? 'Yes, Running only on Static IP nodes' : 'No, Running on all nodes'
+        app.staticip ? t('core.appDetailsCard.staticIpYes') : t('core.appDetailsCard.staticIpNo')
       "
       title-icon="mdi-map-marker-radius"
       title-icon-scale="1.2"
@@ -175,6 +175,7 @@
 
 <script setup>
 import { ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 import geolocations from "@/utils/geolocation"
 
 const props = defineProps({
@@ -194,6 +195,8 @@ const props = defineProps({
   },
 })
 
+const { t } = useI18n()
+
 const snackbar = ref({
   show: false,
   message: '',
@@ -205,6 +208,7 @@ function isMarketplaceApp(name) {
   if (!name || name.length < 14) return false
   const possibleDateString = name.substring(name.length - 13)
   const possibleDate = Number(possibleDateString)
+  
   return !isNaN(possibleDate)
 }
 
@@ -216,19 +220,19 @@ async function exportSpec() {
     // Use native clipboard API
     await navigator.clipboard.writeText(spec)
 
-    snackbar.value.message = 'Application specification copied to clipboard!'
+    snackbar.value.message = t('core.appDetailsCard.specificationCopied')
     snackbar.value.color = 'success'
     snackbar.value.show = true
   } catch (error) {
     console.error('Failed to copy specification:', error)
-    snackbar.value.message = 'Failed to copy specification'
+    snackbar.value.message = t('core.appDetailsCard.specificationCopyFailed')
     snackbar.value.color = 'error'
     snackbar.value.show = true
   }
 }
 
 function getGeolocation(geo) {
-  if (!geo) return "Worldwide"
+  if (!geo) return t('core.appDetailsCard.worldwide')
 
   if (geo.startsWith("a") && !geo.startsWith("ac") && !geo.startsWith("a!c")) {
     // Specific continent
@@ -236,10 +240,10 @@ function getGeolocation(geo) {
 
     const continentExists = geolocations.continents.find(
       c => c.code === continentCode,
-    ) || { name: "Unknown" }
+    ) || { name: t('core.appDetailsCard.unknown') }
 
-    
-    return `Continent: ${continentExists.name}`
+
+    return t('core.appDetailsCard.continent', { name: continentExists.name })
   }
 
   if (geo.startsWith("b")) {
@@ -247,11 +251,11 @@ function getGeolocation(geo) {
     const countryCode = geo.slice(1)
 
     const countryExists = geolocations.countries.find(c => c.code === countryCode) || {
-      name: "Unknown",
+      name: t('core.appDetailsCard.unknown'),
     }
 
-    
-    return `Country: ${countryExists.name}`
+
+    return t('core.appDetailsCard.country', { name: countryExists.name })
   }
 
   if (geo.startsWith("ac")) {
@@ -261,16 +265,16 @@ function getGeolocation(geo) {
 
     const continentExists = geolocations.continents.find(
       c => c.code === continentCode,
-    ) || { name: "Unknown" }
+    ) || { name: t('core.appDetailsCard.unknown') }
 
     const countryExists = geolocations.countries.find(c => c.code === countryCode) || {
-      name: "Unknown",
+      name: t('core.appDetailsCard.unknown'),
     }
 
-    let locationString = `Allowed: Continent: ${continentExists.name}`
-    if (countryCode) locationString += `, Country: ${countryExists.name}`
-    if (regionName) locationString += `, Region: ${regionName}`
-    
+    let locationString = t('core.appDetailsCard.allowedContinent', { name: continentExists.name })
+    if (countryCode) locationString += t('core.appDetailsCard.country', { name: countryExists.name })
+    if (regionName) locationString += t('core.appDetailsCard.region', { name: regionName })
+
     return locationString
   }
 
@@ -281,20 +285,20 @@ function getGeolocation(geo) {
 
     const continentExists = geolocations.continents.find(
       c => c.code === continentCode,
-    ) || { name: "Unknown" }
+    ) || { name: t('core.appDetailsCard.unknown') }
 
     const countryExists = geolocations.countries.find(c => c.code === countryCode) || {
-      name: "Unknown",
+      name: t('core.appDetailsCard.unknown'),
     }
 
-    let locationString = `Forbidden: Continent: ${continentExists.name}`
-    if (countryCode) locationString += `, Country: ${countryExists.name}`
-    if (regionName) locationString += `, Region: ${regionName}`
-    
+    let locationString = t('core.appDetailsCard.forbiddenContinent', { name: continentExists.name })
+    if (countryCode) locationString += t('core.appDetailsCard.country', { name: countryExists.name })
+    if (regionName) locationString += t('core.appDetailsCard.region', { name: regionName })
+
     return locationString
   }
 
-  return "Worldwide"
+  return t('core.appDetailsCard.worldwide')
 }
 
 function sanitized(value) {

@@ -5,7 +5,7 @@
       v-if="isLoading"
       icon="mdi-apps"
       :icon-size="56"
-      title="Loading Application..."
+      :title="t('pages.marketplace.detail.loadingTitle')"
     />
 
     <!-- Error State -->
@@ -15,7 +15,7 @@
       variant="outlined"
       class="mb-4 modern-alert"
     >
-      Failed to load application details: {{ error }}
+      {{ t('pages.marketplace.detail.errorMessage', { error }) }}
     </VAlert>
 
     <!-- Back Button -->
@@ -91,8 +91,8 @@
           <!-- Action Section -->
           <div class="action-section">
             <div class="price-section">
-              <span class="price-label">Price</span>
-              <span class="price-value">{{ app.price ? `$${app.price.toFixed(2)}` : 'Free' }}</span>
+              <span class="price-label">{{ t('pages.marketplace.detail.priceLabel') }}</span>
+              <span class="price-value">{{ app.price ? `$${app.price.toFixed(2)}` : t('pages.marketplace.detail.priceFree') }}</span>
             </div>
             <VBtn
               color="primary"
@@ -113,7 +113,7 @@
           <VAvatar size="32" class="req-title-avatar">
             <VIcon icon="mdi-rocket-launch" size="18" color="white" />
           </VAvatar>
-          <span class="req-title-text">Minimum Requirements</span>
+          <span class="req-title-text">{{ t('pages.marketplace.detail.minimumRequirements') }}</span>
         </div>
         <div class="req-visual-grid">
           <div class="req-visual-item cpu-item">
@@ -121,8 +121,8 @@
               <VIcon icon="mdi-cpu-64-bit" size="16" color="white" />
             </div>
             <div class="req-visual-content">
-              <div class="req-visual-value">{{ app.compose[0].cpu || 1 }}<span class="req-unit"> Cores</span></div>
-              <div class="req-visual-label">CPU Power</div>
+              <div class="req-visual-value">{{ app.compose[0].cpu || 1 }}<span class="req-unit">{{ t('pages.marketplace.detail.unitCores') }}</span></div>
+              <div class="req-visual-label">{{ t('pages.marketplace.detail.cpuPower') }}</div>
             </div>
           </div>
 
@@ -131,8 +131,8 @@
               <VIcon icon="mdi-memory" size="16" color="white" />
             </div>
             <div class="req-visual-content">
-              <div class="req-visual-value">{{ app.compose[0].ram || 512 }}<span class="req-unit"> MB</span></div>
-              <div class="req-visual-label">Memory</div>
+              <div class="req-visual-value">{{ app.compose[0].ram || 512 }}<span class="req-unit">{{ t('pages.marketplace.detail.unitMB') }}</span></div>
+              <div class="req-visual-label">{{ t('pages.marketplace.detail.memory') }}</div>
             </div>
           </div>
 
@@ -141,8 +141,8 @@
               <VIcon icon="mdi-harddisk" size="16" color="white" />
             </div>
             <div class="req-visual-content">
-              <div class="req-visual-value">{{ app.compose[0].hdd || 1 }}<span class="req-unit"> GB</span></div>
-              <div class="req-visual-label">Storage</div>
+              <div class="req-visual-value">{{ app.compose[0].hdd || 1 }}<span class="req-unit">{{ t('pages.marketplace.detail.unitGB') }}</span></div>
+              <div class="req-visual-label">{{ t('pages.marketplace.detail.storage') }}</div>
             </div>
           </div>
         </div>
@@ -154,7 +154,7 @@
           <VAvatar size="32" class="section-title-avatar screenshots-avatar">
             <VIcon icon="mdi-image-multiple" size="18" color="white" />
           </VAvatar>
-          <span class="section-title-text">Screenshots</span>
+          <span class="section-title-text">{{ t('pages.marketplace.detail.screenshots') }}</span>
         </div>
         <div class="screenshot-grid">
           <div
@@ -165,7 +165,7 @@
           >
             <VImg
               :src="image"
-              :alt="`Screenshot ${index + 1}`"
+              :alt="t('pages.marketplace.detail.screenshotAlt', { number: index + 1 })"
               height="120"
               cover
               @error="handleImageError(image)"
@@ -191,7 +191,7 @@
             <VAvatar size="32" class="section-title-avatar about-avatar">
               <VIcon icon="mdi-information" size="18" color="white" />
             </VAvatar>
-            <span class="section-title-text">About</span>
+            <span class="section-title-text">{{ t('pages.marketplace.detail.about') }}</span>
           </div>
           <div v-if="app.description" class="description-scroll">
             <p class="app-description">{{ app.description }}</p>
@@ -203,7 +203,7 @@
                 <VIcon icon="mdi-account-circle" size="14" color="info" />
               </div>
               <div class="info-content">
-                <span class="info-label">Developer</span>
+                <span class="info-label">{{ t('pages.marketplace.detail.developer') }}</span>
                 <span class="info-value">{{ app.developer && app.developer.trim() && app.developer.toLowerCase() !== 'n/a' ? app.developer : app.company }}</span>
               </div>
             </div>
@@ -213,7 +213,7 @@
                 <VIcon icon="mdi-calendar-clock" size="14" color="warning" />
               </div>
               <div class="info-content">
-                <span class="info-label">Last Update</span>
+                <span class="info-label">{{ t('pages.marketplace.detail.lastUpdate') }}</span>
                 <span class="info-value">{{ new Date(app.updated_at || app.timestamp).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) }}</span>
               </div>
             </div>
@@ -223,7 +223,7 @@
                 <VIcon icon="mdi-tag" size="14" color="success" />
               </div>
               <div class="info-content">
-                <span class="info-label">Version</span>
+                <span class="info-label">{{ t('pages.marketplace.detail.version') }}</span>
                 <span class="info-value">{{ app.version || app.appVersion }}</span>
               </div>
             </div>
@@ -233,7 +233,7 @@
                 <VIcon icon="mdi-download-circle" size="14" color="error" />
               </div>
               <div class="info-content">
-                <span class="info-label">Downloads</span>
+                <span class="info-label">{{ t('pages.marketplace.detail.downloads') }}</span>
                 <span class="info-value">{{ formatNumber(app.installCount) }}</span>
               </div>
             </div>
@@ -245,7 +245,7 @@
             <VAvatar size="32" class="section-title-avatar links-avatar">
               <VIcon icon="mdi-link" size="18" color="white" />
             </VAvatar>
-            <span class="section-title-text">Links</span>
+            <span class="section-title-text">{{ t('pages.marketplace.detail.links') }}</span>
           </div>
           <div class="links-list">
             <VBtn
@@ -260,7 +260,7 @@
               :ripple="false"
             >
               <VIcon start icon="mdi-web" size="16" />
-              Website
+              {{ t('pages.marketplace.detail.website') }}
             </VBtn>
             <VBtn
               v-if="app.sourceCode"
@@ -274,7 +274,7 @@
               :ripple="false"
             >
               <VIcon start icon="mdi-github" size="16" />
-              Source Code
+              {{ t('pages.marketplace.detail.sourceCode') }}
             </VBtn>
             <VBtn
               v-if="app.supportLink"
@@ -288,7 +288,7 @@
               :ripple="false"
             >
               <VIcon start icon="mdi-help-circle" size="16" />
-              Support
+              {{ t('pages.marketplace.detail.support') }}
             </VBtn>
           </div>
         </div>
@@ -336,10 +336,13 @@
 <script setup>
 import { ref, onMounted, computed, watch, nextTick } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { useMarketplace } from '@/composables/useMarketplace'
 import LoadingSpinner from '@/components/Marketplace/LoadingSpinner.vue'
 import AppIcon from '@/components/Marketplace/AppIcon.vue'
 import InstallDialog from '@/components/Marketplace/InstallDialog.vue'
+
+const { t } = useI18n()
 
 const route = useRoute()
 const router = useRouter()
@@ -434,7 +437,7 @@ const getActionText = () => {
   if (!app.value) return ''
 
   // In marketplace, all apps show Install which includes configuration and payment
-  return 'Install'
+  return t('pages.marketplace.detail.install')
 }
 
 const getActionIcon = () => {
@@ -1237,6 +1240,10 @@ onMounted(() => {
   font-size: 0.7rem;
   font-weight: 500;
   opacity: 0.6;
+}
+
+.req-unit::before {
+  content: '\00a0';
 }
 
 .req-visual-label {

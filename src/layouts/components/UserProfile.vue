@@ -6,7 +6,9 @@ import qs from "qs"
 import { useRoute, useRouter } from "vue-router"
 import { eventBus } from "@/utils/eventBus"
 import { disconnectWalletConnect } from "@/utils/walletService"
+import { useI18n } from "vue-i18n"
 
+const { t } = useI18n()
 const route = useRoute()
 const router = useRouter()
 const fluxStore = useFluxStore()
@@ -111,7 +113,7 @@ async function logout() {
 
   // For other login types (zelcore, ssp, metamask), no additional cleanup needed
 
-  showToast('success', 'Logged out successfully')
+  showToast('success', t('common.messages.loggedOutSuccessfully'))
   if (route.path === "/") {
     eventBus.emit("getZelIdLoginPhrase")
   } else {

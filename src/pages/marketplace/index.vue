@@ -5,15 +5,14 @@
       v-if="isInitialLoading"
       icon="mdi-store"
       :icon-size="56"
-      title="Loading Marketplace..."
+      :title="t('pages.marketplace.loading')"
     />
 
     <!-- Maintenance Mode -->
     <MaintenanceCard
       v-else-if="error || (!isInitialLoading && apps.length === 0)"
-      title="Applications Marketplace
-Under Maintenance"
-      subtitle="We're currently experiencing technical difficulties with the marketplace. Our team is working to resolve this issue as quickly as possible."
+      :title="t('pages.marketplace.maintenanceTitle')"
+      :subtitle="t('pages.marketplace.maintenanceSubtitle')"
       :loading="loading"
       @retry="handleRefresh"
     />
@@ -143,6 +142,7 @@ Under Maintenance"
 import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useDisplay } from 'vuetify'
+import { useI18n } from 'vue-i18n'
 import { useMarketplace } from '@/composables/useMarketplace'
 
 // Import components
@@ -153,6 +153,7 @@ import NewListedCard from '@/components/Marketplace/NewListedCard.vue'
 import SponsoredCard from '@/components/Marketplace/SponsoredCard.vue'
 import AppsGrid from '@/components/Marketplace/AppsGrid.vue'
 
+const { t } = useI18n()
 const router = useRouter()
 const { width, height } = useDisplay()
 

@@ -27,7 +27,7 @@
             <VProgressCircular indeterminate />
           </VOverlay>
 
-          <h3>Geographic Locations ({{ getLocationCount() }})</h3>
+          <h3>{{ t('pages.dashboard.locations.geographicTitle', { count: getLocationCount() }) }}</h3>
 
           <template v-if="geographicData.series.length > 0">
             <VueApexCharts
@@ -41,7 +41,7 @@
           </template>
           <template v-else>
             <div class="no-data">
-              No geographic data available.
+              {{ t('pages.dashboard.locations.noGeographicData') }}
             </div>
           </template>
         </VCard>
@@ -65,7 +65,7 @@
             <VProgressCircular indeterminate />
           </VOverlay>
 
-          <h3>Providers ({{ getProviderCount() }})</h3>
+          <h3>{{ t('pages.dashboard.locations.providersTitle', { count: getProviderCount() }) }}</h3>
 
           <template v-if="providerData.series.length > 0">
             <VueApexCharts
@@ -79,7 +79,7 @@
           </template>
           <template v-else>
             <div class="no-data">
-              No provider data available.
+              {{ t('pages.dashboard.locations.noProviderData') }}
             </div>
           </template>
         </VCard>
@@ -90,10 +90,14 @@
 
 <script setup>
 import { ref, reactive, onMounted, watch, nextTick } from "vue"
+import { useI18n } from "vue-i18n"
 import axios from "axios"
 import DashboardService from "@/services/DashboardService"
 import { useConfigStore } from "@core/stores/config"
 import { storeToRefs } from "pinia"
+
+// Initialize i18n
+const { t } = useI18n()
 
 // Reactive state
 const fluxList = ref([])
@@ -192,7 +196,7 @@ const generateGeographicPie = async () => {
     const nodeData = []
 
     fluxList.value.forEach(flux => {
-      const country = flux.geolocation?.country || "Unknown"
+      const country = flux.geolocation?.country || t('pages.dashboard.locations.unknown')
       const existingPoint = nodeData.find(node => node.country === country)
       if (existingPoint) {
         existingPoint.amount += 1
@@ -202,11 +206,12 @@ const generateGeographicPie = async () => {
     })
 
     for (let i = 0; i < fluxNodeCount.value - fluxList.value.length; i++) {
-      const existingPoint = nodeData.find(node => node.country === "Unknown")
+      const unknownLabel = t('pages.dashboard.locations.unknown')
+      const existingPoint = nodeData.find(node => node.country === unknownLabel)
       if (existingPoint) {
         existingPoint.amount += 1
       } else {
-        nodeData.push({ country: "Unknown", amount: 1 })
+        nodeData.push({ country: unknownLabel, amount: 1 })
       }
     }
 
@@ -234,7 +239,7 @@ const generateProviderPie = async () => {
     const nodeData = []
 
     fluxList.value.forEach(flux => {
-      const org = flux.geolocation?.org || "Unknown"
+      const org = flux.geolocation?.org || t('pages.dashboard.locations.unknown')
       const existingPoint = nodeData.find(node => node.org === org)
       if (existingPoint) {
         existingPoint.amount += 1
@@ -244,11 +249,12 @@ const generateProviderPie = async () => {
     })
 
     for (let i = 0; i < fluxNodeCount.value - fluxList.value.length; i++) {
-      const existingPoint = nodeData.find(node => node.org === "Unknown")
+      const unknownLabel = t('pages.dashboard.locations.unknown')
+      const existingPoint = nodeData.find(node => node.org === unknownLabel)
       if (existingPoint) {
         existingPoint.amount += 1
       } else {
-        nodeData.push({ org: "Unknown", amount: 1 })
+        nodeData.push({ org: unknownLabel, amount: 1 })
       }
     }
 

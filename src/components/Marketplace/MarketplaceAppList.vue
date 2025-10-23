@@ -24,7 +24,7 @@
                 size="x-small"
                 prepend-icon="mdi-star"
               >
-                Featured
+                {{ labels.featured }}
               </VChip>
             </div>
           </template>
@@ -40,7 +40,7 @@
                   color="grey"
                   variant="outlined"
                 >
-                  by {{ app.author }}
+                  {{ labels.by }} {{ app.author }}
                 </VChip>
                 <VChip
                   :color="getCategoryColor(app.category)"
@@ -75,7 +75,7 @@
                   </div>
                 </div>
                 <div class="text-h6 font-weight-bold">
-                  {{ app.price ? `$${app.price}` : 'Free' }}
+                  {{ app.price ? `$${app.price}` : labels.free }}
                 </div>
               </div>
             </div>
@@ -89,14 +89,14 @@
                 @click.stop="$emit('deploy', app)"
               >
                 <VIcon :icon="app.price ? 'mdi-cart' : 'mdi-download'" class="me-1" />
-                {{ app.price ? 'Purchase' : 'Deploy' }}
+                {{ app.price ? labels.purchase : labels.deploy }}
               </VBtn>
               <VBtn
                 variant="outlined"
                 size="small"
                 @click.stop="$router.push(`/marketplace/${app.id}`)"
               >
-                Details
+                {{ labels.details }}
               </VBtn>
             </div>
           </template>
@@ -109,6 +109,8 @@
 </template>
 
 <script setup>
+import { computed } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useMarketplaceUtils } from '@/composables/useMarketplaceUtils'
 
 const props = defineProps({
@@ -120,7 +122,18 @@ const props = defineProps({
 
 const emit = defineEmits(['select', 'deploy'])
 
+const { t } = useI18n()
+
 const { formatNumber, getCategoryColor } = useMarketplaceUtils()
+
+const labels = computed(() => ({
+  featured: t('components.marketplace.appList.featured'),
+  by: t('components.marketplace.appList.by'),
+  free: t('components.marketplace.appList.free'),
+  purchase: t('components.marketplace.appList.purchase'),
+  deploy: t('components.marketplace.appList.deploy'),
+  details: t('components.marketplace.appList.details'),
+}))
 </script>
 
 <style scoped>

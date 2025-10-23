@@ -5,7 +5,7 @@
       v-if="loading"
       icon="mdi-gamepad-variant"
       :icon-size="56"
-      title="Loading Game Details..."
+      :title="t('pages.marketplace.games.detail.loadingTitle')"
     />
 
     <!-- Error State -->
@@ -13,7 +13,7 @@
       {{ error }}
       <template #append>
         <VBtn variant="text" @click="router.push('/marketplace/games')">
-          Back to Games
+          {{ t('pages.marketplace.games.detail.backToGames') }}
         </VBtn>
       </template>
     </VAlert>
@@ -63,7 +63,7 @@
 
             <!-- Configurations -->
             <div v-if="game.useConfig && game.configs && game.configs.length" class="configs-section">
-              <h2>Available Configurations</h2>
+              <h2>{{ t('pages.marketplace.games.detail.availableConfigurations') }}</h2>
               <div class="configs-grid">
                 <AppConfigCard
                   v-for="config in game.configs"
@@ -82,7 +82,7 @@
                 size="large"
                 @click="handleInstall({ app: game, config: null })"
               >
-                Install {{ game.displayName || game.name }}
+                {{ t('pages.marketplace.games.detail.installGame', { name: game.displayName || game.name }) }}
               </VBtn>
             </div>
           </VCardText>
@@ -105,12 +105,15 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { useMarketplace } from '@/composables/useMarketplace'
 import { useGameUtils } from '@/composables/useGameUtils'
 import LoadingSpinner from '@/components/Marketplace/LoadingSpinner.vue'
 import PanelRenderer from '@/components/Marketplace/PanelRenderer.vue'
 import AppConfigCard from '@/components/Marketplace/AppConfigCard.vue'
 import InstallDialog from '@/components/Marketplace/InstallDialog.vue'
+
+const { t } = useI18n()
 
 const route = useRoute()
 const router = useRouter()
@@ -169,17 +172,17 @@ const loadGameDetails = async () => {
     console.log('🎮 Found game:', foundGame ? foundGame.name : 'NOT FOUND')
 
     if (!foundGame) {
-      error.value = 'Game not found'
+      error.value = t('pages.marketplace.games.detail.gameNotFound')
       console.error('❌ Game not found:', gameName)
-      
+
       return
     }
 
     // Verify it's available (visible && enabled)
     if (!foundGame.visible || !foundGame.enabled) {
-      error.value = 'Game not available'
+      error.value = t('pages.marketplace.games.detail.gameNotAvailable')
       console.error('❌ Game not available. visible:', foundGame.visible, 'enabled:', foundGame.enabled)
-      
+
       return
     }
 
@@ -197,7 +200,7 @@ const loadGameDetails = async () => {
     game.value = foundGame
   } catch (err) {
     console.error('Failed to load game details:', err)
-    error.value = err.message || 'Failed to load game'
+    error.value = err.message || t('pages.marketplace.games.detail.failedToLoad')
   } finally {
     loading.value = false
   }

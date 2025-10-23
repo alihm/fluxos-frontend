@@ -13,7 +13,7 @@
         <VCardTitle class="d-flex justify-space-between align-center">
           <div>
             <h2 class="mt-0 truncate text-h4">
-              Total Nodes: {{ totalNodes }}
+              {{ t('pages.dashboard.overview.totalNodes') }}: {{ totalNodes }}
             </h2>
           </div>
           <VAvatar
@@ -53,7 +53,7 @@
                     color="success"
                     size="small"
                   >
-                    Version Breakdown
+                    {{ t('pages.dashboard.overview.versionBreakdown') }}
                   </VChip>
                 </h4>
                 <div
@@ -70,10 +70,10 @@
                     :style="{ borderLeftColor: getVersionColor(version, index) }"
                   >
                     <div class="text-body-2 font-weight-medium">
-                      {{ version === 'legacy' ? 'Legacy' : version }}
+                      {{ version === 'legacy' ? t('pages.dashboard.overview.legacy') : version }}
                     </div>
                     <div class="text-body-2 font-weight-bold">
-                      {{ count }} <span class="text-caption text-medium-emphasis">nodes</span>
+                      {{ count }} <span class="text-caption text-medium-emphasis">{{ t('pages.dashboard.overview.nodes', count) }}</span>
                     </div>
                     <VChip
                       v-if="version !== 'legacy'"
@@ -115,7 +115,7 @@
       >
         <VCardTitle class="d-flex justify-space-between align-center">
           <h2 class="mt-2 truncate text-h4">
-            Node History
+            {{ t('pages.dashboard.overview.nodeHistory') }}
           </h2>
         </VCardTitle>
         <VueApexCharts
@@ -162,7 +162,7 @@
         <VCardTitle class="d-flex justify-space-between align-center justify-center">
           <div>
             <h2 class="mt-0 truncate text-h4">
-              Locked Supply: {{ beautifyValue(lockedSupply, 0) }}
+              {{ t('pages.dashboard.overview.lockedSupply') }}: {{ beautifyValue(lockedSupply, 0) }}
             </h2>
           </div>
           <VAvatar
@@ -202,7 +202,7 @@
                     color="success"
                     size="small"
                   >
-                    Tier Breakdown
+                    {{ t('pages.dashboard.overview.tierBreakdown') }}
                   </VChip>
                 </h4>
                 <div
@@ -217,7 +217,7 @@
                     :style="{ borderLeftColor: lockedSupplyData.chartOptions.colors[0] }"
                   >
                     <div class="text-body-2 font-weight-medium">
-                      Cumulus
+                      {{ t('pages.dashboard.overview.cumulus') }}
                     </div>
                     <div class="text-body-2 font-weight-bold">
                       {{ beautifyValue(lockedSupplyData.series[0] || 0, 0) }} <span class="text-caption text-medium-emphasis">FLUX</span>
@@ -231,7 +231,7 @@
                     :style="{ borderLeftColor: lockedSupplyData.chartOptions.colors[1] }"
                   >
                     <div class="text-body-2 font-weight-medium">
-                      Nimbus
+                      {{ t('pages.dashboard.overview.nimbus') }}
                     </div>
                     <div class="text-body-2 font-weight-bold">
                       {{ beautifyValue(lockedSupplyData.series[1] || 0, 0) }} <span class="text-caption text-medium-emphasis">FLUX</span>
@@ -245,7 +245,7 @@
                     :style="{ borderLeftColor: lockedSupplyData.chartOptions.colors[2] }"
                   >
                     <div class="text-body-2 font-weight-medium">
-                      Stratus
+                      {{ t('pages.dashboard.overview.stratus') }}
                     </div>
                     <div class="text-body-2 font-weight-bold">
                       {{ beautifyValue(lockedSupplyData.series[2] || 0, 0) }} <span class="text-caption text-medium-emphasis">FLUX</span>
@@ -280,11 +280,11 @@
         </VOverlay>
         <VCardTitle>
           <h2 class="mt-0 truncate text-h4">
-            FLUX Supply
+            {{ t('pages.dashboard.overview.fluxSupply') }}
           </h2>
         </VCardTitle>
         <VCardText class="py-1 mr-2">
-          Max Supply
+          {{ t('pages.dashboard.overview.maxSupply') }}
         </VCardText>
         <VRow class="px-6">
           <VCol
@@ -297,7 +297,7 @@
         </VRow>
         <VDivider class="mx-4 my-1" />
         <VCardText class="py-1">
-          Circulating Supply
+          {{ t('pages.dashboard.overview.circulatingSupply') }}
         </VCardText>
         <VRow class="px-6">
           <VCol
@@ -328,7 +328,7 @@
         </VRow>
         <VDivider class="mx-4 my-1" />
         <VCardText class="py-1">
-          Locked Supply
+          {{ t('pages.dashboard.overview.lockedSupply') }}
         </VCardText>
         <VRow class="px-6">
           <VCol
@@ -364,11 +364,14 @@
 
 <script setup>
 import { ref, computed, onMounted, watch, nextTick } from "vue"
+import { useI18n } from "vue-i18n"
 import axios from "axios"
 import tierColors from "@/utils/colors"
 import DashboardService from "@/services/DashboardService"
 import { useConfigStore } from "@core/stores/config"
 import { storeToRefs } from "pinia"
+
+const { t } = useI18n()
 
 // Data properties
 const isLoading = ref(true) // Unified loading state
@@ -399,7 +402,11 @@ const nodeData = ref({
   chartOptions: {
     chart: { toolbar: { show: false } },
     dataLabels: { enabled: true },
-    labels: ["Cumulus", "Nimbus", "Stratus"],
+    labels: [
+      t('pages.dashboard.overview.cumulus'),
+      t('pages.dashboard.overview.nimbus'),
+      t('pages.dashboard.overview.stratus'),
+    ],
     legend: { show: false },
     stroke: { width: 0 },
     colors: [tierColors.cumulus, tierColors.nimbus, tierColors.stratus],
@@ -414,7 +421,11 @@ const nodeData = ref({
 const nodeHistoryData = ref({
   chartOptions: {
     colors: [tierColors.cumulus, tierColors.nimbus, tierColors.stratus],
-    labels: ["Cumulus", "Nimbus", "Stratus"],
+    labels: [
+      t('pages.dashboard.overview.cumulus'),
+      t('pages.dashboard.overview.nimbus'),
+      t('pages.dashboard.overview.stratus'),
+    ],
     grid: { show: false, padding: { left: 0, right: 0 } },
     chart: { toolbar: { show: false }, sparkline: { enabled: true }, stacked: true },
     dataLabels: { enabled: false },
@@ -447,7 +458,11 @@ const lockedSupplyData = ref({
   chartOptions: {
     chart: { toolbar: { show: false } },
     dataLabels: { enabled: true },
-    labels: ["Cumulus", "Nimbus", "Stratus"],
+    labels: [
+      t('pages.dashboard.overview.cumulus'),
+      t('pages.dashboard.overview.nimbus'),
+      t('pages.dashboard.overview.stratus'),
+    ],
     legend: { show: false },
     stroke: { width: 0 },
     colors: [tierColors.cumulus, tierColors.nimbus, tierColors.stratus],
@@ -523,9 +538,9 @@ const getHistoryStats = async () => {
     })
 
     nodeHistoryData.value.series = [
-      { name: "Cumulus", data: cumulusHistory },
-      { name: "Nimbus", data: nimbusHistory },
-      { name: "Stratus", data: stratusHistory },
+      { name: t('pages.dashboard.overview.cumulus'), data: cumulusHistory },
+      { name: t('pages.dashboard.overview.nimbus'), data: nimbusHistory },
+      { name: t('pages.dashboard.overview.stratus'), data: stratusHistory },
     ]
   } catch (error) {
     console.error("Error fetching history stats:", error)

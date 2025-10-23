@@ -1,4 +1,5 @@
 <script setup>
+import { useI18n } from 'vue-i18n'
 import safeBoxWithGoldenCoin from "@images/misc/3d-safe-box-with-golden-dollar-coins.png"
 import spaceRocket from "@images/misc/3d-space-rocket-with-smoke.png"
 import dollarCoinPiggyBank from "@images/misc/dollar-coins-flying-pink-piggy-bank.png"
@@ -30,71 +31,73 @@ const props = defineProps({
   },
 })
 
+const { t } = useI18n()
+
 const annualMonthlyPlanPriceToggler = ref(true)
 
-const pricingPlans = [
+const pricingPlans = computed(() => [
   {
-    name: "Basic",
-    tagLine: "A simple start for everyone",
+    name: t('components.appPricing.plans.basic.name'),
+    tagLine: t('components.appPricing.plans.basic.tagLine'),
     logo: dollarCoinPiggyBank,
     monthlyPrice: 0,
     yearlyPrice: 0,
     isPopular: false,
     current: true,
     features: [
-      "100 responses a month",
-      "Unlimited forms and surveys",
-      "Unlimited fields",
-      "Basic form creation tools",
-      "Up to 2 subdomains",
+      t('components.appPricing.plans.basic.features.0'),
+      t('components.appPricing.plans.basic.features.1'),
+      t('components.appPricing.plans.basic.features.2'),
+      t('components.appPricing.plans.basic.features.3'),
+      t('components.appPricing.plans.basic.features.4'),
     ],
   },
   {
-    name: "Standard",
-    tagLine: "For small to medium businesses",
+    name: t('components.appPricing.plans.standard.name'),
+    tagLine: t('components.appPricing.plans.standard.tagLine'),
     logo: safeBoxWithGoldenCoin,
     monthlyPrice: 49,
     yearlyPrice: 499,
     isPopular: true,
     current: false,
     features: [
-      "Unlimited responses",
-      "Unlimited forms and surveys",
-      "Instagram profile page",
-      "Google Docs integration",
-      "Custom “Thank you” page",
+      t('components.appPricing.plans.standard.features.0'),
+      t('components.appPricing.plans.standard.features.1'),
+      t('components.appPricing.plans.standard.features.2'),
+      t('components.appPricing.plans.standard.features.3'),
+      t('components.appPricing.plans.standard.features.4'),
     ],
   },
   {
-    name: "Enterprise",
-    tagLine: "Solution for big organizations",
+    name: t('components.appPricing.plans.enterprise.name'),
+    tagLine: t('components.appPricing.plans.enterprise.tagLine'),
     logo: spaceRocket,
     monthlyPrice: 99,
     yearlyPrice: 999,
     isPopular: false,
     current: false,
     features: [
-      "PayPal payments",
-      "Logic Jumps",
-      "File upload with 5GB storage",
-      "Custom domain support",
-      "Stripe integration",
+      t('components.appPricing.plans.enterprise.features.0'),
+      t('components.appPricing.plans.enterprise.features.1'),
+      t('components.appPricing.plans.enterprise.features.2'),
+      t('components.appPricing.plans.enterprise.features.3'),
+      t('components.appPricing.plans.enterprise.features.4'),
     ],
   },
-]
+])
 </script>
 
 <template>
   <!-- 👉 Title and subtitle -->
   <div class="text-center">
     <h3 class="text-h3 pricing-title mb-2">
-      {{ props.title ? props.title : "Pricing Plans" }}
+      {{ props.title ? props.title : t('components.appPricing.title') }}
     </h3>
     <p class="mb-0">
-      All plans include 40+ advanced tools and features to boost your product.
+      {{ t('components.appPricing.subtitle1') }}
     </p>
     <p class="mb-2">
-      Choose the best plan to fit your needs.
+      {{ t('components.appPricing.subtitle2') }}
     </p>
   </div>
 
@@ -105,7 +108,7 @@ const pricingPlans = [
       for="pricing-plan-toggle"
       class="me-3"
     >
-      Monthly
+      {{ t('components.appPricing.monthly') }}
     </VLabel>
 
     <div class="position-relative">
@@ -115,7 +118,7 @@ const pricingPlans = [
       >
         <template #label>
           <div class="text-body-1 font-weight-medium">
-            Annually
+            {{ t('components.appPricing.annually') }}
           </div>
         </template>
       </VSwitch>
@@ -131,7 +134,7 @@ const pricingPlans = [
           color="primary"
           size="small"
         >
-          Save up to 10%
+          {{ t('components.appPricing.saveUpTo') }}
         </VChip>
       </div>
     </div>
@@ -162,7 +165,7 @@ const pricingPlans = [
             color="primary"
             size="small"
           >
-            Popular
+            {{ t('components.appPricing.popular') }}
           </VChip>
         </VCardText>
 
@@ -198,7 +201,7 @@ const pricingPlans = [
                 }}
               </h1>
               <div class="text-body-1 font-weight-medium align-self-end">
-                /month
+                {{ t('components.appPricing.perMonth') }}
               </div>
             </div>
 
@@ -207,7 +210,7 @@ const pricingPlans = [
               v-show="annualMonthlyPlanPriceToggler"
               class="annual-price-text position-absolute text-caption text-disabled pb-4"
             >
-              {{ plan.yearlyPrice === 0 ? "free" : `USD ${plan.yearlyPrice}/Year` }}
+              {{ plan.yearlyPrice === 0 ? t('components.appPricing.free') : t('components.appPricing.yearlyPrice', { price: plan.yearlyPrice }) }}
             </span>
           </div>
 
@@ -240,7 +243,7 @@ const pricingPlans = [
             :to="{ name: 'front-pages-payment' }"
             :active="false"
           >
-            {{ plan.yearlyPrice === 0 ? "Your Current Plan" : "Upgrade" }}
+            {{ plan.yearlyPrice === 0 ? t('components.appPricing.currentPlan') : t('components.appPricing.upgrade') }}
           </VBtn>
         </VCardText>
       </VCard>

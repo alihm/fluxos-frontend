@@ -23,10 +23,10 @@
             </VAvatar>
             <div>
               <h1 class="text-h4 text-sm-h3 font-weight-bold mb-2">
-                Flux XDAO
+                {{ t('pages.xdao.title') }}
               </h1>
               <p class="text-body-1 text-sm-h6 text-medium-emphasis mb-0">
-                Decentralized governance for the Flux ecosystem
+                {{ t('pages.xdao.subtitle') }}
               </p>
             </div>
           </div>
@@ -51,7 +51,7 @@
                 <VIcon icon="mdi-account-check" :size="$vuetify.display.xs ? '12' : '16'" />
               </VAvatar>
               <span :class="$vuetify.display.xs ? 'text-caption' : ''">
-                {{ $vuetify.display.xs ? userZelid?.substring(0, 6) + '..' : userZelid?.substring(0, 8) + '...' || 'Logged in' }}
+                {{ $vuetify.display.xs ? userZelid?.substring(0, 6) + '..' : userZelid?.substring(0, 8) + '...' || t('pages.xdao.loggedIn') }}
               </span>
             </VChip>
             <VBtn
@@ -59,7 +59,7 @@
               color="primary"
               variant="flat"
               :size="$vuetify.display.xs ? 'small' : 'large'"
-              @click="showLogin = true"
+              @click="openLoginBottomSheet"
               class="text-none"
             >
               <VIcon
@@ -67,7 +67,7 @@
                 :size="$vuetify.display.xs ? '18' : '24'"
                 class="me-1 me-sm-2"
               />
-              {{ $vuetify.display.xs ? 'Login' : 'Login to Vote' }}
+              {{ $vuetify.display.xs ? t('pages.xdao.login') : t('pages.xdao.loginToVote') }}
             </VBtn>
           </div>
         </div>
@@ -84,7 +84,7 @@
               @click="showMobileFilters = !showMobileFilters"
             >
               <VIcon icon="mdi-filter-variant" class="me-2" />
-              Filters
+              {{ t('pages.xdao.filters') }}
             </VBtn>
         
             <div v-if="showMobileFilters" class="mt-4">
@@ -141,14 +141,14 @@
                 @click="openAddProposal"
               >
                 <VListItemTitle class="text-body-2 font-weight-medium">
-                  Add Proposal
+                  {{ t('pages.xdao.addProposal') }}
                 </VListItemTitle>
               </VListItem>
           
               <VDivider class="my-3" />
-          
+
               <VListSubheader class="text-medium-emphasis px-0 mb-2 text-body-2">
-                Filter Proposals
+                {{ t('pages.xdao.filterProposals') }}
               </VListSubheader>
               <VListItem
                 v-for="filter in proposalFilters"
@@ -195,7 +195,7 @@
                 >
                   <VTextField
                     v-model="searchQuery"
-                    placeholder="Search proposals..."
+                    :placeholder="t('pages.xdao.searchProposals')"
                     prepend-inner-icon="mdi-magnify"
                     variant="outlined"
                     density="compact"
@@ -209,7 +209,7 @@
                   <VSelect
                     v-model="sortBy"
                     :items="sortOptions"
-                    label="Sort by"
+                    :label="t('pages.xdao.sortBy')"
                     variant="outlined"
                     density="compact"
                     hide-details
@@ -227,7 +227,7 @@
                 color="primary"
                 size="48"
               />
-              <div class="mt-4 text-body-1">Loading proposals...</div>
+              <div class="mt-4 text-body-1">{{ t('pages.xdao.loadingProposals') }}</div>
             </VCardText>
           </VCard>
 
@@ -240,7 +240,7 @@
                 color="error"
                 class="mb-4"
               />
-              <h3 class="text-h5 mb-2">Failed to Load Proposals</h3>
+              <h3 class="text-h5 mb-2">{{ t('pages.xdao.failedToLoad') }}</h3>
               <p class="text-body-1 text-medium-emphasis mb-4">
                 {{ error }}
               </p>
@@ -250,7 +250,7 @@
                 @click="fetchProposals"
               >
                 <VIcon icon="mdi-refresh" class="me-2" />
-                Try Again
+                {{ t('pages.xdao.tryAgain') }}
               </VBtn>
             </VCardText>
           </VCard>
@@ -289,10 +289,10 @@
                     size="small"
                     class="flex-shrink-0"
                   >
-                    {{ proposal.status }}
+                    {{ formatStatus(proposal.status) }}
                   </VChip>
                 </div>
-              
+
                 <!-- Author and Date -->
                 <div class="d-flex flex-column gap-2 mb-3">
                   <div class="d-flex align-center">
@@ -306,10 +306,10 @@
                       <span class="text-caption">{{ getAvatarText(proposal.nickName) }}</span>
                     </VAvatar>
                     <VIcon v-else icon="mdi-account" size="20" class="me-2 text-medium-emphasis" />
-                    <span class="text-body-2">{{ proposal.nickName || 'Anonymous' }}</span>
+                    <span class="text-body-2">{{ proposal.nickName || t('pages.xdao.anonymous') }}</span>
                   </div>
                   <div class="text-caption text-medium-emphasis">
-                    End: {{ formatDate(proposal.voteEndDate) }}
+                    {{ t('pages.xdao.end') }}: {{ formatDate(proposal.voteEndDate) }}
                   </div>
                 </div>
               </div>
@@ -326,7 +326,7 @@
                     size="small"
                     class="flex-shrink-0"
                   >
-                    {{ proposal.status }}
+                    {{ formatStatus(proposal.status) }}
                   </VChip>
                 </div>
 
@@ -342,10 +342,10 @@
                       <span class="text-caption">{{ getAvatarText(proposal.nickName) }}</span>
                     </VAvatar>
                     <VIcon v-else icon="mdi-account" size="24" class="me-2 text-medium-emphasis" />
-                    <span class="text-body-2">{{ proposal.nickName || 'Anonymous' }}</span>
+                    <span class="text-body-2">{{ proposal.nickName || t('pages.xdao.anonymous') }}</span>
                   </div>
                   <div class="text-caption text-medium-emphasis">
-                    End: {{ formatDate(proposal.voteEndDate) }}
+                    {{ t('pages.xdao.end') }}: {{ formatDate(proposal.voteEndDate) }}
                   </div>
                 </div>
               </div>
@@ -353,8 +353,8 @@
               <!-- Voting Progress -->
               <div class="voting-progress pt-3">
                 <div class="d-flex justify-space-between text-caption mb-2">
-                  <span>Required: {{ Number(proposal.votesRequired).toLocaleString() }}</span>
-                  <span>Total: {{ Number(proposal.votesYes + proposal.votesNo).toLocaleString() }}</span>
+                  <span>{{ t('pages.xdao.required') }}: {{ Number(proposal.votesRequired).toLocaleString() }}</span>
+                  <span>{{ t('pages.xdao.total') }}: {{ Number(proposal.votesYes + proposal.votesNo).toLocaleString() }}</span>
                 </div>
               
                 <VProgressLinear
@@ -383,18 +383,18 @@
                     </div>
                   </template>
                 </VProgressLinear>
-              
+
                 <div class="d-flex justify-space-between text-caption mt-2">
-                  <span class="text-success">Yes: {{ Number(proposal.votesYes).toLocaleString() }}</span>
-                  <VChip 
-                    variant="tonal" 
-                    size="x-small" 
+                  <span class="text-success">{{ t('pages.xdao.yes') }}: {{ Number(proposal.votesYes).toLocaleString() }}</span>
+                  <VChip
+                    variant="tonal"
+                    size="x-small"
                     :color="getPercentageColor(proposal)"
                     class="percentage-chip"
                   >
                     {{ Math.round(((proposal.votesYes + proposal.votesNo) / proposal.votesRequired) * 100) }}%
                   </VChip>
-                  <span class="text-error">No: {{ Number(proposal.votesNo).toLocaleString() }}</span>
+                  <span class="text-error">{{ t('pages.xdao.no') }}: {{ Number(proposal.votesNo).toLocaleString() }}</span>
                 </div>
               </div>
             </VCardText>
@@ -414,7 +414,7 @@
       v-model="showProposalDetail"
       :proposal="selectedProposal"
       :zelid="userZelid"
-      @showLogin="showLogin = true"
+      @showLogin="openLoginBottomSheet"
     />
 
     <!-- Debug Info -->
@@ -426,27 +426,22 @@
       <p>activeFilter: {{ activeFilter }}</p>
     </div>
   </div>
-
-
-  <!-- Login Dialog -->
-  <LoginDialog
-    v-model="showLogin"
-    title="Login Required for Voting"
-    message="You need to be logged in to participate in xDAO voting. Please choose your preferred login method below."
-    @loginSuccess="showLogin = false"
-  />
 </template>
 
 <script setup>
 import { ref, computed, onMounted, watch, nextTick } from 'vue'
+import { useI18n } from 'vue-i18n'
 import axios from 'axios'
 import { useFluxStore } from '@/stores/flux'
 import { storeToRefs } from 'pinia'
+import { useLoginSheet } from '@/composables/useLoginSheet'
 
 // Import components
 import ProposalDetailDialog from '@/components/xdao/ProposalDetailDialog.vue'
 import AddProposalTab from '@/components/xdao/AddProposalTab.vue'
-import LoginDialog from '@/components/shared/LoginDialog.vue'
+
+const { t } = useI18n()
+const { openLoginBottomSheet, closeLoginBottomSheet } = useLoginSheet()
 
 // Stores
 const fluxStore = useFluxStore()
@@ -465,7 +460,6 @@ const selectedProposal = ref(null)
 const showMobileFilters = ref(false)
 const activeFilterIndex = ref(0)
 const activeTab = ref(0)
-const showLogin = ref(false)
 
 // Authentication computed values
 const isLoggedIn = computed(() => privilege.value !== 'none')
@@ -475,38 +469,38 @@ const userZelid = computed(() => zelid.value)
 const proposalFilters = computed(() => {
   const getCount = filterValue => {
     if (filterValue === 'all') return proposals.value.length
-    
+
     return proposals.value.filter(proposal => {
       if (filterValue === 'open') return proposal.status === 'Open'
       if (filterValue === 'passed') return proposal.status === 'Passed'
       if (filterValue === 'unpaid') {
-        return proposal.status === 'Unpaid' || 
+        return proposal.status === 'Unpaid' ||
                (proposal.status.includes('Unpaid') && !proposal.status.includes('Rejected') && !proposal.status.includes('Not Enough Votes'))
       }
       if (filterValue === 'rejected') {
         return (proposal.status.includes('Rejected') || proposal.status === 'Rejected')
       }
-      
+
       return false
     }).length
   }
 
   return [
-    { title: 'All Proposals', icon: 'mdi-clipboard-outline', value: 'all', count: getCount('all') },
-    { title: 'Open', icon: 'mdi-clock-outline', value: 'open', count: getCount('open') },
-    { title: 'Passed', icon: 'mdi-check-circle-outline', value: 'passed', count: getCount('passed') },
-    { title: 'Unpaid', icon: 'mdi-currency-usd-off', value: 'unpaid', count: getCount('unpaid') },
-    { title: 'Rejected', icon: 'mdi-close-circle-outline', value: 'rejected', count: getCount('rejected') },
+    { title: t('pages.xdao.allProposals'), icon: 'mdi-clipboard-outline', value: 'all', count: getCount('all') },
+    { title: t('pages.xdao.open'), icon: 'mdi-clock-outline', value: 'open', count: getCount('open') },
+    { title: t('pages.xdao.passed'), icon: 'mdi-check-circle-outline', value: 'passed', count: getCount('passed') },
+    { title: t('pages.xdao.unpaid'), icon: 'mdi-currency-usd-off', value: 'unpaid', count: getCount('unpaid') },
+    { title: t('pages.xdao.rejected'), icon: 'mdi-close-circle-outline', value: 'rejected', count: getCount('rejected') },
   ]
 })
 
 // Sort options
-const sortOptions = [
-  { title: 'Latest', value: 'latest' },
-  { title: 'Title A-Z', value: 'title-asc' },
-  { title: 'Title Z-A', value: 'title-desc' },
-  { title: 'End Date', value: 'end-date' },
-]
+const sortOptions = computed(() => [
+  { title: t('pages.xdao.latest'), value: 'latest' },
+  { title: t('pages.xdao.titleAsc'), value: 'title-asc' },
+  { title: t('pages.xdao.titleDesc'), value: 'title-desc' },
+  { title: t('pages.xdao.endDate'), value: 'end-date' },
+])
 
 // Computed properties
 const filteredProposals = computed(() => {
@@ -662,8 +656,39 @@ const getStatusColor = status => {
 
   // All rejected proposals (including "Rejected Unpaid") should be error color
   if (status.includes('Rejected') || status === 'Rejected') return 'error'
-  
+
   return 'primary'
+}
+
+// Format status with translation - handles compound statuses like "Rejected Unpaid" or "Rejected <reason>"
+const formatStatus = status => {
+  if (!status) return ''
+
+  // Define translation map
+  const statusMap = {
+    'Open': t('components.xdao.proposalDetail.charts.status.open'),
+    'Passed': t('components.xdao.proposalDetail.charts.status.passed'),
+    'Unpaid': t('components.xdao.proposalDetail.charts.status.unpaid'),
+    'Rejected': t('components.xdao.proposalDetail.charts.status.rejected'),
+    'Not Enough Votes': t('components.xdao.proposalDetail.charts.status.notEnoughVotes'),
+  }
+
+  // Handle "Not Enough Votes" as a single phrase
+  if (status.includes('Not Enough Votes')) {
+    return status.replace('Not Enough Votes', statusMap['Not Enough Votes'])
+      .replace('Rejected', statusMap['Rejected'])
+  }
+
+  // Handle compound status like "Rejected Unpaid" or "Rejected <reason>"
+  if (status.includes(' ')) {
+    const parts = status.split(' ')
+    const translatedParts = parts.map(part => statusMap[part] || part)
+    
+    return translatedParts.join(' ')
+  }
+
+  // Single word status
+  return statusMap[status] || status
 }
 
 const getProgressColor = proposal => {
@@ -692,32 +717,32 @@ const formatDate = timestamp => {
 
 const getEmptyStateTitle = () => {
   if (activeFilter.value === 'all') {
-    return 'No Proposals Found'
+    return t('pages.xdao.noProposalsFound')
   }
-  
+
   const filterLabels = {
-    'open': 'No Open Proposals',
-    'passed': 'No Passed Proposals', 
-    'unpaid': 'No Unpaid Proposals',
-    'rejected': 'No Rejected Proposals',
+    'open': t('pages.xdao.noOpenProposals'),
+    'passed': t('pages.xdao.noPassedProposals'),
+    'unpaid': t('pages.xdao.noUnpaidProposals'),
+    'rejected': t('pages.xdao.noRejectedProposals'),
   }
-  
-  return filterLabels[activeFilter.value] || 'No Proposals Found'
+
+  return filterLabels[activeFilter.value] || t('pages.xdao.noProposalsFound')
 }
 
 const getEmptyStateMessage = () => {
   if (activeFilter.value === 'all') {
-    return 'No proposals have been submitted yet.'
+    return t('pages.xdao.noProposalsSubmitted')
   }
-  
+
   const messages = {
-    'open': 'There are currently no open proposals for voting.',
-    'passed': 'No proposals have passed yet.', 
-    'unpaid': 'All passed proposals have been paid.',
-    'rejected': 'No proposals have been rejected.',
+    'open': t('pages.xdao.noOpenProposalsMessage'),
+    'passed': t('pages.xdao.noPassedProposalsMessage'),
+    'unpaid': t('pages.xdao.noUnpaidProposalsMessage'),
+    'rejected': t('pages.xdao.noRejectedProposalsMessage'),
   }
-  
-  return messages[activeFilter.value] || 'Try selecting a different filter.'
+
+  return messages[activeFilter.value] || t('pages.xdao.tryDifferentFilter')
 }
 
 const formatDescription = text => {
@@ -784,8 +809,8 @@ watch(showAddProposal, (newValue, oldValue) => {
 // Lifecycle
 // Watch for login status changes
 watch(isLoggedIn, newValue => {
-  if (newValue && showLogin.value) {
-    showLogin.value = false
+  if (newValue) {
+    closeLoginBottomSheet()
   }
 })
 

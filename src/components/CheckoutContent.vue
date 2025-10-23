@@ -9,7 +9,7 @@
         color="primary"
         class="mb-4"
       />
-      <h3 class="text-h5 mb-2">Loading plan details...</h3>
+      <h3 class="text-h5 mb-2">{{ t('components.checkoutContent.loadingPlanDetails') }}</h3>
     </div>
 
     <!-- Error state -->
@@ -20,15 +20,15 @@
         color="error"
         class="mb-4"
       />
-      <h3 class="text-h5 mb-2">Unable to load plan details</h3>
+      <h3 class="text-h5 mb-2">{{ t('components.checkoutContent.unableToLoadPlan') }}</h3>
       <p class="text-body-1 text-medium-emphasis mb-4">
-        Please try again or contact support if the problem persists.
+        {{ t('components.checkoutContent.tryAgainOrContactSupport') }}
       </p>
       <VBtn
         color="primary"
         @click="loadPlanDetails"
       >
-        Try Again
+        {{ t('components.checkoutContent.tryAgain') }}
       </VBtn>
     </div>
 
@@ -43,20 +43,20 @@
                 :icon="props.actionType === 'renew' ? 'mdi-refresh' : props.actionType === 'upgrade' ? 'mdi-arrow-up-bold' : props.actionType === 'downgrade' ? 'mdi-arrow-down-bold' : 'mdi-receipt'"
                 class="me-2"
               />
-              {{ props.actionType === 'renew' ? 'Renewal' : props.actionType === 'upgrade' ? 'Upgrade' : props.actionType === 'downgrade' ? 'Downgrade' : 'Order' }} Summary
+              {{ props.actionType === 'renew' ? t('components.checkoutContent.renewal') : props.actionType === 'upgrade' ? t('components.checkoutContent.upgrade') : props.actionType === 'downgrade' ? t('components.checkoutContent.downgrade') : t('components.checkoutContent.order') }} {{ t('components.checkoutContent.summary') }}
             </VCardTitle>
             <VCardText>
               <div class="plan-summary">
                 <!-- Full Plan Comparison for Upgrades/Downgrades -->
                 <div v-if="props.actionType === 'upgrade' || props.actionType === 'downgrade'" class="mb-3">
-                  <div class="text-body-2 mb-3 text-center font-weight-medium">Plan Comparison</div>
+                  <div class="text-body-2 mb-3 text-center font-weight-medium">{{ t('components.checkoutContent.planComparison') }}</div>
 
                   <!-- Current Plan Card -->
                   <VCard variant="outlined" class="mb-2" style="border-color: rgb(var(--v-theme-info));">
                     <VCardText class="pa-3">
                       <div class="d-flex align-center mb-2">
                         <VIcon icon="mdi-account-check" size="16" class="me-2 text-info" />
-                        <span class="text-body-2 font-weight-medium text-info">Your Current Plan</span>
+                        <span class="text-body-2 font-weight-medium text-info">{{ t('components.checkoutContent.yourCurrentPlan') }}</span>
                       </div>
                       <div class="d-flex justify-space-between align-center mb-1">
                         <span class="text-body-1 font-weight-bold">{{ getDisplayPlanName(getCurrentPlanName()) }}</span>
@@ -65,7 +65,7 @@
                         </VChip>
                       </div>
                       <div class="text-body-2 text-medium-emphasis">
-                        <div>{{ getCurrentPlanStorage() }} Storage</div>
+                        <div>{{ getCurrentPlanStorage() }} {{ t('components.checkoutContent.storage') }}</div>
                       </div>
                     </VCardText>
                   </VCard>
@@ -75,7 +75,7 @@
                     <div class="d-flex align-center justify-center mb-1">
                       <VIcon icon="mdi-arrow-down" size="20" :class="props.actionType === 'downgrade' ? 'text-warning' : 'text-success'" class="me-1" />
                       <span class="text-body-2 font-weight-medium" :class="props.actionType === 'downgrade' ? 'text-warning' : 'text-success'">
-                        {{ props.actionType === 'downgrade' ? 'Downgrade to' : 'Upgrade to' }}
+                        {{ props.actionType === 'downgrade' ? t('components.checkoutContent.downgradeTo') : t('components.checkoutContent.upgradeTo') }}
                       </span>
                     </div>
                   </div>
@@ -85,7 +85,7 @@
                     <VCardText class="pa-3">
                       <div class="d-flex align-center mb-2">
                         <VIcon :icon="props.actionType === 'downgrade' ? 'mdi-arrow-down-bold' : 'mdi-star'" size="16" class="me-2" :class="props.actionType === 'downgrade' ? 'text-warning' : 'text-success'" />
-                        <span class="text-body-2 font-weight-medium" :class="props.actionType === 'downgrade' ? 'text-warning' : 'text-success'">New Plan</span>
+                        <span class="text-body-2 font-weight-medium" :class="props.actionType === 'downgrade' ? 'text-warning' : 'text-success'">{{ t('components.checkoutContent.newPlan') }}</span>
                       </div>
                       <div class="d-flex justify-space-between align-center mb-1">
                         <span class="text-body-1 font-weight-bold">{{ getDisplayPlanName(getNewPlanName()) }}</span>
@@ -94,7 +94,7 @@
                         </VChip>
                       </div>
                       <div class="text-body-2 text-medium-emphasis">
-                        <div>{{ getStorageDisplay() }} Storage</div>
+                        <div>{{ getStorageDisplay() }} {{ t('components.checkoutContent.storage') }}</div>
                       </div>
                     </VCardText>
                   </VCard>
@@ -104,7 +104,7 @@
                     <VCardText class="pa-3">
                       <div class="d-flex justify-space-between align-center">
                         <span class="text-body-2">
-                          {{ props.actionType === 'downgrade' ? 'You will save:' : 'Price difference:' }}
+                          {{ props.actionType === 'downgrade' ? t('components.checkoutContent.youWillSave') : t('components.checkoutContent.priceDifference') }}
                         </span>
                         <span class="text-body-1 font-weight-bold">
                           ${{ Math.abs(getPlanPrice() - getCurrentPlanPrice()).toFixed(2) }}/month
@@ -117,21 +117,21 @@
                 <!-- Regular Plan Details for Renew/New/Downgrade -->
                 <div v-else class="plan-details">
                   <div class="d-flex justify-space-between align-center mb-3">
-                    <span>Plan:</span>
+                    <span>{{ t('components.checkoutContent.plan') }}:</span>
                     <VChip color="primary" variant="flat" size="small">
                       {{ getDisplayPlanName(selectedPlan.plan_name) }}
                     </VChip>
                   </div>
                   <div class="d-flex justify-space-between align-center mb-3">
-                    <span>Storage:</span>
+                    <span>{{ t('components.checkoutContent.storage') }}:</span>
                     <VChip color="success" variant="tonal" size="small">
                       {{ getStorageDisplay() }}
                     </VChip>
                   </div>
                   <div class="d-flex justify-space-between align-center mb-3">
-                    <span>Duration:</span>
+                    <span>{{ t('components.checkoutContent.duration') }}:</span>
                     <VChip color="info" variant="tonal" size="small">
-                      1 Month
+                      {{ t('components.checkoutContent.oneMonth') }}
                     </VChip>
                   </div>
                 </div>
@@ -148,7 +148,7 @@
                     class="action-chip"
                   >
                     <VIcon icon="mdi-refresh" size="14" class="me-1" />
-                    Renewing your current plan
+                    {{ t('components.checkoutContent.renewingYourCurrentPlan') }}
                   </VChip>
                   <VChip
                     v-else-if="props.actionType === 'upgrade'"
@@ -158,7 +158,7 @@
                     class="action-chip"
                   >
                     <VIcon icon="mdi-arrow-up" size="14" class="me-1" />
-                    Upgrading to a higher plan
+                    {{ t('components.checkoutContent.upgradingToHigherPlan') }}
                   </VChip>
                   <VChip
                     v-else-if="props.actionType === 'downgrade'"
@@ -168,7 +168,7 @@
                     class="action-chip"
                   >
                     <VIcon icon="mdi-arrow-down" size="14" class="me-1" />
-                    Downgrading to a lower plan
+                    {{ t('components.checkoutContent.downgradingToLowerPlan') }}
                   </VChip>
                   <VChip
                     v-else-if="props.actionType === 'signup' || !props.actionType"
@@ -178,12 +178,12 @@
                     class="action-chip"
                   >
                     <VIcon icon="mdi-plus" size="14" class="me-1" />
-                    New subscription
+                    {{ t('components.checkoutContent.newSubscription') }}
                   </VChip>
                 </div>
 
                 <div class="d-flex justify-space-between">
-                  <span class="text-h6">Total:</span>
+                  <span class="text-h6">{{ t('components.checkoutContent.total') }}:</span>
                   <span class="text-h6 font-weight-bold">${{ getPlanPrice() }}</span>
                 </div>
               </div>
@@ -196,18 +196,18 @@
           <VCard variant="outlined">
             <VCardTitle>
               <VIcon icon="mdi-credit-card" class="me-2" />
-              Payment Method
+              {{ t('components.checkoutContent.paymentMethod') }}
             </VCardTitle>
             <VCardText>
               <!-- Payment Method Tabs -->
               <VTabs v-model="activePaymentMethod" color="primary" class="mb-4">
                 <VTab value="fluxpay">
                   <VIcon icon="mdi-wallet" class="me-2" />
-                  Flux Pay
+                  {{ t('components.checkoutContent.fluxPay') }}
                 </VTab>
                 <VTab value="cryptocom">
                   <VIcon icon="mdi-credit-card-multiple" class="me-2" />
-                  Crypto.com
+                  {{ t('components.checkoutContent.cryptoCom') }}
                 </VTab>
               </VTabs>
 
@@ -242,7 +242,7 @@
                               {{ parseFloat(estimatedFluxAmount).toFixed(2) }} FLUX *
                             </VChip>
                             <VChip v-else color="info" variant="tonal" size="default">
-                              Calculating FLUX...
+                              {{ t('components.checkoutContent.calculatingFlux') }}
                             </VChip>
                           </div>
 
@@ -254,7 +254,7 @@
                                 <div class="flex-grow-1 text-center">
                                   <div class="d-flex justify-center mb-1" style="align-items: center; height: 1.2em;">
                                     <VIcon icon="mdi-calendar-clock" size="16" class="text-info" style="display: flex; align-items: center; margin-right: 6px;" />
-                                    <span class="text-caption font-weight-medium text-info" style="display: flex; align-items: center;">Current ends:</span>
+                                    <span class="text-caption font-weight-medium text-info" style="display: flex; align-items: center;">{{ t('components.checkoutContent.currentEnds') }}:</span>
                                   </div>
                                   <div class="text-body-2 font-weight-medium">{{ formatEndDate(getCurrentSubscriptionEndDate()) }}</div>
                                 </div>
@@ -269,7 +269,7 @@
                                   <div class="d-flex justify-center mb-1" style="align-items: center; height: 1.2em;">
                                     <VIcon icon="mdi-calendar-plus" size="16" :class="props.actionType === 'downgrade' ? 'text-warning' : 'text-success'" style="display: flex; align-items: center; margin-right: 6px;" />
                                     <span class="text-caption font-weight-medium" :class="props.actionType === 'downgrade' ? 'text-warning' : 'text-success'" style="display: flex; align-items: center;">
-                                      {{ props.actionType === 'renew' ? 'Renewal' : props.actionType === 'upgrade' ? 'Upgrade' : 'Downgrade' }} ends:
+                                      {{ props.actionType === 'renew' ? t('components.checkoutContent.renewal') : props.actionType === 'upgrade' ? t('components.checkoutContent.upgrade') : t('components.checkoutContent.downgrade') }} {{ t('components.checkoutContent.ends') }}:
                                     </span>
                                   </div>
                                   <div class="text-body-2 font-weight-medium">{{ formatEndDate(getEndDate()) }}</div>
@@ -285,7 +285,7 @@
                                 <VExpansionPanelTitle class="py-2 px-3">
                                   <div class="d-flex align-center text-caption">
                                     <VIcon size="18" class="me-2">mdi-wallet-outline</VIcon>
-                                    <span>Manual Payment Details</span>
+                                    <span>{{ t('components.checkoutContent.manualPaymentDetails') }}</span>
                                   </div>
                                 </VExpansionPanelTitle>
                                 <VExpansionPanelText class="pt-2">
@@ -293,7 +293,7 @@
                                     <!-- Address -->
                                     <div class="d-flex align-center justify-space-between mb-1 px-2 py-1" style="background: rgba(var(--v-theme-on-surface), 0.05); border-radius: 4px;">
                                       <div style="flex: 1; min-width: 0; overflow: hidden;">
-                                        <div class="text-caption" style="font-size: 0.65rem; opacity: 0.7;">Address</div>
+                                        <div class="text-caption" style="font-size: 0.65rem; opacity: 0.7;">{{ t('components.checkoutContent.address') }}</div>
                                         <code class="text-caption" style="font-size: 0.7rem; word-break: break-all;">{{ fluxPayment.paymentAddr }}</code>
                                       </div>
                                       <VBtn
@@ -312,7 +312,7 @@
                                       <!-- Amount -->
                                       <div class="d-flex align-center justify-space-between mb-1 px-2 py-1" style="background: rgba(var(--v-theme-on-surface), 0.05); border-radius: 4px; flex: 1;">
                                         <div>
-                                          <div class="text-caption" style="font-size: 0.65rem; opacity: 0.7;">Amount</div>
+                                          <div class="text-caption" style="font-size: 0.65rem; opacity: 0.7;">{{ t('components.checkoutContent.amount') }}</div>
                                           <code class="text-caption" style="font-size: 0.7rem;">{{ fluxPayment.amount }} FLUX</code>
                                         </div>
                                         <VBtn
@@ -329,7 +329,7 @@
                                       <!-- Message -->
                                       <div class="d-flex align-center justify-space-between mb-1 px-2 py-1" style="background: rgba(var(--v-theme-on-surface), 0.05); border-radius: 4px; flex: 1;">
                                         <div style="flex: 1; min-width: 0; overflow: hidden;">
-                                          <div class="text-caption" style="font-size: 0.65rem; opacity: 0.7;">Message</div>
+                                          <div class="text-caption" style="font-size: 0.65rem; opacity: 0.7;">{{ t('components.checkoutContent.message') }}</div>
                                           <code class="text-caption" style="font-size: 0.7rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">FLUXDRIVE{{ fluxPayment.subId }}</code>
                                         </div>
                                         <VBtn
@@ -355,7 +355,7 @@
                                         color="primary"
                                         class="me-2"
                                       />
-                                      {{ loading ? 'Loading payment details...' : 'Payment details will appear here' }}
+                                      {{ loading ? t('components.checkoutContent.loadingPaymentDetails') : t('components.checkoutContent.paymentDetailsWillAppear') }}
                                     </div>
                                   </template>
                                 </VExpansionPanelText>
@@ -377,13 +377,13 @@
                                 color="info"
                                 class="mb-3"
                               />
-                              <div class="text-h6 mb-2 text-center">Monitoring Payment...</div>
+                              <div class="text-h6 mb-2 text-center">{{ t('components.checkoutContent.monitoringPayment') }}</div>
                               <div class="text-body-2 text-center text-medium-emphasis mb-3">
-                                Waiting for payment confirmation on the Flux blockchain.
+                                {{ t('components.checkoutContent.waitingForPaymentConfirmation') }}
                               </div>
                               <div class="d-flex align-center text-caption text-medium-emphasis">
                                 <VIcon color="warning" size="16" class="me-2">mdi-clock-alert</VIcon>
-                                <span>This can take up to 20 minutes</span>
+                                <span>{{ t('components.checkoutContent.canTakeUpTo20Minutes') }}</span>
                               </div>
                             </div>
                           </VCard>
@@ -403,9 +403,9 @@
                                 <img
                                   class="wallet-brand-icon mr-3"
                                   :src="FluxIDImg"
-                                  alt="Zelcore"
+                                  :alt="t('components.checkoutContent.zelcore')"
                                 />
-                                <span class="text-h6 font-weight-medium">Zelcore</span>
+                                <span class="text-h6 font-weight-medium">{{ t('components.checkoutContent.zelcore') }}</span>
                               </VCardText>
                             </VCard>
 
@@ -419,9 +419,9 @@
                                 <img
                                   class="wallet-brand-icon mr-3"
                                   :src="SSPLogoThemeImg"
-                                  alt="SSP"
+                                  :alt="t('components.checkoutContent.ssp')"
                                 />
-                                <span class="text-h6 font-weight-medium">SSP</span>
+                                <span class="text-h6 font-weight-medium">{{ t('components.checkoutContent.ssp') }}</span>
                               </VCardText>
                             </VCard>
                           </div>
@@ -437,13 +437,13 @@
                             @click="cancelFluxPayment"
                           >
                             <VIcon icon="mdi-close-circle" class="me-2" />
-                            Cancel Monitoring
+                            {{ t('components.checkoutContent.cancelMonitoring') }}
                           </VBtn>
                         </div>
 
                         <!-- Subscription Note -->
                         <div class="text-caption text-medium-emphasis mt-4 text-center">
-                          *FLUX price is estimated and will be finalized in ZelCore
+                          {{ t('components.checkoutContent.fluxPriceEstimated') }}
                         </div>
                       </div>
                     </VCardText>
@@ -471,7 +471,7 @@
                             ${{ getPlanPrice() }} USD / Month
                           </div>
                           <div class="text-body-2 text-medium-emphasis mb-2">
-                            Next Automatic Subscription:<br />{{ formatEndDate(getEndDate()) }}
+                            {{ t('components.checkoutContent.nextAutomaticSubscription') }}:<br />{{ formatEndDate(getEndDate()) }}
                           </div>
                         </div>
 
@@ -485,7 +485,7 @@
                             @click="initializeCryptoComPayment"
                           >
                             <VIcon icon="mdi-credit-card" class="me-2" />
-                            Generate Subscription
+                            {{ t('components.checkoutContent.generateSubscription') }}
                           </VBtn>
 
                           <VBtn
@@ -496,7 +496,7 @@
                             block
                           >
                             <VIcon icon="mdi-clock-outline" class="me-2" />
-                            Pending Payment
+                            {{ t('components.checkoutContent.pendingPayment') }}
                           </VBtn>
 
                           <VBtn
@@ -507,14 +507,14 @@
                             block
                             @click="cancelCryptoPayment"
                           >
-                            Cancel
+                            {{ t('components.checkoutContent.cancel') }}
                           </VBtn>
 
                         </div>
 
                         <!-- Subscription Note -->
                         <div class="text-caption text-medium-emphasis mt-4">
-                          Subscriptions will be charged monthly
+                          {{ t('components.checkoutContent.subscriptionsChargedMonthly') }}
                         </div>
                       </div>
                     </VCardText>
@@ -545,6 +545,7 @@ import ClipboardJS from 'clipboard'
 import qs from 'qs'
 import { payWithSSP, payWithZelcore } from '@/utils/walletService'
 import { useTheme } from 'vuetify'
+import { useI18n } from 'vue-i18n'
 
 // Import payment images
 import FluxIDImg from '@images/FluxID.svg?url'
@@ -602,6 +603,7 @@ defineExpose({
 const fluxStore = useFluxStore()
 const { showSnackbar, hideSnackbar } = useSnackbar()
 const theme = useTheme()
+const { t } = useI18n()
 
 // Theme-aware SSP logo
 const SSPLogoThemeImg = computed(() => {
@@ -760,7 +762,7 @@ const loadPlanDetails = async () => {
 
     // Check authentication
     if (!isLoggedIn.value) {
-      showAlert('Please login to continue with your purchase')
+      showAlert(t('components.checkoutContent.pleaseLoginToContinue'))
       emit('close')
 
       return
@@ -803,7 +805,7 @@ const loadPlanDetails = async () => {
 
     const auth = getAuthFromStorage()
     if (!auth.zelid || !auth.signature || !auth.loginPhrase) {
-      showAlert('Invalid authentication data')
+      showAlert(t('components.checkoutContent.invalidAuthenticationData'))
       emit('close')
 
       return
@@ -879,6 +881,7 @@ const loadPlanDetails = async () => {
         // Wait for FLUX amount to be calculated before pre-initializing payment
         if (!estimatedFluxAmount.value) {
           console.log('⏳ Waiting for FLUX amount calculation...')
+
           // Wait a moment for the FLUX price calculation to complete
           await new Promise(resolve => setTimeout(resolve, 500))
         }
@@ -902,11 +905,11 @@ const loadPlanDetails = async () => {
       console.log('Selected plan data:', selectedPlan.value)
       console.log('Price_id from API:', selectedPlan.value.price_id)
     } else {
-      showAlert('Plan not found or invalid response from server')
+      showAlert(t('components.checkoutContent.planNotFoundOrInvalidResponse'))
     }
   } catch (error) {
     console.error('Error loading plan:', error)
-    showAlert('Failed to load plan details. Please try again.')
+    showAlert(t('components.checkoutContent.failedToLoadPlanDetails'))
   } finally {
     loading.value = false
   }
@@ -944,11 +947,13 @@ const preInitializeManualPaymentData = async () => {
     if (!auth.zelid || !auth.signature) {
       console.log('⚠️ Cannot pre-initialize payment data - missing auth')
       console.log('Auth check:', { hasZelid: !!auth.zelid, hasSignature: !!auth.signature, hasLoginPhrase: !!auth.loginPhrase })
+      
       return
     }
 
     if (!estimatedFluxAmount.value) {
       console.log('⚠️ Cannot pre-initialize payment data - missing FLUX amount')
+      
       return
     }
 
@@ -979,6 +984,7 @@ const preInitializeManualPaymentData = async () => {
       for (let i = 0; i < length; i++) {
         result += characters[Math.floor(Math.random() * characters.length)]
       }
+      
       return result
     }
 
@@ -1072,13 +1078,13 @@ const initializeFluxPayment = async (walletType = 'zelcore') => {
 
           // Set payment processing state and start monitoring
           fluxPaymentProcessing.value = true
-          showSnackbar('SSP payment initiated, monitoring for confirmation...', 'info', 8000)
+          showSnackbar(t('components.checkoutContent.sspPaymentInitiated'), 'info', 8000)
 
           // Start monitoring payment status
           monitorPayment(null, fluxPayment.value.subId, fluxPayment.value.paymentAddr, 'flux')
         } catch (error) {
           console.error('SSP payment error:', error)
-          showAlert(`SSP payment failed: ${error.message}`)
+          showAlert(t('components.checkoutContent.sspPaymentFailed', { error: error.message }))
         }
       } else {
         // Use Zelcore wallet
@@ -1093,17 +1099,18 @@ const initializeFluxPayment = async (walletType = 'zelcore') => {
 
           // Set payment processing state and start monitoring
           fluxPaymentProcessing.value = true
-          showSnackbar('Opening ZelCore wallet for payment...', 'info', 8000)
+          showSnackbar(t('components.checkoutContent.openingZelcoreWallet'), 'info', 8000)
 
           // Start monitoring payment status
           monitorPayment(null, fluxPayment.value.subId, fluxPayment.value.paymentAddr, 'flux')
         } catch (error) {
           console.error('Zelcore payment error:', error)
-          showAlert(`Zelcore payment failed: ${error.message}`)
+          showAlert(t('components.checkoutContent.zelcorePaymentFailed', { error: error.message }))
         }
       }
 
       initializingFluxPayment.value = false
+      
       return
     }
 
@@ -1112,7 +1119,7 @@ const initializeFluxPayment = async (walletType = 'zelcore') => {
 
     const auth = getAuthFromStorage()
     if (!auth.zelid || !auth.signature || !auth.loginPhrase) {
-      showAlert('Authentication required. Please login again.')
+      showAlert(t('components.checkoutContent.authenticationRequired'))
 
       return
     }
@@ -1222,13 +1229,13 @@ const initializeFluxPayment = async (walletType = 'zelcore') => {
 
           // Set payment processing state and start monitoring
           fluxPaymentProcessing.value = true
-          showSnackbar('SSP payment initiated, monitoring for confirmation...', 'info', 8000)
+          showSnackbar(t('components.checkoutContent.sspPaymentInitiated'), 'info', 8000)
 
           // Start monitoring payment status
           monitorPayment(null, result.sub_id, paymentPayload.payment_addr, 'flux')
         } catch (error) {
           console.error('SSP payment error:', error)
-          showAlert(`SSP payment failed: ${error.message}`)
+          showAlert(t('components.checkoutContent.sspPaymentFailed', { error: error.message }))
         }
       } else {
         // Use Zelcore wallet
@@ -1243,21 +1250,21 @@ const initializeFluxPayment = async (walletType = 'zelcore') => {
 
           // Set payment processing state and start monitoring
           fluxPaymentProcessing.value = true
-          showSnackbar('Opening ZelCore wallet for payment...', 'info', 8000)
+          showSnackbar(t('components.checkoutContent.openingZelcoreWallet'), 'info', 8000)
 
           // Start monitoring payment status
           monitorPayment(null, result.sub_id, paymentPayload.payment_addr, 'flux')
         } catch (error) {
           console.error('Zelcore payment error:', error)
-          showAlert(`Zelcore payment failed: ${error.message}`)
+          showAlert(t('components.checkoutContent.zelcorePaymentFailed', { error: error.message }))
         }
       }
     } else {
-      showAlert(result.error || 'Failed to initialize payment')
+      showAlert(result.error || t('components.checkoutContent.failedToInitializePayment'))
     }
   } catch (error) {
     console.error('Error initializing payment:', error)
-    showAlert('Failed to initialize payment. Please try again.')
+    showAlert(t('components.checkoutContent.failedToInitializePaymentTryAgain'))
   } finally {
     initializingFluxPayment.value = false
   }
@@ -1270,7 +1277,7 @@ const initializeCryptoComPayment = async () => {
 
     const auth = getAuthFromStorage()
     if (!auth.zelid || !auth.signature || !auth.loginPhrase) {
-      showAlert('Authentication required. Please login again.')
+      showAlert(t('components.checkoutContent.authenticationRequired'))
 
       return
     }
@@ -1343,7 +1350,7 @@ const initializeCryptoComPayment = async () => {
       if (redirectUrl) {
         console.log('🚀 Redirecting to Crypto.com:', redirectUrl)
         window.open(redirectUrl, '_blank')
-        showAlert('Redirected to Crypto.com for payment. Complete the payment and return here.', 'info')
+        showAlert(t('components.checkoutContent.redirectedToCryptoCom'), 'info')
         cryptoPaymentProcessing.value = true
 
         // Start monitoring for Crypto.com payment as well
@@ -1351,25 +1358,25 @@ const initializeCryptoComPayment = async () => {
       } else {
         console.error('❌ No checkout_url or subscription_url in successful response!')
         console.error('This means the backend returned success=true but no payment URL')
-        showAlert('Payment was initialized but no checkout URL received. Please contact support.', 'warning')
+        showAlert(t('components.checkoutContent.paymentInitializedNoUrl'), 'warning')
       }
     } else {
       // Provide more helpful error messages based on common issues
-      let errorMessage = result.error || 'Failed to initialize Crypto.com payment'
+      let errorMessage = result.error || t('components.checkoutContent.failedToInitializeCryptoCom')
 
       if (response.status === 500) {
-        errorMessage += '. Server error - please contact support.'
+        errorMessage += '. ' + t('components.checkoutContent.serverErrorContactSupport')
       } else if (response.status === 404) {
-        errorMessage += '. Payment service not found - please contact support.'
+        errorMessage += '. ' + t('components.checkoutContent.paymentServiceNotFound')
       } else if (result.error && result.error.includes('environment') || result.error && result.error.includes('config')) {
-        errorMessage += '. Payment service not properly configured - please contact support.'
+        errorMessage += '. ' + t('components.checkoutContent.paymentServiceNotConfigured')
       }
 
       showAlert(errorMessage)
     }
   } catch (error) {
     console.error('Error initializing Crypto.com payment:', error)
-    showAlert('Failed to initialize Crypto.com payment. Please try again.')
+    showAlert(t('components.checkoutContent.failedToInitializeCryptoComTryAgain'))
   } finally {
     initializingCryptoPayment.value = false
   }
@@ -1471,7 +1478,7 @@ const monitorPayment = async (paymentId, subId, paymentAddr, paymentType = 'flux
           paymentMonitoringInterval = null
           paymentMonitoringTimeout = null
           cryptoPaymentProcessing.value = false
-          showSnackbar('Payment confirmed! Your subscription is now active.', 'success', 8000)
+          showSnackbar(t('components.checkoutContent.paymentConfirmedSubscriptionActive'), 'success', 8000)
           emit('success')
         } else if (result.error) {
           console.warn('Payment check error:', result.error)
@@ -1517,12 +1524,12 @@ const monitorPayment = async (paymentId, subId, paymentAddr, paymentType = 'flux
               fluxPaymentProcessing.value = false
 
               const message = props.actionType === 'renew'
-                ? 'Payment confirmed! Your subscription has been renewed.'
+                ? t('components.checkoutContent.paymentConfirmedRenewed')
                 : props.actionType === 'upgrade'
-                  ? 'Payment confirmed! Your subscription has been upgraded.'
+                  ? t('components.checkoutContent.paymentConfirmedUpgraded')
                   : props.actionType === 'downgrade'
-                    ? 'Payment confirmed! Your subscription has been downgraded.'
-                    : 'Payment confirmed! Your subscription is now active.'
+                    ? t('components.checkoutContent.paymentConfirmedDowngraded')
+                    : t('components.checkoutContent.paymentConfirmedSubscriptionActive')
 
               showSnackbar(message, 'success', 8000)
               emit('success')
@@ -1544,7 +1551,7 @@ const monitorPayment = async (paymentId, subId, paymentAddr, paymentType = 'flux
             paymentMonitoringTimeout = null
             fluxPaymentProcessing.value = false
 
-            showSnackbar('Payment confirmed! Your subscription is now active.', 'success', 8000)
+            showSnackbar(t('components.checkoutContent.paymentConfirmedSubscriptionActive'), 'success', 8000)
             emit('success')
           } else {
             console.log('⏳ Subscription not yet active - continuing to monitor...', result)
@@ -1575,10 +1582,10 @@ const monitorPayment = async (paymentId, subId, paymentAddr, paymentType = 'flux
 
     if (paymentType === 'crypto' && cryptoPaymentProcessing.value) {
       cryptoPaymentProcessing.value = false
-      showAlert('Crypto.com payment monitoring timeout. Please check your subscription status manually.', 'warning')
+      showAlert(t('components.checkoutContent.cryptoComTimeoutCheckManually'), 'warning')
     } else if (paymentType === 'flux' && fluxPaymentProcessing.value) {
       fluxPaymentProcessing.value = false
-      showAlert('FluxPay payment monitoring timeout. Please check your subscription status manually.', 'warning')
+      showAlert(t('components.checkoutContent.fluxPayTimeoutCheckManually'), 'warning')
     }
   }, 600000)
 }
@@ -1600,8 +1607,9 @@ const cancelFluxPayment = () => {
   hideSnackbar()
 
   fluxPaymentProcessing.value = false
+
   // DON'T clear fluxPayment.value - keep manual payment data visible
-  showAlert('Payment monitoring cancelled. You can still pay manually using the details above.', 'info')
+  showAlert(t('components.checkoutContent.paymentMonitoringCancelledCanPayManually'), 'info')
 }
 
 const cancelCryptoPayment = () => {
@@ -1621,7 +1629,7 @@ const cancelCryptoPayment = () => {
   hideSnackbar()
 
   cryptoPaymentProcessing.value = false
-  showAlert('Crypto.com payment cancelled', 'info')
+  showAlert(t('components.checkoutContent.cryptoComPaymentCancelled'), 'info')
 }
 
 const formatEndDate = endTime => {
@@ -1735,14 +1743,14 @@ const getCurrentPlan = () => {
     // The current subscription API response should contain the current plan info
     if (data.plan) {
       console.log('📋 Using currentSubscriptionData.plan:', data.plan)
-      
+
       return data.plan
     }
 
     // If plan info is at root level
     if (data.plan_name || data.storage_gb || data.price) {
       console.log('📋 Using currentSubscriptionData root level data')
-      
+
       return data
     }
 
@@ -1808,13 +1816,13 @@ const getCurrentPlanName = () => {
   // If we can't find current plan, for upgrades/downgrades we can show a generic message
   if (props.actionType === 'upgrade' || props.actionType === 'downgrade') {
     console.log('🏷️ Using fallback for upgrade/downgrade - Current Subscription')
-    
-    return 'Current Subscription'
+
+    return t('components.checkoutContent.currentSubscription')
   }
 
   console.log('🏷️ Using fallback - Current Plan')
-  
-  return 'Current Plan'
+
+  return t('components.checkoutContent.currentPlanFallback')
 }
 
 const getNewPlanName = () => {
@@ -1833,9 +1841,9 @@ const getCurrentPlanStorage = () => {
 
   // For upgrades and downgrades, show a generic message instead of N/A
   if (props.actionType === 'upgrade' || props.actionType === 'downgrade') {
-    return 'Current Storage'
+    return t('components.checkoutContent.currentStorage')
   }
-  
+
   return 'N/A'
 }
 
@@ -1893,18 +1901,18 @@ const getPlanPrice = () => {
 const getDisplayPlanName = planName => {
   if (!planName) return 'N/A'
 
-  // Map 'pro' to 'Elite' for display
-  const displayNameMap = {
-    'starter': 'Starter',
-    'standard': 'Standard',
-    'pro': 'Elite',  // Show 'Elite' when API returns 'pro'
-    'enterprise': 'Flux Drive Pro',
-    'flux drive pro': 'Flux Drive Pro',
-  }
-
+  // Map plan names to translated versions
   const lowerPlanName = planName.toLowerCase()
-  
-  return displayNameMap[lowerPlanName] || planName
+
+  // Use translation keys for plan names
+  const planNameKey = lowerPlanName.replace(/\s+/g, '')
+  if (planNameKey === 'starter') return t('components.checkoutContent.planNames.starter')
+  if (planNameKey === 'standard') return t('components.checkoutContent.planNames.standard')
+  if (planNameKey === 'pro') return t('components.checkoutContent.planNames.pro')
+  if (planNameKey === 'enterprise') return t('components.checkoutContent.planNames.enterprise')
+  if (planNameKey === 'fluxdrivepro') return t('components.checkoutContent.planNames.fluxDrivePro')
+
+  return planName
 }
 
 const getStorageDisplay = () => {
@@ -2003,12 +2011,12 @@ onMounted(() => {
   })
 
   clipboard.on('success', e => {
-    showSnackbar('Copied to clipboard!', 'success', 2000, 'mdi-check-circle')
+    showSnackbar(t('components.checkoutContent.copiedToClipboard'), 'success', 2000, 'mdi-check-circle')
     e.clearSelection()
   })
 
   clipboard.on('error', e => {
-    showSnackbar('Failed to copy', 'error', 2000, 'mdi-alert-circle')
+    showSnackbar(t('components.checkoutContent.failedToCopy'), 'error', 2000, 'mdi-alert-circle')
   })
 })
 

@@ -7,13 +7,13 @@
     <VCard rounded="xl">
       <VCardTitle class="bg-primary text-white dialog-title d-flex align-center">
         <VIcon>mdi-upload</VIcon>
-        <span class="ml-2">Upgrade Application Specification</span>
+        <span class="ml-2">{{ t('components.dialogs.upgradeSpecDialog.title') }}</span>
       </VCardTitle>
 
       <VCardText class="px-6 pt-6 pb-0">
         <!-- Upgrade info -->
         <div class="text-body-1 mb-4">
-          You are about to upgrade this application specification from <strong>v{{ currentVersion }}</strong> to <strong>v{{ targetVersion }}</strong>.
+          {{ t('components.dialogs.upgradeSpecDialog.upgradeInfo', { currentVersion, targetVersion }) }}
         </div>
 
         <!-- Warning section - dynamic based on version -->
@@ -22,7 +22,7 @@
           variant="tonal"
           class="mb-4"
         >
-          <div class="font-weight-bold mb-2">The following data will be lost or reset:</div>
+          <div class="font-weight-bold mb-2">{{ t('components.dialogs.upgradeSpecDialog.dataLossWarning') }}</div>
           <ul class="ml-2">
             <li v-for="(item, index) in warningItems" :key="index">{{ item }}</li>
           </ul>
@@ -33,11 +33,11 @@
           type="info"
           variant="tonal"
         >
-          <div class="font-weight-bold mb-2">What happens next:</div>
+          <div class="font-weight-bold mb-2">{{ t('components.dialogs.upgradeSpecDialog.nextSteps') }}</div>
           <ul class="ml-2">
-            <li>Specification format will be updated to v{{ targetVersion }}</li>
-            <li>You can review and modify the upgraded specification</li>
-            <li>You must validate and sign the updated specification</li>
+            <li>{{ t('components.dialogs.upgradeSpecDialog.step1', { targetVersion }) }}</li>
+            <li>{{ t('components.dialogs.upgradeSpecDialog.step2') }}</li>
+            <li>{{ t('components.dialogs.upgradeSpecDialog.step3') }}</li>
           </ul>
         </VAlert>
       </VCardText>
@@ -49,7 +49,7 @@
           variant="text"
           @click="closeDialog"
         >
-          Cancel
+          {{ t('common.buttons.cancel') }}
         </VBtn>
         <VBtn
           color="warning"
@@ -57,7 +57,7 @@
           @click="confirmUpgrade"
         >
           <VIcon size="22" class="mr-2">mdi-upload</VIcon>
-          Upgrade
+          {{ t('components.dialogs.upgradeSpecDialog.upgrade') }}
         </VBtn>
       </VCardActions>
     </VCard>
@@ -66,6 +66,7 @@
 
 <script setup>
 import { ref, watch, computed } from 'vue'
+import { useI18n } from 'vue-i18n'
 
 const props = defineProps({
   modelValue: {
@@ -84,6 +85,8 @@ const props = defineProps({
 
 const emit = defineEmits(['update:modelValue', 'confirm'])
 
+const { t } = useI18n()
+
 const isOpen = ref(props.modelValue)
 
 // Dynamic warning items based on version
@@ -92,22 +95,22 @@ const warningItems = computed(() => {
 
   // All versions lose tiered field
   if (props.currentVersion >= 3 && props.currentVersion <= 7) {
-    items.push('Tiered pricing configurations (tiered field)')
+    items.push(t('components.dialogs.upgradeSpecDialog.warnings.tieredPricing'))
   }
 
   // V3 and earlier don't have these fields, so they get reset
   if (props.currentVersion < 5) {
-    items.push('Custom contacts (reset to empty)')
-    items.push('Custom geolocation (reset to empty)')
+    items.push(t('components.dialogs.upgradeSpecDialog.warnings.customContacts'))
+    items.push(t('components.dialogs.upgradeSpecDialog.warnings.customGeolocation'))
   }
 
   if (props.currentVersion < 6) {
-    items.push('Custom expire value (reset to 22000)')
+    items.push(t('components.dialogs.upgradeSpecDialog.warnings.customExpire'))
   }
 
   // V1-V2 specific warnings
   if (props.currentVersion <= 2) {
-    items.push('Port type conversions (string → number)')
+    items.push(t('components.dialogs.upgradeSpecDialog.warnings.portConversion'))
   }
 
   return items

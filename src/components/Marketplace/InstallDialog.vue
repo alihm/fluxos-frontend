@@ -7,7 +7,7 @@
     class="install-dialog"
     style="height: 90vh;"
   >
-    <VCard v-show="!showLoginDialog" class="install-card">
+    <VCard class="install-card">
       <!-- Primary Title Header -->
       <VCardTitle class="install-header">
         <div class="header-content">
@@ -96,8 +96,8 @@
                   <VIcon icon="mdi-alert-circle" size="32" />
                 </template>
                 <div class="d-flex flex-column">
-                  <span class="text-subtitle-1 font-weight-medium mb-1">Terms Acceptance Required</span>
-                  <span class="text-body-2">Please scroll down and accept the Terms of Use to continue with the installation.</span>
+                  <span class="text-subtitle-1 font-weight-medium mb-1">{{ t('components.marketplace.installDialog.termsAcceptanceRequired') }}</span>
+                  <span class="text-body-2">{{ t('components.marketplace.installDialog.pleaseScrollAndAccept') }}</span>
                 </div>
               </VAlert>
 
@@ -111,7 +111,7 @@
                   <VAvatar size="32" color="primary" variant="flat">
                     <VIcon icon="mdi-memory" size="18" color="white" />
                   </VAvatar>
-                  <h5>Hardware Requirements</h5>
+                  <h5>{{ t('components.marketplace.installDialog.hardwareRequirements') }}</h5>
                 </div>
 
                 <div class="hardware-grid">
@@ -121,7 +121,7 @@
                       <VIcon icon="mdi-cpu-64-bit" size="20" />
                     </VAvatar>
                     <div class="hardware-details">
-                      <span class="hardware-label">CPU Cores</span>
+                      <span class="hardware-label">{{ t('components.marketplace.installDialog.cpuCores') }}</span>
                       <div class="hardware-control">
                         <VBtn
                           v-if="!isCpuLocked"
@@ -160,7 +160,7 @@
                       <VIcon icon="mdi-memory" size="20" />
                     </VAvatar>
                     <div class="hardware-details">
-                      <span class="hardware-label">Memory (MB)</span>
+                      <span class="hardware-label">{{ t('components.marketplace.installDialog.memoryMb') }}</span>
                       <div class="hardware-control">
                         <VBtn
                           v-if="!isRamLocked"
@@ -199,7 +199,7 @@
                       <VIcon icon="mdi-harddisk" size="20" />
                     </VAvatar>
                     <div class="hardware-details">
-                      <span class="hardware-label">Storage (GB)</span>
+                      <span class="hardware-label">{{ t('components.marketplace.installDialog.storageGb') }}</span>
                       <div class="hardware-control">
                         <VBtn
                           v-if="!isStorageLocked"
@@ -239,7 +239,7 @@
                   <VAvatar size="32" color="warning" variant="flat">
                     <VIcon icon="mdi-calendar-clock" size="18" color="white" />
                   </VAvatar>
-                  <h5>Subscription Duration</h5>
+                  <h5>{{ t('components.marketplace.installDialog.subscriptionDuration') }}</h5>
                 </div>
 
                 <div class="subscription-duration">
@@ -269,7 +269,7 @@
                   <VAvatar size="32" color="primary" variant="flat">
                     <VIcon icon="mdi-layers-triple" size="18" color="white" />
                   </VAvatar>
-                  <h5>Deployment Options</h5>
+                  <h5>{{ t('components.marketplace.installDialog.deploymentOptions') }}</h5>
                 </div>
 
                 <div class="deployment-slider-container">
@@ -281,7 +281,7 @@
                       class="instances-chip"
                     >
                       <VIcon start icon="mdi-layers" size="14" />
-                      {{ config.instances }} Instance{{ config.instances !== 1 ? 's' : '' }}
+                      {{ t('components.marketplace.installDialog.instances', { count: config.instances }) }}
                       <VIcon v-if="isInstancesLocked" icon="mdi-lock" size="14" color="warning" class="ml-1" />
                     </VChip>
                   </div>
@@ -308,7 +308,7 @@
                   <VAvatar size="32" color="primary" variant="flat">
                     <VIcon icon="mdi-calculator" size="18" color="white" />
                   </VAvatar>
-                  <h5>Estimated Pricing</h5>
+                  <h5>{{ t('components.marketplace.installDialog.estimatedPricing') }}</h5>
                 </div>
                 <div class="pricing-chips">
                   <VChip
@@ -327,7 +327,7 @@
                       class="price-chip flux-chip"
                     >
                       <VIcon start icon="mdi-lightning-bolt" size="16" />
-                      <span v-if="loadingPricing">Loading...</span>
+                      <span v-if="loadingPricing">{{ t('components.marketplace.installDialog.loading') }}</span>
                       <span v-else>{{ totalFluxPrice }} FLUX</span>
                     </VChip>
                     <VBadge
@@ -349,9 +349,7 @@
                   hide-details
                 >
                   <template #label>
-                    <span class="text-body-2">
-                      I agree to the <a href="https://runonflux.io/terms" target="_blank" rel="noopener noreferrer" style="color: inherit; text-decoration: none; font-weight: bold;">Terms of Use</a> and <a href="https://runonflux.io/privacy" target="_blank" rel="noopener noreferrer" style="color: inherit; text-decoration: none; font-weight: bold;">Privacy Policy</a>
-                    </span>
+                    <span class="text-body-2" v-html="t('components.marketplace.installDialog.agreeToTerms')"></span>
                   </template>
                 </VCheckbox>
               </div>
@@ -367,7 +365,7 @@
                 <div v-if="isFluxCloudGame && getEnvironmentParameters().some(p => p.advanced)" class="advanced-toggle" style="display: flex; justify-content: flex-end; margin-bottom: 16px;">
                   <VSwitch
                     v-model="showAdvanced"
-                    label="Show Advanced"
+                    :label="t('components.marketplace.installDialog.showAdvanced')"
                     color="primary"
                     hide-details
                     density="compact"
@@ -406,7 +404,7 @@
                         <template #activator="{ props }">
                           <VIcon v-bind="props" icon="mdi-help-circle" size="16" />
                         </template>
-                        {{ param.description || 'Configuration parameter' }}
+                        {{ param.description || t('components.marketplace.installDialog.configurationParameter') }}
                       </VTooltip>
                     </template>
                   </VSelect>
@@ -428,7 +426,7 @@
                         <template #activator="{ props }">
                           <VIcon v-bind="props" icon="mdi-help-circle" size="16" />
                         </template>
-                        {{ param.description || 'Configuration parameter' }}
+                        {{ param.description || t('components.marketplace.installDialog.configurationParameter') }}
                       </VTooltip>
                     </template>
                   </VTextField>
@@ -440,8 +438,8 @@
                   <VIcon icon="mdi-check-circle" size="48" color="success" />
                 </div>
                 <div class="no-params-text">
-                  <h5>All Set!</h5>
-                  <p>No additional configuration required</p>
+                  <h5>{{ t('components.marketplace.installDialog.allSet') }}</h5>
+                  <p>{{ t('components.marketplace.installDialog.noAdditionalConfig') }}</p>
                 </div>
               </div>
             </div>
@@ -455,7 +453,7 @@
                   <VAvatar size="32" color="primary" variant="flat">
                     <VIcon icon="mdi-earth" size="20" color="white" />
                   </VAvatar>
-                  <h5 class="deployment-title">Deployment Location</h5>
+                  <h5 class="deployment-title">{{ t('components.marketplace.installDialog.deploymentLocation') }}</h5>
                 </div>
 
                 <div class="geolocation-content">
@@ -465,18 +463,18 @@
                       <div class="geolocation-card">
                         <h6 class="geolocation-title mb-4">
                           <VIcon icon="mdi-check-circle" color="success" class="mr-2" />
-                          Allowed Locations
+                          {{ t('components.marketplace.installDialog.allowedLocations') }}
                         </h6>
 
                         <div class="geolocation-controls">
                           <div class="control-group mb-3">
-                            <label class="control-label">Continent:</label>
+                            <label class="control-label">{{ t('components.marketplace.installDialog.continent') }}:</label>
                             <VSelect
                               v-model="geolocation.allowedContinent"
-                              :items="[{name: 'Global', code: '', totalInstances: null}, ...availableContinents]"
+                              :items="[{name: t('components.marketplace.installDialog.global'), code: '', totalInstances: null}, ...availableContinents]"
                               item-title="name"
                               item-value="code"
-                              placeholder="Global (All Continents)"
+                              :placeholder="t('components.marketplace.installDialog.globalAllContinents')"
                               variant="outlined"
                               density="compact"
                               class="geolocation-select"
@@ -503,13 +501,13 @@
                           </div>
 
                           <div class="control-group">
-                            <label class="control-label">Country:</label>
+                            <label class="control-label">{{ t('components.marketplace.installDialog.country') }}:</label>
                             <VSelect
                               v-model="geolocation.allowedCountry"
-                              :items="geolocation.allowedContinent ? [{name: 'All Countries', code: '', instances: null}, ...allowedCountries] : []"
+                              :items="geolocation.allowedContinent ? [{name: t('components.marketplace.installDialog.allCountries'), code: '', instances: null}, ...allowedCountries] : []"
                               item-title="name"
                               item-value="code"
-                              placeholder="All Countries"
+                              :placeholder="t('components.marketplace.installDialog.allCountries')"
                               variant="outlined"
                               density="compact"
                               :disabled="!geolocation.allowedContinent"
@@ -546,7 +544,7 @@
                               :disabled="!geolocation.allowedContinent"
                             >
                               <VIcon icon="mdi-plus" size="16" class="mr-1" />
-                              Add Allowed
+                              {{ t('components.marketplace.installDialog.addAllowed') }}
                             </VBtn>
                           </div>
                         </div>
@@ -558,18 +556,18 @@
                       <div class="geolocation-card">
                         <h6 class="geolocation-title mb-4">
                           <VIcon icon="mdi-close-circle" color="error" class="mr-2" />
-                          Forbidden Locations
+                          {{ t('components.marketplace.installDialog.forbiddenLocations') }}
                         </h6>
 
                         <div class="geolocation-controls">
                           <div class="control-group mb-3">
-                            <label class="control-label">Continent:</label>
+                            <label class="control-label">{{ t('components.marketplace.installDialog.continent') }}:</label>
                             <VSelect
                               v-model="geolocation.forbiddenContinent"
-                              :items="[{name: 'No Continents Forbidden', code: '', totalInstances: null}, ...availableContinents]"
+                              :items="[{name: t('components.marketplace.installDialog.noContinentsForbidden'), code: '', totalInstances: null}, ...availableContinents]"
                               item-title="name"
                               item-value="code"
-                              placeholder="None (No Restrictions)"
+                              :placeholder="t('components.marketplace.installDialog.noneNoRestrictions')"
                               variant="outlined"
                               density="compact"
                               class="geolocation-select"
@@ -596,13 +594,13 @@
                           </div>
 
                           <div class="control-group">
-                            <label class="control-label">Country:</label>
+                            <label class="control-label">{{ t('components.marketplace.installDialog.country') }}:</label>
                             <VSelect
                               v-model="geolocation.forbiddenCountry"
-                              :items="geolocation.forbiddenContinent ? [{name: 'No Countries Forbidden', code: '', instances: null}, ...forbiddenCountries] : []"
+                              :items="geolocation.forbiddenContinent ? [{name: t('components.marketplace.installDialog.noCountriesForbidden'), code: '', instances: null}, ...forbiddenCountries] : []"
                               item-title="name"
                               item-value="code"
-                              placeholder="All Countries"
+                              :placeholder="t('components.marketplace.installDialog.allCountries')"
                               variant="outlined"
                               density="compact"
                               :disabled="!geolocation.forbiddenContinent"
@@ -639,7 +637,7 @@
                               :disabled="!geolocation.forbiddenContinent"
                             >
                               <VIcon icon="mdi-plus" size="16" class="mr-1" />
-                              Add Forbidden
+                              {{ t('components.marketplace.installDialog.addForbidden') }}
                             </VBtn>
                           </div>
                         </div>
@@ -651,14 +649,14 @@
                   <div v-if="allowedGeolocations.length > 0 || forbiddenGeolocations.length > 0" class="mt-4">
                     <h4 class="mb-3 current-rules-title">
                       <VIcon icon="mdi-format-list-bulleted" size="20" class="mr-2" />
-                      Current Rules
+                      {{ t('components.marketplace.installDialog.currentRules') }}
                     </h4>
 
                     <!-- Allowed Rules -->
                     <div v-if="allowedGeolocations.length > 0" class="mb-4">
                       <h5 class="text-success mb-2 d-flex align-center">
                         <VIcon icon="mdi-check-circle" size="20" class="mr-1" />
-                        Allowed Locations:
+                        {{ t('components.marketplace.installDialog.allowedLocationsColon') }}
                       </h5>
                       <div class="d-flex flex-wrap gap-2">
                         <VChip
@@ -679,7 +677,7 @@
                     <div v-if="!isFluxCloudGame && forbiddenGeolocations.length > 0">
                       <h5 class="text-error mb-2 d-flex align-center">
                         <VIcon icon="mdi-close-circle" size="20" class="mr-1" />
-                        Forbidden Locations:
+                        {{ t('components.marketplace.installDialog.forbiddenLocationsColon') }}
                       </h5>
                       <div class="d-flex flex-wrap gap-2">
                         <VChip
@@ -705,9 +703,9 @@
                   >
                     <div class="alert-content">
                       <ul class="alert-list">
-                        <li><strong>Allowed:</strong> Your app will only be deployed on nodes in the selected locations</li>
-                        <li v-if="!isFluxCloudGame"><strong>Forbidden:</strong> Your app will avoid deployment on nodes in the selected locations</li>
-                        <li><strong>Global:</strong> No geographic restrictions (recommended for best availability)</li>
+                        <li><strong>{{ t('components.marketplace.installDialog.allowedColon') }}</strong> {{ t('components.marketplace.installDialog.allowedGeoInfo') }}</li>
+                        <li v-if="!isFluxCloudGame"><strong>{{ t('components.marketplace.installDialog.forbiddenColon') }}</strong> {{ t('components.marketplace.installDialog.forbiddenGeoInfo') }}</li>
+                        <li><strong>{{ t('components.marketplace.installDialog.globalColon') }}</strong> {{ t('components.marketplace.installDialog.globalGeoInfo') }}</li>
                       </ul>
                     </div>
                   </VAlert>
@@ -724,7 +722,7 @@
                   <VAvatar size="32" color="warning" variant="flat">
                     <VIcon icon="mdi-email-alert" size="18" color="white" />
                   </VAvatar>
-                  <h5 class="email-title">Email Notifications</h5>
+                  <h5 class="email-title">{{ t('components.marketplace.installDialog.emailNotifications') }}</h5>
                 </div>
 
                 <div class="email-content">
@@ -733,14 +731,14 @@
                       <div class="email-card">
                         <h6 class="notification-subtitle">
                           <VIcon icon="mdi-bell-ring" color="warning" class="mr-2" />
-                          Notification Settings
+                          {{ t('components.marketplace.installDialog.notificationSettings') }}
                         </h6>
 
                         <div class="email-control">
                           <VTextField
                             v-model="emailNotifications.email"
-                            label="Email Address"
-                            placeholder="Enter your email for notifications (optional)"
+                            :label="t('components.marketplace.installDialog.emailAddress')"
+                            :placeholder="t('components.marketplace.installDialog.enterEmailOptional')"
                             variant="outlined"
                             density="comfortable"
                             type="email"
@@ -757,15 +755,15 @@
                         <div class="notification-info mt-4">
                           <div class="info-item">
                             <VIcon icon="mdi-information" color="info" class="mr-3" />
-                            <span>App notifications will inform you when your application has finished launching on the network</span>
+                            <span>{{ t('components.marketplace.installDialog.notificationInfo1') }}</span>
                           </div>
                           <div class="info-item">
                             <VIcon icon="mdi-information" color="info" class="mr-3" />
-                            <span>Notifications will also let you know when the primary server for your application has changed</span>
+                            <span>{{ t('components.marketplace.installDialog.notificationInfo2') }}</span>
                           </div>
                           <div class="info-item">
                             <VIcon icon="mdi-information" color="info" class="mr-3" />
-                            <span>You will also be notified when your app expiration date is approaching</span>
+                            <span>{{ t('components.marketplace.installDialog.notificationInfo3') }}</span>
                           </div>
                         </div>
                       </div>
@@ -785,21 +783,21 @@
                     <VAvatar size="40" color="primary" variant="flat" class="mr-3">
                       <VIcon icon="mdi-rocket-launch" size="24" color="white" />
                     </VAvatar>
-                    <div class="text-h4">Launching Application</div>
+                    <div class="text-h4">{{ t('components.marketplace.installDialog.launchingApplication') }}</div>
                   </div>
                   <div class="text-body-1 mb-4">
-                    Your application needs to be signed and registered on the Flux network.
+                    {{ t('components.marketplace.installDialog.applicationNeedsSignature') }}
                   </div>
 
                   <!-- Status Chips -->
                   <div class="d-flex justify-center gap-2 mb-6">
                     <VChip color="info" variant="tonal" size="small">
                       <VIcon start icon="mdi-security" size="16" />
-                      Secure Signing
+                      {{ t('components.marketplace.installDialog.secureSigning') }}
                     </VChip>
                     <VChip color="success" variant="tonal" size="small">
                       <VIcon start icon="mdi-cloud-check" size="16" />
-                      Network Registration
+                      {{ t('components.marketplace.installDialog.networkRegistration') }}
                     </VChip>
                   </div>
 
@@ -851,7 +849,7 @@
                     :disabled="availableWallets.length === 0"
                   >
                     <VIcon start icon="mdi-draw-pen" size="24" />
-                    Sign and Register
+                    {{ t('components.marketplace.installDialog.signAndRegister') }}
                   </VBtn>
 
 
@@ -863,7 +861,7 @@
                     class="mt-4"
                   >
                     <div class="text-body-2">
-                      No compatible wallets detected. Please install ZelCore, SSP, MetaMask, or ensure you're logged in via SSO.
+                      {{ t('components.marketplace.installDialog.noCompatibleWallets') }}
                     </div>
                   </VAlert>
 
@@ -879,7 +877,7 @@
                               <VProgressCircular v-else-if="signingProgress.signing" indeterminate size="24" width="3" color="primary" />
                               <VIcon v-else icon="mdi-circle-outline" color="grey" size="24" />
                             </div>
-                            <span class="progress-text">Signing App...</span>
+                            <span class="progress-text">{{ t('components.marketplace.installDialog.signingApp') }}</span>
                           </div>
                         </div>
 
@@ -890,7 +888,7 @@
                               <VProgressCircular v-else-if="signingProgress.registering" indeterminate size="24" width="3" color="primary" />
                               <VIcon v-else icon="mdi-circle-outline" color="grey" size="24" />
                             </div>
-                            <span class="progress-text">Registering App...</span>
+                            <span class="progress-text">{{ t('components.marketplace.installDialog.registeringApp') }}</span>
                           </div>
                         </div>
                       </div>
@@ -906,7 +904,7 @@
                         style="min-width: 300px;"
                       >
                         <VIcon start icon="mdi-close" size="24" />
-                        Cancel
+                        {{ t('components.marketplace.installDialog.cancel') }}
                       </VBtn>
                     </div>
                   </div>
@@ -914,10 +912,10 @@
                   <!-- Success Message -->
                   <div v-if="signStepCompleted[0] && signStepCompleted[1]" class="success-section">
                     <VIcon icon="mdi-check-circle" size="64" color="success" class="mb-3" />
-                    <div class="text-h5 text-success mb-2">Signing and Registration Complete</div>
+                    <div class="text-h5 text-success mb-2">{{ t('components.marketplace.installDialog.signingAndRegistrationComplete') }}</div>
                     <div class="text-caption mt-2">
-                      <span v-if="redirectCountdown > 0">You will be redirected in {{ redirectCountdown }} seconds...</span>
-                      <span v-else>Proceed to the next step to complete payment</span>
+                      <span v-if="redirectCountdown > 0">{{ t('components.marketplace.installDialog.redirectIn', { seconds: redirectCountdown }) }}</span>
+                      <span v-else>{{ t('components.marketplace.installDialog.proceedToNextStep') }}</span>
                     </div>
                   </div>
                 </div>
@@ -936,25 +934,22 @@
                     <VAvatar size="32" color="info" variant="flat">
                       <VIcon icon="mdi-information" size="18" color="white" />
                     </VAvatar>
-                    <h5>Payment Information</h5>
+                    <h5>{{ t('components.marketplace.installDialog.paymentInformation') }}</h5>
                   </div>
                   <div class="payment-info-content">
                     <div class="d-flex align-center mb-3">
                       <VIcon icon="mdi-check-circle" color="success" size="22" class="mr-2 flex-shrink-0" />
-                      <div class="text-body-1 text-high-emphasis">
-                        Everything is ready, your payment option links, both for <strong class="text-no-wrap">fiat</strong> and <strong class="text-no-wrap">flux</strong>, are valid for the next <strong class="text-warning text-no-wrap">30 minutes</strong>.
+                      <div class="text-body-1 text-high-emphasis" v-html="t('components.marketplace.installDialog.paymentLinksValid')">
                       </div>
                     </div>
                     <div class="d-flex align-center mb-3">
                       <VIcon icon="mdi-calendar-clock" color="orange" size="22" class="mr-2 flex-shrink-0" />
-                      <div class="text-body-1 text-high-emphasis">
-                        The application will be subscribed until <strong class="text-no-wrap" style="color: orange;">{{ subscriptionEndDate }}</strong>.
+                      <div class="text-body-1 text-high-emphasis" v-html="t('components.marketplace.installDialog.subscribedUntil', { date: subscriptionEndDate })">
                       </div>
                     </div>
                     <div class="d-flex align-center">
                       <VIcon icon="mdi-information" color="info" size="22" class="mr-2 flex-shrink-0" />
-                      <div class="text-body-1 text-high-emphasis">
-                        To finish the application registration, pay for your application with your preferred payment method or check below for how to pay with <strong class="text-no-wrap">Flux</strong> crypto currency.
+                      <div class="text-body-1 text-high-emphasis" v-html="t('components.marketplace.installDialog.finishRegistrationInfo')">
                       </div>
                     </div>
                   </div>
@@ -966,7 +961,7 @@
                     <VAvatar size="32" color="primary" variant="flat">
                       <VIcon icon="mdi-wallet" size="18" color="white" />
                     </VAvatar>
-                    <h5>Choose Payment Method</h5>
+                    <h5>{{ t('components.marketplace.installDialog.choosePaymentMethod') }}</h5>
                   </div>
 
                   <VRadioGroup v-model="paymentMethod" class="payment-methods-compact">
@@ -994,12 +989,12 @@
                           </div>
                           <div class="payment-method-price">
                             <div v-if="method.id === 'flux' || method.id === 'ssp'" class="text-body-2 font-weight-bold text-success">
-                              <span v-if="loadingPricing">Loading...</span>
+                              <span v-if="loadingPricing">{{ t('components.marketplace.installDialog.loading') }}</span>
                               <span v-else>{{ totalFluxPrice }} FLUX</span>
                               <VChip v-if="!loadingPricing && fluxDiscount > 0" size="x-small" color="success" class="ml-1">-{{ fluxDiscount }}%</VChip>
                             </div>
                             <div v-else class="text-body-2 font-weight-bold">
-                              {{ totalCost }} + VAT
+                              {{ totalCost }} + {{ t('components.marketplace.installDialog.vat') }}
                             </div>
                           </div>
                         </div>
@@ -1019,7 +1014,7 @@
                           style="width: 44px; height: 44px; object-fit: contain;"
                         />
                       </VAvatar>
-                      <h5>{{ paymentMethod === 'flux' ? 'ZelCore' : 'SSP' }} Payment Instructions</h5>
+                      <h5>{{ paymentMethod === 'flux' ? t('components.marketplace.installDialog.paymentInstructionsZelCore') : t('components.marketplace.installDialog.paymentInstructionsSSP') }}</h5>
                     </div>
 
                     <!-- Payment Details (hidden during monitoring) -->
@@ -1028,7 +1023,7 @@
                         <VCardText class="pa-2">
                           <div class="d-flex align-center mb-1">
                             <VIcon icon="mdi-wallet-outline" size="18" class="mr-2" />
-                            <div class="text-caption font-weight-medium">Payment Address</div>
+                            <div class="text-caption font-weight-medium">{{ t('components.marketplace.installDialog.paymentAddress') }}</div>
                           </div>
                           <div class="d-flex align-center ga-2">
                             <code class="text-caption flex-grow-1 text-truncate pa-1 rounded" style="background: rgba(0,0,0,0.1);">{{ fluxPaymentAddress }}</code>
@@ -1037,7 +1032,7 @@
                               variant="text"
                               icon
                               color="grey"
-                              @click="copyToClipboard(fluxPaymentAddress, 'Copied to clipboard!')"
+                              @click="copyToClipboard(fluxPaymentAddress, t('components.marketplace.installDialog.copiedToClipboard'))"
                             >
                               <VIcon icon="mdi-content-copy" size="16" />
                             </VBtn>
@@ -1049,16 +1044,16 @@
                         <VCardText class="pa-2">
                           <div class="d-flex align-center mb-1">
                             <VIcon icon="mdi-message-text-outline" size="18" class="mr-2" />
-                            <div class="text-caption font-weight-medium">Payment Message</div>
+                            <div class="text-caption font-weight-medium">{{ t('components.marketplace.installDialog.paymentMessage') }}</div>
                           </div>
                           <div class="d-flex align-center ga-2">
-                            <code class="text-caption flex-grow-1 text-truncate pa-1 rounded" style="background: rgba(0,0,0,0.1);">{{ paymentHash || 'Generating...' }}</code>
+                            <code class="text-caption flex-grow-1 text-truncate pa-1 rounded" style="background: rgba(0,0,0,0.1);">{{ paymentHash || t('components.marketplace.installDialog.generating') }}</code>
                             <VBtn
                               size="x-small"
                               variant="text"
                               icon
                               color="grey"
-                              @click="copyToClipboard(paymentHash, 'Copied to clipboard!')"
+                              @click="copyToClipboard(paymentHash, t('components.marketplace.installDialog.copiedToClipboard'))"
                               :disabled="!paymentHash"
                             >
                               <VIcon icon="mdi-content-copy" size="16" />
@@ -1076,7 +1071,7 @@
                         elevation="2"
                       >
                         <VIcon start icon="mdi-wallet" size="18" />
-                        Open {{ paymentMethod === 'flux' ? 'ZelCore' : 'SSP' }}
+                        {{ t('components.marketplace.installDialog.openWallet', { wallet: paymentMethod === 'flux' ? 'ZelCore' : 'SSP' }) }}
                       </VBtn>
                     </div>
 
@@ -1092,15 +1087,12 @@
                           class="mb-4"
                         />
                         <VIcon v-else icon="mdi-check-circle" size="64" color="success" class="mb-4" />
-                        <div class="text-h6 mb-2">{{ paymentConfirmed ? 'Payment Confirmed!' : 'Waiting for Payment' }}</div>
+                        <div class="text-h6 mb-2">{{ paymentConfirmed ? t('components.marketplace.installDialog.paymentConfirmed') : t('components.marketplace.installDialog.waitingForPayment') }}</div>
                         <div class="text-body-2 text-center mb-4 text-medium-emphasis">
-                          <span v-if="!paymentConfirmed">
-                            Please complete the payment in your {{ paymentMethod === 'flux' ? 'ZelCore' : 'SSP' }} wallet.<br>
-                            Payment will be confirmed automatically.<br>
-                            <span class="text-warning">This can take up to 45 minutes.</span>
+                          <span v-if="!paymentConfirmed" v-html="t('components.marketplace.installDialog.completePaymentInWallet', { wallet: paymentMethod === 'flux' ? 'ZelCore' : 'SSP' })">
                           </span>
                           <span v-else-if="redirectCountdown > 0" class="text-success">
-                            Advancing to deployment summary in {{ redirectCountdown }} seconds...
+                            {{ t('components.marketplace.installDialog.advancingToDeployment', { seconds: redirectCountdown }) }}
                           </span>
                         </div>
                         <VBtn
@@ -1111,7 +1103,7 @@
                           class="text-none"
                         >
                           <VIcon start icon="mdi-close" />
-                          Cancel Monitoring
+                          {{ t('components.marketplace.installDialog.cancelMonitoring') }}
                         </VBtn>
                       </div>
                     </div>
@@ -1136,10 +1128,9 @@
                     <div v-if="paymentBridgeMaintenance" class="maintenance-content">
                       <div class="d-flex flex-column align-center justify-center pa-6">
                         <VIcon icon="mdi-wrench" size="64" color="warning" class="mb-4" />
-                        <div class="text-h6 mb-2">Payment Service Maintenance</div>
+                        <div class="text-h6 mb-2">{{ t('components.marketplace.installDialog.paymentServiceMaintenance') }}</div>
                         <div class="text-body-2 text-center mb-4 text-medium-emphasis">
-                          The payment service is currently under maintenance.<br>
-                          Please try again later or use crypto payment options (ZelCore or SSP).
+                          {{ t('components.marketplace.installDialog.maintenanceMessage') }}
                         </div>
                         <VBtn
                           variant="flat"
@@ -1148,7 +1139,7 @@
                           class="text-none"
                         >
                           <VIcon start icon="mdi-refresh" size="24" />
-                          Try Again
+                          {{ t('components.marketplace.installDialog.tryAgain') }}
                         </VBtn>
                       </div>
                     </div>
@@ -1159,7 +1150,7 @@
                         <VCardText class="d-flex align-center pa-3">
                           <VIcon :icon="paymentMethod === 'stripe' ? 'mdi-shield-check' : 'mdi-security'" size="20" class="mr-2" />
                           <div class="text-body-2">
-                            Secure checkout powered by {{ paymentMethod === 'stripe' ? 'Stripe' : 'PayPal' }}
+                            {{ t('components.marketplace.installDialog.secureCheckout', { provider: paymentMethod === 'stripe' ? 'Stripe' : 'PayPal' }) }}
                           </div>
                         </VCardText>
                       </VCard>
@@ -1173,7 +1164,7 @@
                         elevation="2"
                       >
                         <VIcon start :icon="paymentMethod === 'stripe' ? 'mdi-credit-card' : 'mdi-paypal'" size="20" />
-                        Continue to {{ paymentMethod === 'stripe' ? 'Stripe' : 'PayPal' }}
+                        {{ t('components.marketplace.installDialog.continueTo', { provider: paymentMethod === 'stripe' ? 'Stripe' : 'PayPal' }) }}
                       </VBtn>
                     </div>
 
@@ -1187,11 +1178,8 @@
                           width="6"
                           class="mb-4"
                         />
-                        <div class="text-h6 mb-2">Waiting for Payment</div>
-                        <div class="text-body-2 text-center mb-4 text-medium-emphasis">
-                          Complete the payment in the {{ paymentMethod === 'stripe' ? 'Stripe' : 'PayPal' }} checkout window.<br>
-                          Payment will be confirmed automatically.<br>
-                          <span class="text-warning">This can take up to 45 minutes.</span>
+                        <div class="text-h6 mb-2">{{ t('components.marketplace.installDialog.waitingForPayment') }}</div>
+                        <div class="text-body-2 text-center mb-4 text-medium-emphasis" v-html="t('components.marketplace.installDialog.completePaymentInCheckout', { provider: paymentMethod === 'stripe' ? 'Stripe' : 'PayPal' })">
                         </div>
                         <VBtn
                           variant="outlined"
@@ -1219,16 +1207,16 @@
                   <VAvatar size="32" color="success" variant="flat">
                     <VIcon icon="mdi-check-circle" size="18" color="white" />
                   </VAvatar>
-                  <h5>Deployment Summary</h5>
+                  <h5>{{ t('components.marketplace.installDialog.deploymentSummary') }}</h5>
                 </div>
 
                 <div class="text-center mb-4">
                   <div class="d-flex align-center justify-center gap-2 text-h5 text-success mb-2">
                     <VIcon icon="mdi-party-popper" size="32" color="success" />
-                    Payment Confirmed!
+                    {{ t('components.marketplace.installDialog.paymentConfirmedExclaim') }}
                     <VIcon icon="mdi-rocket-launch" size="32" color="success" />
                   </div>
-                  <div class="text-body-2 text-medium-emphasis">Your application is now active and running</div>
+                  <div class="text-body-2 text-medium-emphasis">{{ t('components.marketplace.installDialog.applicationActiveAndRunning') }}</div>
                 </div>
 
                 <div class="mb-4">
@@ -1246,7 +1234,7 @@
                   <div class="d-flex justify-center align-center flex-wrap gap-2">
                     <VChip color="warning" variant="tonal" size="small" class="summary-chip">
                       <VIcon start icon="mdi-cpu-64-bit" size="14" />
-                      {{ config.cpu }} cores
+                      {{ t('components.marketplace.installDialog.coresCount', { count: config.cpu }) }}
                     </VChip>
                     <VChip color="success" variant="tonal" size="small" class="summary-chip">
                       <VIcon start icon="mdi-memory" size="14" />
@@ -1258,7 +1246,7 @@
                     </VChip>
                     <VChip color="orange" variant="tonal" size="small" class="summary-chip">
                       <VIcon start icon="mdi-layers" size="14" />
-                      {{ config.instances }} instance{{ config.instances !== 1 ? 's' : '' }}
+                      {{ t('components.marketplace.installDialog.instances', { count: config.instances }) }}
                     </VChip>
                   </div>
 
@@ -1286,28 +1274,28 @@
 
                 <div class="payment-summary">
                   <div class="d-flex justify-space-between align-center mb-2">
-                    <span class="text-body-2 text-medium-emphasis">Payment Type:</span>
+                    <span class="text-body-2 text-medium-emphasis">{{ t('components.marketplace.installDialog.paymentType') }}:</span>
                     <VChip size="small" variant="tonal" :color="(paymentMethod === 'flux' || paymentMethod === 'ssp') ? 'success' : 'info'">
                       <VIcon start :icon="(paymentMethod === 'flux' || paymentMethod === 'ssp') ? 'mdi-bitcoin' : 'mdi-credit-card'" size="16" />
-                      {{ (paymentMethod === 'flux' || paymentMethod === 'ssp') ? 'Crypto' : 'Fiat' }}
+                      {{ (paymentMethod === 'flux' || paymentMethod === 'ssp') ? t('components.marketplace.installDialog.crypto') : t('components.marketplace.installDialog.fiat') }}
                     </VChip>
                   </div>
                   <div class="d-flex justify-space-between align-center mb-2">
-                    <span class="text-body-2 text-medium-emphasis">Payment Method:</span>
+                    <span class="text-body-2 text-medium-emphasis">{{ t('components.marketplace.installDialog.paymentMethod') }}:</span>
                     <VChip size="small" variant="tonal" color="info">
                       <VIcon start :icon="paymentMethod === 'flux' ? 'mdi-wallet' : paymentMethod === 'ssp' ? 'mdi-wallet' : paymentMethod === 'stripe' ? 'mdi-credit-card' : 'mdi-paypal'" size="16" />
                       {{ paymentMethod === 'flux' ? 'ZelCore' : paymentMethod === 'ssp' ? 'SSP' : paymentMethod === 'stripe' ? 'Stripe' : 'PayPal' }}
                     </VChip>
                   </div>
                   <div class="d-flex justify-space-between align-center mb-2">
-                    <span class="text-body-2 text-medium-emphasis">Total Paid:</span>
+                    <span class="text-body-2 text-medium-emphasis">{{ t('components.marketplace.installDialog.totalPaid') }}:</span>
                     <VChip size="small" variant="tonal" color="success">
                       <VIcon start :icon="(paymentMethod === 'flux' || paymentMethod === 'ssp') ? 'mdi-lightning-bolt' : 'mdi-check-circle'" size="18" />
                       {{ (paymentMethod === 'flux' || paymentMethod === 'ssp') ? `${totalFluxPrice} FLUX` : totalCost }}
                     </VChip>
                   </div>
                   <div class="d-flex justify-space-between align-center">
-                    <span class="text-body-2 text-medium-emphasis">Subscription Valid Until:</span>
+                    <span class="text-body-2 text-medium-emphasis">{{ t('components.marketplace.installDialog.subscriptionValidUntil') }}:</span>
                     <VChip size="small" variant="tonal">
                       <VIcon start icon="mdi-calendar-check" size="16" />
                       {{ subscriptionEndDate }}
@@ -1322,10 +1310,10 @@
                     color="primary"
                     variant="flat"
                     size="default"
-                    :to="`/apps/manage/${app.name}`"
+                    :to="`/apps/manage/${encodeURIComponent(deployedAppName)}`"
                   >
                     <VIcon start icon="mdi-cog" size="20" />
-                    Manage Application
+                    {{ t('components.marketplace.installDialog.manageApplication') }}
                   </VBtn>
                 </div>
 
@@ -1333,7 +1321,7 @@
 
               <div v-if="deploying" class="deployment-progress">
                 <VProgressCircular indeterminate color="primary" size="48" />
-                <p>Deploying your application...</p>
+                <p>{{ t('components.marketplace.installDialog.deployingYourApplication') }}</p>
               </div>
             </div>
           </VWindowItem>
@@ -1366,15 +1354,15 @@
     <VCard rounded="xl" class="overflow-hidden">
       <VCardTitle class="d-flex align-center gap-3 bg-primary text-white" style="height: 52px; padding-inline: 16px;">
         <VIcon icon="mdi-alert-circle" color="orange" size="28" />
-        <span class="text-h6">Popup Blocked</span>
+        <span class="text-h6">{{ t('components.marketplace.installDialog.popupBlocked') }}</span>
       </VCardTitle>
       <VCardText class="py-8 px-6 text-center">
         <VIcon icon="mdi-block-helper" color="orange" size="64" class="mb-4" />
         <p class="text-body-1 mb-3">
-          Your browser blocked the {{ blockedPaymentType }} checkout window.
+          {{ t('components.marketplace.installDialog.browserBlockedCheckout', { type: blockedPaymentType }) }}
         </p>
         <p class="text-body-2 text-medium-emphasis">
-          Click the button below to open the payment page in a new tab.
+          {{ t('components.marketplace.installDialog.clickButtonToOpenPayment') }}
         </p>
       </VCardText>
       <VCardActions class="pa-0 d-flex ga-0">
@@ -1387,7 +1375,7 @@
           @click="() => { popupBlockedDialog = false; cancelPaymentMonitoring(); }"
         >
           <VIcon start icon="mdi-close-circle" />
-          Cancel
+          {{ t('components.marketplace.installDialog.cancel') }}
         </VBtn>
         <VBtn
           color="primary"
@@ -1398,25 +1386,17 @@
           @click="openBlockedPayment"
         >
           <VIcon start icon="mdi-open-in-new" />
-          Open {{ blockedPaymentType }}
+          {{ t('components.marketplace.installDialog.openPaymentType', { type: blockedPaymentType }) }}
         </VBtn>
       </VCardActions>
     </VCard>
   </VDialog>
-
-
-  <!-- Login Dialog -->
-  <LoginDialog
-    v-model="showLoginDialog"
-    title="Login Required"
-    @loginSuccess="handleLoginSuccess"
-    @cancel="closeLoginDialog"
-  />
 </template>
 
 <script setup>
 import { ref, computed, watch, onMounted, onBeforeUnmount, nextTick } from 'vue'
-import LoginDialog from '@/components/shared/LoginDialog.vue'
+import { useI18n } from 'vue-i18n'
+import { useLoginSheet } from '@/composables/useLoginSheet'
 import { storeToRefs } from 'pinia'
 import { useTheme } from 'vuetify'
 import { useMarketplace } from '@/composables/useMarketplace'
@@ -1469,6 +1449,12 @@ const props = defineProps({
 })
 const emit = defineEmits(['update:modelValue', 'deployed', 'installed'])
 
+// i18n
+const { t } = useI18n()
+
+// Login sheet
+const { openLoginBottomSheet, closeLoginBottomSheet } = useLoginSheet()
+
 // Theme detection for logos
 const theme = useTheme()
 const { showSnackbar } = useSnackbar()
@@ -1508,6 +1494,14 @@ const isOpen = computed({
 
 // Check if user is logged in - using privilege from flux store (reactive)
 const isLoggedIn = computed(() => privilege.value !== 'none')
+
+// Compute the full deployed app name with timestamp
+const deployedAppName = computed(() => {
+  if (deploymentTimestamp.value) {
+    return `${props.app.name}${deploymentTimestamp.value}`
+  }
+  return props.app.name
+})
 
 // Wizard state
 const currentStep = ref(0)
@@ -1552,11 +1546,11 @@ const signingProgressPercent = computed(() => {
 })
 
 const signingProgressText = computed(() => {
-  if (signingProgress.value.signing) return 'Signing application message...'
-  if (signingProgress.value.registering) return 'Registering application on Flux network...'
-  if (signStepCompleted.value[1]) return 'Application ready for payment'
-  
-  return 'Waiting to start...'
+  if (signingProgress.value.signing) return t('components.marketplace.installDialog.signingApplicationMessage')
+  if (signingProgress.value.registering) return t('components.marketplace.installDialog.registeringApplication')
+  if (signStepCompleted.value[1]) return t('components.marketplace.installDialog.applicationReadyForPayment')
+
+  return t('components.marketplace.installDialog.waitingToStart')
 })
 
 // Initialize authentication check
@@ -1733,7 +1727,7 @@ onMounted(async () => {
     geolocation.value.allowedCountry = null
     geolocation.value.forbiddenContinent = null
     geolocation.value.forbiddenCountry = null
-    showSnackbar('Using global deployment - geolocation data unavailable', 'warning')
+    showSnackbar(t('components.marketplace.installDialog.messages.usingGlobalDeployment'), 'warning')
   }
 })
 const paymentMethod = ref('stripe') // Will be updated when authentication is determined
@@ -1744,26 +1738,28 @@ const creditCard = ref({
 })
 
 // Marketplace subscription duration options (from FluxCloud marketplace)
-const subscriptionOptions = ref([
+const subscriptionOptionsDiscounts = ref([0, 0, 0, 0]) // Store discounts separately
+
+const subscriptionOptions = computed(() => [
   {
     months: 1,
-    label: '1 Month',
-    discount: 0,
+    label: t('components.marketplace.installDialog.oneMonth'),
+    discount: subscriptionOptionsDiscounts.value[0],
   },
   {
     months: 3,
-    label: '3 Months',
-    discount: 0, // Will be fetched from app.discounts.threeMonths
+    label: t('components.marketplace.installDialog.threeMonths'),
+    discount: subscriptionOptionsDiscounts.value[1], // Will be fetched from app.discounts.threeMonths
   },
   {
     months: 6,
-    label: '6 Months',
-    discount: 0, // Will be fetched from app.discounts.sixMonths
+    label: t('components.marketplace.installDialog.sixMonths'),
+    discount: subscriptionOptionsDiscounts.value[2], // Will be fetched from app.discounts.sixMonths
   },
   {
     months: 12,
-    label: '12 Months',
-    discount: 0, // Will be fetched from app.discounts.twelveMonths
+    label: t('components.marketplace.installDialog.twelveMonths'),
+    discount: subscriptionOptionsDiscounts.value[3], // Will be fetched from app.discounts.twelveMonths
   },
 ])
 
@@ -1771,14 +1767,14 @@ const subscriptionOptions = ref([
 const initializeDiscounts = () => {
   if (props.app.discounts) {
     // Use app-specific discounts if available
-    subscriptionOptions.value[1].discount = props.app.discounts.threeMonths || 0
-    subscriptionOptions.value[2].discount = props.app.discounts.sixMonths || 0
-    subscriptionOptions.value[3].discount = props.app.discounts.twelveMonths || 0
+    subscriptionOptionsDiscounts.value[1] = props.app.discounts.threeMonths || 0
+    subscriptionOptionsDiscounts.value[2] = props.app.discounts.sixMonths || 0
+    subscriptionOptionsDiscounts.value[3] = props.app.discounts.twelveMonths || 0
   } else {
     // Fallback to typical marketplace discounts if app doesn't specify
-    subscriptionOptions.value[1].discount = 5  // 3 months: 5% discount
-    subscriptionOptions.value[2].discount = 10 // 6 months: 10% discount
-    subscriptionOptions.value[3].discount = 20 // 12 months: 20% discount
+    subscriptionOptionsDiscounts.value[1] = 5  // 3 months: 5% discount
+    subscriptionOptionsDiscounts.value[2] = 10 // 6 months: 10% discount
+    subscriptionOptionsDiscounts.value[3] = 20 // 12 months: 20% discount
   }
 }
 
@@ -2039,9 +2035,9 @@ const forbiddenCountries = computed(() => {
 })
 
 // Email validation rules (optional with format validation)
-const emailRules = [
-  v => !v || /.+@.+\..+/.test(v) || 'Email must be valid',
-]
+const emailRules = computed(() => [
+  v => !v || /.+@.+\..+/.test(v) || t('components.marketplace.installDialog.emailMustBeValid'),
+])
 
 // Locked values functionality - check if configuration values are locked by the app
 const isValueLocked = valueName => {
@@ -2081,25 +2077,25 @@ const paymentMethods = computed(() => {
     {
       id: 'stripe',
       name: 'Stripe',
-      description: 'Pay with Credit Card',
+      description: t('components.marketplace.installDialog.payWithCreditCard'),
       image: stripeLogo,
     },
     {
       id: 'paypal',
       name: 'PayPal',
-      description: 'Pay with PayPal',
+      description: t('components.marketplace.installDialog.payWithPayPal'),
       image: paypalLogo,
     },
     {
       id: 'flux',
       name: 'ZelCore',
-      description: 'Pay with FLUX',
+      description: t('components.marketplace.installDialog.payWithFlux'),
       image: fluxIDLogo,
     },
     {
       id: 'ssp',
       name: 'SSP',
-      description: 'Pay with FLUX',
+      description: t('components.marketplace.installDialog.payWithFlux'),
       image: theme.global.name.value === 'dark' ? sspLogoWhite : sspLogoBlack,
     },
   ]
@@ -2397,7 +2393,6 @@ const paymentMonitoringInterval = ref(null)
 const paymentMonitoringTimeout = ref(null)
 const paymentConfirmed = ref(false)
 const paymentBridgeMaintenance = ref(false)
-const showLoginDialog = ref(false)
 const popupBlockedDialog = ref(false)
 const blockedPaymentUrl = ref('')
 const blockedPaymentType = ref('')
@@ -2437,7 +2432,7 @@ const copyToClipboard = async (text, successMessage) => {
     showSnackbar(successMessage, 'success', 3000, 'mdi-content-copy')
   } catch (err) {
     console.error('Failed to copy:', err)
-    showSnackbar('Failed to copy to clipboard', 'error')
+    showSnackbar(t('components.marketplace.installDialog.messages.failedToCopyToClipboard'), 'error')
   }
 }
 
@@ -2649,21 +2644,21 @@ const stepItems = computed(() => {
   // WordPress has only 3 steps
   if (isWordPress.value) {
     return [
-      { label: 'Signing', icon: 'mdi-shield-key' },
-      { label: 'Payment', icon: 'mdi-credit-card-outline' },
-      { label: 'Deploy', icon: 'mdi-rocket-launch-outline' },
+      { label: t('components.marketplace.installDialog.signing'), icon: 'mdi-shield-key' },
+      { label: t('components.marketplace.installDialog.payment'), icon: 'mdi-credit-card-outline' },
+      { label: t('components.marketplace.installDialog.deploy'), icon: 'mdi-rocket-launch-outline' },
     ]
   }
 
   // Regular apps - both SSO and wallet have same steps
   return [
-    { label: 'Config', icon: 'mdi-tune-variant' },
-    { label: 'Params', icon: 'mdi-code-tags' },
-    { label: 'Location', icon: 'mdi-earth' },
-    { label: 'Alerts', icon: 'mdi-email-alert' },
-    { label: 'Sign', icon: 'mdi-shield-key' },
-    { label: 'Payment', icon: 'mdi-credit-card-outline' },
-    { label: 'Deploy', icon: 'mdi-rocket-launch-outline' },
+    { label: t('components.marketplace.installDialog.config'), icon: 'mdi-tune-variant' },
+    { label: t('components.marketplace.installDialog.params'), icon: 'mdi-code-tags' },
+    { label: t('components.marketplace.installDialog.location'), icon: 'mdi-earth' },
+    { label: t('components.marketplace.installDialog.alerts'), icon: 'mdi-email-alert' },
+    { label: t('components.marketplace.installDialog.sign'), icon: 'mdi-shield-key' },
+    { label: t('components.marketplace.installDialog.payment'), icon: 'mdi-credit-card-outline' },
+    { label: t('components.marketplace.installDialog.deploy'), icon: 'mdi-rocket-launch-outline' },
   ]
 })
 
@@ -2709,7 +2704,7 @@ const closeDialog = () => {
 }
 
 const closeLoginDialog = () => {
-  showLoginDialog.value = false
+  closeLoginBottomSheet()
 
   // If user cancels login and is still not logged in, close the install dialog too
   if (!isLoggedIn.value) {
@@ -2720,7 +2715,7 @@ const closeLoginDialog = () => {
 
 const handleLoginSuccess = () => {
   // Close login dialog
-  showLoginDialog.value = false
+  closeLoginBottomSheet()
 
   // Open install dialog after successful login
   isOpen.value = true
@@ -3758,7 +3753,7 @@ const resetDialog = () => {
   paymentConfirmed.value = false
   paymentBridgeMaintenance.value = false
   paymentMethod.value = isWalletUser.value ? 'flux' : 'stripe'
-  showLoginDialog.value = false // Reset login dialog state
+  closeLoginBottomSheet() // Reset login dialog state
 
   // Cancel any running countdown
   cancelRedirectCountdown()
@@ -3829,7 +3824,7 @@ const startPaymentMonitoring = async () => {
       paymentMonitoringInterval.value = null
     }
     if (!paymentConfirmed.value) {
-      showSnackbar('Payment monitoring timed out. Please check your application status.', 'warning', 8000)
+      showSnackbar(t('components.marketplace.installDialog.messages.paymentMonitoringTimedOut'), 'warning', 8000)
       paymentProcessing.value = false
     }
   }, 30 * 60 * 1000) // 30 minutes
@@ -3862,7 +3857,7 @@ const startPaymentMonitoring = async () => {
           paymentProcessing.value = false
 
           // Show success message
-          showSnackbar('Payment confirmed! Your application is now active and running.', 'success', 8000)
+          showSnackbar(t('components.marketplace.installDialog.messages.paymentConfirmedActive'), 'success', 8000)
 
           // Clear any existing countdown before starting new one
           if (redirectCountdownInterval.value) {
@@ -3903,11 +3898,11 @@ const processFluxPayment = async () => {
     // Start monitoring for payment
     await startPaymentMonitoring()
 
-    showSnackbar('Opening ZelCore wallet for payment...', 'info', 5000)
+    showSnackbar(t('components.marketplace.installDialog.messages.openingZelCoreWallet'), 'info', 5000)
   } catch (error) {
     console.error('Flux payment failed:', error)
     paymentProcessing.value = false
-    showSnackbar('Failed to open ZelCore wallet', 'error')
+    showSnackbar(t('components.marketplace.installDialog.messages.failedToOpenZelCoreWallet'), 'error')
   }
 }
 
@@ -3918,7 +3913,7 @@ const processStripePayment = async () => {
     // Check authentication from localStorage
     const zelidauthData = localStorage.getItem('zelidauth')
     if (!zelidauthData) {
-      showSnackbar('Please login to FluxOS to make payments', 'error')
+      showSnackbar(t('components.marketplace.installDialog.messages.pleaseLoginToMakePayments'), 'error')
       paymentProcessing.value = false
       
       return
@@ -3929,7 +3924,7 @@ const processStripePayment = async () => {
 
     // Validate required authentication fields
     if (!authData.zelid || !authData.signature || !authData.loginPhrase) {
-      showSnackbar('Invalid authentication data - please login again', 'error')
+      showSnackbar(t('components.marketplace.installDialog.messages.invalidAuthenticationData'), 'error')
       paymentProcessing.value = false
       
       return
@@ -3978,7 +3973,7 @@ const processStripePayment = async () => {
       blockedPaymentType.value = 'Stripe'
     } else {
       win.focus()
-      showSnackbar('Stripe checkout opened. Complete payment in the popup window.', 'info', 5000)
+      showSnackbar(t('components.marketplace.installDialog.messages.stripeCheckoutOpened'), 'info', 5000)
     }
   } catch (error) {
     console.error('Stripe payment failed:', error)
@@ -4064,7 +4059,7 @@ const processPayPalPayment = async () => {
       blockedPaymentType.value = 'PayPal'
     } else {
       win.focus()
-      showSnackbar('PayPal checkout opened. Complete payment in the popup window.', 'info', 5000)
+      showSnackbar(t('components.marketplace.installDialog.messages.payPalCheckoutOpened'), 'info', 5000)
     }
   } catch (error) {
     console.error('PayPal payment failed:', error)
@@ -4090,7 +4085,7 @@ const processSSPPayment = async () => {
   try {
     // Check if SSP wallet is installed
     if (!isSSPAvailable()) {
-      showSnackbar('SSP Wallet not installed', 'error')
+      showSnackbar(t('components.marketplace.installDialog.messages.sspWalletNotInstalled'), 'error')
       paymentProcessing.value = false
 
       return
@@ -4142,7 +4137,7 @@ const cancelPaymentMonitoring = () => {
   paymentConfirmed.value = false
   paymentBridgeMaintenance.value = false
 
-  showSnackbar('Payment monitoring cancelled', 'info')
+  showSnackbar(t('components.marketplace.installDialog.messages.paymentMonitoringCancelled'), 'info')
 }
 
 const cancelRedirectCountdown = () => {
@@ -4249,7 +4244,7 @@ const addAllowedGeolocation = () => {
     allowedGeolocations.value.push(geoCode)
     showSnackbar(`Added allowed location: ${formatGeolocationLabel(geoCode)}`, 'success', 3000, 'mdi-check-circle')
   } else {
-    showSnackbar('This location is already in the allowed list', 'warning', 3000, 'mdi-alert')
+    showSnackbar(t('components.marketplace.installDialog.messages.locationAlreadyInAllowedList'), 'warning', 3000, 'mdi-alert')
     
     return
   }
@@ -4280,7 +4275,7 @@ const addForbiddenGeolocation = () => {
     forbiddenGeolocations.value.push(geoCode)
     showSnackbar(`Added forbidden location: ${formatGeolocationLabel(geoCode)}`, 'success', 3000, 'mdi-check-circle')
   } else {
-    showSnackbar('This location is already in the forbidden list', 'warning', 3000, 'mdi-alert')
+    showSnackbar(t('components.marketplace.installDialog.messages.locationAlreadyInForbiddenList'), 'warning', 3000, 'mdi-alert')
     
     return
   }
@@ -4603,7 +4598,7 @@ watch([() => config.value.cpu, () => config.value.ram, () => config.value.storag
   if (paymentProcessing.value) {
     cancelPaymentMonitoring()
     cancelRedirectCountdown()
-    showSnackbar('Configuration changed. Please initiate payment again.', 'warning')
+    showSnackbar(t('components.marketplace.installDialog.messages.configurationChanged'), 'warning')
   }
 })
 
@@ -4668,14 +4663,24 @@ watch(() => props.modelValue, newValue => {
       // User not logged in - close install dialog and show only login dialog
       isOpen.value = false
       nextTick(() => {
-        showLoginDialog.value = true
+        openLoginBottomSheet()
       })
     } else {
       // User is logged in - ensure login dialog is hidden
-      showLoginDialog.value = false
+      closeLoginBottomSheet()
     }
   }
 }, { immediate: true })
+
+// Watch for login status changes to handle successful login
+watch(isLoggedIn, (newValue, oldValue) => {
+  // Only handle when user logs in (changes from false to true)
+  // Don't check props.modelValue - dialog was closed to show login sheet
+  // We want to reopen it automatically after successful login
+  if (newValue && !oldValue) {
+    handleLoginSuccess()
+  }
+})
 </script>
 
 

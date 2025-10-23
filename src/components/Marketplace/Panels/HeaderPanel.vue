@@ -3,7 +3,7 @@
     <div class="header-content" :class="{ 'reverse-layout': app.swapPageHeaderLayout }">
       <div class="text-section">
         <h1 class="game-title">
-          {{ app.uiName || app.displayName || app.name }} Server Hosting
+          {{ t('components.marketplace.panels.headerPanel.serverHosting', { name: app.uiName || app.displayName || app.name }) }}
         </h1>
         <p v-if="app.detailHeaderText" class="header-description">
           {{ app.detailHeaderText }}
@@ -18,6 +18,7 @@
 
 <script setup>
 import { computed } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useGameUtils } from '@/composables/useGameUtils'
 
 const props = defineProps({
@@ -31,6 +32,7 @@ const props = defineProps({
   },
 })
 
+const { t } = useI18n()
 const { parseLandingImage } = useGameUtils()
 
 const headerImage = computed(() => parseLandingImage(props.app.detailHeaderImage))

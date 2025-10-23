@@ -1,7 +1,10 @@
 <script setup>
+import { useI18n } from 'vue-i18n'
 import miscMaskDark from '@images/pages/misc-mask-dark.png'
 import miscMaskLight from '@images/pages/misc-mask-light.png'
 import { useGenerateImageVariant } from '@core/composable/useGenerateImageVariant'
+
+const { t } = useI18n()
 
 definePage({
   alias: '/pages/misc/not-authorized',
@@ -18,15 +21,15 @@ const authThemeMask = useGenerateImageVariant(miscMaskLight, miscMaskDark)
   <div class="misc-wrapper">
     <ErrorHeader
       status-code="401"
-      title="You are not authorized! 🔐"
-      description="You don’t have permission to access this page."
+      :title="t('pages.unauthorized.title')"
+      :description="t('pages.unauthorized.description')"
     />
 
     <VBtn
       class="mb-11"
       to="/"
     >
-      Back To Home
+      {{ t('pages.unauthorized.backToHome') }}
     </VBtn>
 
     <!-- 👉 Image -->

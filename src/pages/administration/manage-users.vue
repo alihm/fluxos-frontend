@@ -7,9 +7,9 @@
           <VIcon icon="mdi-account-group" size="32" color="white" />
         </VAvatar>
         <div>
-          <h2 class="text-h5 font-weight-bold">Manage Users</h2>
+          <h2 class="text-h5 font-weight-bold">{{ t('pages.administration.manageUsers.title') }}</h2>
           <p class="text-body-2 text-medium-emphasis mb-0">
-            View and manage logged users and active sessions
+            {{ t('pages.administration.manageUsers.subtitle') }}
           </p>
         </div>
       </div>
@@ -22,7 +22,7 @@
           <VCol cols="12" md="6">
             <VTextField
               v-model="usersSearch"
-              label="Search users"
+              :label="t('pages.administration.manageUsers.searchUsers')"
               variant="outlined"
               density="compact"
               clearable
@@ -40,14 +40,14 @@
               @click="loadUsers"
             >
               <VIcon icon="mdi-refresh" size="22" class="mr-2" />
-              Refresh
+              {{ t('pages.administration.manageUsers.refresh') }}
             </VBtn>
           </VCol>
         </VRow>
 
         <VCard variant="outlined">
           <VDataTable
-            :headers="usersHeaders"
+            :headers="translatedUsersHeaders"
             :items="users"
             :search="usersSearch"
             :loading="usersLoading"
@@ -87,7 +87,7 @@
                   <template #activator="{ props }">
                     <VIcon v-bind="props" icon="mdi-information-outline" color="info" size="20" />
                   </template>
-                  <span>Your current session</span>
+                  <span>{{ t('pages.administration.manageUsers.yourCurrentSession') }}</span>
                 </VTooltip>
                 <VBtn
                   size="small"
@@ -96,7 +96,7 @@
                   prepend-icon="mdi-logout"
                   @click="confirmLogoutUser(item)"
                 >
-                  Log Out
+                  {{ t('pages.administration.manageUsers.logOut') }}
                 </VBtn>
               </div>
             </template>
@@ -106,7 +106,7 @@
                 <td :colspan="columns.length" class="pa-4 bg-surface">
                   <div class="text-subtitle-2 font-weight-medium mb-3 d-flex align-center">
                     <VIcon icon="mdi-view-list" size="18" class="mr-2" />
-                    Active Sessions
+                    {{ t('pages.administration.manageUsers.activeSessions') }}
                   </div>
                   <VCard variant="outlined">
                     <VList class="py-0">
@@ -126,10 +126,10 @@
                             <VTooltip location="top" v-if="session.loginPhrase === currentLoginPhrase">
                               <template #activator="{ props }">
                                 <VChip v-bind="props" size="small" variant="tonal" color="info" prepend-icon="mdi-information-outline">
-                                  Current
+                                  {{ t('pages.administration.manageUsers.current') }}
                                 </VChip>
                               </template>
-                              <span>Your current session</span>
+                              <span>{{ t('pages.administration.manageUsers.yourCurrentSession') }}</span>
                             </VTooltip>
                             <VBtn
                               size="small"
@@ -138,7 +138,7 @@
                               prepend-icon="mdi-logout"
                               @click="confirmLogoutUser(session)"
                             >
-                              Log Out
+                              {{ t('pages.administration.manageUsers.logOut') }}
                             </VBtn>
                           </div>
                         </div>
@@ -159,7 +159,7 @@
                   @click="confirmLogoutAllUsers"
                 >
                   <VIcon icon="mdi-account-multiple-remove" size="22" class="mr-2" />
-                  Log Out All Users
+                  {{ t('pages.administration.manageUsers.logOutAllUsers') }}
                 </VBtn>
               </div>
             </template>
@@ -173,19 +173,19 @@
       <VCard>
         <VCardTitle class="d-flex align-center pa-3 bg-primary">
           <VIcon icon="mdi-account-remove" size="28" color="white" class="mr-2" />
-          <span class="text-white">Confirm Logout User</span>
+          <span class="text-white">{{ t('pages.administration.manageUsers.confirmLogoutUser') }}</span>
         </VCardTitle>
         <VDivider />
         <VCardText class="pa-3">
           <VAlert type="warning" variant="tonal" class="mb-2">
-            This will log out the selected user.
+            {{ t('pages.administration.manageUsers.logoutUserWarning') }}
           </VAlert>
-          Are you sure you want to proceed?
+          {{ t('pages.administration.manageUsers.areYouSureProceed') }}
         </VCardText>
         <VCardActions class="pa-3 pt-0">
           <VSpacer />
-          <VBtn color="error" variant="flat" size="small" @click="logoutUserDialog = false">Cancel</VBtn>
-          <VBtn color="primary" variant="flat" size="small" @click="logoutUser">Log Out</VBtn>
+          <VBtn color="error" variant="flat" size="small" @click="logoutUserDialog = false">{{ t('pages.administration.manageUsers.cancel') }}</VBtn>
+          <VBtn color="primary" variant="flat" size="small" @click="logoutUser">{{ t('pages.administration.manageUsers.logOut') }}</VBtn>
         </VCardActions>
       </VCard>
     </VDialog>
@@ -194,19 +194,19 @@
       <VCard>
         <VCardTitle class="d-flex align-center pa-3 bg-primary">
           <VIcon icon="mdi-account-multiple-remove" size="28" color="white" class="mr-2" />
-          <span class="text-white">Confirm Logout All Users</span>
+          <span class="text-white">{{ t('pages.administration.manageUsers.confirmLogoutAllUsers') }}</span>
         </VCardTitle>
         <VDivider />
         <VCardText class="pa-3">
           <VAlert type="error" variant="tonal" class="mb-2">
-            This will log out ALL users including yourself!
+            {{ t('pages.administration.manageUsers.logoutAllUsersWarning') }}
           </VAlert>
-          Are you sure you want to proceed?
+          {{ t('pages.administration.manageUsers.areYouSureProceed') }}
         </VCardText>
         <VCardActions class="pa-3 pt-0">
           <VSpacer />
-          <VBtn color="error" variant="flat" size="small" @click="logoutAllUsersDialog = false">Cancel</VBtn>
-          <VBtn color="primary" variant="flat" size="small" @click="logoutAllUsers">Log Out All</VBtn>
+          <VBtn color="error" variant="flat" size="small" @click="logoutAllUsersDialog = false">{{ t('pages.administration.manageUsers.cancel') }}</VBtn>
+          <VBtn color="primary" variant="flat" size="small" @click="logoutAllUsers">{{ t('pages.administration.manageUsers.logOutAll') }}</VBtn>
         </VCardActions>
       </VCard>
     </VDialog>
@@ -217,12 +217,14 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { useSnackbar } from '@/composables/useSnackbar'
 import { useFluxStore } from '@/stores/flux'
 import IDService from '@/services/IDService'
 import qs from 'qs'
 
 const router = useRouter()
+const { t } = useI18n()
 const { showSnackbar } = useSnackbar()
 const fluxStore = useFluxStore()
 
@@ -232,12 +234,14 @@ const sessions = ref([])
 const usersSearch = ref('')
 const usersLoading = ref(false)
 const expanded = ref([])
-const usersHeaders = [
+
+// Translated headers computed property
+const translatedUsersHeaders = computed(() => [
   { title: '', key: 'data-table-expand', sortable: false, width: '48px' },
-  { title: 'Flux ID', key: 'zelid', sortable: true },
-  { title: 'Login Phrase', key: 'loginPhrase', sortable: true },
+  { title: t('pages.administration.manageUsers.table.fluxId'), key: 'zelid', sortable: true },
+  { title: t('pages.administration.manageUsers.table.loginPhrase'), key: 'loginPhrase', sortable: true },
   { title: '', key: 'actions', sortable: false, align: 'end' },
-]
+])
 
 // Dialog states
 const logoutUserDialog = ref(false)
@@ -249,7 +253,7 @@ const currentLoginPhrase = computed(() => {
   const zelidauth = localStorage.getItem('zelidauth')
   if (!zelidauth) return ''
   const auth = qs.parse(zelidauth)
-  
+
   return auth.loginPhrase || ''
 })
 
@@ -281,7 +285,7 @@ const loadUsers = async () => {
     }
   } catch (error) {
     console.error(error)
-    showSnackbar('Failed to load users', 'error', 3000, 'mdi-alert-circle')
+    showSnackbar(t('pages.administration.manageUsers.errors.failedToLoadUsers'), 'error', 3000, 'mdi-alert-circle')
   } finally {
     usersLoading.value = false
   }
@@ -317,7 +321,7 @@ const logoutUser = async () => {
     }
   } catch (error) {
     console.error(error)
-    showSnackbar('Failed to logout user', 'error', 3000, 'mdi-alert-circle')
+    showSnackbar(t('pages.administration.manageUsers.errors.failedToLogoutUser'), 'error', 3000, 'mdi-alert-circle')
   }
 }
 
@@ -344,7 +348,7 @@ const logoutAllUsers = async () => {
     }
   } catch (error) {
     console.error(error)
-    showSnackbar('Failed to logout all users', 'error', 3000, 'mdi-alert-circle')
+    showSnackbar(t('pages.administration.manageUsers.errors.failedToLogoutAllUsers'), 'error', 3000, 'mdi-alert-circle')
   }
 }
 

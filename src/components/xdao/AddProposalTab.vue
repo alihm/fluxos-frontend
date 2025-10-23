@@ -3,7 +3,7 @@
     <VCardTitle class="bg-primary text-white pa-4">
       <div class="d-flex align-center">
         <VIcon icon="mdi-plus-circle-outline" class="me-2" />
-        Add New Proposal
+        {{ t('components.xdao.addProposal.title') }}
       </div>
     </VCardTitle>
 
@@ -17,10 +17,10 @@
           <VCol cols="12">
             <VTextField
               v-model="formData.topic"
-              label="Proposal Topic"
-              :rules="[rules.required, rules.minLength(3)]"
+              :label="t('components.xdao.addProposal.fields.topic.label')"
+              :rules="[rules.value.required, rules.value.minLength(3)]"
               variant="outlined"
-              placeholder="Enter a clear and descriptive proposal title"
+              :placeholder="t('components.xdao.addProposal.fields.topic.placeholder')"
             />
           </VCol>
 
@@ -28,11 +28,11 @@
           <VCol cols="12">
             <VTextarea
               v-model="formData.description"
-              label="Proposal Description"
-              :rules="[rules.required, rules.minLength(50)]"
+              :label="t('components.xdao.addProposal.fields.description.label')"
+              :rules="[rules.value.required, rules.value.minLength(50)]"
               rows="6"
               variant="outlined"
-              placeholder="Provide a detailed description of your proposal (minimum 50 characters)"
+              :placeholder="t('components.xdao.addProposal.fields.description.placeholder')"
             />
           </VCol>
 
@@ -49,14 +49,14 @@
                   >
                     <VIcon icon="mdi-currency-usd" size="16" />
                   </VAvatar>
-                  Grant Information 
+                  {{ t('components.xdao.addProposal.fields.grantInformation') }}
                 </VExpansionPanelTitle>
                 <VExpansionPanelText>
                   <VRow>
                     <VCol cols="12" md="6">
                       <VTextField
                         v-model="formData.grantValue"
-                        label="Grant Amount (FLUX)"
+                        :label="t('components.xdao.addProposal.fields.grantAmount.label')"
                         type="number"
                         variant="outlined"
                         placeholder="0"
@@ -67,9 +67,9 @@
                     <VCol cols="12" md="6">
                       <VTextField
                         v-model="formData.grantAddress"
-                        label="Grant Pay to Address"
+                        :label="t('components.xdao.addProposal.fields.grantAddress.label')"
                         variant="outlined"
-                        placeholder="Flux address to receive grant"
+                        :placeholder="t('components.xdao.addProposal.fields.grantAddress.placeholder')"
                         :rules="grantAddressRules"
                         :disabled="!formData.grantValue || formData.grantValue <= 0"
                       />
@@ -84,9 +84,9 @@
           <VCol cols="12" md="6">
             <VTextField
               v-model="formData.nickName"
-              label="Name/Nickname"
+              :label="t('components.xdao.addProposal.fields.nickname.label')"
               variant="outlined"
-              placeholder="Your name or nickname (optional)"
+              :placeholder="t('components.xdao.addProposal.fields.nickname.placeholder')"
             />
           </VCol>
 
@@ -123,11 +123,11 @@
           >
             <VCardText class="pa-6">
               <div class="text-center">
-                <h3 class="text-h5 mb-4">Proposal Validated Successfully!</h3>
+                <h3 class="text-h5 mb-4">{{ t('components.xdao.addProposal.validatedSuccessfully') }}</h3>
                 <p class="text-h6 mb-4">
-                  Proposal Registration Fee: <strong>{{ proposalPrice }} FLUX</strong>
+                  {{ t('components.xdao.addProposal.registrationFee') }}: <strong>{{ proposalPrice }} FLUX</strong>
                 </p>
-                
+
                 <VBtn
                   :loading="registering"
                   :disabled="registering"
@@ -137,7 +137,7 @@
                   @click="registerProposal"
                 >
                   <VIcon icon="mdi-clipboard-check-outline" class="me-2" />
-                  Register Flux XDAO Proposal
+                  {{ t('components.xdao.addProposal.registerProposal') }}
                 </VBtn>
               </div>
             </VCardText>
@@ -153,29 +153,29 @@
           >
             <VCardText class="pa-6">
               <div class="text-center mb-6">
-                <h2 class="text-h4 mb-3 font-weight-bold">Complete Payment</h2>
+                <h2 class="text-h4 mb-3 font-weight-bold">{{ t('components.xdao.addProposal.payment.completePayment') }}</h2>
                 <div class="payment-info-card mx-auto mb-4">
-                  <div class="text-body-1 mb-1">Payment Required</div>
+                  <div class="text-body-1 mb-1">{{ t('components.xdao.addProposal.payment.paymentRequired') }}</div>
                   <div class="d-flex align-center justify-center">
-                    <VChip 
-                      variant="flat" 
-                      color="success" 
-                      size="large" 
+                    <VChip
+                      variant="flat"
+                      color="success"
+                      size="large"
                       class="payment-chip"
                     >
                       <VIcon icon="mdi-currency-usd" class="me-2" size="20" />
                       {{ proposalPrice }} FLUX
                     </VChip>
                   </div>
-                  <div class="text-caption text-medium-emphasis mt-1">To complete your proposal registration</div>
+                  <div class="text-caption text-medium-emphasis mt-1">{{ t('components.xdao.addProposal.payment.toCompleteRegistration') }}</div>
                 </div>
                 
                 <VRow class="mt-4">
                   <VCol cols="12" md="6">
                     <VCard class="simple-payment-card h-100" variant="outlined">
                       <VCardText class="text-center">
-                        <div class="text-h6 mb-3">Wallet Payment</div>
-                        <div class="text-body-2 text-medium-emphasis mb-3">Choose your preferred wallet</div>
+                        <div class="text-h6 mb-3">{{ t('components.xdao.addProposal.payment.walletPayment') }}</div>
+                        <div class="text-body-2 text-medium-emphasis mb-3">{{ t('components.xdao.addProposal.payment.chooseWallet') }}</div>
                         <div class="wallet-options">
                           <div
                             class="wallet-image-container"
@@ -207,10 +207,10 @@
                   <VCol cols="12" md="6">
                     <VCard class="simple-payment-card h-100" variant="outlined">
                       <VCardText>
-                        <div class="text-h6 mb-3">Manual Payment</div>
+                        <div class="text-h6 mb-3">{{ t('components.xdao.addProposal.payment.manualPayment') }}</div>
 
                         <div class="mb-3">
-                          <div class="text-caption mb-1">Foundation Address</div>
+                          <div class="text-caption mb-1">{{ t('components.xdao.addProposal.payment.foundationAddress') }}</div>
                           <div class="copy-container">
                             <input
                               readonly
@@ -227,7 +227,7 @@
                         </div>
 
                         <div class="mb-3">
-                          <div class="text-caption mb-1">Transaction Message</div>
+                          <div class="text-caption mb-1">{{ t('components.xdao.addProposal.payment.transactionMessage') }}</div>
                           <div class="copy-container">
                             <input
                               readonly
@@ -251,7 +251,7 @@
                           rel="noopener noreferrer"
                         >
                           <VIcon icon="mdi-open-in-new" size="14" class="me-1" />
-                          View on Explorer
+                          {{ t('components.xdao.addProposal.payment.viewOnExplorer') }}
                         </VBtn>
                       </VCardText>
                     </VCard>
@@ -295,6 +295,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useTheme } from 'vuetify'
+import { useI18n } from 'vue-i18n'
 import axios from 'axios'
 import FluxIDImg from '@images/FluxID.svg?url'
 import SSPLogoBlackImg from '@images/ssp-logo-black.svg?url'
@@ -302,6 +303,9 @@ import SSPLogoWhiteImg from '@images/ssp-logo-white.svg?url'
 
 // Props and Emits
 const emit = defineEmits(['proposal-added'])
+
+// i18n
+const { t } = useI18n()
 
 // Theme
 const theme = useTheme()
@@ -345,43 +349,43 @@ const canValidate = computed(() => {
 
 const validationStatus = computed(() => {
   if (proposalValidated.value) {
-    return { color: 'success', text: 'Validated' }
+    return { color: 'success', text: t('components.xdao.addProposal.validated') }
   }
   if (!canValidate.value) {
-    return { color: 'grey', text: 'Complete Form to Validate' }
+    return { color: 'grey', text: t('components.xdao.addProposal.completeFormToValidate') }
   }
-  
-  return { color: 'primary', text: 'Validate Proposal' }
+
+  return { color: 'primary', text: t('components.xdao.addProposal.validateProposal') }
 })
 
 // Validation rules
-const rules = {
-  required: value => !!value || 'This field is required',
-  minLength: min => value => 
-    (value && value.length >= min) || `Minimum ${min} characters required`,
-}
+const rules = computed(() => ({
+  required: value => !!value || t('components.xdao.addProposal.validation.fieldRequired'),
+  minLength: min => value =>
+    (value && value.length >= min) || t('components.xdao.addProposal.validation.minCharactersRequired', { min }),
+}))
 
 const grantRules = computed(() => {
   const baseRules = []
   if (formData.value.grantValue) {
     baseRules.push(value => {
       const num = Number(value)
-      
-      return (!isNaN(num) && Number.isInteger(num)) || 'Grant amount must be a whole number'
+
+      return (!isNaN(num) && Number.isInteger(num)) || t('components.xdao.addProposal.validation.grantMustBeWholeNumber')
     })
   }
-  
+
   return baseRules
 })
 
 const grantAddressRules = computed(() => {
   if (formData.value.grantValue && formData.value.grantValue > 0) {
     return [
-      rules.required,
-      value => !/\s/.test(value) || 'Address cannot contain spaces',
+      rules.value.required,
+      value => !/\s/.test(value) || t('components.xdao.addProposal.validation.addressNoSpaces'),
     ]
   }
-  
+
   return []
 })
 
@@ -392,25 +396,25 @@ const validateProposal = async () => {
 
     // Basic validation
     if (!canValidate.value) {
-      showError('Please complete all required fields correctly')
-      
+      showError(t('components.xdao.addProposal.messages.completeRequiredFields'))
+
       return
     }
 
     // Get XDAO price
-    const priceUrl = import.meta.env.DEV 
-      ? '/api/proposals/price' 
+    const priceUrl = import.meta.env.DEV
+      ? '/api/proposals/price'
       : 'https://stats.runonflux.io/proposals/price'
     const priceResponse = await axios.get(priceUrl)
     if (priceResponse.data.status === 'success') {
       proposalPrice.value = priceResponse.data.data
       proposalValidated.value = true
-      showSuccess('Proposal validated successfully!')
+      showSuccess(t('components.xdao.addProposal.messages.proposalValidatedSuccess'))
     } else {
       showError(priceResponse.data.data.message || priceResponse.data.data)
     }
   } catch (error) {
-    showError('Failed to validate proposal: ' + error.message)
+    showError(t('components.xdao.addProposal.messages.failedToValidate', { error: error.message }))
   } finally {
     validating.value = false
   }
@@ -428,10 +432,10 @@ const registerProposal = async () => {
       nickName: formData.value.nickName || '',
     }
 
-    const submitUrl = import.meta.env.DEV 
-      ? '/api/proposals/submitproposal' 
+    const submitUrl = import.meta.env.DEV
+      ? '/api/proposals/submitproposal'
       : 'https://stats.runonflux.io/proposals/submitproposal'
-      
+
     const response = await axios.post(
       submitUrl,
       JSON.stringify(data),
@@ -447,12 +451,12 @@ const registerProposal = async () => {
       registrationHash.value = response.data.data.hash
       proposalPrice.value = response.data.data.amount
       validTill.value = response.data.data.paidTillDate
-      showSuccess('Proposal registered! Please complete the payment.')
+      showSuccess(t('components.xdao.addProposal.messages.proposalRegisteredSuccess'))
     } else {
       showError(response.data.data.message || response.data.data)
     }
   } catch (error) {
-    showError('Failed to register proposal: ' + error.message)
+    showError(t('components.xdao.addProposal.messages.failedToRegister', { error: error.message }))
   } finally {
     registering.value = false
   }
@@ -461,23 +465,23 @@ const registerProposal = async () => {
 const payWithZelcore = () => {
   try {
     if (!foundationAddress.value || !proposalPrice.value || !registrationHash.value) {
-      showError('Payment details not available. Please try registering again.')
-      
+      showError(t('components.xdao.addProposal.messages.paymentDetailsNotAvailable'))
+
       return
     }
 
     const protocol = `zel:?action=pay&coin=zelcash&address=${foundationAddress.value}&amount=${proposalPrice.value}&message=${registrationHash.value}`
-    
+
     const a = document.createElement('a')
     a.href = protocol
     a.style.display = 'none'
     document.body.appendChild(a)
     a.click()
     document.body.removeChild(a)
-    
-    showSuccess('Zelcore payment initiated - please complete payment in Zelcore wallet')
+
+    showSuccess(t('components.xdao.addProposal.messages.zelcorePaymentInitiated'))
   } catch (error) {
-    showError('Failed to open Zelcore')
+    showError(t('components.xdao.addProposal.messages.failedToOpenZelcore'))
   }
 }
 
@@ -486,8 +490,8 @@ const payWithZelcore = () => {
 const payWithSSP = async () => {
   try {
     if (!window.ssp) {
-      showError('SSP Wallet not installed')
-      
+      showError(t('components.xdao.addProposal.messages.sspWalletNotInstalled'))
+
       return
     }
 
@@ -502,10 +506,10 @@ const payWithSSP = async () => {
     if (response.status === 'ERROR') {
       throw new Error(response.data || response.result)
     } else {
-      showSuccess(`SSP payment initiated`)
+      showSuccess(t('components.xdao.addProposal.messages.sspPaymentInitiated'))
     }
   } catch (error) {
-    showError('Failed to initiate SSP payment: ' + error.message)
+    showError(t('components.xdao.addProposal.messages.failedToInitiateSSP', { error: error.message }))
   }
 }
 
@@ -513,9 +517,9 @@ const payWithSSP = async () => {
 const copyToClipboard = async text => {
   try {
     await navigator.clipboard.writeText(text)
-    showSuccess('Copied to clipboard!')
+    showSuccess(t('components.xdao.addProposal.messages.copiedToClipboard'))
   } catch (error) {
-    showError('Failed to copy to clipboard')
+    showError(t('components.xdao.addProposal.messages.failedToCopy'))
   }
 }
 

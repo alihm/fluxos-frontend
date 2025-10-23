@@ -11,7 +11,7 @@
 
       <div v-else-if="!displayApps.length" class="empty-container">
         <VIcon size="80" color="grey-lighten-1">mdi-star-outline</VIcon>
-        <p class="text-h6 mt-3 font-weight-medium">No sponsored apps available</p>
+        <p class="text-h6 mt-3 font-weight-medium">{{ labels.noSponsoredApps }}</p>
       </div>
 
       <div v-else class="carousel-wrapper">
@@ -36,7 +36,7 @@
                 <div class="sponsored-badge">
                   <div>
                     <VIcon size="12" color="#FFD700">mdi-star</VIcon>
-                    Sponsored
+                    {{ labels.sponsored }}
                   </div>
                 </div>
 
@@ -55,7 +55,7 @@
                           class="action-btn"
                           @click.stop="deployApp(app)"
                         >
-                          Install
+                          {{ labels.install }}
                         </VBtn>
                         <VBtn
                           color="primary"
@@ -64,7 +64,7 @@
                           class="action-btn"
                           @click.stop="navigateToApp(app)"
                         >
-                          View
+                          {{ labels.view }}
                         </VBtn>
                       </div>
                     </div>
@@ -83,6 +83,7 @@
 import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useDisplay } from 'vuetify'
+import { useI18n } from 'vue-i18n'
 import AppIcon from '@/components/Marketplace/AppIcon.vue'
 import { useMarketplaceUtils } from '@/composables/useMarketplaceUtils'
 
@@ -104,9 +105,19 @@ const props = defineProps({
     default: false,
   },
 })
+
+const { t } = useI18n()
+
 const router = useRouter()
 const { width } = useDisplay()
 const { formatNumber } = useMarketplaceUtils()
+
+const labels = computed(() => ({
+  sponsored: t('components.marketplace.sponsoredCard.sponsored'),
+  install: t('components.marketplace.sponsoredCard.install'),
+  view: t('components.marketplace.sponsoredCard.view'),
+  noSponsoredApps: t('components.marketplace.sponsoredCard.noSponsoredApps'),
+}))
 
 // Auto-sliding carousel state
 const currentSlide = ref(0)

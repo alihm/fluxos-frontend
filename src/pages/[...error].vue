@@ -1,9 +1,11 @@
 <script setup>
+import { useI18n } from 'vue-i18n'
 import { useGenerateImageVariant } from '@core/composable/useGenerateImageVariant'
 import misc404 from '@images/pages/404.png'
 import miscMaskDark from '@images/pages/misc-mask-dark.png'
 import miscMaskLight from '@images/pages/misc-mask-light.png'
 
+const { t } = useI18n()
 const authThemeMask = useGenerateImageVariant(miscMaskLight, miscMaskDark)
 
 definePage({
@@ -19,22 +21,22 @@ definePage({
   <div class="misc-wrapper">
     <ErrorHeader
       status-code="404"
-      title="Page Not Found ⚠️"
-      description="We couldn't find the page you are looking for."
+      :title="t('pages.error.pageNotFoundTitle')"
+      :description="t('pages.error.pageNotFoundDescription')"
     />
 
     <VBtn
       to="/"
       class="mb-11"
     >
-      Back to Home
+      {{ t('pages.error.backToHome') }}
     </VBtn>
 
     <!-- 👉 Image -->
     <div class="misc-avatar w-100 text-center">
       <VImg
         :src="misc404"
-        alt="error 404"
+        :alt="t('pages.error.error404Alt')"
         :max-height="$vuetify.display.smAndDown ? 350 : 500"
         class="mx-auto"
       />
@@ -43,7 +45,7 @@ definePage({
     <img
       class="misc-footer-img d-none d-md-block"
       :src="authThemeMask"
-      alt="misc-footer-img"
+      :alt="t('pages.error.footerImageAlt')"
       height="320"
     >
   </div>

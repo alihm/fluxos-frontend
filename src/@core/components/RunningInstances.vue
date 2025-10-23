@@ -17,7 +17,7 @@
               mdi-information-variant-circle-outline
             </VIcon>
           </VAvatar>
-          <span class="text-h5">Deployed Instances</span>
+          <span class="text-h5">{{ t('core.runningInstances.deployedInstances') }}</span>
         </div>
       </div>
     </VCol>
@@ -39,7 +39,7 @@
                 color="success"
                 size="small"
               >
-                Primary Server IP Address
+                {{ t('core.runningInstances.primaryServerIpAddress') }}
               </VChip>
             </VCol>
             <VChip
@@ -69,6 +69,7 @@
 
 <script setup>
 import { ref, reactive, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 
 // Props definition
 const props = defineProps({
@@ -96,6 +97,8 @@ const props = defineProps({
   },
 
 })
+
+const { t } = useI18n()
 
 // Local copies of props to avoid mutating props
 const localInstances = reactive({ ...props.instances })

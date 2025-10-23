@@ -8,10 +8,12 @@ import logoDark from '@images/logo_dark.svg?raw'
 import logoLight from '@images/logo_light.svg?raw'
 import { AppContentLayoutNav, ContentWidth, FooterType, NavbarType } from '@layouts/enums'
 import { h, shallowRef } from 'vue'
+import Logo from '@core/components/Logo.vue'
 
-export const logoRef = shallowRef(h('div', {
-  innerHTML: logoDark,
-  style: 'line-height: 0;',
+// Use the Logo Vue component (like FluxCloud's Logo widget)
+export const logoRef = shallowRef(h(Logo, {
+  title: 'Flux',
+  gradientTitle: 'Cloud',
 }))
 
 export const logos = { light: logoLight, dark: logoDark }

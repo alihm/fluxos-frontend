@@ -5,18 +5,18 @@
         <VAvatar size="120" class="mx-auto mb-6 maintenance-avatar">
           <VIcon icon="mdi-tools" size="80" color="warning" />
         </VAvatar>
-        <h2 class="text-h3 font-weight-bold mb-4 maintenance-title" style="white-space: pre-line;">{{ title }}</h2>
+        <h2 class="text-h3 font-weight-bold mb-4 maintenance-title" style="white-space: pre-line;">{{ displayTitle }}</h2>
         <div class="maintenance-text-box mb-8">
           <div class="maintenance-subtitle-box mb-4">
             <VIcon icon="mdi-alert-circle-outline" size="24" class="subtitle-icon" />
             <p class="text-h6 font-weight-regular maintenance-subtitle">
-              {{ subtitle }}
+              {{ displaySubtitle }}
             </p>
           </div>
           <div class="maintenance-description-box">
             <VIcon icon="mdi-information-outline" size="24" class="description-icon" />
             <p class="text-body-1 maintenance-description">
-              {{ description }}
+              {{ displayDescription }}
             </p>
           </div>
         </div>
@@ -28,7 +28,7 @@
           class="maintenance-btn"
         >
           <VIcon start icon="mdi-refresh" />
-          Refresh
+          {{ refreshLabel }}
         </VBtn>
       </VCard>
     </VCol>
@@ -36,18 +36,21 @@
 </template>
 
 <script setup>
+import { computed } from 'vue'
+import { useI18n } from 'vue-i18n'
+
 const props = defineProps({
   title: {
     type: String,
-    default: 'Under Maintenance',
+    default: '',
   },
   subtitle: {
     type: String,
-    default: "We're currently experiencing technical difficulties. Our team is working to resolve this issue as quickly as possible.",
+    default: '',
   },
   description: {
     type: String,
-    default: 'Please check back later or contact support if you need immediate assistance.',
+    default: '',
   },
   loading: {
     type: Boolean,
@@ -60,6 +63,13 @@ const props = defineProps({
 })
 
 defineEmits(['retry'])
+
+const { t } = useI18n()
+
+const displayTitle = computed(() => props.title || t('components.marketplace.maintenanceCard.defaultTitle'))
+const displaySubtitle = computed(() => props.subtitle || t('components.marketplace.maintenanceCard.defaultSubtitle'))
+const displayDescription = computed(() => props.description || t('components.marketplace.maintenanceCard.defaultDescription'))
+const refreshLabel = computed(() => t('components.marketplace.maintenanceCard.refresh'))
 </script>
 
 <style scoped>

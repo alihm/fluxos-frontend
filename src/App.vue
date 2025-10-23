@@ -3,8 +3,8 @@ import ScrollToTop from "@core/components/ScrollToTop.vue"
 import initCore from "@core/initCore"
 import { initConfigStore, useConfigStore } from "@core/stores/config"
 import { hexToRgb } from "@core/utils/colorConverter"
-import { logoRef, logos } from "@themeConfig"
-import { onMounted, watch, nextTick } from "vue"
+import { logoRef } from "@themeConfig"
+import { onMounted, watch } from "vue"
 import { useTheme } from "vuetify"
 import { useFluxStore } from '@/stores/flux'
 
@@ -32,10 +32,9 @@ function updateLogoByTheme() {
 
   localStorage.setItem("vuexy-initial-loader-bg", theme.colors.background)
   localStorage.setItem("vuexy-initial-loader-color", theme.colors.primary)
-  logoRef.value = h("div", {
-    innerHTML: global.current.value.dark ? logos.dark : logos.light,
-    style: "line-height: 0;",
-  })
+
+  // Note: logoRef is already set to the Logo component in themeConfig
+  // No need to override it here - the Logo component will handle its own styling
 }
 
 onMounted(() => {

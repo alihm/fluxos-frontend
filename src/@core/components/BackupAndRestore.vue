@@ -17,7 +17,7 @@
           >
             mdi-database-arrow-up
           </VIcon>
-          <span>Backup</span>
+          <span>{{ t('core.backupAndRestore.backup') }}</span>
         </div>
       </VTab>
 
@@ -32,7 +32,7 @@
           >
             mdi-database-arrow-down
           </VIcon>
-          <span>Restore</span>
+          <span>{{ t('core.backupAndRestore.restore') }}</span>
         </div>
       </VTab>
     </VTabs>
@@ -60,7 +60,7 @@
                       mdi-database-arrow-up
                     </VIcon>
                   </VAvatar>
-                  <span class="text-h5">Backup Container Data</span>
+                  <span class="text-h5">{{ t('core.backupAndRestore.backupContainerData') }}</span>
                 </div>
               </div>
             </VCol>
@@ -73,7 +73,7 @@
             multiple
             chips
             closable-chips
-            placeholder="Select component(s) to backup"
+            :placeholder="t('core.backupAndRestore.selectComponentsToBackup')"
             hide-selected
             hide-no-data
             class="mb-4 red-hover"
@@ -95,7 +95,7 @@
               >
                 mdi-checkbox-multiple-marked
               </VIcon>
-              Select all
+              {{ t('core.backupAndRestore.selectAll') }}
             </VBtn>
 
             <VBtn
@@ -111,7 +111,7 @@
               >
                 mdi-database-arrow-up
               </VIcon>
-              Create Backup
+              {{ t('core.backupAndRestore.createBackup') }}
             </VBtn>
           </div>
 
@@ -173,7 +173,7 @@
                     mdi-lifebuoy
                   </VIcon>
                 </template>
-                <span style="font-size: 16px;">Available Local Backups</span>
+                <span style="font-size: 16px;">{{ t('core.backupAndRestore.availableLocalBackups') }}</span>
               </VChip>
            
               <!-- Action Buttons -->
@@ -207,7 +207,7 @@
                         >
                           mdi-progress-check
                         </VIcon>
-                        Download selected
+                        {{ t('core.backupAndRestore.downloadSelected') }}
                       </VListItemTitle>
                     </VListItem>
                     <VListItem @click="downloadAllBackupFiles(backupList)">
@@ -218,7 +218,7 @@
                         >
                           mdi-download-circle-outline
                         </VIcon>
-                        Download all
+                        {{ t('core.backupAndRestore.downloadAll') }}
                       </VListItemTitle>
                     </VListItem>
                   </VList>
@@ -227,7 +227,7 @@
                 <!-- Remove All Button -->
                 <VBtn
                   id="remove-all"
-                  v-tooltip.bottom="'Remove all backup files'"
+                  v-tooltip.bottom="t('core.backupAndRestore.removeAllBackupFiles')"
                   class="mr-2"
                   icon
                   color="error"
@@ -239,7 +239,7 @@
                 </VBtn>
                 <ConfirmCustomDialog
                   target="remove-all"
-                  confirm-button="Remove all backup files"
+                  :confirm-button="t('core.backupAndRestore.removeAllBackupFiles')"
                   @confirm="deleteLocalBackup(null, backupList)"
                 />
               </div>
@@ -267,7 +267,7 @@
                 <template #top>
                   <div class="px-4 pt-2 pb-2 text-center top-header">
                     <div class="text-subtitle-1 font-weight-medium">
-                      List of available backups on the local machine (backups are automatically deleted 24 hours after creation)
+                      {{ t('core.backupAndRestore.backupListDescription') }}
                     </div>
                   </div>
                   <VDivider />
@@ -339,7 +339,7 @@
                 <template #item.actions="{ item }">
                   <div class="d-flex gap-2">
                     <VBtn
-                      v-tooltip.bottom="'Download backup file'"
+                      v-tooltip.bottom="t('core.backupAndRestore.downloadBackupFile')"
                       icon
                       density="compact"
                       variant="tonal"
@@ -351,7 +351,7 @@
                     </VBtn>
                     <VBtn
                       :id="`remove-${item.component}`"
-                      v-tooltip.bottom="'Remove backup file'"
+                      v-tooltip.bottom="t('core.backupAndRestore.removeBackupFile')"
                       icon
                       color="error"
                       variant="tonal"
@@ -363,7 +363,7 @@
                     </VBtn>
                     <ConfirmCustomDialog
                       :target="`remove-${item.component}`"
-                      confirm-button="Remove backup file"
+                      :confirm-button="t('core.backupAndRestore.removeBackupFile')"
                       @confirm="deleteLocalBackup(item.component, backupList, item.file)"
                     />
                   </div>
@@ -373,7 +373,7 @@
             <span
               class="ml-2"
               style="font-size: 0.9rem;"
-            >Select application component(s) you would like to upload</span>
+            >{{ t('core.backupAndRestore.selectComponentsToUpload') }}</span>
           </div>
           <div v-if="backupList.length > 0 && !showProgressBar && !backupProgress">
             <VRow class="align-center justify-space-between mt-2">
@@ -394,7 +394,7 @@
                         mdi-server
                       </VIcon>
                     </VAvatar>
-                    <span class="text-h5">Choose your storage method</span>
+                    <span class="text-h5">{{ t('core.backupAndRestore.chooseStorageMethod') }}</span>
                   </div>
                 </div>
               </VCol>
@@ -431,8 +431,8 @@
                 class="mt-2 ml-8"
                 style="font-size: 0.9rem; text-align: left;"
               >
-                <li>Free FluxDrive backups! Up to 10GB total to use per user</li>
-                <li>FluxDrive backups can be downloaded on Restore page</li>
+                <li>{{ t('core.backupAndRestore.freeFluxDriveInfo') }}</li>
+                <li>{{ t('core.backupAndRestore.fluxDriveDownloadInfo') }}</li>
               </ul>
             </div>
 
@@ -486,7 +486,7 @@
                 >
                   mdi-cloud-upload
                 </VIcon>
-                Upload Selected Components
+                {{ t('core.backupAndRestore.uploadSelectedComponents') }}
               </VBtn>
             </div>
           </div>
@@ -514,7 +514,7 @@
                       mdi-cloud-download
                     </VIcon>
                   </VAvatar>
-                  <span class="text-h5">Select Restore Method</span>
+                  <span class="text-h5">{{ t('core.backupAndRestore.selectRestoreMethod') }}</span>
                 </div>
               </div>
             </VCol>
@@ -527,15 +527,15 @@
             color="primary"
           >
             <VRadio
-              label="FluxDrive"
+              :label="t('core.backupAndRestore.fluxDrive')"
               value="FluxDrive"
             />
             <VRadio
-              label="Upload File"
+              :label="t('core.backupAndRestore.uploadFile')"
               value="Upload File"
             />
             <VRadio
-              label="Remote URL"
+              :label="t('core.backupAndRestore.remoteUrl')"
               value="Remote URL"
               class="mr-2"
             />
@@ -567,7 +567,7 @@
                       mdi-archive-sync
                     </VIcon>
                     <div class="text-subtitle-1 font-weight-medium">
-                      <b>Backups Inventory</b>
+                      <b>{{ t('core.backupAndRestore.backupsInventory') }}</b>
                     </div>
                   </div>
                   <VDivider />
@@ -577,7 +577,7 @@
                     <!-- Delete Button -->
                     <VBtn
                       :id="`remove-checkpoint-${item.timestamp}`"
-                      v-tooltip.bottom="'Remove Backup'"
+                      v-tooltip.bottom="t('core.backupAndRestore.removeBackup')"
                       icon
                       variant="text"
                       :color="theme === 'dark' ? 'error' : 'rgba(211, 47, 47, 0.85)'"
@@ -592,13 +592,13 @@
                     <!-- Confirm Dialog for Delete -->
                     <ConfirmCustomDialog
                       :target="`remove-checkpoint-${item.timestamp}`"
-                      confirm-button="Remove Backup"
+                      :confirm-button="t('core.backupAndRestore.removeBackup')"
                       @confirm="deleteRestoreBackup(checkpoints, item.timestamp)"
                     />
 
                     <!-- Add to Restore List Button -->
                     <VBtn
-                      v-tooltip.bottom="'Add all to Restore List'"
+                      v-tooltip.bottom="t('core.backupAndRestore.addAllToRestoreList')"
                       icon
                       variant="text"
                       :color="theme === 'dark' ? 'success' : 'rgba(1, 87, 72, 0.75)'"
@@ -728,7 +728,7 @@
                           <div class="d-flex justify-end align-center">
                             <!-- Add to Restore List Button -->
                             <VBtn
-                              v-tooltip.bottom="'Add to Restore List'"
+                              v-tooltip.bottom="t('core.backupAndRestore.addToRestoreList')"
                               icon
                               variant="text"
                               :color="theme === 'dark' ? 'success' : 'rgba(1, 87, 72, 0.75)'"
@@ -752,7 +752,7 @@
                       class="my-0"
                       style="color: orange"
                     >
-                      No backup records available
+                      {{ t('core.backupAndRestore.noBackupRecords') }}
                     </p> 
                   </div>
                 </template>
@@ -780,7 +780,7 @@
                       mdi-lifebuoy
                     </VIcon>
                     <div class="text-subtitle-1 font-weight-medium">
-                      <b>Restore Overview</b>
+                      <b>{{ t('core.backupAndRestore.restoreOverview') }}</b>
                     </div>
                   </div>
                   <VDivider />
@@ -865,7 +865,7 @@
                 <template #item.actions="{ index }">
                   <div class="d-flex align-center justify-end">
                     <VBtn
-                      v-tooltip.bottom="'Remove restore job'"
+                      v-tooltip.bottom="t('core.backupAndRestore.removeRestoreJob')"
                       icon
                       variant="text"
                       color="error"
@@ -923,7 +923,7 @@
               >
                 mdi-rotate-left
               </VIcon>
-              Restore
+              {{ t('core.backupAndRestore.restore') }}
             </VBtn>
           </div>
           <div v-if="selectedRestoreOption === 'Upload File'">
@@ -931,7 +931,7 @@
               <VSelect
                 v-model="restoreRemoteFile"
                 :items="componentAvailableOptions"
-                placeholder="Select component"
+                :placeholder="t('core.backupAndRestore.selectComponent')"
                 prepend-inner-icon="mdi-cube-outline"
                 prepend-icon=""
                 clearable
@@ -979,7 +979,7 @@
                       mdi-lifebuoy
                     </VIcon>
                     <div class="text-subtitle-1 font-weight-medium">
-                      <b>Restore Overview</b>
+                      <b>{{ t('core.backupAndRestore.restoreOverview') }}</b>
                     </div>
                   </div>
                   <VDivider />
@@ -1040,7 +1040,7 @@
                 <template #item.actions="{ item }">
                   <div class="d-flex align-center justify-end">
                     <VBtn
-                      v-tooltip.top="'Remove restore job'"
+                      v-tooltip.top="t('core.backupAndRestore.removeRestoreJob')"
                       icon
                       variant="text"
                       color="error"
@@ -1127,13 +1127,13 @@
               >
                 mdi-rotate-left
               </VIcon>
-              Restore
+              {{ t('core.backupAndRestore.restore') }}
             </VBtn>
           </div>
           <div v-if="selectedRestoreOption === 'Remote URL'">
             <VTextField
               v-model="restoreRemoteUrl"
-              placeholder="Enter the URL for your remote backup archive"
+              :placeholder="t('core.backupAndRestore.enterRemoteBackupUrl')"
               class="mb-4 mt-2"
               prepend-inner-icon="mdi-web"
               prepend-icon=""
@@ -1146,13 +1146,13 @@
               <VSelect
                 v-model="restoreRemoteComponent"
                 :items="componentAvailableOptions"
-                placeholder="Select component"
+                :placeholder="t('core.backupAndRestore.selectComponent')"
                 prepend-inner-icon="mdi-cube-outline"
                 prepend-icon=""
                 clearable
               />
               <VBtn
-                v-tooltip.top="'Add to Restore List'"
+                v-tooltip.top="t('core.backupAndRestore.addToRestoreList')"
                 icon
                 variant="flat"
                 class="ml-2"
@@ -1188,7 +1188,7 @@
                       mdi-lifebuoy
                     </VIcon>
                     <div class="text-subtitle-1 font-weight-medium">
-                      <b>Restore Overview</b>
+                      <b>{{ t('core.backupAndRestore.restoreOverview') }}</b>
                     </div>
                   </div>
                   <VDivider />
@@ -1273,7 +1273,7 @@
                 <template #item.actions="{ index }">
                   <div class="d-flex align-center justify-end">
                     <VBtn
-                      v-tooltip.top="'Remove restore job'"
+                      v-tooltip.top="t('core.backupAndRestore.removeRestoreJob')"
                       icon
                       variant="text"
                       color="error"
@@ -1332,7 +1332,7 @@
               >
                 mdi-rotate-left
               </VIcon>
-              Restore
+              {{ t('core.backupAndRestore.restore') }}
             </VBtn>
           </div>
         </VCardText>
@@ -1364,6 +1364,7 @@
 import axios from "axios"
 import { storeToRefs } from "pinia"
 import { useConfigStore } from "@core/stores/config"
+import { useI18n } from 'vue-i18n'
 
 const props = defineProps({
   appSpec: { 
@@ -1387,6 +1388,8 @@ const props = defineProps({
     required: true,
   },
 })
+
+const { t } = useI18n()
 
 const snackbar = ref({
   model: false,
@@ -1453,13 +1456,13 @@ const zelidHeader = computed(() => {
   }
 })
 
-const backupTableHeaders = [
-  { title: 'Component', key: 'component' },
-  { title: 'Size', key: 'file_size' },
-  { title: 'Created', key: 'create' },
-  { title: 'Expires', key: 'expire' },
-  { title: 'Actions', key: 'actions' },
-]
+const backupTableHeaders = computed(() => [
+  { title: t('core.backupAndRestore.component'), key: 'component' },
+  { title: t('core.backupAndRestore.size'), key: 'file_size' },
+  { title: t('core.backupAndRestore.created'), key: 'create' },
+  { title: t('core.backupAndRestore.expires'), key: 'expire' },
+  { title: t('core.backupAndRestore.actions'), key: 'actions' },
+])
 
 const fileProgressFD = ref([])
 const restoringFromFluxDrive = ref(false)
@@ -1570,11 +1573,11 @@ function formatDateTime(date, isExpire = false) {
 
 const selectedRestoreOption = ref('FluxDrive')
 
-const fluxDriveHeaders = [
-  { key: 'timestamp', title: 'Name', sortable: false },
-  { key: 'timestamp', title: 'Time', sortable: false },
+const fluxDriveHeaders = computed(() => [
+  { key: 'timestamp', title: t('core.backupAndRestore.name'), sortable: false },
+  { key: 'timestamp', title: t('core.backupAndRestore.time'), sortable: false },
   { title: '', value: 'actions', sortable: false },
-]
+])
 
 const deleteRestoreBackup = async (restoreItem, timestamp = 0) => {
   if (timestamp !== 0) {
@@ -1599,7 +1602,7 @@ const deleteRestoreBackup = async (restoreItem, timestamp = 0) => {
         const backupIndex = restoreItem.findIndex(item => item.timestamp === timestamp)
 
         restoreItem.splice(backupIndex, 1)
-        showToast('success', 'Checkpoint backup removed successfully.')
+        showToast('success', t('core.backupAndRestore.checkpointBackupRemovedSuccessfully'))
         
         return true
       }
@@ -1608,7 +1611,7 @@ const deleteRestoreBackup = async (restoreItem, timestamp = 0) => {
       return false
     } catch (error) {
       console.error('Error removing checkpoint', error)
-      showToast('danger', 'Error removing checkpoint')
+      showToast('danger', t('core.backupAndRestore.errorRemovingCheckpoint'))
     }
   }
   
@@ -1618,7 +1621,7 @@ const deleteRestoreBackup = async (restoreItem, timestamp = 0) => {
 const restoreFromLocalFile = async () => {
   showTopUpload.value = false
   restoreFromUpload.value = true
-  restoreFromUploadStatus.value = 'Uploading...'
+  restoreFromUploadStatus.value = t('core.backupAndRestore.uploading')
 
   try {
     // Process the file uploads
@@ -1646,7 +1649,7 @@ const restoreFromLocalFile = async () => {
       entry.progress = 0
     })
 
-    restoreFromUploadStatus.value = 'Initializing restore jobs...'
+    restoreFromUploadStatus.value = t('core.backupAndRestore.initializingRestoreJobs')
 
     const postLayout = buildPostBody('restore', 'upload')
     let postRestoreData
@@ -1702,12 +1705,12 @@ const restoreFromLocalFile = async () => {
     restoreFromUpload.value = false
     restoreFromUploadStatus.value = ''
     loadBackupList('upload', 'files')
-    showToast('success', 'Restore completed successfully')
+    showToast('success', t('core.backupAndRestore.restoreCompletedSuccessfully'))
   } catch (error) {
     console.error('Upload failed', error)
     restoreFromUpload.value = false
     restoreFromUploadStatus.value = 'Error during upload'
-    showToast('error', 'Restore failed')
+    showToast('error', t('core.backupAndRestore.restoreFailed'))
   }
 }
 
@@ -1717,7 +1720,7 @@ const restoreRemoteComponent = ref(null)
 const restoreFromRemoteFile = async () => {
   showTopRemote.value = false
   downloadingFromUrl.value = true
-  restoreFromRemoteURLStatus.value = 'Initializing restore jobs...'
+  restoreFromRemoteURLStatus.value = t('core.backupAndRestore.initializingRestoreJobs')
   
   const zelidauth = localStorage.getItem('zelidauth')
 
@@ -1774,43 +1777,43 @@ const restoreFromRemoteFile = async () => {
 
     downloadingFromUrl.value = false
     restoreFromRemoteURLStatus.value = ''
-    showToast('success', 'Restore completed successfully')
+    showToast('success', t('core.backupAndRestore.restoreCompletedSuccessfully'))
   } catch (error) {
     console.error('Upload failed', error)
     downloadingFromUrl.value = false
     restoreFromRemoteURLStatus.value = 'Error during upload'
-    showToast('error', 'Restore failed')
+    showToast('error', t('core.backupAndRestore.restoreFailed'))
   }
 }
 
-const nestedHeaders = [
-  { key: 'component', title: 'Component', sortable: false  },
-  { key: 'file_url', title: 'URL', sortable: false  },
-  { key: 'file_size', title: 'Size', sortable: false  },
+const nestedHeaders = computed(() => [
+  { key: 'component', title: t('core.backupAndRestore.component'), sortable: false  },
+  { key: 'file_url', title: t('core.backupAndRestore.url'), sortable: false  },
+  { key: 'file_size', title: t('core.backupAndRestore.size'), sortable: false  },
   { key: 'actions', title: '', sortable: false  },
-]
+])
 
-const restoreHeaders = [
-  { key: 'component', title: 'Component', sortable: false  },
-  { key: 'file_url', title: 'URL', sortable: false  },
-  { key: 'timestamp', title: 'Timestamp', sortable: false  },
-  { key: 'file_size', title: 'Size', sortable: false  },
+const restoreHeaders = computed(() => [
+  { key: 'component', title: t('core.backupAndRestore.component'), sortable: false  },
+  { key: 'file_url', title: t('core.backupAndRestore.url'), sortable: false  },
+  { key: 'timestamp', title: t('core.backupAndRestore.timestamp'), sortable: false  },
+  { key: 'file_size', title: t('core.backupAndRestore.size'), sortable: false  },
   { key: 'actions', title: '', sortable: false  },
-]
+])
 
-const restoreHeadersRemote = [
-  { key: 'component', title: 'Component', sortable: false  },
-  { key: 'url', title: 'URL', sortable: false  },
-  { key: 'file_size', title: 'Size', sortable: false  },
+const restoreHeadersRemote = computed(() => [
+  { key: 'component', title: t('core.backupAndRestore.component'), sortable: false  },
+  { key: 'url', title: t('core.backupAndRestore.url'), sortable: false  },
+  { key: 'file_size', title: t('core.backupAndRestore.size'), sortable: false  },
   { key: 'actions', title: '', sortable: false  },
-]
+])
 
-const restoreHeadersLocal = [
-  { key: 'component', title: 'Component', sortable: false  },
-  { key: 'file_name', title: 'File', sortable: false  },
-  { key: 'file_size', title: 'Size', sortable: false  },
+const restoreHeadersLocal = computed(() => [
+  { key: 'component', title: t('core.backupAndRestore.component'), sortable: false  },
+  { key: 'file_name', title: t('core.backupAndRestore.file'), sortable: false  },
+  { key: 'file_size', title: t('core.backupAndRestore.size'), sortable: false  },
   { key: 'actions', title: '', sortable: false  },
-]
+])
 
 const restoreFromUploadStatus = ref('')
 const restoreFromRemoteURLStatus = ref('')
@@ -1827,10 +1830,10 @@ const showProgressBar = ref(false)
 const selectedStorageMethod = ref('flux')
 const restoreFromUpload = ref(false)
 
-const storageMethod = ref([
-  { value: 'flux', disabled: false, text: 'FluxDrive' },
-  { value: 'google', disabled: true, text: 'GoogleDrive' },
-  { value: 'as3', disabled: true, text: 'AS3Storage' },
+const storageMethod = computed(() => [
+  { value: 'flux', disabled: false, text: t('core.backupAndRestore.fluxDrive') },
+  { value: 'google', disabled: true, text: t('core.backupAndRestore.googleDrive') },
+  { value: 'as3', disabled: true, text: t('core.backupAndRestore.as3Storage') },
 ])
 
 const alertRefs = {
@@ -1861,8 +1864,8 @@ const isValidUrl = () => {
 const urlValidationRules = computed(() => [
   value => {
     if (!value) return true // Allow empty URL (if needed)
-    
-    return isValidUrl() || 'Please enter a valid URL ending with .tar.gz' // Validation message if invalid
+
+    return isValidUrl() || t('core.backupAndRestore.invalidUrlValidation') // Validation message if invalid
   },
 ])
 
@@ -1889,7 +1892,7 @@ async function processChunks(chunks, type) {
             changeAlert('danger', chunk, 'showTopUpload', true)
           } else if (chunk.includes('Finalizing')) {
             setTimeout(() => {
-              changeAlert('success', 'Restore completed successfully', 'showTopUpload', true)
+              changeAlert('success', t('core.backupAndRestore.restoreCompletedSuccessfully'), 'showTopUpload', true)
             }, 5000)
           }
         } else if (type === 'restore_remote') {
@@ -1897,7 +1900,7 @@ async function processChunks(chunks, type) {
             changeAlert('danger', chunk, 'showTopRemote', true)
           } else if (chunk.includes('Finalizing')) {
             setTimeout(() => {
-              changeAlert('success', 'Restore completed successfully', 'showTopRemote', true)
+              changeAlert('success', t('core.backupAndRestore.restoreCompletedSuccessfully'), 'showTopRemote', true)
               restoreRemoteUrlItems.value = []
             }, 5000)
           }
@@ -1906,7 +1909,7 @@ async function processChunks(chunks, type) {
             changeAlert('danger', chunk, 'showTopFluxDrive', true)
           } else if (chunk.includes('Finalizing')) {
             setTimeout(() => {
-              changeAlert('success', 'Restore completed successfully', 'showTopFluxDrive', true)
+              changeAlert('success', t('core.backupAndRestore.restoreCompletedSuccessfully'), 'showTopFluxDrive', true)
               restoreRemoteUrlItems.value = []
             }, 5000)
           }
@@ -1961,7 +1964,7 @@ async function createBackup(selectedBackupComponents) {
   if (!selectedBackupComponents?.length) return
 
   backupProgress.value = true
-  tarProgress.value = 'Initializing backup jobs...'
+  tarProgress.value = t('core.backupAndRestore.initializingBackupJobs')
 
   const zelidauth = localStorage.getItem('zelidauth')
 
@@ -2043,7 +2046,7 @@ function updateFileProgress(fileName, progress, loaded, total, component) {
 
 async function downloadAllBackupFiles(list) {
   try {
-    tarProgress.value = 'Downloading backup files...'
+    tarProgress.value = t('core.backupAndRestore.downloadingBackupFiles')
     showProgressBar.value = true
 
     const zelidauth = localStorage.getItem('zelidauth')
@@ -2187,9 +2190,9 @@ const checkFluxDriveUploadProgress = async () => {
         updateFileProgressFD(task.progress, task.component)
         fluxDriveUploadStatus.value = response.data.data.status.message
         if (task.status === 'finished') {
-          showToast('success', `${task.component} backup uploaded to FluxDrive successfully.`)
+          showToast('success', t('core.backupAndRestore.backupUploadedSuccessfully', { component: task.component }))
         } else if (task.status === 'failed') {
-          showToast('danger', `Failed to upload ${task.component} backup to FluxDrive. ${fluxDriveUploadStatus.value}`)
+          showToast('danger', t('core.backupAndRestore.backupUploadFailed', { component: task.component, message: fluxDriveUploadStatus.value }))
         } else {
           fluxDriveUploadTaskTmp.push(task)
         }
@@ -2276,7 +2279,7 @@ const uploadToFluxDrive = async () => {
         return true
       } catch (error) {
         console.error('Error registering file:', error)
-        showToast('danger', 'Error registering file(s) for upload.')
+        showToast('danger', t('core.backupAndRestore.errorRegisteringFiles'))
         
         return false
       }
@@ -2291,7 +2294,7 @@ const uploadToFluxDrive = async () => {
     }
   } catch (error) {
     console.error('Error registering files:', error)
-    showToast('danger', 'Error registering file(s) for upload.')
+    showToast('danger', t('core.backupAndRestore.errorRegisteringFiles'))
   } finally {
     setTimeout(() => {
       checkFluxDriveUploadProgress()
@@ -2333,7 +2336,7 @@ const getFluxDriveBackupList = async () => {
     }
   } catch (error) {
     console.error('Error receiving FluxDrive backup list', error)
-    showToast('danger', 'Error receiving FluxDrive backup list')
+    showToast('danger', t('core.backupAndRestore.errorReceivingFluxDriveBackupList'))
   }
 }
 
@@ -2389,7 +2392,7 @@ async function restoreFromFluxDrive(newComponents) {
   }))
 
   restoringFromFluxDrive.value = true
-  restoreFromFluxDriveStatus.value = 'Initializing restore jobs...'
+  restoreFromFluxDriveStatus.value = t('core.backupAndRestore.initializingRestoreJobs')
 
   const zelidauth = localStorage.getItem('zelidauth')
 
@@ -2446,12 +2449,12 @@ async function restoreFromFluxDrive(newComponents) {
     // Reset flags after restore is complete
     restoringFromFluxDrive.value = false
     restoreFromFluxDriveStatus.value = ''
-    showToast('success', 'Restore completed successfully')
+    showToast('success', t('core.backupAndRestore.restoreCompletedSuccessfully'))
   } catch (error) {
     console.error('Error during restore process:', error)
     restoringFromFluxDrive.value = false
     restoreFromFluxDriveStatus.value = 'Restore failed.'
-    showToast('error', 'Restore failed')
+    showToast('error', t('core.backupAndRestore.restoreFailed'))
   }
 }
 
@@ -2495,7 +2498,7 @@ const addRemoteUrlItem = async (appname, component) => {
       // Check if the URL already exists
       const existingURL = restoreRemoteUrlItems.value.findIndex(item => item.url === restoreRemoteUrl.value)
       if (existingURL !== -1) {
-        showToast('warning', `'${restoreRemoteUrl.value}' is already in the download queue for another component.`)
+        showToast('warning', t('core.backupAndRestore.urlAlreadyInQueue', { url: restoreRemoteUrl.value }))
         
         return
       }
@@ -2559,7 +2562,7 @@ const addFiles = async filesToAdd => {
     )
 
     if (existingFile !== -1) {
-      showToast('warning', `'${f.name}' is already in the upload queue for another component.`)
+      showToast('warning', t('core.backupAndRestore.fileAlreadyInQueue', { fileName: f.name }))
       
       return false
     }
@@ -2656,7 +2659,7 @@ async function upload(file, isContentUpload = false) {
         entry.uploaded = false
         entry.progress = 0
       })
-      showToast('danger', `An error occurred while uploading ${file.selected_file.name}, try to relogin`)
+      showToast('danger', t('core.backupAndRestore.uploadError', { fileName: file.selected_file.name }))
       reject(e)
     }
 
@@ -2670,7 +2673,7 @@ async function upload(file, isContentUpload = false) {
           entry.uploaded = false
           entry.progress = 0
         })
-        showToast('danger', `An error occurred while uploading '${file.selected_file.name}' - Status code: ${xhr.status}`)
+        showToast('danger', t('core.backupAndRestore.uploadErrorWithStatus', { fileName: file.selected_file.name, status: xhr.status }))
         reject(xhr.status)
         
         return

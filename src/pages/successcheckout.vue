@@ -1,4 +1,5 @@
 <script setup>
+import { useI18n } from 'vue-i18n'
 import { useGenerateImageVariant } from '@core/composable/useGenerateImageVariant'
 import miscMaskDark from '@images/pages/misc-mask-dark.png'
 import miscMaskLight from '@images/pages/misc-mask-light.png'
@@ -10,6 +11,7 @@ definePage({
   },
 })
 
+const { t } = useI18n()
 const authThemeMask = useGenerateImageVariant(miscMaskLight, miscMaskDark)
 
 // Auto-close window after 10 seconds (only if popup)
@@ -27,6 +29,7 @@ onMounted(() => {
       closeTimer.value--
       if (closeTimer.value <= 0) {
         clearInterval(interval)
+
         // Try to close the window
         window.close()
 
@@ -53,21 +56,21 @@ onMounted(() => {
         class="mb-2"
       />
       <h1 class="text-h4 font-weight-bold text-center">
-        Payment Completed Successfully! 🎉
+        {{ t('pages.successCheckout.title') }}
       </h1>
       <p class="text-body-1 text-center text-medium-emphasis" style="max-width: 600px;">
-        Your application payment has been processed successfully.
+        {{ t('pages.successCheckout.paymentProcessed') }}
         <br>
-        <span class="text-warning">It can take up to 45 minutes</span> for your application to be deployed on the Flux network.
+        <span class="text-warning">{{ t('pages.successCheckout.deploymentTime') }}</span> {{ t('pages.successCheckout.deploymentMessage') }}
       </p>
       <p v-if="isPopup && closeTimer > 0" class="text-body-1 text-center text-medium-emphasis mt-4">
-        This window will close automatically in <span class="text-primary font-weight-bold">{{ closeTimer }}</span> seconds
+        {{ t('pages.successCheckout.autoCloseMessage', { seconds: closeTimer }) }}
       </p>
       <p v-else-if="isPopup && cannotClose" class="text-body-1 text-center text-medium-emphasis mt-4">
-        You can safely close this window now
+        {{ t('pages.successCheckout.safeToClose') }}
       </p>
       <p v-else-if="!isPopup" class="text-body-1 text-center text-medium-emphasis mt-4">
-        You can safely close this window now
+        {{ t('pages.successCheckout.safeToClose') }}
       </p>
     </div>
 

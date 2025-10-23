@@ -25,11 +25,11 @@
                   
                     <!-- Title and Description -->
                     <h1 class="text-h4 font-weight-bold mb-3">
-                      Sign In Required
+                      {{ t('menu.application.signInRequired') }}
                     </h1>
-                  
+
                     <p class="text-body-1 text-medium-emphasis mb-8 px-4">
-                      To register and deploy applications on the Flux network, you need to authenticate with your Flux identity.
+                      {{ t('menu.application.signInDescription') }}
                     </p>
                   
                     <!-- Features List -->
@@ -39,21 +39,21 @@
                           <div class="mr-sm-8">
                             <div class="d-flex align-center mb-2">
                               <VIcon color="success" size="20" class="mr-2 flex-shrink-0">mdi-check-circle</VIcon>
-                              <span class="text-body-2 text-no-wrap">Deploy distributed apps</span>
+                              <span class="text-body-2 text-no-wrap">{{ t('menu.application.deployDistributedApps') }}</span>
                             </div>
                             <div class="d-flex align-center mb-2">
                               <VIcon color="success" size="20" class="mr-2 flex-shrink-0">mdi-check-circle</VIcon>
-                              <span class="text-body-2 text-no-wrap">Manage resources</span>
+                              <span class="text-body-2 text-no-wrap">{{ t('menu.application.manageResources') }}</span>
                             </div>
                           </div>
                           <div>
                             <div class="d-flex align-center mb-2">
                               <VIcon color="success" size="20" class="mr-2 flex-shrink-0">mdi-check-circle</VIcon>
-                              <span class="text-body-2 text-no-wrap">Monitor performance</span>
+                              <span class="text-body-2 text-no-wrap">{{ t('menu.application.monitorPerformance') }}</span>
                             </div>
                             <div class="d-flex align-center">
                               <VIcon color="success" size="20" class="mr-2 flex-shrink-0">mdi-check-circle</VIcon>
-                              <span class="text-body-2 text-no-wrap">Scale globally</span>
+                              <span class="text-body-2 text-no-wrap">{{ t('menu.application.scaleGlobally') }}</span>
                             </div>
                           </div>
                         </div>
@@ -65,10 +65,10 @@
                       <VBtn
                         color="primary"
                         variant="flat"
-                        @click="showLogin = true"
+                        @click="openLoginBottomSheet"
                       >
                         <VIcon size="22" class="mr-2">mdi-login-variant</VIcon>
-                        Sign In
+                        {{ t('menu.application.signIn') }}
                       </VBtn>
                       <VBtn
                         variant="flat"
@@ -77,17 +77,17 @@
                         rel="noopener noreferrer"
                       >
                         <VIcon size="22" class="mr-2">mdi-information-outline</VIcon>
-                        Learn More
+                        {{ t('menu.application.learnMore') }}
                       </VBtn>
                     </div>
 
                     <!-- Help Text -->
                     <p class="text-caption text-medium-emphasis mt-6">
-                      New to Flux?
+                      {{ t('menu.application.newToFlux') }}
                       <a href="https://docs.runonflux.io" target="_blank" rel="noopener noreferrer" class="text-primary text-decoration-none">
-                        Check our documentation
+                        {{ t('menu.application.checkDocumentation') }}
                       </a>
-                      to get started.
+                      {{ t('menu.application.toGetStarted') }}
                     </p>
                   </div>
                 </VCol>
@@ -108,22 +108,20 @@
       </VCol>
     </VRow>
 
-    <!-- Login Dialog -->
-    <LoginDialog
-      v-model="showLogin"
-      title="Login Required"
-      @loginSuccess="showLogin = false"
-    />
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted, computed, watch } from 'vue'
+import { ref, onMounted, computed, watch, nextTick } from 'vue'
 import { useFluxStore } from '@/stores/flux'
 import { storeToRefs } from 'pinia'
+import { useI18n } from 'vue-i18n'
+import { useLoginSheet } from '@/composables/useLoginSheet'
 import axios from 'axios'
 import { getDetectedBackendURL } from '@/utils/backend'
-import LoginDialog from '@/components/shared/LoginDialog.vue'
+
+const { t } = useI18n()
+const { openLoginBottomSheet, closeLoginBottomSheet } = useLoginSheet()
 
 // Initialize flux store
 const fluxStore = useFluxStore()
@@ -133,8 +131,6 @@ const { privilege } = storeToRefs(fluxStore)
 const isLoggedIn = computed(() => privilege.value !== 'none')
 
 // Create a new app specification with default values
-// Login dialog state
-const showLogin = ref(false)
 const isRedeploy = ref(false)
 
 const newAppSpec = ref({
@@ -179,6 +175,7 @@ watch(newAppSpec, spec => {
   if (!spec) {
     console.log('[Spec Adapter] No spec available')
     adaptedAppSpec.value = null
+    
     return
   }
 
@@ -301,8 +298,8 @@ async function executeLocalCommand(
 
 // Watch for login status changes to close dialog when logged in
 watch(isLoggedIn, newValue => {
-  if (newValue && showLogin.value) {
-    showLogin.value = false
+  if (newValue) {
+    closeLoginBottomSheet()
   }
 })
 

@@ -9,7 +9,7 @@
       <VCardTitle class="d-flex align-center justify-space-between bg-primary pa-4" style="color: white !important;">
         <div class="d-flex align-center">
           <VIcon icon="mdi-login" class="me-3" color="white" size="28" />
-          <span class="text-h5" style="color: white !important;">{{ title || 'Login Required' }}</span>
+          <span class="text-h5" style="color: white !important;">{{ title || t('components.loginDialog.title') }}</span>
         </div>
         <VBtn
           icon="mdi-close"
@@ -38,6 +38,7 @@
 
 <script setup>
 import { computed } from 'vue'
+import { useI18n } from 'vue-i18n'
 import Login from '@/@core/components/Login.vue'
 
 const props = defineProps({
@@ -47,7 +48,7 @@ const props = defineProps({
   },
   title: {
     type: String,
-    default: 'Login Required',
+    default: '',
   },
   message: {
     type: String,
@@ -56,6 +57,8 @@ const props = defineProps({
 })
 
 const emit = defineEmits(['update:modelValue', 'loginSuccess', 'cancel'])
+
+const { t } = useI18n()
 
 const isOpen = computed({
   get: () => props.modelValue,

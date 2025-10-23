@@ -125,7 +125,7 @@
               <VIcon icon="mdi-cpu-64-bit" size="16" color="white" />
             </div>
             <div class="req-visual-content">
-              <div class="req-visual-value">{{ app.compose[0].cpu || 1 }}<span class="req-unit"> Cores</span></div>
+              <div class="req-visual-value">{{ app.compose[0].cpu || 1 }}<span class="req-unit">vCores</span></div>
               <div class="req-visual-label">CPU Power</div>
             </div>
           </div>
@@ -135,7 +135,7 @@
               <VIcon icon="mdi-memory" size="16" color="white" />
             </div>
             <div class="req-visual-content">
-              <div class="req-visual-value">{{ app.compose[0].ram || 512 }}<span class="req-unit"> MB</span></div>
+              <div class="req-visual-value">{{ app.compose[0].ram || 512 }}<span class="req-unit">MB</span></div>
               <div class="req-visual-label">Memory</div>
             </div>
           </div>
@@ -145,7 +145,7 @@
               <VIcon icon="mdi-harddisk" size="16" color="white" />
             </div>
             <div class="req-visual-content">
-              <div class="req-visual-value">{{ app.compose[0].hdd || 1 }}<span class="req-unit"> GB</span></div>
+              <div class="req-visual-value">{{ app.compose[0].hdd || 1 }}<span class="req-unit">GB</span></div>
               <div class="req-visual-label">Storage</div>
             </div>
           </div>
@@ -1249,6 +1249,10 @@ onMounted(() => {
   font-size: 0.7rem;
   font-weight: 500;
   opacity: 0.6;
+}
+
+.req-unit::before {
+  content: '\00a0';
 }
 
 .req-visual-label {

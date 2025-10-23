@@ -22,7 +22,7 @@
             {{ app.displayName || app.name }}
           </div>
           <div class="text-caption text-medium-emphasis text-truncate mb-2">
-            {{ app.developer || 'Unknown' }}
+            {{ app.developer || labels.unknown }}
           </div>
 
           <!-- Stats -->
@@ -45,7 +45,7 @@
               size="x-small"
               variant="tonal"
             >
-              {{ app.price > 0 ? `$${app.price}` : 'Free' }}
+              {{ app.price > 0 ? `$${app.price}` : labels.free }}
             </VChip>
           </div>
         </VCol>
@@ -67,6 +67,8 @@
 </template>
 
 <script setup>
+import { computed } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useMarketplace } from '@/composables/useMarketplace'
 import { useMarketplaceUtils } from '@/composables/useMarketplaceUtils'
 
@@ -78,11 +80,20 @@ const props = defineProps({
 })
 
 const emit = defineEmits(['click'])
+
+const { t } = useI18n()
+
 const { categoryMap } = useMarketplace()
 const { formatNumber, getCategoryColor } = useMarketplaceUtils()
 
+const labels = computed(() => ({
+  unknown: t('components.marketplace.sponsoredAppCard.unknown'),
+  free: t('components.marketplace.sponsoredAppCard.free'),
+  other: t('components.marketplace.sponsoredAppCard.other'),
+}))
+
 const getCategoryName = categoryUuid => {
-  return categoryMap.value.get(categoryUuid) || 'Other'
+  return categoryMap.value.get(categoryUuid) || labels.value.other
 }
 
 
@@ -93,7 +104,7 @@ const formatInstallCount = count => {
   if (count >= 1000) {
     return (count / 1000).toFixed(1) + 'K'
   }
-  
+
   return count.toString()
 }
 </script>

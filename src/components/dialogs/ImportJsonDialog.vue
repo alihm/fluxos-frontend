@@ -9,7 +9,7 @@
       <VCardTitle class="d-flex align-center justify-space-between bg-primary">
         <div class="d-flex align-center">
           <VIcon color="white" size="24" class="mr-2">mdi-file-import-outline</VIcon>
-          <span class="text-h6 text-white">Import {{ type === 'env' ? 'Environment Variables' : 'Commands' }} from JSON</span>
+          <span class="text-h6 text-white">{{ t('components.dialogs.importJsonDialog.title', { type: type === 'env' ? t('components.dialogs.importJsonDialog.environmentVariables') : t('components.dialogs.importJsonDialog.commands') }) }}</span>
         </div>
         <VBtn
           icon="mdi-close"
@@ -28,12 +28,12 @@
           density="compact"
         >
           <div class="text-body-2">
-            <strong>Format:</strong> Paste a JSON array or drag & drop a file
+            <strong>{{ t('components.dialogs.importJsonDialog.format') }}:</strong> {{ t('components.dialogs.importJsonDialog.formatHint') }}
             <template v-if="type === 'env'">
-              <br>Example: <code>["KEY=value", "FOO=bar", "PORT=3000"]</code>
+              <br>{{ t('components.dialogs.importJsonDialog.example') }}: <code>["KEY=value", "FOO=bar", "PORT=3000"]</code>
             </template>
             <template v-else>
-              <br>Example: <code>["npm install", "npm run build", "node server.js"]</code>
+              <br>{{ t('components.dialogs.importJsonDialog.example') }}: <code>["npm install", "npm run build", "node server.js"]</code>
             </template>
           </div>
         </VAlert>
@@ -47,7 +47,7 @@
         >
           <VTextarea
             v-model="jsonInput"
-            placeholder="Paste your JSON array here or drag & drop a file..."
+            :placeholder="t('components.dialogs.importJsonDialog.placeholder')"
             rows="8"
             variant="outlined"
             density="comfortable"
@@ -58,7 +58,7 @@
           />
           <div v-if="isDragging" class="drop-overlay">
             <VIcon size="48" color="primary">mdi-file-upload</VIcon>
-            <div class="text-h6 mt-2">Drop JSON file here</div>
+            <div class="text-h6 mt-2">{{ t('components.dialogs.importJsonDialog.dropFileHere') }}</div>
           </div>
         </div>
 
@@ -71,7 +71,7 @@
             class="text-none"
           >
             <VIcon size="20" class="mr-2">mdi-folder-open-outline</VIcon>
-            Browse
+            {{ t('components.dialogs.importJsonDialog.browse') }}
           </VBtn>
           <input
             ref="fileInput"
@@ -92,7 +92,7 @@
           @click="closeDialog"
           min-width="100"
         >
-          Cancel
+          {{ t('common.buttons.cancel') }}
         </VBtn>
         <VBtn
           color="primary"
@@ -102,7 +102,7 @@
           @click="handleImport"
           min-width="100"
         >
-          Import
+          {{ t('common.buttons.import') }}
         </VBtn>
       </VCardActions>
     </VCard>
@@ -110,7 +110,8 @@
 </template>
 
 <script setup>
-import { ref, watch } from 'vue'
+import { ref, watch, computed } from 'vue'
+import { useI18n } from 'vue-i18n'
 
 const props = defineProps({
   modelValue: {
@@ -125,6 +126,8 @@ const props = defineProps({
 })
 
 const emit = defineEmits(['update:modelValue', 'import'])
+
+const { t } = useI18n()
 
 const jsonInput = ref('')
 const errorMessage = ref('')
@@ -169,8 +172,8 @@ const handleFileSelect = async e => {
 
 const readFile = async file => {
   if (!file.name.endsWith('.json') && !file.name.endsWith('.txt')) {
-    errorMessage.value = 'Please select a valid file'
-    
+    errorMessage.value = t('components.dialogs.importJsonDialog.invalidFileType')
+
     return
   }
 
@@ -179,7 +182,7 @@ const readFile = async file => {
     jsonInput.value = text
     errorMessage.value = ''
   } catch (error) {
-    errorMessage.value = 'Failed to read file: ' + error.message
+    errorMessage.value = t('components.dialogs.importJsonDialog.failedToReadFile', { message: error.message })
   }
 }
 
@@ -194,14 +197,14 @@ const handleImport = () => {
     const parsed = JSON.parse(jsonInput.value)
 
     if (!Array.isArray(parsed)) {
-      errorMessage.value = 'Invalid JSON: Expected an array'
-      
+      errorMessage.value = t('components.dialogs.importJsonDialog.invalidJsonArray')
+
       return
     }
 
     if (parsed.length === 0) {
-      errorMessage.value = 'Array is empty'
-      
+      errorMessage.value = t('components.dialogs.importJsonDialog.emptyArray')
+
       return
     }
 
@@ -210,15 +213,15 @@ const handleImport = () => {
       const validEntries = []
       for (const item of parsed) {
         if (typeof item !== 'string' || !item.includes('=')) {
-          errorMessage.value = `Invalid format: "${item}" - Expected "KEY=value" format`
-          
+          errorMessage.value = t('components.dialogs.importJsonDialog.invalidEnvFormat', { item })
+
           return
         }
         const [key, ...rest] = item.split('=')
         const value = rest.join('=')
         if (!key || !value) {
-          errorMessage.value = `Invalid entry: "${item}" - Key and value are required`
-          
+          errorMessage.value = t('components.dialogs.importJsonDialog.invalidEnvEntry', { item })
+
           return
         }
         validEntries.push({ key, value })
@@ -228,8 +231,8 @@ const handleImport = () => {
       // Validate commands
       const validCommands = parsed.filter(cmd => typeof cmd === 'string' && cmd.trim())
       if (validCommands.length === 0) {
-        errorMessage.value = 'No valid commands found'
-        
+        errorMessage.value = t('components.dialogs.importJsonDialog.noValidCommands')
+
         return
       }
       emit('import', validCommands)
@@ -237,7 +240,7 @@ const handleImport = () => {
 
     closeDialog()
   } catch (error) {
-    errorMessage.value = 'Invalid JSON format: ' + error.message
+    errorMessage.value = t('components.dialogs.importJsonDialog.invalidJsonFormat', { message: error.message })
   }
 }
 </script>

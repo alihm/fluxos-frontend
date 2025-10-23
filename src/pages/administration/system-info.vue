@@ -4,16 +4,15 @@
     <LoadingSpinner
       v-if="loading"
       icon="mdi-information-outline"
-      title="Loading System Information..."
+      :title="t('pages.administration.systemInfo.loadingTitle')"
     />
 
     <!-- Maintenance/Error State -->
     <MaintenanceCard
       v-else-if="error"
-      title="System Information
-Unavailable"
-      subtitle="Unable to load system information at this time."
-      description="The system is currently unavailable or experiencing connectivity issues. Please check your connection and try again in a few moments. If the problem persists, contact your system administrator."
+      :title="t('pages.administration.systemInfo.errorTitle')"
+      :subtitle="t('pages.administration.systemInfo.errorSubtitle')"
+      :description="t('pages.administration.systemInfo.errorDescription')"
       :loading="loading"
       margin-top="-50px"
       @retry="fetchSystemInfo"
@@ -28,9 +27,9 @@ Unavailable"
             <VIcon icon="mdi-information-outline" size="32" color="white" />
           </VAvatar>
           <div>
-            <h2 class="text-h5 font-weight-bold">System Information</h2>
+            <h2 class="text-h5 font-weight-bold">{{ t('pages.administration.systemInfo.title') }}</h2>
             <p class="text-body-2 text-medium-emphasis mb-0">
-              View system resources and component versions
+              {{ t('pages.administration.systemInfo.subtitle') }}
             </p>
           </div>
         </div>
@@ -40,7 +39,7 @@ Unavailable"
       <VCard class="mb-3" elevation="1">
         <VCardTitle class="d-flex align-center pa-3 bg-surface">
           <VIcon icon="mdi-server" size="24" class="mr-2" />
-          <span class="text-body-1 font-weight-medium">Resources Allocated</span>
+          <span class="text-body-1 font-weight-medium">{{ t('pages.administration.systemInfo.resourcesAllocated') }}</span>
         </VCardTitle>
         <VDivider />
         <VCardText class="pa-3">
@@ -55,10 +54,10 @@ Unavailable"
                         <VAvatar color="info" variant="flat" size="32" class="mr-2">
                           <VIcon icon="mdi-harddisk" size="18" color="white" />
                         </VAvatar>
-                        <span class="text-body-2 font-weight-medium">Storage</span>
+                        <span class="text-body-2 font-weight-medium">{{ t('pages.administration.systemInfo.storage') }}</span>
                       </div>
-                      <div class="text-h5 font-weight-bold">{{ systemInfo.storage.used }} GB</div>
-                      <div class="text-body-2 text-medium-emphasis">of {{ systemInfo.storage.total }} GB</div>
+                      <div class="text-h5 font-weight-bold">{{ t('pages.administration.systemInfo.storageUsed', { used: systemInfo.storage.used }) }}</div>
+                      <div class="text-body-2 text-medium-emphasis">{{ t('pages.administration.systemInfo.storageTotal', { total: systemInfo.storage.total }) }}</div>
                     </div>
                     <VProgressCircular
                       :model-value="(systemInfo.storage.used / systemInfo.storage.total) * 100"
@@ -83,10 +82,10 @@ Unavailable"
                         <VAvatar color="success" variant="flat" size="32" class="mr-2">
                           <VIcon icon="mdi-cpu-64-bit" size="18" color="white" />
                         </VAvatar>
-                        <span class="text-body-2 font-weight-medium">vCPU</span>
+                        <span class="text-body-2 font-weight-medium">{{ t('pages.administration.systemInfo.vcpu') }}</span>
                       </div>
-                      <div class="text-h5 font-weight-bold">{{ systemInfo.cpu.used }} vCores</div>
-                      <div class="text-body-2 text-medium-emphasis">of {{ systemInfo.cpu.cores }} vCores</div>
+                      <div class="text-h5 font-weight-bold">{{ t('pages.administration.systemInfo.vcpuUsed', { used: systemInfo.cpu.used }) }}</div>
+                      <div class="text-body-2 text-medium-emphasis">{{ t('pages.administration.systemInfo.vcpuTotal', { total: systemInfo.cpu.cores }) }}</div>
                     </div>
                     <VProgressCircular
                       :model-value="systemInfo.cpu.usage"
@@ -111,10 +110,10 @@ Unavailable"
                         <VAvatar color="warning" variant="flat" size="32" class="mr-2">
                           <VIcon icon="mdi-memory" size="18" color="white" />
                         </VAvatar>
-                        <span class="text-body-2 font-weight-medium">RAM</span>
+                        <span class="text-body-2 font-weight-medium">{{ t('pages.administration.systemInfo.ram') }}</span>
                       </div>
-                      <div class="text-h5 font-weight-bold">{{ systemInfo.ram.used }} GB</div>
-                      <div class="text-body-2 text-medium-emphasis">of {{ systemInfo.ram.total }} GB</div>
+                      <div class="text-h5 font-weight-bold">{{ t('pages.administration.systemInfo.ramUsed', { used: systemInfo.ram.used }) }}</div>
+                      <div class="text-body-2 text-medium-emphasis">{{ t('pages.administration.systemInfo.ramTotal', { total: systemInfo.ram.total }) }}</div>
                     </div>
                     <VProgressCircular
                       :model-value="(systemInfo.ram.used / systemInfo.ram.total) * 100"
@@ -137,7 +136,7 @@ Unavailable"
       <VCard class="mb-3" elevation="1">
         <VCardTitle class="d-flex align-center pa-3 bg-surface">
           <VIcon icon="mdi-apps" size="24" class="mr-2" />
-          <span class="text-body-1 font-weight-medium">Applications</span>
+          <span class="text-body-1 font-weight-medium">{{ t('pages.administration.systemInfo.applications') }}</span>
         </VCardTitle>
         <VDivider />
         <VCardText class="pa-3">
@@ -152,9 +151,9 @@ Unavailable"
                         <VAvatar color="primary" variant="flat" size="32" class="mr-2">
                           <VIcon icon="mdi-apps" size="18" color="white" />
                         </VAvatar>
-                        <span class="text-body-2 font-weight-medium">Installed Apps</span>
+                        <span class="text-body-2 font-weight-medium">{{ t('pages.administration.systemInfo.installedApps') }}</span>
                       </div>
-                      <div class="text-h5 font-weight-bold">{{ installedApps.length }} application(s)</div>
+                      <div class="text-h5 font-weight-bold">{{ t('pages.administration.systemInfo.installedAppsCount', { count: installedApps.length }) }}</div>
                     </div>
                     <VProgressCircular
                       :model-value="installedApps.length > 0 ? 100 : 0"
@@ -179,12 +178,12 @@ Unavailable"
                         <VAvatar color="info" variant="flat" size="32" class="mr-2">
                           <VIcon icon="mdi-database-check" size="18" color="white" />
                         </VAvatar>
-                        <span class="text-body-2 font-weight-medium">Apps Hashes</span>
+                        <span class="text-body-2 font-weight-medium">{{ t('pages.administration.systemInfo.appsHashes') }}</span>
                       </div>
                       <div class="text-h5 font-weight-bold">{{ systemInfo.hashesPresent }} / {{ systemInfo.appsHashesTotal }}</div>
                       <VChip size="small" variant="flat" color="warning" class="mt-1">
                         <VIcon icon="mdi-alert-circle-outline" size="16" class="mr-1" />
-                        {{ systemInfo.appsHashesTotal - systemInfo.hashesPresent }} not synced
+                        {{ t('pages.administration.systemInfo.notSynced', { count: systemInfo.appsHashesTotal - systemInfo.hashesPresent }) }}
                       </VChip>
                     </div>
                     <VProgressCircular
@@ -207,7 +206,7 @@ Unavailable"
       <VCard class="mb-3" elevation="1">
         <VCardTitle class="d-flex align-center pa-3 bg-surface">
           <VIcon icon="mdi-package-variant" size="24" class="mr-2" />
-          <span class="text-body-1 font-weight-medium">Component Versions</span>
+          <span class="text-body-1 font-weight-medium">{{ t('pages.administration.systemInfo.componentVersions') }}</span>
         </VCardTitle>
         <VDivider />
         <VCardText class="pa-3">
@@ -248,6 +247,7 @@ Unavailable"
 
 <script setup>
 import { ref, onMounted } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useSnackbar } from '@/composables/useSnackbar'
 import BenchmarkService from '@/services/BenchmarkService'
 import FluxService from '@/services/FluxService'
@@ -257,6 +257,7 @@ import MaintenanceCard from '@/components/Marketplace/MaintenanceCard.vue'
 import fluxLogo from '/images/logo.png?url'
 import syncthingLogo from '/images/syncthing-logo.png?url'
 
+const { t } = useI18n()
 const { showSnackbar } = useSnackbar()
 const loading = ref(true)
 const showContent = ref(false)
@@ -276,7 +277,7 @@ const componentVersions = ref([])
 // Preload images
 const preloadImages = () => {
   const images = ['/images/logo.png', '/images/syncthing-logo.png']
-  
+
   return Promise.all(
     images.map(src => {
       return new Promise((resolve, reject) => {
@@ -304,7 +305,7 @@ const fetchSystemInfo = async () => {
       // Check for error status
       if (fluxInfoResponse?.data?.status === 'error') {
         error.value = fluxInfoResponse.data.data || { message: 'An error occurred while loading system information' }
-        
+
         return
       }
 
@@ -389,12 +390,12 @@ const fetchSystemInfo = async () => {
 
             // Include version fields but exclude osversion (keep only osprettyname)
             if (keyLower === 'osversion') return false
-            
+
             return keyLower.includes('version') || keyLower === 'osprettyname'
           })
           .map(field => {
             const icon = iconMap[field.toLowerCase()] || 'mdi-package-variant'
-            
+
             return {
               name: nameMap[field.toLowerCase()] || field.replace('version', '').replace(/([A-Z])/g, ' $1').trim()
                 .split(' ')
@@ -444,7 +445,7 @@ const fetchInstalledApps = async () => {
 // Format version - remove 'v' prefix
 const formatVersion = version => {
   if (!version) return 'N/A'
-  
+
   return version.toString().replace(/^v/i, '')
 }
 

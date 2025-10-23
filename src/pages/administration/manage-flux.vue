@@ -7,9 +7,9 @@
           <VIcon icon="mdi-cog" size="32" color="white" />
         </VAvatar>
         <div>
-          <h2 class="text-h5 font-weight-bold">Manage Flux</h2>
+          <h2 class="text-h5 font-weight-bold">{{ t('pages.administration.manageFlux.title') }}</h2>
           <p class="text-body-2 text-medium-emphasis mb-0">
-            Configure and manage your Flux node settings
+            {{ t('pages.administration.manageFlux.subtitle') }}
           </p>
         </div>
       </div>
@@ -20,19 +20,19 @@
       <VTabs v-model="currentTab" bg-color="surface" color="primary">
         <VTab value="settings">
           <VIcon icon="mdi-cog" size="22" class="mr-2" />
-          <span class="text-subtitle-1 font-weight-medium">Settings</span>
+          <span class="text-subtitle-1 font-weight-medium">{{ t('pages.administration.manageFlux.tabs.settings') }}</span>
         </VTab>
         <VTab value="logs">
           <VIcon icon="mdi-text-box-multiple" size="22" class="mr-2" />
-          <span class="text-subtitle-1 font-weight-medium">Logs</span>
+          <span class="text-subtitle-1 font-weight-medium">{{ t('pages.administration.manageFlux.tabs.logs') }}</span>
         </VTab>
         <VTab value="daemon">
           <VIcon icon="mdi-server" size="22" class="mr-2" />
-          <span class="text-subtitle-1 font-weight-medium">Daemon</span>
+          <span class="text-subtitle-1 font-weight-medium">{{ t('pages.administration.manageFlux.tabs.daemon') }}</span>
         </VTab>
         <VTab value="benchmark">
           <VIcon icon="mdi-speedometer" size="22" class="mr-2" />
-          <span class="text-subtitle-1 font-weight-medium">Benchmark</span>
+          <span class="text-subtitle-1 font-weight-medium">{{ t('pages.administration.manageFlux.tabs.benchmark') }}</span>
         </VTab>
       </VTabs>
     </VCard>
@@ -46,7 +46,7 @@
             <VAvatar color="primary" variant="flat" size="28" class="mr-2">
               <VIcon icon="mdi-update" size="18" color="white" />
             </VAvatar>
-            <span class="text-body-1">System Updates</span>
+            <span class="text-body-1">{{ t('pages.administration.manageFlux.sections.systemUpdates.title') }}</span>
           </VCardTitle>
           <VDivider />
           <VCardText class="pa-3">
@@ -57,12 +57,12 @@
                     <VIcon icon="mdi-cloud-sync" size="22" />
                   </VAvatar>
                   <div>
-                    <h3 class="text-body-1 mb-1">Flux Update</h3>
-                    <p class="text-body-2 text-medium-emphasis mb-0">Standard update process</p>
+                    <h3 class="text-body-1 mb-1">{{ t('pages.administration.manageFlux.sections.systemUpdates.fluxUpdate.title') }}</h3>
+                    <p class="text-body-2 text-medium-emphasis mb-0">{{ t('pages.administration.manageFlux.sections.systemUpdates.fluxUpdate.process') }}</p>
                   </div>
                 </div>
                 <p class="text-body-2 mb-3">
-                  Update your Flux to the latest version. Every Flux has to run the newest version to stay on par with the network.
+                  {{ t('pages.administration.manageFlux.sections.systemUpdates.fluxUpdate.description') }}
                 </p>
                 <VBtn
                   block
@@ -72,7 +72,7 @@
                   @click="updateFluxDialog = true"
                 >
                   <VIcon icon="mdi-download" size="20" class="mr-2" />
-                  Update Flux
+                  {{ t('pages.administration.manageFlux.sections.systemUpdates.fluxUpdate.button') }}
                 </VBtn>
               </VCardText>
             </VCard>
@@ -85,7 +85,7 @@
             <VAvatar color="primary" variant="flat" size="28" class="mr-2">
               <VIcon icon="mdi-cog-outline" size="18" color="white" />
             </VAvatar>
-            <span class="text-body-1">Node Configuration</span>
+            <span class="text-body-1">{{ t('pages.administration.manageFlux.sections.nodeConfiguration.title') }}</span>
           </VCardTitle>
           <VDivider />
           <VCardText class="pa-3">
@@ -99,26 +99,26 @@
                         <VIcon icon="mdi-router-wireless" size="18" color="white" />
                       </VAvatar>
                       <div class="flex-grow-1">
-                        <h3 class="text-body-1 font-weight-bold">Router IP</h3>
-                        <p class="text-caption text-medium-emphasis mb-0">Network configuration</p>
+                        <h3 class="text-body-1 font-weight-bold">{{ t('pages.administration.manageFlux.sections.nodeConfiguration.routerIp.title') }}</h3>
+                        <p class="text-caption text-medium-emphasis mb-0">{{ t('pages.administration.manageFlux.sections.nodeConfiguration.routerIp.subtitle') }}</p>
                       </div>
                       <VTooltip location="top">
                         <template #activator="{ props }">
                           <VIcon v-bind="props" icon="mdi-information-outline" size="20" color="grey" />
                         </template>
-                        <span>Configure your router's IP address for UPNP port forwarding. Leave blank if not using UPNP.</span>
+                        <span>{{ t('pages.administration.manageFlux.sections.nodeConfiguration.routerIp.tooltip') }}</span>
                       </VTooltip>
                     </div>
                     <VTextField
                       v-model="routerIPInput"
-                      label="Router IP Address"
+                      :label="t('pages.administration.manageFlux.labels.routerIpAddress')"
                       prepend-inner-icon="mdi-ip-network"
                       variant="outlined"
                       density="comfortable"
                       class="mb-3"
-                      hint="Leave blank if not using UPNP"
+                      :hint="t('pages.administration.manageFlux.sections.nodeConfiguration.routerIp.hint')"
                       persistent-hint
-                      placeholder="192.168.1.1"
+                      :placeholder="t('pages.administration.manageFlux.placeholders.routerIpPlaceholder')"
                     />
                     <VBtn
                       block
@@ -128,7 +128,7 @@
                       @click="adjustRouterIPDialog = true"
                     >
                       <VIcon icon="mdi-check-circle" size="20" class="mr-2" />
-                      Update Router IP
+                      {{ t('pages.administration.manageFlux.sections.nodeConfiguration.routerIp.button') }}
                     </VBtn>
                   </VCardText>
                 </VCard>
@@ -143,25 +143,25 @@
                         <VIcon icon="mdi-ethernet" size="18" color="white" />
                       </VAvatar>
                       <div class="flex-grow-1">
-                        <h3 class="text-body-1 font-weight-bold">API Port</h3>
-                        <p class="text-caption text-medium-emphasis mb-0">Service port configuration</p>
+                        <h3 class="text-body-1 font-weight-bold">{{ t('pages.administration.manageFlux.sections.nodeConfiguration.apiPort.title') }}</h3>
+                        <p class="text-caption text-medium-emphasis mb-0">{{ t('pages.administration.manageFlux.sections.nodeConfiguration.apiPort.subtitle') }}</p>
                       </div>
                       <VTooltip location="top">
                         <template #activator="{ props }">
                           <VIcon v-bind="props" icon="mdi-information-outline" size="20" color="grey" />
                         </template>
-                        <span>Configure the port number for FluxOS API service. Default is 16127.</span>
+                        <span>{{ t('pages.administration.manageFlux.sections.nodeConfiguration.apiPort.tooltip') }}</span>
                       </VTooltip>
                     </div>
                     <VTextField
                       v-model.number="apiPortInput"
-                      label="API Port"
+                      :label="t('pages.administration.manageFlux.labels.apiPort')"
                       prepend-inner-icon="mdi-ethernet"
                       type="number"
                       variant="outlined"
                       density="comfortable"
                       class="mb-3"
-                      hint="Default: 16127"
+                      :hint="t('pages.administration.manageFlux.sections.nodeConfiguration.apiPort.hint')"
                       persistent-hint
                     />
                     <VBtn
@@ -172,7 +172,7 @@
                       @click="adjustAPIPortDialog = true"
                     >
                       <VIcon icon="mdi-check-circle" size="20" class="mr-2" />
-                      Update API Port
+                      {{ t('pages.administration.manageFlux.sections.nodeConfiguration.apiPort.button') }}
                     </VBtn>
                   </VCardText>
                 </VCard>
@@ -187,13 +187,13 @@
                         <VIcon icon="mdi-restart" size="18" color="white" />
                       </VAvatar>
                       <div>
-                        <h3 class="text-body-1 font-weight-bold">Restart FluxOS</h3>
-                        <p class="text-caption text-medium-emphasis mb-0">Restart application</p>
+                        <h3 class="text-body-1 font-weight-bold">{{ t('pages.administration.manageFlux.sections.nodeConfiguration.restartFluxOs.title') }}</h3>
+                        <p class="text-caption text-medium-emphasis mb-0">{{ t('pages.administration.manageFlux.sections.nodeConfiguration.restartFluxOs.subtitle') }}</p>
                       </div>
                     </div>
                     <VAlert type="info" variant="tonal" class="mb-3" density="compact">
                       <div class="text-caption">
-                        Restarting will close and immediately restart FluxOS. You'll need to refresh and log in again.
+                        {{ t('pages.administration.manageFlux.sections.nodeConfiguration.restartFluxOs.warning') }}
                       </div>
                     </VAlert>
                     <VBtn
@@ -204,7 +204,7 @@
                       @click="restartFluxOSDialog = true"
                     >
                       <VIcon icon="mdi-restart" size="20" class="mr-2" />
-                      Restart FluxOS
+                      {{ t('pages.administration.manageFlux.sections.nodeConfiguration.restartFluxOs.button') }}
                     </VBtn>
                   </VCardText>
                 </VCard>
@@ -219,7 +219,7 @@
             <VAvatar color="primary" variant="flat" size="28" class="mr-2">
               <VIcon icon="mdi-shield-lock" size="18" color="white" />
             </VAvatar>
-            <span class="text-body-1">Security & Access Control</span>
+            <span class="text-body-1">{{ t('pages.administration.manageFlux.sections.securityAccess.title') }}</span>
           </VCardTitle>
           <VDivider />
           <VCardText class="pa-3">
@@ -233,28 +233,28 @@
                         <VIcon icon="mdi-shield-lock-outline" size="18" color="white" />
                       </VAvatar>
                       <div class="flex-grow-1">
-                        <h3 class="text-body-1 font-weight-bold">Blocked Ports</h3>
-                        <p class="text-caption text-medium-emphasis mb-0">Port access control</p>
+                        <h3 class="text-body-1 font-weight-bold">{{ t('pages.administration.manageFlux.sections.securityAccess.blockedPorts.title') }}</h3>
+                        <p class="text-caption text-medium-emphasis mb-0">{{ t('pages.administration.manageFlux.sections.securityAccess.blockedPorts.subtitle') }}</p>
                       </div>
                       <VTooltip location="top">
                         <template #activator="{ props }">
                           <VIcon v-bind="props" icon="mdi-information-outline" size="20" color="grey" />
                         </template>
-                        <span>Block specific ports from being used by applications. You can add up to 100 ports.</span>
+                        <span>{{ t('pages.administration.manageFlux.sections.securityAccess.blockedPorts.tooltip') }}</span>
                       </VTooltip>
                     </div>
                     <VCombobox
                       v-model="blockedPortsInput"
-                      label="Blocked Ports"
+                      :label="t('pages.administration.manageFlux.labels.blockedPorts')"
                       prepend-inner-icon="mdi-lock"
                       variant="outlined"
                       chips
                       multiple
                       closable-chips
                       class="mb-3"
-                      hint="Press Enter to add port (up to 100)"
+                      :hint="t('pages.administration.manageFlux.sections.securityAccess.blockedPorts.hint')"
                       persistent-hint
-                      placeholder="Type port number and press Enter"
+                      :placeholder="t('pages.administration.manageFlux.placeholders.portPlaceholder')"
                     />
                     <VBtn
                       block
@@ -264,7 +264,7 @@
                       @click="adjustBlockedPortsDialog = true"
                     >
                       <VIcon icon="mdi-shield-lock" size="20" class="mr-2" />
-                      Update Blocked Ports
+                      {{ t('pages.administration.manageFlux.sections.securityAccess.blockedPorts.button') }}
                     </VBtn>
                   </VCardText>
                 </VCard>
@@ -279,28 +279,28 @@
                         <VIcon icon="mdi-docker" size="18" color="white" />
                       </VAvatar>
                       <div class="flex-grow-1">
-                        <h3 class="text-body-1 font-weight-bold">Blocked Repositories</h3>
-                        <p class="text-caption text-medium-emphasis mb-0">Repository restrictions</p>
+                        <h3 class="text-body-1 font-weight-bold">{{ t('pages.administration.manageFlux.sections.securityAccess.blockedRepos.title') }}</h3>
+                        <p class="text-caption text-medium-emphasis mb-0">{{ t('pages.administration.manageFlux.sections.securityAccess.blockedRepos.subtitle') }}</p>
                       </div>
                       <VTooltip location="top">
                         <template #activator="{ props }">
                           <VIcon v-bind="props" icon="mdi-information-outline" size="20" color="grey" />
                         </template>
-                        <span>Exclude specific Docker repositories from being deployed on your node.</span>
+                        <span>{{ t('pages.administration.manageFlux.sections.securityAccess.blockedRepos.tooltip') }}</span>
                       </VTooltip>
                     </div>
                     <VCombobox
                       v-model="blockedRepositoriesInput"
-                      label="Blocked Repositories"
+                      :label="t('pages.administration.manageFlux.labels.blockedRepositories')"
                       prepend-inner-icon="mdi-docker"
                       variant="outlined"
                       chips
                       multiple
                       closable-chips
                       class="mb-3"
-                      hint="Press Enter to add repository"
+                      :hint="t('pages.administration.manageFlux.sections.securityAccess.blockedRepos.hint')"
                       persistent-hint
-                      placeholder="Type repository name and press Enter"
+                      :placeholder="t('pages.administration.manageFlux.placeholders.repositoryPlaceholder')"
                     />
                     <VBtn
                       block
@@ -310,7 +310,7 @@
                       @click="adjustBlockedRepositoriesDialog = true"
                     >
                       <VIcon icon="mdi-docker" size="20" class="mr-2" />
-                      Update Blocked Repos
+                      {{ t('pages.administration.manageFlux.sections.securityAccess.blockedRepos.button') }}
                     </VBtn>
                   </VCardText>
                 </VCard>
@@ -332,7 +332,7 @@
                 @click="logsTab = 'flux'"
                 style="cursor: pointer;"
               >
-                Flux Logs
+                {{ t('pages.administration.manageFlux.logs.flux') }}
               </VChip>
               <VChip
                 :variant="logsTab === 'daemon' ? 'flat' : 'outlined'"
@@ -341,7 +341,7 @@
                 @click="logsTab = 'daemon'"
                 style="cursor: pointer;"
               >
-                Daemon Logs
+                {{ t('pages.administration.manageFlux.logs.daemon') }}
               </VChip>
               <VChip
                 :variant="logsTab === 'benchmark' ? 'flat' : 'outlined'"
@@ -350,7 +350,7 @@
                 @click="logsTab = 'benchmark'"
                 style="cursor: pointer;"
               >
-                Benchmark Logs
+                {{ t('pages.administration.manageFlux.logs.benchmark') }}
               </VChip>
             </div>
           </VCardTitle>
@@ -363,7 +363,7 @@
                 <VSelect
                   v-model="selectedFluxLogType"
                   :items="fluxLogTypeOptions"
-                  label="Type"
+                  :label="t('pages.administration.manageFlux.labels.type')"
                   variant="outlined"
                   density="compact"
                   hide-details
@@ -379,7 +379,7 @@
                   class="mr-2"
                   @click="downloadFullLogFile('flux')"
                 >
-                  Download
+                  {{ t('pages.administration.manageFlux.logs.download') }}
                 </VBtn>
                 <VBtn
                   size="small"
@@ -388,14 +388,14 @@
                   prepend-icon="mdi-refresh"
                   @click="fetchFluxLogs"
                 >
-                  Refresh
+                  {{ t('pages.administration.manageFlux.logs.refresh') }}
                 </VBtn>
               </VCardTitle>
               <VDivider />
               <VCardText class="pa-0">
                 <div v-if="fluxLogsLoading" class="text-center pa-6">
                   <VProgressCircular indeterminate color="primary" />
-                  <p class="text-body-2 text-medium-emphasis mt-3 mb-0">Loading logs...</p>
+                  <p class="text-body-2 text-medium-emphasis mt-3 mb-0">{{ t('pages.administration.manageFlux.logs.loading') }}</p>
                 </div>
                 <div v-else-if="fluxLogs" style="height: 600px;">
                   <VueMonacoEditor
@@ -420,7 +420,7 @@
                   class="mr-2"
                   @click="downloadFullLogFile('daemon')"
                 >
-                  Download
+                  {{ t('pages.administration.manageFlux.logs.download') }}
                 </VBtn>
                 <VBtn
                   size="small"
@@ -429,14 +429,14 @@
                   prepend-icon="mdi-refresh"
                   @click="fetchDaemonLogs"
                 >
-                  Refresh
+                  {{ t('pages.administration.manageFlux.logs.refresh') }}
                 </VBtn>
               </VCardTitle>
               <VDivider />
               <VCardText class="pa-0">
                 <div v-if="daemonLogsLoading" class="text-center pa-6">
                   <VProgressCircular indeterminate color="primary" />
-                  <p class="text-body-2 text-medium-emphasis mt-3 mb-0">Loading logs...</p>
+                  <p class="text-body-2 text-medium-emphasis mt-3 mb-0">{{ t('pages.administration.manageFlux.logs.loading') }}</p>
                 </div>
                 <div v-else-if="daemonLogs" style="height: 600px;">
                   <VueMonacoEditor
@@ -461,7 +461,7 @@
                   class="mr-2"
                   @click="downloadFullLogFile('benchmark')"
                 >
-                  Download
+                  {{ t('pages.administration.manageFlux.logs.download') }}
                 </VBtn>
                 <VBtn
                   size="small"
@@ -470,14 +470,14 @@
                   prepend-icon="mdi-refresh"
                   @click="fetchBenchmarkLogs"
                 >
-                  Refresh
+                  {{ t('pages.administration.manageFlux.logs.refresh') }}
                 </VBtn>
               </VCardTitle>
               <VDivider />
               <VCardText class="pa-0">
                 <div v-if="benchmarkLogsLoading" class="text-center pa-6">
                   <VProgressCircular indeterminate color="primary" />
-                  <p class="text-body-2 text-medium-emphasis mt-3 mb-0">Loading logs...</p>
+                  <p class="text-body-2 text-medium-emphasis mt-3 mb-0">{{ t('pages.administration.manageFlux.logs.loading') }}</p>
                 </div>
                 <div v-else-if="benchmarkLogs" style="height: 600px;">
                   <VueMonacoEditor
@@ -498,7 +498,7 @@
         <VCard elevation="1">
           <VCardTitle class="d-flex align-center pa-4 bg-surface">
             <VIcon icon="mdi-server" size="24" color="grey" class="mr-2" />
-            <span class="text-h6">Daemon Control</span>
+            <span class="text-h6">{{ t('pages.administration.manageFlux.daemon.control.title') }}</span>
           </VCardTitle>
           <VDivider />
           <VCardText class="pa-3">
@@ -511,8 +511,8 @@
                         <VIcon icon="mdi-play" size="22" />
                       </VAvatar>
                       <div>
-                        <h3 class="text-body-1 font-weight-bold">Start</h3>
-                        <p class="text-caption text-medium-emphasis mb-0">Start daemon</p>
+                        <h3 class="text-body-1 font-weight-bold">{{ t('pages.administration.manageFlux.daemon.control.start.title') }}</h3>
+                        <p class="text-caption text-medium-emphasis mb-0">{{ t('pages.administration.manageFlux.daemon.control.start.subtitle') }}</p>
                       </div>
                     </div>
                     <VBtn
@@ -523,7 +523,7 @@
                       @click="startDaemonDialog = true"
                     >
                       <VIcon icon="mdi-play" size="20" class="mr-2" />
-                      Start Daemon
+                      {{ t('pages.administration.manageFlux.daemon.control.start.button') }}
                     </VBtn>
                   </VCardText>
                 </VCard>
@@ -537,8 +537,8 @@
                         <VIcon icon="mdi-restart" size="22" />
                       </VAvatar>
                       <div>
-                        <h3 class="text-body-1 font-weight-bold">Restart</h3>
-                        <p class="text-caption text-medium-emphasis mb-0">Restart daemon</p>
+                        <h3 class="text-body-1 font-weight-bold">{{ t('pages.administration.manageFlux.daemon.control.restart.title') }}</h3>
+                        <p class="text-caption text-medium-emphasis mb-0">{{ t('pages.administration.manageFlux.daemon.control.restart.subtitle') }}</p>
                       </div>
                     </div>
                     <VBtn
@@ -549,7 +549,7 @@
                       @click="restartDaemonDialog = true"
                     >
                       <VIcon icon="mdi-restart" size="20" class="mr-2" />
-                      Restart Daemon
+                      {{ t('pages.administration.manageFlux.daemon.control.restart.button') }}
                     </VBtn>
                   </VCardText>
                 </VCard>
@@ -563,8 +563,8 @@
                         <VIcon icon="mdi-stop" size="22" />
                       </VAvatar>
                       <div>
-                        <h3 class="text-body-1 font-weight-bold">Stop</h3>
-                        <p class="text-caption text-medium-emphasis mb-0">Stop daemon</p>
+                        <h3 class="text-body-1 font-weight-bold">{{ t('pages.administration.manageFlux.daemon.control.stop.title') }}</h3>
+                        <p class="text-caption text-medium-emphasis mb-0">{{ t('pages.administration.manageFlux.daemon.control.stop.subtitle') }}</p>
                       </div>
                     </div>
                     <VBtn
@@ -575,7 +575,7 @@
                       @click="stopDaemonDialog = true"
                     >
                       <VIcon icon="mdi-stop" size="20" class="mr-2" />
-                      Stop Daemon
+                      {{ t('pages.administration.manageFlux.daemon.control.stop.button') }}
                     </VBtn>
                   </VCardText>
                 </VCard>
@@ -587,7 +587,7 @@
         <VCard elevation="1" class="mt-3">
           <VCardTitle class="d-flex align-center pa-3 bg-surface">
             <VIcon icon="mdi-information-outline" size="24" color="grey" class="mr-2" />
-            <span class="text-h6">Daemon Information</span>
+            <span class="text-h6">{{ t('pages.administration.manageFlux.daemon.info.title') }}</span>
             <VSpacer />
             <VBtn
               size="small"
@@ -596,14 +596,14 @@
               prepend-icon="mdi-refresh"
               @click="fetchDaemonInfo"
             >
-              Refresh
+              {{ t('pages.administration.manageFlux.daemon.info.refresh') }}
             </VBtn>
           </VCardTitle>
           <VDivider />
           <VCardText class="pa-3">
             <div v-if="daemonInfoLoading" class="text-center pa-6">
               <VProgressCircular indeterminate color="primary" />
-              <p class="text-body-2 text-medium-emphasis mt-3 mb-0">Loading daemon info...</p>
+              <p class="text-body-2 text-medium-emphasis mt-3 mb-0">{{ t('pages.administration.manageFlux.daemon.info.loadingMessage') }}</p>
             </div>
             <div v-else-if="daemonInfoParsed">
               <!-- Version Information -->
@@ -612,7 +612,7 @@
                   <VAvatar color="info" variant="flat" size="32" class="mr-2">
                     <VIcon icon="mdi-information" size="18" color="white" />
                   </VAvatar>
-                  Version Information
+                  {{ t('pages.administration.manageFlux.daemon.info.versionInfo') }}
                 </VCardTitle>
                 <VDivider />
                 <VCardText class="pa-2">
@@ -636,7 +636,7 @@
                   <VAvatar color="success" variant="flat" size="32" class="mr-2">
                     <VIcon icon="mdi-lan" size="18" color="white" />
                   </VAvatar>
-                  Network Status
+                  {{ t('pages.administration.manageFlux.daemon.info.networkStatus') }}
                 </VCardTitle>
                 <VDivider />
                 <VCardText class="pa-2">
@@ -666,7 +666,7 @@
                   <VAvatar color="teal" variant="flat" size="32" class="mr-2">
                     <VIcon icon="mdi-wallet" size="18" color="white" />
                   </VAvatar>
-                  Wallet Information
+                  {{ t('pages.administration.manageFlux.daemon.info.walletInfo') }}
                 </VCardTitle>
                 <VDivider />
                 <VCardText class="pa-2">
@@ -696,7 +696,7 @@
                   <VAvatar :color="daemonInfoParsed.errors ? 'error' : 'success'" variant="flat" size="32" class="mr-2">
                     <VIcon :icon="daemonInfoParsed.errors ? 'mdi-alert-circle' : 'mdi-check-circle'" size="18" color="white" />
                   </VAvatar>
-                  Error Status
+                  {{ t('pages.administration.manageFlux.daemon.info.errorStatus') }}
                 </VCardTitle>
                 <VDivider />
                 <VCardText class="pa-2">
@@ -704,7 +704,7 @@
                     {{ daemonInfoParsed.errors }}
                   </VAlert>
                   <VAlert v-else type="success" variant="tonal" density="comfortable">
-                    No errors detected
+                    {{ t('pages.administration.manageFlux.daemon.info.noErrors') }}
                   </VAlert>
                 </VCardText>
               </VCard>
@@ -712,7 +712,7 @@
             </div>
             <div v-else class="text-center pa-6">
               <VIcon icon="mdi-information-outline" size="48" color="grey" class="mb-3" />
-              <p class="text-body-2 text-medium-emphasis mb-0">No daemon info loaded. Click "Refresh" to fetch.</p>
+              <p class="text-body-2 text-medium-emphasis mb-0">{{ t('pages.administration.manageFlux.daemon.info.noInfoLoaded') }}</p>
             </div>
           </VCardText>
         </VCard>
@@ -723,7 +723,7 @@
         <VCard elevation="1">
           <VCardTitle class="d-flex align-center pa-4 bg-surface">
             <VIcon icon="mdi-speedometer" size="24" color="grey" class="mr-2" />
-            <span class="text-h6">Benchmark Control</span>
+            <span class="text-h6">{{ t('pages.administration.manageFlux.benchmark.control.title') }}</span>
           </VCardTitle>
           <VDivider />
           <VCardText class="pa-3">
@@ -736,8 +736,8 @@
                         <VIcon icon="mdi-play" size="22" />
                       </VAvatar>
                       <div>
-                        <h3 class="text-body-1 font-weight-bold">Start</h3>
-                        <p class="text-caption text-medium-emphasis mb-0">Start benchmark</p>
+                        <h3 class="text-body-1 font-weight-bold">{{ t('pages.administration.manageFlux.benchmark.control.start.title') }}</h3>
+                        <p class="text-caption text-medium-emphasis mb-0">{{ t('pages.administration.manageFlux.benchmark.control.start.subtitle') }}</p>
                       </div>
                     </div>
                     <VBtn
@@ -748,7 +748,7 @@
                       @click="startBenchmarkDialog = true"
                     >
                       <VIcon icon="mdi-play" size="20" class="mr-2" />
-                      Start Benchmark
+                      {{ t('pages.administration.manageFlux.benchmark.control.start.button') }}
                     </VBtn>
                   </VCardText>
                 </VCard>
@@ -762,8 +762,8 @@
                         <VIcon icon="mdi-restart" size="22" />
                       </VAvatar>
                       <div>
-                        <h3 class="text-body-1 font-weight-bold">Restart</h3>
-                        <p class="text-caption text-medium-emphasis mb-0">Restart benchmark</p>
+                        <h3 class="text-body-1 font-weight-bold">{{ t('pages.administration.manageFlux.benchmark.control.restart.title') }}</h3>
+                        <p class="text-caption text-medium-emphasis mb-0">{{ t('pages.administration.manageFlux.benchmark.control.restart.subtitle') }}</p>
                       </div>
                     </div>
                     <VBtn
@@ -774,7 +774,7 @@
                       @click="restartBenchmarkDialog = true"
                     >
                       <VIcon icon="mdi-restart" size="20" class="mr-2" />
-                      Restart Benchmark
+                      {{ t('pages.administration.manageFlux.benchmark.control.restart.button') }}
                     </VBtn>
                   </VCardText>
                 </VCard>
@@ -788,8 +788,8 @@
                         <VIcon icon="mdi-stop" size="22" />
                       </VAvatar>
                       <div>
-                        <h3 class="text-body-1 font-weight-bold">Stop</h3>
-                        <p class="text-caption text-medium-emphasis mb-0">Stop benchmark</p>
+                        <h3 class="text-body-1 font-weight-bold">{{ t('pages.administration.manageFlux.benchmark.control.stop.title') }}</h3>
+                        <p class="text-caption text-medium-emphasis mb-0">{{ t('pages.administration.manageFlux.benchmark.control.stop.subtitle') }}</p>
                       </div>
                     </div>
                     <VBtn
@@ -800,7 +800,7 @@
                       @click="stopBenchmarkDialog = true"
                     >
                       <VIcon icon="mdi-stop" size="20" class="mr-2" />
-                      Stop Benchmark
+                      {{ t('pages.administration.manageFlux.benchmark.control.stop.button') }}
                     </VBtn>
                   </VCardText>
                 </VCard>
@@ -812,7 +812,7 @@
         <VCard elevation="1" class="mt-3">
           <VCardTitle class="d-flex align-center pa-3 bg-surface">
             <VIcon icon="mdi-chart-box-outline" size="24" color="grey" class="mr-2" />
-            <span class="text-h6">Benchmark Information</span>
+            <span class="text-h6">{{ t('pages.administration.manageFlux.benchmark.info.title') }}</span>
             <VSpacer />
             <VBtn
               size="small"
@@ -821,14 +821,14 @@
               prepend-icon="mdi-refresh"
               @click="fetchBenchmarkInfo"
             >
-              Refresh
+              {{ t('pages.administration.manageFlux.benchmark.info.refresh') }}
             </VBtn>
           </VCardTitle>
           <VDivider />
           <VCardText class="pa-3">
             <div v-if="benchmarkInfoLoading" class="text-center pa-6">
               <VProgressCircular indeterminate color="primary" />
-              <p class="text-body-2 text-medium-emphasis mt-3 mb-0">Loading benchmark info...</p>
+              <p class="text-body-2 text-medium-emphasis mt-3 mb-0">{{ t('pages.administration.manageFlux.benchmark.info.loadingMessage') }}</p>
             </div>
             <div v-else-if="benchmarkInfoParsed">
               <!-- Status Badge -->
@@ -845,7 +845,7 @@
                     </div>
                     <VSpacer />
                     <VChip v-if="benchmarkInfoParsed.thunder" color="amber" variant="tonal" size="small" prepend-icon="mdi-weather-lightning">
-                      Thunder
+                      {{ t('pages.administration.manageFlux.benchmark.info.thunder') }}
                     </VChip>
                   </div>
                 </VCardText>
@@ -853,7 +853,7 @@
 
               <!-- Running Warning -->
               <VAlert v-if="benchmarkInfoParsed.status === 'running'" type="warning" variant="tonal" density="compact" class="mb-2" border="start">
-                Benchmark is currently running. Please try again later.
+                {{ t('pages.administration.manageFlux.benchmark.info.runningWarning') }}
               </VAlert>
 
               <!-- Hardware Specs -->
@@ -862,7 +862,7 @@
                   <VAvatar color="info" variant="flat" size="32" class="mr-2">
                     <VIcon icon="mdi-chip" size="18" color="white" />
                   </VAvatar>
-                  Hardware Specifications
+                  {{ t('pages.administration.manageFlux.benchmark.info.hardwareSpecs') }}
                 </VCardTitle>
                 <VDivider />
                 <VCardText class="pa-2">
@@ -892,7 +892,7 @@
                   <VAvatar color="warning" variant="flat" size="32" class="mr-2">
                     <VIcon icon="mdi-speedometer" size="18" color="white" />
                   </VAvatar>
-                  Performance Metrics
+                  {{ t('pages.administration.manageFlux.benchmark.info.performanceMetrics') }}
                 </VCardTitle>
                 <VDivider />
                 <VCardText class="pa-2">
@@ -913,7 +913,7 @@
                   <VAvatar color="success" variant="flat" size="32" class="mr-2">
                     <VIcon icon="mdi-download-network" size="18" color="white" />
                   </VAvatar>
-                  Network Speed
+                  {{ t('pages.administration.manageFlux.benchmark.info.networkSpeed') }}
                 </VCardTitle>
                 <VDivider />
                 <VCardText class="pa-2">
@@ -937,7 +937,7 @@
                   <VAvatar color="secondary" variant="flat" size="32" class="mr-2">
                     <VIcon icon="mdi-information-outline" size="18" color="white" />
                   </VAvatar>
-                  System Information
+                  {{ t('pages.administration.manageFlux.benchmark.info.systemInfo') }}
                 </VCardTitle>
                 <VDivider />
                 <VCardText class="pa-2">
@@ -971,7 +971,7 @@
             </div>
             <div v-else class="text-center pa-6">
               <VIcon icon="mdi-chart-box-outline" size="48" color="grey" class="mb-3" />
-              <p class="text-body-2 text-medium-emphasis mb-0">No benchmark info loaded. Click "Refresh" to fetch.</p>
+              <p class="text-body-2 text-medium-emphasis mb-0">{{ t('pages.administration.manageFlux.benchmark.info.noInfoLoaded') }}</p>
             </div>
           </VCardText>
         </VCard>
@@ -984,19 +984,19 @@
       <VCard>
         <VCardTitle class="d-flex align-center pa-3 bg-primary">
           <VIcon icon="mdi-cloud-sync" size="28" color="white" class="mr-2" />
-          <span class="text-white">Confirm Flux Update</span>
+          <span class="text-white">{{ t('pages.administration.manageFlux.dialogs.updateFlux.title') }}</span>
         </VCardTitle>
         <VDivider />
         <VCardText class="pa-3">
           <VAlert type="info" variant="tonal" class="mb-2">
-            This will update your Flux to the latest version.
+            {{ t('pages.administration.manageFlux.dialogs.updateFlux.message') }}
           </VAlert>
-          Are you sure you want to proceed?
+          {{ t('pages.administration.manageFlux.dialogs.confirmProceed') }}
         </VCardText>
         <VCardActions class="pa-3 pt-0">
           <VSpacer />
-          <VBtn color="error" variant="flat" size="small" @click="updateFluxDialog = false">Cancel</VBtn>
-          <VBtn color="primary" variant="flat" size="small" @click="updateFlux">Update Flux</VBtn>
+          <VBtn color="error" variant="flat" size="small" @click="updateFluxDialog = false">{{ t('pages.administration.manageFlux.dialogs.cancel') }}</VBtn>
+          <VBtn color="primary" variant="flat" size="small" @click="updateFlux">{{ t('pages.administration.manageFlux.dialogs.updateFlux.button') }}</VBtn>
         </VCardActions>
       </VCard>
     </VDialog>
@@ -1005,16 +1005,16 @@
       <VCard>
         <VCardTitle class="d-flex align-center pa-3 bg-primary">
           <VIcon icon="mdi-router-wireless" size="28" color="white" class="mr-2" />
-          <span class="text-white">Update Router IP</span>
+          <span class="text-white">{{ t('pages.administration.manageFlux.dialogs.updateRouterIp.title') }}</span>
         </VCardTitle>
         <VDivider />
         <VCardText class="pa-3">
-          Are you sure you want to update the router IP?
+          {{ t('pages.administration.manageFlux.dialogs.updateRouterIp.confirm') }}
         </VCardText>
         <VCardActions class="pa-3 pt-0">
           <VSpacer />
-          <VBtn color="error" variant="flat" size="small" @click="adjustRouterIPDialog = false">Cancel</VBtn>
-          <VBtn color="primary" variant="flat" size="small" @click="adjustRouterIP">Update</VBtn>
+          <VBtn color="error" variant="flat" size="small" @click="adjustRouterIPDialog = false">{{ t('pages.administration.manageFlux.dialogs.cancel') }}</VBtn>
+          <VBtn color="primary" variant="flat" size="small" @click="adjustRouterIP">{{ t('pages.administration.manageFlux.dialogs.update') }}</VBtn>
         </VCardActions>
       </VCard>
     </VDialog>
@@ -1023,16 +1023,16 @@
       <VCard>
         <VCardTitle class="d-flex align-center pa-3 bg-primary">
           <VIcon icon="mdi-shield-lock-outline" size="28" color="white" class="mr-2" />
-          <span class="text-white">Update Blocked Ports</span>
+          <span class="text-white">{{ t('pages.administration.manageFlux.dialogs.updateBlockedPorts.title') }}</span>
         </VCardTitle>
         <VDivider />
         <VCardText class="pa-3">
-          Are you sure you want to update the blocked ports list?
+          {{ t('pages.administration.manageFlux.dialogs.updateBlockedPorts.message') }}
         </VCardText>
         <VCardActions class="pa-3 pt-0">
           <VSpacer />
-          <VBtn color="error" variant="flat" size="small" @click="adjustBlockedPortsDialog = false">Cancel</VBtn>
-          <VBtn color="primary" variant="flat" size="small" @click="adjustBlockedPorts">Update</VBtn>
+          <VBtn color="error" variant="flat" size="small" @click="adjustBlockedPortsDialog = false">{{ t('pages.administration.manageFlux.dialogs.cancel') }}</VBtn>
+          <VBtn color="primary" variant="flat" size="small" @click="adjustBlockedPorts">{{ t('pages.administration.manageFlux.dialogs.update') }}</VBtn>
         </VCardActions>
       </VCard>
     </VDialog>
@@ -1041,16 +1041,16 @@
       <VCard>
         <VCardTitle class="d-flex align-center pa-3 bg-primary">
           <VIcon icon="mdi-ethernet" size="28" color="white" class="mr-2" />
-          <span class="text-white">Update API Port</span>
+          <span class="text-white">{{ t('pages.administration.manageFlux.dialogs.updateApiPort.title') }}</span>
         </VCardTitle>
         <VDivider />
         <VCardText class="pa-3">
-          Are you sure you want to update the API port?
+          {{ t('pages.administration.manageFlux.dialogs.updateApiPort.message') }}
         </VCardText>
         <VCardActions class="pa-3 pt-0">
           <VSpacer />
-          <VBtn color="error" variant="flat" size="small" @click="adjustAPIPortDialog = false">Cancel</VBtn>
-          <VBtn color="primary" variant="flat" size="small" @click="adjustAPIPort">Update</VBtn>
+          <VBtn color="error" variant="flat" size="small" @click="adjustAPIPortDialog = false">{{ t('pages.administration.manageFlux.dialogs.cancel') }}</VBtn>
+          <VBtn color="primary" variant="flat" size="small" @click="adjustAPIPort">{{ t('pages.administration.manageFlux.dialogs.update') }}</VBtn>
         </VCardActions>
       </VCard>
     </VDialog>
@@ -1059,16 +1059,16 @@
       <VCard>
         <VCardTitle class="d-flex align-center pa-3 bg-primary">
           <VIcon icon="mdi-docker" size="28" color="white" class="mr-2" />
-          <span class="text-white">Update Blocked Repositories</span>
+          <span class="text-white">{{ t('pages.administration.manageFlux.dialogs.updateBlockedRepos.title') }}</span>
         </VCardTitle>
         <VDivider />
         <VCardText class="pa-3">
-          Are you sure you want to update the blocked repositories list?
+          {{ t('pages.administration.manageFlux.dialogs.updateBlockedRepos.message') }}
         </VCardText>
         <VCardActions class="pa-3 pt-0">
           <VSpacer />
-          <VBtn color="error" variant="flat" size="small" @click="adjustBlockedRepositoriesDialog = false">Cancel</VBtn>
-          <VBtn color="primary" variant="flat" size="small" @click="adjustBlockedRepositories">Update</VBtn>
+          <VBtn color="error" variant="flat" size="small" @click="adjustBlockedRepositoriesDialog = false">{{ t('pages.administration.manageFlux.dialogs.cancel') }}</VBtn>
+          <VBtn color="primary" variant="flat" size="small" @click="adjustBlockedRepositories">{{ t('pages.administration.manageFlux.dialogs.update') }}</VBtn>
         </VCardActions>
       </VCard>
     </VDialog>
@@ -1077,19 +1077,19 @@
       <VCard>
         <VCardTitle class="d-flex align-center pa-3 bg-primary">
           <VIcon icon="mdi-restart" size="28" color="white" class="mr-2" />
-          <span class="text-white">Restart FluxOS</span>
+          <span class="text-white">{{ t('pages.administration.manageFlux.dialogs.restartFluxOs.title') }}</span>
         </VCardTitle>
         <VDivider />
         <VCardText class="pa-3">
           <VAlert type="error" variant="tonal" class="mb-2">
-            This will restart FluxOS. You'll need to refresh and log in again.
+            {{ t('pages.administration.manageFlux.dialogs.restartFluxOs.warning') }}
           </VAlert>
-          Are you sure you want to proceed?
+          {{ t('pages.administration.manageFlux.dialogs.confirmProceed') }}
         </VCardText>
         <VCardActions class="pa-3 pt-0">
           <VSpacer />
-          <VBtn color="error" variant="flat" size="small" @click="restartFluxOSDialog = false">Cancel</VBtn>
-          <VBtn color="primary" variant="flat" size="small" @click="restartFluxOS">Restart</VBtn>
+          <VBtn color="error" variant="flat" size="small" @click="restartFluxOSDialog = false">{{ t('pages.administration.manageFlux.dialogs.cancel') }}</VBtn>
+          <VBtn color="primary" variant="flat" size="small" @click="restartFluxOS">{{ t('pages.administration.manageFlux.dialogs.restart') }}</VBtn>
         </VCardActions>
       </VCard>
     </VDialog>
@@ -1099,7 +1099,7 @@
       <VCard>
         <VCardTitle class="d-flex align-center pa-4">
           <VIcon icon="mdi-cloud-download" color="primary" class="mr-2" />
-          Flux Update Progress
+          {{ t('pages.administration.manageFlux.dialogs.updateProgress.title') }}
         </VCardTitle>
         <VDivider />
         <VCardText class="pa-3">
@@ -1121,7 +1121,7 @@
             striped
           />
           <p class="text-center text-body-2 text-medium-emphasis mt-4 mb-0">
-            Please wait while Flux is being updated...
+            {{ t('pages.administration.manageFlux.dialogs.updateProgress.message') }}
           </p>
         </VCardText>
       </VCard>
@@ -1132,16 +1132,16 @@
       <VCard>
         <VCardTitle class="d-flex align-center pa-4">
           <VIcon icon="mdi-play" color="success" class="mr-2" />
-          Start Daemon
+          {{ t('pages.administration.manageFlux.dialogs.startDaemon.title') }}
         </VCardTitle>
         <VDivider />
         <VCardText class="pa-3">
-          Are you sure you want to start the daemon?
+          {{ t('pages.administration.manageFlux.dialogs.startDaemon.confirm') }}
         </VCardText>
         <VCardActions class="pa-4 pt-0">
           <VSpacer />
-          <VBtn variant="text" @click="startDaemonDialog = false">Cancel</VBtn>
-          <VBtn color="success" variant="flat" size="default" @click="startDaemon">Start</VBtn>
+          <VBtn variant="text" @click="startDaemonDialog = false">{{ t('pages.administration.manageFlux.dialogs.cancel') }}</VBtn>
+          <VBtn color="success" variant="flat" size="default" @click="startDaemon">{{ t('pages.administration.manageFlux.dialogs.start') }}</VBtn>
         </VCardActions>
       </VCard>
     </VDialog>
@@ -1150,16 +1150,16 @@
       <VCard>
         <VCardTitle class="d-flex align-center pa-4">
           <VIcon icon="mdi-restart" color="warning" class="mr-2" />
-          Restart Daemon
+          {{ t('pages.administration.manageFlux.dialogs.restartDaemon.title') }}
         </VCardTitle>
         <VDivider />
         <VCardText class="pa-3">
-          Are you sure you want to restart the daemon?
+          {{ t('pages.administration.manageFlux.dialogs.restartDaemon.confirm') }}
         </VCardText>
         <VCardActions class="pa-4 pt-0">
           <VSpacer />
-          <VBtn variant="text" @click="restartDaemonDialog = false">Cancel</VBtn>
-          <VBtn color="warning" variant="flat" size="default" @click="restartDaemon">Restart</VBtn>
+          <VBtn variant="text" @click="restartDaemonDialog = false">{{ t('pages.administration.manageFlux.dialogs.cancel') }}</VBtn>
+          <VBtn color="warning" variant="flat" size="default" @click="restartDaemon">{{ t('pages.administration.manageFlux.dialogs.restart') }}</VBtn>
         </VCardActions>
       </VCard>
     </VDialog>
@@ -1168,19 +1168,19 @@
       <VCard>
         <VCardTitle class="d-flex align-center pa-4">
           <VIcon icon="mdi-stop" color="error" class="mr-2" />
-          Stop Daemon
+          {{ t('pages.administration.manageFlux.dialogs.stopDaemon.title') }}
         </VCardTitle>
         <VDivider />
         <VCardText class="pa-3">
           <VAlert type="warning" variant="tonal" class="mb-2">
-            This will stop the daemon.
+            {{ t('pages.administration.manageFlux.dialogs.stopDaemon.warning') }}
           </VAlert>
-          Are you sure you want to proceed?
+          {{ t('pages.administration.manageFlux.dialogs.confirmProceed') }}
         </VCardText>
         <VCardActions class="pa-4 pt-0">
           <VSpacer />
-          <VBtn variant="text" @click="stopDaemonDialog = false">Cancel</VBtn>
-          <VBtn color="error" variant="flat" size="default" @click="stopDaemon">Stop</VBtn>
+          <VBtn variant="text" @click="stopDaemonDialog = false">{{ t('pages.administration.manageFlux.dialogs.cancel') }}</VBtn>
+          <VBtn color="error" variant="flat" size="default" @click="stopDaemon">{{ t('pages.administration.manageFlux.dialogs.stop') }}</VBtn>
         </VCardActions>
       </VCard>
     </VDialog>
@@ -1190,16 +1190,16 @@
       <VCard>
         <VCardTitle class="d-flex align-center pa-4">
           <VIcon icon="mdi-play" color="success" class="mr-2" />
-          Start Benchmark
+          {{ t('pages.administration.manageFlux.dialogs.startBenchmark.title') }}
         </VCardTitle>
         <VDivider />
         <VCardText class="pa-3">
-          Are you sure you want to start the benchmark?
+          {{ t('pages.administration.manageFlux.dialogs.startBenchmark.confirm') }}
         </VCardText>
         <VCardActions class="pa-4 pt-0">
           <VSpacer />
-          <VBtn variant="text" @click="startBenchmarkDialog = false">Cancel</VBtn>
-          <VBtn color="success" variant="flat" size="default" @click="startBenchmark">Start</VBtn>
+          <VBtn variant="text" @click="startBenchmarkDialog = false">{{ t('pages.administration.manageFlux.dialogs.cancel') }}</VBtn>
+          <VBtn color="success" variant="flat" size="default" @click="startBenchmark">{{ t('pages.administration.manageFlux.dialogs.start') }}</VBtn>
         </VCardActions>
       </VCard>
     </VDialog>
@@ -1208,16 +1208,16 @@
       <VCard>
         <VCardTitle class="d-flex align-center pa-4">
           <VIcon icon="mdi-restart" color="warning" class="mr-2" />
-          Restart Benchmark
+          {{ t('pages.administration.manageFlux.dialogs.restartBenchmark.title') }}
         </VCardTitle>
         <VDivider />
         <VCardText class="pa-3">
-          Are you sure you want to restart the benchmark?
+          {{ t('pages.administration.manageFlux.dialogs.restartBenchmark.confirm') }}
         </VCardText>
         <VCardActions class="pa-4 pt-0">
           <VSpacer />
-          <VBtn variant="text" @click="restartBenchmarkDialog = false">Cancel</VBtn>
-          <VBtn color="warning" variant="flat" size="default" @click="restartBenchmark">Restart</VBtn>
+          <VBtn variant="text" @click="restartBenchmarkDialog = false">{{ t('pages.administration.manageFlux.dialogs.cancel') }}</VBtn>
+          <VBtn color="warning" variant="flat" size="default" @click="restartBenchmark">{{ t('pages.administration.manageFlux.dialogs.restart') }}</VBtn>
         </VCardActions>
       </VCard>
     </VDialog>
@@ -1226,19 +1226,19 @@
       <VCard>
         <VCardTitle class="d-flex align-center pa-4">
           <VIcon icon="mdi-stop" color="error" class="mr-2" />
-          Stop Benchmark
+          {{ t('pages.administration.manageFlux.dialogs.stopBenchmark.title') }}
         </VCardTitle>
         <VDivider />
         <VCardText class="pa-3">
           <VAlert type="warning" variant="tonal" class="mb-2">
-            This will stop the benchmark.
+            {{ t('pages.administration.manageFlux.dialogs.stopBenchmark.warning') }}
           </VAlert>
-          Are you sure you want to proceed?
+          {{ t('pages.administration.manageFlux.dialogs.confirmProceed') }}
         </VCardText>
         <VCardActions class="pa-4 pt-0">
           <VSpacer />
-          <VBtn variant="text" @click="stopBenchmarkDialog = false">Cancel</VBtn>
-          <VBtn color="error" variant="flat" size="default" @click="stopBenchmark">Stop</VBtn>
+          <VBtn variant="text" @click="stopBenchmarkDialog = false">{{ t('pages.administration.manageFlux.dialogs.cancel') }}</VBtn>
+          <VBtn color="error" variant="flat" size="default" @click="stopBenchmark">{{ t('pages.administration.manageFlux.dialogs.stop') }}</VBtn>
         </VCardActions>
       </VCard>
     </VDialog>
@@ -1253,7 +1253,7 @@
             size="28"
             class="mr-3"
           />
-          <span class="text-white">{{ downloadProgress === 100 ? 'Download Complete' : 'Downloading...' }}</span>
+          <span class="text-white">{{ downloadProgress === 100 ? t('pages.administration.manageFlux.dialogs.downloadProgress.complete') : t('pages.administration.manageFlux.dialogs.downloadProgress.downloading') }}</span>
         </VCardTitle>
         <VDivider />
         <VCardText class="pa-4 pa-sm-5">
@@ -1294,7 +1294,7 @@
             />
             <div class="d-flex justify-space-between text-caption text-medium-emphasis">
               <span v-if="!downloadIndeterminate">{{ downloadProgress }}%</span>
-              <span v-else>Downloading...</span>
+              <span v-else>{{ t('pages.administration.manageFlux.dialogs.downloadProgress.downloading') }}</span>
               <span>{{ formatFileSize(downloadedBytes) }}<template v-if="downloadSize > 0"> / {{ formatFileSize(downloadSize) }}</template></span>
             </div>
           </template>
@@ -1325,7 +1325,7 @@
                 <div class="d-flex align-center justify-space-between">
                   <div class="d-flex align-center">
                     <VIcon icon="mdi-database" size="20" class="mr-2" />
-                    <span class="text-body-2">File Size:</span>
+                    <span class="text-body-2">{{ t('pages.administration.manageFlux.dialogs.downloadProgress.fileSize') }}</span>
                   </div>
                   <VChip variant="tonal" color="success" size="small">
                     {{ formatFileSize(downloadSize) }}
@@ -1340,7 +1340,7 @@
               block
               @click="downloadDialog = false"
             >
-              Done
+              {{ t('pages.administration.manageFlux.dialogs.downloadProgress.done') }}
             </VBtn>
           </template>
         </VCardText>
@@ -1351,12 +1351,15 @@
 
 <script setup>
 import { ref, onMounted, computed, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useSnackbar } from '@/composables/useSnackbar'
 import axios from 'axios'
 import { useFluxStore } from '@/stores/flux'
 import { getDetectedBackendURL } from '@/utils/backend'
 import { VueMonacoEditor } from '@guolao/vue-monaco-editor'
 import { useTheme } from 'vuetify'
+
+const { t } = useI18n()
 
 const fluxStore = useFluxStore()
 const { showSnackbar } = useSnackbar()
@@ -1463,7 +1466,7 @@ const callAPI = async (endpoint, method = 'GET', data = null) => {
   const zelidauth = getZelidAuth()
 
   if (!zelidauth) {
-    showSnackbar('Not authenticated', 'error')
+    showSnackbar(t('pages.administration.manageFlux.messages.notAuthenticated'), 'error')
 
     return null
   }
@@ -1522,7 +1525,7 @@ const getBlockedRepositories = async () => {
 // Action methods
 const updateFlux = async () => {
   updateFluxDialog.value = false
-  showSnackbar('Checking for Flux updates...', 'info')
+  showSnackbar(t('pages.administration.manageFlux.messages.checkingForFluxUpdates'), 'info')
 
   try {
     const versionResponse = await axios.get('https://raw.githubusercontent.com/runonflux/flux/master/package.json')
@@ -1530,7 +1533,7 @@ const updateFlux = async () => {
     const currentVersion = fluxStore.fluxVersion
 
     if (latestVersion !== currentVersion) {
-      showSnackbar('Flux is now updating in the background', 'warning')
+      showSnackbar(t('pages.administration.manageFlux.messages.fluxUpdatingInBackground'), 'warning')
       updateProgressDialog.value = true
       updateProgress.value = 5
 
@@ -1544,7 +1547,7 @@ const updateFlux = async () => {
 
         if (updateProgress.value >= 100) {
           clearInterval(interval)
-          showSnackbar('Update completed. Flux will now reload', 'success')
+          showSnackbar(t('pages.administration.manageFlux.messages.updateCompletedFluxWillReload'), 'success')
           setTimeout(() => {
             if (updateProgressDialog.value)
               window.location.reload()
@@ -1565,11 +1568,11 @@ const updateFlux = async () => {
       }
     }
     else {
-      showSnackbar('Flux is already up to date', 'success')
+      showSnackbar(t('pages.administration.manageFlux.messages.fluxAlreadyUpToDate'), 'success')
     }
   }
   catch (error) {
-    showSnackbar('Error checking Flux version', 'error')
+    showSnackbar(t('pages.administration.manageFlux.messages.errorCheckingFluxVersion'), 'error')
     console.error(error)
   }
 }
@@ -1600,7 +1603,7 @@ const adjustAPIPort = async () => {
   const allowedAPIPorts = [16127, 16137, 16147, 16157, 16167, 16177, 16187, 16197]
 
   if (!allowedAPIPorts.includes(Number(apiPort))) {
-    showSnackbar('API Port not valid', 'error')
+    showSnackbar(t('pages.administration.manageFlux.messages.apiPortNotValid'), 'error')
 
     return
   }
@@ -1649,7 +1652,7 @@ const fetchFluxLogs = async () => {
       fluxLogs.value = 'No logs available'
     }
   } catch (error) {
-    showSnackbar('Error loading Flux logs', 'error', 3000, 'mdi-alert-circle')
+    showSnackbar(t('pages.administration.manageFlux.messages.errorLoadingFluxLogs'), 'error', 3000, 'mdi-alert-circle')
     console.error('Flux log fetch error:', error)
   } finally {
     fluxLogsLoading.value = false
@@ -1672,7 +1675,7 @@ const fetchDaemonLogs = async () => {
       daemonLogs.value = 'No logs available'
     }
   } catch (error) {
-    showSnackbar('Error loading Daemon logs', 'error', 3000, 'mdi-alert-circle')
+    showSnackbar(t('pages.administration.manageFlux.messages.errorLoadingDaemonLogs'), 'error', 3000, 'mdi-alert-circle')
     console.error('Daemon log fetch error:', error)
   } finally {
     daemonLogsLoading.value = false
@@ -1695,7 +1698,7 @@ const fetchBenchmarkLogs = async () => {
       benchmarkLogs.value = 'No logs available'
     }
   } catch (error) {
-    showSnackbar('Error loading Benchmark logs', 'error', 3000, 'mdi-alert-circle')
+    showSnackbar(t('pages.administration.manageFlux.messages.errorLoadingBenchmarkLogs'), 'error', 3000, 'mdi-alert-circle')
     console.error('Benchmark log fetch error:', error)
   } finally {
     benchmarkLogsLoading.value = false
@@ -1829,7 +1832,7 @@ const downloadFullLogFile = async type => {
     // Keep dialog open - user will close it manually
   } catch (error) {
     downloadDialog.value = false
-    showSnackbar('Failed to download log file', 'error', 3000, 'mdi-alert-circle')
+    showSnackbar(t('pages.administration.manageFlux.messages.failedToDownloadLogFile'), 'error', 3000, 'mdi-alert-circle')
   }
 }
 
@@ -2043,7 +2046,7 @@ const fetchDaemonInfo = async () => {
       daemonInfoParsed.value = null
     }
   } catch (error) {
-    showSnackbar('Error loading daemon info', 'error', 3000, 'mdi-alert-circle')
+    showSnackbar(t('pages.administration.manageFlux.messages.errorLoadingDaemonInfo'), 'error', 3000, 'mdi-alert-circle')
     console.error('Daemon info fetch error:', error)
     daemonInfo.value = null
     daemonInfoParsed.value = null
@@ -2068,7 +2071,7 @@ const fetchBenchmarkInfo = async () => {
       benchmarkInfoParsed.value = null
     }
   } catch (error) {
-    showSnackbar('Error loading benchmark info', 'error', 3000, 'mdi-alert-circle')
+    showSnackbar(t('pages.administration.manageFlux.messages.errorLoadingBenchmarkInfo'), 'error', 3000, 'mdi-alert-circle')
     console.error('Benchmark info fetch error:', error)
     benchmarkInfo.value = null
     benchmarkInfoParsed.value = null

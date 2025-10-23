@@ -18,8 +18,8 @@
     <div class="card-content">
       <h1 class="discover-title">
         <span class="gradient-text">
-          Discover Your Flux<br>
-          Web3 Marketplace
+          {{ t('components.marketplace.discoverCard.title') }}<br>
+          {{ t('components.marketplace.discoverCard.subtitle') }}
         </span>
       </h1>
     </div>
@@ -29,6 +29,7 @@
 <script setup>
 import { computed } from 'vue'
 import { useTheme } from 'vuetify'
+import { useI18n } from 'vue-i18n'
 
 // Import background image
 import backgroundImg from '@images/header.png'
@@ -47,6 +48,8 @@ const props = defineProps({
     default: false,
   },
 })
+
+const { t } = useI18n()
 
 const theme = useTheme()
 

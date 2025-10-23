@@ -18,7 +18,7 @@
               mdi-controller
             </VIcon>
           </VAvatar>
-          <span class="text-h5">Application Control</span>
+          <span class="text-h5">{{ t('core.appControl.title') }}</span>
         </div>
       </div>
     </VCol>
@@ -28,20 +28,20 @@
     inline
   >
     <VRadio
-      label="Manual"
+      :label="t('core.appControl.manual')"
       value="1"
     />
     <VRadio
       v-if="!props.isComposeSingle"
-      label="Component"
+      :label="t('core.appControl.component')"
       value="2"
     />
     <VRadio
-      label="Local"
+      :label="t('core.appControl.local')"
       value="3"
     />
     <VRadio
-      label="Global"
+      :label="t('core.appControl.global')"
       value="4"
     />
   </VRadioGroup>
@@ -59,7 +59,7 @@
         <VIcon size="24">
           mdi-selection-marker
         </VIcon>
-      </VAvatar> Manual Selection
+      </VAvatar> {{ t('core.appControl.manualSelection') }}
     </VCardTitle>
     <VCardText>
       <VRow>
@@ -71,7 +71,7 @@
             class="ml-2"
             style="font-size: 16px; font-weight: 800;"
           >
-            Available
+            {{ t('core.appControl.available') }}
           </div>
           <div class="listbox-wrapper">
             <VList
@@ -107,7 +107,7 @@
         >
           <VTooltip
             location="top"
-            text="Add selected items"
+            :text="t('core.appControl.tooltips.addSelected')"
           >
             <template #activator="{ props: addProps }">
               <VBtn
@@ -126,7 +126,7 @@
 
           <VTooltip
             location="top"
-            text="Add all items"
+            :text="t('core.appControl.tooltips.addAll')"
           >
             <template #activator="{ props: addAllProps }">
               <VBtn
@@ -144,7 +144,7 @@
 
           <VTooltip
             location="top"
-            text="Remove selected items"
+            :text="t('core.appControl.tooltips.removeSelected')"
           >
             <template #activator="{ props: removeAllProps }">
               <VBtn
@@ -162,7 +162,7 @@
 
           <VTooltip
             location="top"
-            text="Refresh available items"
+            :text="t('core.appControl.tooltips.refreshAvailable')"
           >
             <template #activator="{ props: refreshProps }">
               <VBtn
@@ -188,7 +188,7 @@
             class="ml-2"
             style="font-size: 16px; font-weight: 800;"
           >
-            Selected
+            {{ t('core.appControl.selected') }}
           </div>
           <div class="listbox-wrapper">
             <VList
@@ -280,7 +280,7 @@
                     <VIcon size="24">
                       mdi-gamepad-down
                     </VIcon>
-                  </VAvatar> Control
+                  </VAvatar> {{ t('core.appControl.control') }}
                 </div>
                 <VChip
                   size="small"
@@ -317,11 +317,11 @@
                       >
                         mdi-play-circle
                       </VIcon>
-                      Start Component
+                      {{ t('core.appControl.buttons.startComponent') }}
                     </VBtn>
                     <ConfirmCustomDialog
                       target="start-app"
-                      confirm-button="Start Component"
+                      :confirm-button="t('core.appControl.confirmButtons.startComponent')"
                       @confirm="handleOperation('start', index)"
                     />
                   </VCol>
@@ -345,11 +345,11 @@
                       >
                         mdi-stop-circle
                       </VIcon>
-                      Stop Component
+                      {{ t('core.appControl.buttons.stopComponent') }}
                     </VBtn>
                     <ConfirmCustomDialog
                       :target="`stop-app-${index}`"
-                      confirm-button="Stop Component"
+                      :confirm-button="t('core.appControl.confirmButtons.stopComponent')"
                       @confirm="handleOperation('stop', index)"
                     />
                   </VCol>
@@ -373,11 +373,11 @@
                       >
                         mdi-restart
                       </VIcon>
-                      Restart Component
+                      {{ t('core.appControl.buttons.restartComponent') }}
                     </VBtn>
                     <ConfirmCustomDialog
                       :target="`restart-app-${index}`"
-                      confirm-button="Restart Component"
+                      :confirm-button="t('core.appControl.confirmButtons.restartComponent')"
                       @confirm="handleOperation('restart', index)"
                     />
                   </VCol>
@@ -401,11 +401,11 @@
                       >
                         mdi-pause-circle
                       </VIcon>
-                      Pause Component
+                      {{ t('core.appControl.buttons.pauseComponent') }}
                     </VBtn>
                     <ConfirmCustomDialog
                       :target="`pause-app-${index}`"
-                      confirm-button="Pause Component"
+                      :confirm-button="t('core.appControl.confirmButtons.pauseComponent')"
                       @confirm="handleOperation('pause', index)"
                     />
                   </VCol>
@@ -429,11 +429,11 @@
                       >
                         mdi-motion-play-outline
                       </VIcon>
-                      Unpause Component
+                      {{ t('core.appControl.buttons.unpauseComponent') }}
                     </VBtn>
                     <ConfirmCustomDialog
                       :target="`unpause-app-${index}`"
-                      confirm-button="Unpause Component"
+                      :confirm-button="t('core.appControl.confirmButtons.unpauseComponent')"
                       @confirm="handleOperation('unpause', index)"
                     />
                   </VCol>
@@ -463,7 +463,7 @@
                     <VIcon size="24">
                       mdi-cctv
                     </VIcon>
-                  </VAvatar> Monitoring
+                  </VAvatar> {{ t('core.appControl.monitoring') }}
                 </div>
                 <VChip
                   size="small"
@@ -492,11 +492,11 @@
                     >
                       mdi-play-circle
                     </VIcon>
-                    Start Monitoring
+                    {{ t('core.appControl.buttons.startMonitoring') }}
                   </VBtn>
                   <ConfirmCustomDialog
                     :target="`start-monitoring-${index}`"
-                    confirm-button="Start Monitoring"
+                    :confirm-button="t('core.appControl.confirmButtons.startMonitoring')"
                     @confirm="handleOperation('start-monitoring', index)"
                   />
                   <VBtn
@@ -514,11 +514,11 @@
                     >
                       mdi-stop-circle
                     </VIcon>
-                    Stop Monitoring
+                    {{ t('core.appControl.buttons.stopMonitoring') }}
                   </VBtn>
                   <ConfirmCustomDialog
                     :target="`stop-monitoring-${index}`"
-                    confirm-button="Stop Monitoring"
+                    :confirm-button="t('core.appControl.confirmButtons.stopMonitoring')"
                     @confirm="handleOperation('stop-monitoring', index)"
                   />
                   <VBtn
@@ -536,11 +536,11 @@
                     >
                       mdi-trash-can
                     </VIcon>
-                    Stop & Delete Data
+                    {{ t('core.appControl.buttons.stopMonitoringDelete') }}
                   </VBtn>
                   <ConfirmCustomDialog
                     :target="`stop-monitoring-delete-${index}`"
-                    confirm-button="Stop Monitoring & Delete Data"
+                    :confirm-button="t('core.appControl.confirmButtons.stopMonitoringDelete')"
                     @confirm="handleOperation('stop-and-del-monitoring', index)"
                   />
                 </div>
@@ -577,7 +577,7 @@
             <VIcon size="24">
               mdi-gamepad-down
             </VIcon>
-          </VAvatar> Control
+          </VAvatar> {{ t('core.appControl.control') }}
         </VCardTitle>
         <VCardText class="text-center">
           <VRow class="d-flex flex-wrap justify-center">
@@ -604,11 +604,11 @@
                 >
                   mdi-play-circle
                 </VIcon>
-                Start Application
+                {{ t('core.appControl.buttons.startApplication') }}
               </VBtn>
               <ConfirmCustomDialog
                 target="start-app"
-                confirm-button="Start Application"
+                :confirm-button="t('core.appControl.confirmButtons.startApplication')"
                 @confirm="handleOperation('start')"
               />
             </VCol>
@@ -632,11 +632,11 @@
                 >
                   mdi-stop-circle
                 </VIcon>
-                Stop Application
+                {{ t('core.appControl.buttons.stopApplication') }}
               </VBtn>
               <ConfirmCustomDialog
                 target="stop-app"
-                confirm-button="Stop Application"
+                :confirm-button="t('core.appControl.confirmButtons.stopApplication')"
                 @confirm="handleOperation('stop')"
               />
             </VCol>
@@ -660,11 +660,11 @@
                 >
                   mdi-restart
                 </VIcon>
-                Restart Application
+                {{ t('core.appControl.buttons.restartApplication') }}
               </VBtn>
               <ConfirmCustomDialog
                 target="restart-app"
-                confirm-button="Restart Application"
+                :confirm-button="t('core.appControl.confirmButtons.restartApplication')"
                 @confirm="handleOperation('restart')"
               />
             </VCol>
@@ -688,11 +688,11 @@
                 >
                   mdi-pause-circle
                 </VIcon>
-                Pause Application
+                {{ t('core.appControl.buttons.pauseApplication') }}
               </VBtn>
               <ConfirmCustomDialog
                 target="pause-app"
-                confirm-button="Pause Application"
+                :confirm-button="t('core.appControl.confirmButtons.pauseApplication')"
                 @confirm="handleOperation('pause')"
               />
             </VCol>
@@ -716,11 +716,11 @@
                 >
                   mdi-motion-play-outline
                 </VIcon>
-                Unpause Application
+                {{ t('core.appControl.buttons.unpauseApplication') }}
               </VBtn>
               <ConfirmCustomDialog
                 target="unpause-app"
-                confirm-button="Unpause Application"
+                :confirm-button="t('core.appControl.confirmButtons.unpauseApplication')"
                 @confirm="handleOperation('unpause')"
               />
             </VCol>
@@ -744,11 +744,11 @@
                 >
                   mdi-trash-can
                 </VIcon>
-                Remove Application
+                {{ t('core.appControl.buttons.removeApplication') }}
               </VBtn>
               <ConfirmCustomDialog
                 target="remove-app"
-                confirm-button="Remove Application"
+                :confirm-button="t('core.appControl.confirmButtons.removeApplication')"
                 @confirm="handleOperation('remove')"
               />
             </VCol>
@@ -772,11 +772,11 @@
                 >
                   mdi-backup-restore
                 </VIcon>
-                Soft Reinstall
+                {{ t('core.appControl.buttons.softReinstall') }}
               </VBtn>
               <ConfirmCustomDialog
                 target="redeploy-app-soft"
-                confirm-button="Soft Reinstall Application"
+                :confirm-button="t('core.appControl.confirmButtons.softReinstall')"
                 @confirm="handleOperation('reinstall-soft')"
               />
             </VCol>
@@ -800,11 +800,11 @@
                 >
                   mdi-delete-restore
                 </VIcon>
-                Hard Reinstall
+                {{ t('core.appControl.buttons.hardReinstall') }}
               </VBtn>
               <ConfirmCustomDialog
                 target="redeploy-app-hard"
-                confirm-button="Hard Reinstall Application"
+                :confirm-button="t('core.appControl.confirmButtons.hardReinstall')"
                 @confirm="handleOperation('reinstall-hard')"
               />
             </VCol>
@@ -833,7 +833,7 @@
             <VIcon size="24">
               mdi-cctv
             </VIcon>
-          </VAvatar> Monitoring
+          </VAvatar> {{ t('core.appControl.monitoring') }}
         </VCardTitle>
         <VCardText class="text-center">
           <div class="d-flex flex-column align-center justify-center">
@@ -852,11 +852,11 @@
               >
                 mdi-play-circle
               </VIcon>
-              Start Monitoring
+              {{ t('core.appControl.buttons.startMonitoring') }}
             </VBtn>
             <ConfirmCustomDialog
               target="start-monitoring"
-              confirm-button="Start Monitoring"
+              :confirm-button="t('core.appControl.confirmButtons.startMonitoring')"
               @confirm="handleOperation('start-monitoring')"
             />
             <VBtn
@@ -874,11 +874,11 @@
               >
                 mdi-stop-circle
               </VIcon>
-              Stop Monitoring
+              {{ t('core.appControl.buttons.stopMonitoring') }}
             </VBtn>
             <ConfirmCustomDialog
               target="stop-monitoring"
-              confirm-button="Stop Monitoring"
+              :confirm-button="t('core.appControl.confirmButtons.stopMonitoring')"
               @confirm="handleOperation('stop-monitoring')"
             />
             <VBtn
@@ -896,11 +896,11 @@
               >
                 mdi-trash-can
               </VIcon>
-              Stop & Delete Data
+              {{ t('core.appControl.buttons.stopMonitoringDelete') }}
             </VBtn>
             <ConfirmCustomDialog
               target="stop-monitoring-delete"
-              confirm-button="Stop Monitoring & Delete Data"
+              :confirm-button="t('core.appControl.confirmButtons.stopMonitoringDelete')"
               @confirm="handleOperation('stop-and-del-monitoring')"
             />
           </div>
@@ -1046,7 +1046,7 @@
                 start
                 class="mr-1"
               />
-              {{ showLogs ? 'Hide Logs' : 'Show Logs' }}
+              {{ showLogs ? t('core.appControl.hideLogs') : t('core.appControl.showLogs') }}
             </VBtn>
             <VExpandTransition>
               <div
@@ -1365,7 +1365,7 @@
                 start
                 class="mr-1"
               />
-              {{ showLogs ? 'Hide Logs' : 'Show Logs' }}
+              {{ showLogs ? t('core.appControl.hideLogs') : t('core.appControl.showLogs') }}
             </VBtn>
             <VExpandTransition>
               <div
@@ -1422,6 +1422,7 @@
 
 
 <script setup>
+import { useI18n } from 'vue-i18n'
 import { eventBus } from "@/utils/eventBus"
 import axios from 'axios'
 import { PerfectScrollbar } from "vue3-perfect-scrollbar"
@@ -1459,6 +1460,7 @@ const props = defineProps({
   },
 })
 
+const { t } = useI18n()
 
 const output = ref([])
 const optionalInfoMessage = ref('')
@@ -1667,15 +1669,15 @@ async function handleAppOperation(app, title, endpoint, delay = 0) {
   }
 }
 
-const stopApp = app => handleAppOperation(app, 'Stopping', `/apps/appstop/${app}`, 2000)
-const startApp = app => handleAppOperation(app, 'Starting', `/apps/appstart/${app}`, 3000)
-const restartApp = app => handleAppOperation(app, 'Restarting', `/apps/apprestart/${app}`, 3000)
-const pauseApp = app => handleAppOperation(app, 'Pausing', `/apps/apppause/${app}`, 3000)
-const unpauseApp = app => handleAppOperation(app, 'Unpausing', `/apps/appunpause/${app}`, 3000)
+const stopApp = app => handleAppOperation(app, t('core.appControl.operations.stopping'), `/apps/appstop/${app}`, 2000)
+const startApp = app => handleAppOperation(app, t('core.appControl.operations.starting'), `/apps/appstart/${app}`, 3000)
+const restartApp = app => handleAppOperation(app, t('core.appControl.operations.restarting'), `/apps/apprestart/${app}`, 3000)
+const pauseApp = app => handleAppOperation(app, t('core.appControl.operations.pausing'), `/apps/apppause/${app}`, 3000)
+const unpauseApp = app => handleAppOperation(app, t('core.appControl.operations.unpausing'), `/apps/apppause/${app}`, 3000)
 
-const startMonitoring = app => handleAppOperation(app, 'Starting Monitoring', `/apps/startmonitoring/${app}`, 3000)
-const stopMonitoring = app => handleAppOperation(app, 'Stopping Monitoring', `/apps/stopmonitoring/${app}`, 3000)
-const stopMonitoringAndDelete = app => handleAppOperation(app, 'Stopping Monitoring & Deleting Data', `/apps/stopmonitoring/${app}/true`, 3000)
+const startMonitoring = app => handleAppOperation(app, t('core.appControl.operations.startingMonitoring'), `/apps/startmonitoring/${app}`, 3000)
+const stopMonitoring = app => handleAppOperation(app, t('core.appControl.operations.stoppingMonitoring'), `/apps/stopmonitoring/${app}`, 3000)
+const stopMonitoringAndDelete = app => handleAppOperation(app, t('core.appControl.operations.stoppingMonitoringAndDeleting'), `/apps/stopmonitoring/${app}/true`, 3000)
 
 async function handleAppOperationWithOutput(appName, title, endpoint) {
   output.value = []
@@ -1727,9 +1729,9 @@ async function handleAppOperationWithOutput(appName, title, endpoint) {
   }
 }
 
-const removeApp = app => handleAppOperationWithOutput(app, 'Removing', `/apps/appremove/${app}`)
-const redeployAppSoft = app => handleAppOperationWithOutput(app, 'Soft Reinstalling', `/apps/redeploy/${app}/false`)
-const redeployAppHard = app => handleAppOperationWithOutput(app, 'Hard Reinstalling', `/apps/redeploy/${app}/true`)
+const removeApp = app => handleAppOperationWithOutput(app, t('core.appControl.operations.removing'), `/apps/appremove/${app}`)
+const redeployAppSoft = app => handleAppOperationWithOutput(app, t('core.appControl.operations.softReinstalling'), `/apps/redeploy/${app}/false`)
+const redeployAppHard = app => handleAppOperationWithOutput(app, t('core.appControl.operations.hardReinstalling'), `/apps/redeploy/${app}/true`)
 
 watch([output, outputs], () => {
   nextTick(() => {
@@ -2203,47 +2205,47 @@ const handleMultiAppOperation = async (appName, title, endpoint, ipList, callbac
 }
 
 const startMultiApp = async (app, ipList) => {
-  return await handleMultiAppOperation(app, 'Starting', `/apps/apprestart/${app}`, ipList)
+  return await handleMultiAppOperation(app, t('core.appControl.operations.starting'), `/apps/apprestart/${app}`, ipList)
 }
 
 const stopMultiApp = async (app, ipList) => {
-  return await handleMultiAppOperation(app, 'Stopping', `/apps/appstop/${app}`, ipList)
+  return await handleMultiAppOperation(app, t('core.appControl.operations.stopping'), `/apps/appstop/${app}`, ipList)
 }
 
 const restartMultiApp = async (app, ipList) => {
-  return await handleMultiAppOperation(app, 'Restarting', `/apps/apprestart/${app}`, ipList)
+  return await handleMultiAppOperation(app, t('core.appControl.operations.restarting'), `/apps/apprestart/${app}`, ipList)
 }
 
 const pauseMultiApp = async (app, ipList) => {
-  return await handleMultiAppOperation(app, 'Pausing', `/apps/apppause/${app}`, ipList)
+  return await handleMultiAppOperation(app, t('core.appControl.operations.pausing'), `/apps/apppause/${app}`, ipList)
 }
 
 const unpauseMultiApp = async (app, ipList) => {
-  return await handleMultiAppOperation(app, 'Unpausing', `/apps/appunpause/${app}`, ipList)
+  return await handleMultiAppOperation(app, t('core.appControl.operations.unpausing'), `/apps/appunpause/${app}`, ipList)
 }
 
 const removeMultiApp = async (app, ipList) => {
-  return await handleMultiAppOperation(app, 'Removing', `/apps/appremove/${app}`, ipList, true)
+  return await handleMultiAppOperation(app, t('core.appControl.operations.removing'), `/apps/appremove/${app}`, ipList, true)
 }
 
 const redeployAppSoftMulti = async (app, ipList) => {
-  return await handleMultiAppOperation(app, 'Soft Reinstalling', `/apps/redeploy/${app}/false`, ipList, true)
+  return await handleMultiAppOperation(app, t('core.appControl.operations.softReinstalling'), `/apps/redeploy/${app}/false`, ipList, true)
 }
 
 const redeployAppHardMulti = async (app, ipList) => {
-  return await handleMultiAppOperation(app, 'Hard Reinstalling', `/apps/redeploy/${app}/true`, ipList, true)
+  return await handleMultiAppOperation(app, t('core.appControl.operations.hardReinstalling'), `/apps/redeploy/${app}/true`, ipList, true)
 }
 
 const startMultiAppMonitoring = async (app, ipList) => {
-  return await handleMultiAppOperation(app, 'Starting Monitoring', `/apps/startmonitoring/${app}`, ipList)
+  return await handleMultiAppOperation(app, t('core.appControl.operations.startingMonitoring'), `/apps/startmonitoring/${app}`, ipList)
 }
 
 const stopMultiAppMonitoring = async (app, ipList) => {
-  return await handleMultiAppOperation(app, 'Stopping Monitoring', `/apps/stopmonitoring/${app}`, ipList)
+  return await handleMultiAppOperation(app, t('core.appControl.operations.stoppingMonitoring'), `/apps/stopmonitoring/${app}`, ipList)
 }
 
 const stopAndDelMultiAppMonitoring = async (app, ipList) => {
-  return await handleMultiAppOperation(app, 'Stopping Monitoring & Deleting Data', `/apps/stopmonitoring/${app}/true`, ipList)
+  return await handleMultiAppOperation(app, t('core.appControl.operations.stoppingMonitoringAndDeleting'), `/apps/stopmonitoring/${app}/true`, ipList)
 }
 
 const executeCommand = async (app, command, warningText, parameter) => {
@@ -2517,6 +2519,10 @@ function normalizeComponents(data) {
   background-color: var(--v-theme-surface);
   border-radius: 8px;
   box-shadow: 0 4px 8px var(--v-theme-shadow-color, rgba(0, 0, 0, 0.5));
+}
+
+.v-radio :deep(.v-label) {
+  font-size: 104% !important;
 }
 </style>
 

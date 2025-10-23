@@ -1,6 +1,7 @@
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { v4 as uuid } from 'uuid'
+import { useI18n } from 'vue-i18n'
 
 const props = defineProps({
   modelValue: String,
@@ -11,24 +12,24 @@ const props = defineProps({
 
 const emit = defineEmits(['update:modelValue'])
 
+const { t } = useI18n()
+
 const expandedPanels = ref([])
 
-const getBaseSyncModes = () => {
+const baseSyncModes = computed(() => {
   const modes = [
-    { value: '', label: 'None' },
-    { value: 'r', label: 'Phased Master-Master (r)' },
-    { value: 'g', label: 'Master-Slave (g)' },
+    { value: '', label: t('core.volumePathBuilder.modeNone') },
+    { value: 'r', label: t('core.volumePathBuilder.modePhasedMasterMaster') },
+    { value: 'g', label: t('core.volumePathBuilder.modeMasterSlave') },
   ]
-  
+
   // Only include 's' mode if it's already being used in the existing data
   if (!props.newApp && props.modelValue && props.modelValue.includes('s:')) {
-    modes.splice(1, 0, { value: 's', label: 'Master-Master (s)' })
+    modes.splice(1, 0, { value: 's', label: t('core.volumePathBuilder.modeMasterMaster') })
   }
-  
-  return modes
-}
 
-const baseSyncModes = computed(() => getBaseSyncModes())
+  return modes
+})
 
 const normalize = p =>
   '/' + p.replace(/^\/+/, '').replace(/\/+$/, '').replace(/\/+/g, '/')
@@ -39,11 +40,11 @@ function getAllowedMountModes() {
     modes.push({
       value: String(i),
       label: i === props.componentIndex
-        ? `Remount from same component (${i}:)`
-        : `Mount from component ${i} (${i}:)`,
+        ? t('core.volumePathBuilder.remountFromSameComponent', { index: i })
+        : t('core.volumePathBuilder.mountFromComponent', { index: i }),
     })
   }
-  
+
   return modes
 }
 
@@ -131,39 +132,39 @@ function validateEntries(entries, componentIndex) {
     const path = normalize(entry.path || '')
     const mode = typeof entry.mode === 'object' ? entry.mode?.value : entry.mode
 
-    if (!path) logs.push({ index, mode, path, reason: 'Path is empty' })
-    if (index === 0 && /^\d+$/.test(mode)) logs.push({ index, mode, path, reason: 'Base entry cannot be a mount' })
-    if (seenPaths.has(path)) logs.push({ index, mode, path, reason: 'Duplicate path' })
+    if (!path) logs.push({ index, mode, path, reason: t('core.volumePathBuilder.validationPathEmpty') })
+    if (index === 0 && /^\d+$/.test(mode)) logs.push({ index, mode, path, reason: t('core.volumePathBuilder.validationBaseCannotBeMount') })
+    if (seenPaths.has(path)) logs.push({ index, mode, path, reason: t('core.volumePathBuilder.validationDuplicatePath') })
     else seenPaths.add(path)
-    if (!path.startsWith('/')) logs.push({ index, mode, path, reason: 'Path must start with /' })
+    if (!path.startsWith('/')) logs.push({ index, mode, path, reason: t('core.volumePathBuilder.validationPathMustStartWithSlash') })
     const invalidChars = /[<>:"\\|?*\x00-\x1F;]/
 
     const parts = path.split('/').filter(p => p !== '')
 
     if (parts.some(p => invalidChars.test(p))) {
-      logs.push({ index, mode, path, reason: 'Path contains invalid characters' })
+      logs.push({ index, mode, path, reason: t('core.volumePathBuilder.validationInvalidCharacters') })
     }
     if (/^\d+$/.test(mode) && parseInt(mode) > componentIndex)
-      logs.push({ index, mode, path, reason: `Mount refers to future component` })
+      logs.push({ index, mode, path, reason: t('core.volumePathBuilder.validationMountFutureComponent') })
     if (usedSyncModes.size > 1 && ['s', 'r', 'g'].includes(mode))
-      logs.push({ index, mode, path, reason: 'Mixed sync modes detected' })
+      logs.push({ index, mode, path, reason: t('core.volumePathBuilder.validationMixedSyncModes') })
     if (index !== 0 && ['s', 'r', 'g'].includes(mode) && !path.startsWith(basePath + '/'))
-      logs.push({ index, mode, path, reason: `Sync path must be subpath of base (${basePath})` })
+      logs.push({ index, mode, path, reason: t('core.volumePathBuilder.validationSyncMustBeSubpath', { basePath }) })
     if (index !== 0 && path === basePath)
-      logs.push({ index, mode, path, reason: 'Path cannot equal base path' })
+      logs.push({ index, mode, path, reason: t('core.volumePathBuilder.validationPathCannotEqualBase') })
     if (['s', 'r', 'g'].includes(mode)) {
       const conflicts = entries.filter((e, i2) => {
         if (i2 === index || !e) return false
         const m = typeof e.mode === 'object' ? e.mode?.value : e.mode
         const p = normalize(e.path || '')
-        
+
         return ['s', 'r', 'g'].includes(m) && (path.startsWith(p + '/') || p.startsWith(path + '/'))
       })
-      if (conflicts.length) logs.push({ index, mode, path, reason: 'Conflicts with other sync path' })
+      if (conflicts.length) logs.push({ index, mode, path, reason: t('core.volumePathBuilder.validationConflictsSyncPath') })
     }
     if (index !== 0 && /^\d+$/.test(mode) && ['s', 'r', 'g'].includes(baseMode)) {
       if (path === basePath || path.startsWith(basePath + '/') || basePath.startsWith(path + '/'))
-        logs.push({ index, mode, path, reason: 'Mount overlaps with sync root' })
+        logs.push({ index, mode, path, reason: t('core.volumePathBuilder.validationMountOverlapsSyncRoot') })
     }
   })
 
@@ -228,12 +229,12 @@ function removeEntry(id) {
   validateAndEmit()
 }
 
-watch(validationLogs, logs => {
-  expandedPanels.value = logs.length > 0 ? [0] : []
-})
-
 const isUsingSMode = computed(() => {
   return !props.newApp && props.modelValue && props.modelValue.includes('s:')
+})
+
+watch(validationLogs, logs => {
+  expandedPanels.value = logs.length > 0 ? [0] : []
 })
 </script>
 
@@ -254,7 +255,7 @@ const isUsingSMode = computed(() => {
           item-value="value"
           dense
           hide-details
-          label="Mode"
+          :label="t('core.volumePathBuilder.labelMode')"
           @blur="validateAndEmit"
         />
       </VCol>
@@ -262,8 +263,8 @@ const isUsingSMode = computed(() => {
       <VCol cols="8">
         <VTextField
           v-model="entry.path"
-          label="Path"
-          placeholder="e.g. /data/config"
+          :label="t('core.volumePathBuilder.labelPath')"
+          :placeholder="t('core.volumePathBuilder.pathPlaceholder')"
           :error="!!getEntryError(index)"
           dense
           @blur="() => normalizePath(index)"
@@ -291,7 +292,7 @@ const isUsingSMode = computed(() => {
       size="small"
       color="primary"
     >
-      Add Path
+      {{ t('core.volumePathBuilder.addPath') }}
     </VBtn>
 
 
@@ -302,11 +303,11 @@ const isUsingSMode = computed(() => {
       <VExpansionPanel>
         <VExpansionPanelTitle class="d-flex align-center">
           <VIcon :color="validationLogs.length === 0 ? 'success' : 'error'" size="21" class="mr-2">{{ validationLogs.length === 0 ? 'mdi-file-document-check' : 'mdi-file-document-remove' }}</VIcon>
-          Validation Logs
+          {{ t('core.volumePathBuilder.validationLogs') }}
         </VExpansionPanelTitle>
         <VExpansionPanelText>
           <div v-if="validationLogs.length === 0">
-            No validation errors 🎉
+            {{ t('core.volumePathBuilder.noValidationErrors') }}
           </div>
           <VList v-else dense>
             <VListItem
@@ -314,7 +315,7 @@ const isUsingSMode = computed(() => {
               :key="idx"
             >
               <VListItemTitle>
-                Entry #{{ log.index }} (mode: <code>{{ log.mode ?  log.mode : 'none' }}</code>, path: <code>{{ log.path }}</code>)
+                {{ t('core.volumePathBuilder.entryLabel', { index: log.index, mode: log.mode || 'none', path: log.path }) }}
               </VListItemTitle>
               <VListItemSubtitle style="color: #FF4C51">
                 {{ log.reason }}
@@ -327,28 +328,28 @@ const isUsingSMode = computed(() => {
       <VExpansionPanel>
         <VExpansionPanelTitle class="d-flex align-center">
           <VIcon size="21" class="mr-2">mdi-cog-sync</VIcon>
-          Detailed Information & Sync Behavior
+          {{ t('core.volumePathBuilder.detailedInfoTitle') }}
         </VExpansionPanelTitle>
         <VExpansionPanelText>
-          <h4><strong>Sync Mode Differences:</strong></h4>
+          <h4><strong>{{ t('core.volumePathBuilder.syncModeDifferencesTitle') }}</strong></h4>
           <ul class="mb-4 ml-4" style="font-size: 13px">
-            <li v-if="isUsingSMode"><strong>Master-Master [<code>s</code>]:</strong> Full real-time two-way sync between all participants. Changes on any side are propagated to all others immediately.</li>
-            <li><strong>Phased Master-Master [<code>r</code>]:</strong> Two-way sync between all participants where syncing occurs in controlled phases during startup. The <code>r</code> mode prevents overwriting of existing data when a new instance is started.</li>
-            <li><strong>Master-Slave [<code>g</code>]:</strong> One-way sync from master to others. The base component is the source of truth, and others receive updates but do not modify the data.</li>
+            <li v-if="isUsingSMode"><strong>{{ t('core.volumePathBuilder.syncModesMasterMasterLabel') }}</strong> {{ t('core.volumePathBuilder.syncModesMasterMasterDesc') }}</li>
+            <li><strong>{{ t('core.volumePathBuilder.syncModesPhasedMasterMasterLabel') }}</strong> {{ t('core.volumePathBuilder.syncModesPhasedMasterMasterDesc') }}</li>
+            <li><strong>{{ t('core.volumePathBuilder.syncModesMasterSlaveLabel') }}</strong> {{ t('core.volumePathBuilder.syncModesMasterSlaveDesc') }}</li>
           </ul>
 
-          <h4><strong>Allowed Combinations & Rules:</strong></h4>
+          <h4><strong>{{ t('core.volumePathBuilder.rulesTitle') }}</strong></h4>
           <ul class="ml-4" style="font-size: 13px">
-            <li><strong>Base entry</strong> cannot be a mount (e.g. <code>0:/data</code> is invalid)</li>
-            <li><strong>Only one sync mode</strong> allowed per component</li>
-            <li><strong>All sync paths</strong> must be within the base path but not equal to it</li>
-            <li>To sync folders under a shared parent, use a <code>None</code> base like <code>/data</code> with sync paths like <code>r:/data/sync1</code> and <code>r:/data/sync2</code></li>
-            <li><strong>Same-component remounts</strong> are allowed using <code>N:/path</code> when <code>N == current componentIndex</code></li>
-            <li><strong>Other mounts</strong> must refer to components &lt; current one (e.g. <code>0:/data</code> only valid if current index &ge; 1)</li>
-            <li><strong>No duplicate paths</strong> allowed (even with different modes)</li>
-            <li><strong>Mount paths</strong> must not overlap with the base sync root or any sync subdir</li>
-            <li><strong>Sync subpaths</strong> must not overlap with other sync subpaths (e.g. <code>s:/data/a</code> and <code>s:/data/a/b</code> are invalid)</li>
-            <li><strong>All paths</strong> must start with <code>/</code> and avoid invalid characters</li>
+            <li>{{ t('core.volumePathBuilder.ruleBaseCannotBeMount') }}</li>
+            <li>{{ t('core.volumePathBuilder.ruleOnlyOneSyncMode') }}</li>
+            <li>{{ t('core.volumePathBuilder.ruleAllSyncPathsWithinBase') }}</li>
+            <li>{{ t('core.volumePathBuilder.ruleSyncFoldersSharedParent') }}</li>
+            <li>{{ t('core.volumePathBuilder.ruleSameComponentRemounts') }}</li>
+            <li>{{ t('core.volumePathBuilder.ruleOtherMountsReferPrevious') }}</li>
+            <li>{{ t('core.volumePathBuilder.ruleNoDuplicatePaths') }}</li>
+            <li>{{ t('core.volumePathBuilder.ruleMountPathsNoOverlap') }}</li>
+            <li>{{ t('core.volumePathBuilder.ruleSyncSubpathsNoOverlap') }}</li>
+            <li>{{ t('core.volumePathBuilder.ruleAllPathsStartSlash') }}</li>
           </ul>
         </VExpansionPanelText>
       </VExpansionPanel>

@@ -1,6 +1,9 @@
 <script setup>
 import { computed, onMounted, ref } from "vue"
+import { useI18n } from 'vue-i18n'
 import { eventBus } from "@/utils/eventBus"
+
+const { t } = useI18n()
 
 const dropdownOpen = ref(false)
 const showHistory = ref(false)
@@ -236,7 +239,7 @@ onMounted(() => {
             "
             item-title="title"
             item-value="value"
-            label="Custom Backend"
+            :label="t('core.backendSelector.customBackend')"
             hide-details
             persistent-placeholder
             density="compact"

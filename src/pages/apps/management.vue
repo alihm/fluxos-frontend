@@ -25,7 +25,7 @@
         v-if="privilege !== 'fluxteam'"
         class="tab-chip"
       >
-        My Expired Apps
+        {{ t('menu.application.myExpiredApps') }}
         <VBadge
           v-if="expiredApps.length"
           :content="expiredApps.length"
@@ -97,6 +97,7 @@
 
 <script setup>
 import { ref, computed, onMounted, watch } from "vue"
+import { useI18n } from 'vue-i18n'
 import qs from "qs"
 import Management from "@/views/apps/management/manage.vue"
 import MyAppsTab from "@/views/apps/management/tabView.vue"
@@ -106,6 +107,8 @@ import { decryptEnterpriseWithAes, encryptAesKeyWithRsaKey, importRsaPublicKey, 
 
 import { storeToRefs } from "pinia"
 import { useFluxStore } from "@/stores/flux"
+
+const { t } = useI18n()
 
 const fluxStore = useFluxStore()
 const { privilege } = storeToRefs(fluxStore)
@@ -129,10 +132,10 @@ function showSnackbar(message, color = "error") {
 
 const activeAppsLabel = computed(() => {
   if (privilege.value === 'fluxteam') {
-    return 'Active Apps'
+    return t('menu.application.activeApps')
   }
-  
-  return 'My Active Apps'
+
+  return t('menu.application.myActiveApps')
 })
 
 // --- 🟦 Enterprise Decryption Helper ---
@@ -269,7 +272,7 @@ async function getActiveApps() {
   } catch (error) {
     activeApps.value = []
     apiError.value = true
-    showSnackbar("Failed to load active apps")
+    showSnackbar(t('menu.application.failedToLoadActiveApps'))
   } finally {
     loading.value.active = false
   }
@@ -318,7 +321,7 @@ async function getExpiredApps() {
     expiredApps.value = await decryptEnterpriseApps(filtered.map(msg => msg.appSpecifications))
   } catch (error) {
     expiredApps.value = []
-    showSnackbar("Failed to load expired apps")
+    showSnackbar(t('menu.application.failedToLoadExpiredApps'))
   } finally {
     loading.value.expired = false
   }

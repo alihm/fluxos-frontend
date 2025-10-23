@@ -17,7 +17,7 @@
               mdi-console
             </VIcon>
           </VAvatar>
-          <span class="text-h5">Terminal</span>
+          <span class="text-h5">{{ t('core.terminal.title') }}</span>
         </div>
       </div>
     </VCol>
@@ -38,7 +38,7 @@
         <VSelect
           v-model="selectedApp"
           :items="appSpec?.compose ? appSpec.compose.map(c => c.name) : [appSpec.name]"
-          label="Select Component"
+          :label="t('core.terminal.selectComponent')"
           dense
           density="comfortable"
           :disabled="isComposeSingle"
@@ -48,7 +48,7 @@
         <VSelect
           v-model="selectedCmd"
           :items="['/bin/bash', '/bin/sh', 'Custom']"
-          label="Select Command"
+          :label="t('core.terminal.selectCommand')"
           dense
           density="comfortable"
           class="mr-3 mb-2"
@@ -64,7 +64,7 @@
           class="text-subtitle-1 mr-2 mb-2"
           @click="connectTerminal(appSpec.version > 3 ? `${selectedApp}_${appSpec.name}` : appSpec.name)"
         >
-          Connect
+          {{ t('core.terminal.connect') }}
         </VBtn>
         <VBtn
           v-if="isVisible"
@@ -74,7 +74,7 @@
           class="text-subtitle-1 mb-2"
           @click="disconnectTerminal"
         >
-          Disconnect
+          {{ t('core.terminal.disconnect') }}
         </VBtn>
       </div>
 
@@ -82,13 +82,13 @@
       <div class="d-flex flex-wrap align-center ml-auto">
         <VSwitch
           v-model="enableUser"
-          label="User"
+          :label="t('core.terminal.user')"
           dense
           class="ml-2 mr-4"
         />
         <VSwitch
           v-model="enableEnvironment"
-          label="Environment"
+          :label="t('core.terminal.environment')"
           dense
           class="mr-2"
         />
@@ -103,7 +103,7 @@
     >
       <VTextField
         v-model="customValue"
-        label="Custom Command"
+        :label="t('core.terminal.customCommand')"
         dense
         density="comfortable"
       />
@@ -115,7 +115,7 @@
     >
       <VTextField
         v-model="userInputValue"
-        label="User / UID"
+        :label="t('core.terminal.userUid')"
         dense
         density="comfortable"
       />
@@ -127,7 +127,7 @@
     >
       <VTextField
         v-model="envInputValue"
-        label="Environment Variables"
+        :label="t('core.terminal.environmentVariables')"
         dense
         density="comfortable"
         persistent-hint
@@ -162,6 +162,7 @@
   
 <script setup>
 import { onMounted, onBeforeUnmount, ref, nextTick, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { Terminal } from '@xterm/xterm'
 import { FitAddon } from '@xterm/addon-fit'
 import { WebLinksAddon } from '@xterm/addon-web-links'
@@ -180,6 +181,8 @@ const props = defineProps({
     required: true,
   },
 })
+
+const { t } = useI18n()
 
 const snackbarColor = ref("success")
 const snackbar = ref(false)
@@ -222,14 +225,14 @@ function connectTerminal(name) {
   if (props.appSpec.version >= 4) {
     const found = props.appSpec.compose?.some(c => c.name === selectedApp.value)
     if (!found) {
-      showToast('danger', 'Please select a container app before connecting.')
+      showToast('danger', t('core.terminal.errors.selectContainer'))
       
       return
     }
   }
 
   if (!selectedCmd.value || (selectedCmd.value === 'Custom' && !customValue.value)) {
-    showToast('danger', selectedCmd.value === 'Custom' ? 'Please enter a custom command.' : 'No command selected.')
+    showToast('danger', selectedCmd.value === 'Custom' ? t('core.terminal.errors.enterCustomCommand') : t('core.terminal.errors.noCommandSelected'))
     
     return
   }
@@ -276,7 +279,7 @@ function connectTerminal(name) {
 
     try {
       await navigator.clipboard.writeText(selectedText)
-      showToast('success', 'Copied to clipboard!', 'mdi-content-copy')
+      showToast('success', t('core.terminal.copiedToClipboard'), 'mdi-content-copy')
       terminal.clearSelection()
     } catch (err) {
       // Fallback to execCommand
@@ -302,21 +305,21 @@ function connectTerminal(name) {
       document.body.removeChild(tempInput)
 
       if (success) {
-        showToast('success', 'Copied to clipboard!', 'mdi-content-copy')
+        showToast('success', t('core.terminal.copiedToClipboard'), 'mdi-content-copy')
         terminal.clearSelection()
       } else {
         if (!isManual) {
-          showToast('warning', 'Clipboard access is limited in insecure (HTTP) mode. Switch to HTTPS for full functionality.', 'mdi-alert')
+          showToast('warning', t('core.terminal.warnings.clipboardHttps'), 'mdi-alert')
         } else {
-          showToast('error', 'Copy failed: Clipboard inaccessible', 'mdi-alert')
+          showToast('error', t('core.terminal.errors.clipboardInaccessible'), 'mdi-alert')
         }
       }
     } catch (err) {
       console.error('Fallback execCommand exception:', err)
       if (!isManual) {
-        showToast('warning', 'Clipboard access is limited in insecure (HTTP) mode. Switch to HTTPS for full functionality.', 'mdi-alert')
+        showToast('warning', t('core.terminal.warnings.clipboardHttps'), 'mdi-alert')
       } else {
-        showToast('error', 'Copy failed: Clipboard error', 'mdi-alert')
+        showToast('error', t('core.terminal.errors.clipboardError'), 'mdi-alert')
       }
     }
   }
@@ -405,19 +408,19 @@ function connectTerminal(name) {
   socket.emit('exec', zelidauth, name, cmd, envInputValue.value, user)
 
   socket.on('error', err => {
-    showToast('danger', err)
+    showToast('danger', t('core.terminal.errors.connectionError', { error: err }))
     isConnecting.value = false
     disconnectTerminal()
   })
 
   socket.on('connect_error', err => {
-    showToast('danger', `Connection error: ${err.message}`)
+    showToast('danger', t('core.terminal.errors.connectionErrorWithMessage', { message: err.message }))
     isConnecting.value = false
     disconnectTerminal()
   })
 
   socket.on('connect_timeout', () => {
-    showToast('danger', 'Connection timed out.')
+    showToast('danger', t('core.terminal.errors.connectionTimeout'))
     isConnecting.value = false
     disconnectTerminal()
   })
@@ -425,7 +428,7 @@ function connectTerminal(name) {
   socket.on('show', data => {
     if (typeof data === 'string' && consoleInit === 0 && data.includes('OCI runtime exec')) {
       skipToast = 1
-      showToast('danger', `The command ${cmd} is not supported in this container.`)
+      showToast('danger', t('core.terminal.errors.commandNotSupported', { cmd }))
       disconnectTerminal()
       
       return
@@ -458,7 +461,7 @@ function connectTerminal(name) {
   })
 
   socket.on('disconnect', () => {
-    if (!skipToast) showToast('warning', 'Disconnected from terminal.')
+    if (!skipToast) showToast('warning', t('core.terminal.warnings.disconnected'))
     disconnectTerminal()
   })
 

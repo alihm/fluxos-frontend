@@ -22,7 +22,7 @@
         <VCol cols="4">
           <VSelect
             v-model="appLocationOptions.perPage"
-            label="Per page"
+            :label="t('core.locations.perPage')"
             :items="appLocationOptions.pageOptions"
             density="compact"
             class="flex-grow-1"
@@ -32,10 +32,10 @@
         <VCol cols="8">
           <VTextField
             v-model="appLocationOptions.filter"
-            label="Filter"
+            :label="t('core.locations.filter')"
             density="compact"
             variant="outlined"
-            placeholder="Type to Search"
+            :placeholder="t('core.locations.typeToSearch')"
             clearable
             class="flex-grow-1"
           >
@@ -45,7 +45,7 @@
               </VIcon>
             </template>
             <template #append-inner>
-              <VTooltip text="Select active instance">
+              <VTooltip :text="t('core.locations.selectActiveInstance')">
                 <template #activator="{ props: instanceProps }">
                   <VIcon
                     v-if="selectedNode"
@@ -79,7 +79,7 @@
           hide-headers
           fixed-header
           density="compact"
-          no-data-text="No instances found..."
+          :no-data-text="t('core.locations.noInstancesFound')"
         >
           <template #headers />
   
@@ -112,7 +112,7 @@
               v-bind="props"
               class="text-no-wrap"
             >
-              <VTooltip text="System uptime since last reboot">
+              <VTooltip :text="t('core.locations.systemUptimeTooltip')">
                 <template #activator="{ props: tooltipProps }">
                   <VChip
                     color="info"
@@ -145,7 +145,7 @@
               v-bind="props"
               class="text-no-wrap"
             >
-              <VTooltip text="Time elapsed since installation">
+              <VTooltip :text="t('core.locations.timeElapsedTooltip')">
                 <template #activator="{ props: tooltipProps }">
                   <VChip
                     color="info"
@@ -229,7 +229,7 @@
   
           <template #item.visit="{ item }">
             <div class="d-flex justify-end">
-              <VTooltip text="Visit App">
+              <VTooltip :text="t('core.locations.visitApp')">
                 <template #activator="{ props: btnProps }">
                   <VBtn
                     v-bind="btnProps"
@@ -246,8 +246,8 @@
                   </VBtn>
                 </template>
               </VTooltip>
-  
-              <VTooltip text="Visit FluxNode">
+
+              <VTooltip :text="t('core.locations.visitFluxNode')">
                 <template #activator="{ props: btnProps }">
                   <VBtn
                     v-bind="btnProps"
@@ -292,7 +292,8 @@
 <script setup>
 import { ref, computed, watch } from "vue"
 import axios from 'axios'
-  
+import { useI18n } from 'vue-i18n'
+
 // Props
 const props = defineProps({
   appLocations: {
@@ -317,6 +318,8 @@ const props = defineProps({
   },
 })
   
+const { t } = useI18n()
+  
 // Reactive state
 const mapVisible = ref(props.expanded)
   
@@ -327,23 +330,21 @@ const appLocationOptions = ref({
   filter: "",
 })
 
-const defaultFields = [
-  { key: "ip", title: "IP Address",   cellClass: 'column-ip', headerProps: { class: 'column-ip' } },
-  { key: "osUptime", title: "Uptime",  cellClass: 'column-uptime', headerProps: { class: 'column-uptime' } },
-  { key: "running", title: "Running",  cellClass: 'column-running', headerProps: { class: 'column-running' } },
+const appLocationFields = computed(() => [
+  { key: "ip", title: t('core.locations.ipAddress'), cellClass: 'column-ip', headerProps: { class: 'column-ip' } },
+  { key: "osUptime", title: t('core.locations.uptime'), cellClass: 'column-uptime', headerProps: { class: 'column-uptime' } },
+  { key: "running", title: t('core.locations.running'), cellClass: 'column-running', headerProps: { class: 'column-running' } },
   ...(props.showLocation
-    ? [{ key: "continent", title: "Continent", sortable: false, cellClass: 'column-continent', headerProps: { class: 'column-continent' } }]
+    ? [{ key: "continent", title: t('core.locations.continent'), sortable: false, cellClass: 'column-continent', headerProps: { class: 'column-continent' } }]
     : []),
   ...(props.showLocation
-    ? [{ key: "country", title: "Country", sortable: false, cellClass: 'column-country', headerProps: { class: 'column-country' } }]
+    ? [{ key: "country", title: t('core.locations.country'), sortable: false, cellClass: 'column-country', headerProps: { class: 'column-country' } }]
     : []),
   ...(props.showLocation
-    ? [{ key: "region", title: "Region", sortable: false, cellClass: 'column-region', headerProps: { class: 'column-region' } }]
+    ? [{ key: "region", title: t('core.locations.region'), sortable: false, cellClass: 'column-region', headerProps: { class: 'column-region' } }]
     : []),
   { key: "visit", title: "" },
-]
-
-const appLocationFields = computed(() => defaultFields)
+])
 
 
 
@@ -399,7 +400,7 @@ watch(
   
 // Helpers
 function formatUptime(seconds) {
-  if (!seconds || isNaN(seconds)) return "N/A"
+  if (!seconds || isNaN(seconds)) return t('core.locations.notAvailable')
   
   const days = Math.floor(seconds / 86400)
   const hours = Math.floor((seconds % 86400) / 3600)

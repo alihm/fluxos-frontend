@@ -2,6 +2,8 @@ import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useFluxStore } from '@/stores/flux'
 import { useSnackbar } from '@/composables/useSnackbar'
+import { useLoginSheet } from '@/composables/useLoginSheet'
+import { useI18n } from 'vue-i18n'
 
 // Rate limiting state
 const lastApiCall = ref(0)
@@ -35,6 +37,7 @@ const sharedState = {
 }
 
 export function useFluxDrive() {
+  const { t } = useI18n()
   const { showSnackbar } = useSnackbar()
   const fluxStore = useFluxStore()
   const router = useRouter()
@@ -344,15 +347,15 @@ export function useFluxDrive() {
   const previewingFile = ref(null)
   const resultMessage = ref('')
   const uploadMessage = ref('Drag and drop files here or click to upload')
-  const showLogin = ref(false)
+  const { openLoginBottomSheet, closeLoginBottomSheet } = useLoginSheet()
 
   // Storage is already handled by shared state, don't redefine
 
   // FluxDrive plans (matching FluxCloud source code exactly)
-  const fluxDrivePlans = ref([
+  const fluxDrivePlans = computed(() => [
     {
       id: 'starter',
-      name: 'Starter',
+      name: t('components.fluxDrive.pricingPlans.plans.starter'),
       storage: '10 GB',
       price: '$0.50',
       pricePerMonth: '$0.50 / Month',
@@ -360,58 +363,58 @@ export function useFluxDrive() {
       popular: false,
       badge: null,
       features: [
-        'Web 3 Infrastructure',
-        'Decentralized Storage',
-        'Global Distribution',
-        'Unlimited Bandwidth',
+        t('components.fluxDrive.pricingPlans.features.web3Infrastructure'),
+        t('components.fluxDrive.pricingPlans.features.decentralizedStorage'),
+        t('components.fluxDrive.pricingPlans.features.globalDistribution'),
+        t('components.fluxDrive.pricingPlans.features.unlimitedBandwidth'),
       ],
     },
     {
       id: 'standard',
-      name: 'Standard',
+      name: t('components.fluxDrive.pricingPlans.plans.standard'),
       storage: '50 GB',
       price: '$2.50',
       pricePerMonth: '$2.50 / Month',
       originalPrice: null,
       popular: true,
-      badge: 'Most Popular',
+      badge: t('components.fluxDrive.pricingPlans.badges.mostPopular'),
       features: [
-        'Web 3 Infrastructure',
-        'Decentralized Storage',
-        'Global Distribution',
-        'Unlimited Bandwidth',
+        t('components.fluxDrive.pricingPlans.features.web3Infrastructure'),
+        t('components.fluxDrive.pricingPlans.features.decentralizedStorage'),
+        t('components.fluxDrive.pricingPlans.features.globalDistribution'),
+        t('components.fluxDrive.pricingPlans.features.unlimitedBandwidth'),
       ],
     },
     {
       id: 'pro',
-      name: 'Elite',
+      name: t('components.fluxDrive.pricingPlans.plans.elite'),
       storage: '100 GB',
       price: '$5.00',
       pricePerMonth: '$5.00 / Month',
       originalPrice: null,
       popular: false,
-      badge: 'Best Value',
+      badge: t('components.fluxDrive.pricingPlans.badges.bestValue'),
       features: [
-        'Web 3 Infrastructure',
-        'Decentralized Storage',
-        'Global Distribution',
-        'Unlimited Bandwidth',
+        t('components.fluxDrive.pricingPlans.features.web3Infrastructure'),
+        t('components.fluxDrive.pricingPlans.features.decentralizedStorage'),
+        t('components.fluxDrive.pricingPlans.features.globalDistribution'),
+        t('components.fluxDrive.pricingPlans.features.unlimitedBandwidth'),
       ],
     },
     {
       id: 'enterprise',
-      name: 'Flux Drive Pro',
-      storage: 'Customizable',
+      name: t('components.fluxDrive.pricingPlans.plans.fluxDrivePro'),
+      storage: t('components.fluxDrive.pricingPlans.customizable'),
       price: '',
       pricePerMonth: '',
       originalPrice: null,
       popular: false,
-      badge: 'Enterprise',
+      badge: t('components.fluxDrive.pricingPlans.badges.enterprise'),
       features: [
-        'Web 3 Infrastructure',
-        'Decentralized Storage',
-        'Global Distribution',
-        'Unlimited Bandwidth',
+        t('components.fluxDrive.pricingPlans.features.web3Infrastructure'),
+        t('components.fluxDrive.pricingPlans.features.decentralizedStorage'),
+        t('components.fluxDrive.pricingPlans.features.globalDistribution'),
+        t('components.fluxDrive.pricingPlans.features.unlimitedBandwidth'),
       ],
     },
   ])
@@ -504,8 +507,8 @@ export function useFluxDrive() {
     if (!isLoggedIn.value) {
       // Store the plan selection for after login
       pendingPlanSelection.value = planId
-      showLogin.value = true
-      
+      openLoginBottomSheet()
+
       return
     }
 
@@ -2621,7 +2624,7 @@ export function useFluxDrive() {
     console.log('🚀 handlePostLogin started')
 
     // Close the login dialog
-    showLogin.value = false
+    closeLoginBottomSheet()
 
     // Check subscription status
     console.log('🔍 Checking subscription status...')
@@ -2670,7 +2673,7 @@ export function useFluxDrive() {
     previewingFile,
     resultMessage,
     uploadMessage,
-    showLogin,
+    openLoginBottomSheet,
     pendingPlanSelection,
     usedStorage,
     totalStorage,

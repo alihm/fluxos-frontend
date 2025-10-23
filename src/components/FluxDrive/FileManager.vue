@@ -7,8 +7,8 @@
         <div class="d-flex align-center">
           <VIcon icon="mdi-cloud-outline" size="28" color="primary" class="me-2" />
           <div>
-            <h1 class="text-h5 font-weight-bold text-primary mb-0">FluxDrive</h1>
-            <div class="text-caption text-medium-emphasis">Decentralized Cloud Storage</div>
+            <h1 class="text-h5 font-weight-bold text-primary mb-0">{{ t('components.fluxDrive.fileManager.title') }}</h1>
+            <div class="text-caption text-medium-emphasis">{{ t('components.fluxDrive.fileManager.subtitle') }}</div>
           </div>
         </div>
         <VSpacer />
@@ -19,7 +19,7 @@
           prepend-icon="mdi-rocket-launch"
           @click="showUpgradeDialog = true"
         >
-          Upgrade Plan
+          {{ t('components.fluxDrive.fileManager.upgradePlan') }}
         </VBtn>
       </div>
 
@@ -30,7 +30,7 @@
           <div class="flex-grow-1" style="min-width: 280px; max-width: 400px;">
             <VTextField
               v-model="searchQuery"
-              placeholder="Search files and folders..."
+              :placeholder="t('components.fluxDrive.fileManager.searchPlaceholder')"
               prepend-inner-icon="mdi-magnify"
               variant="outlined"
               density="compact"
@@ -58,7 +58,7 @@
                   icon="mdi-view-list"
                   size="18"
                 />
-                <VTooltip activator="parent" location="bottom">List View</VTooltip>
+                <VTooltip activator="parent" location="bottom">{{ t('components.fluxDrive.fileManager.listView') }}</VTooltip>
               </VBtn>
 
               <VBtn
@@ -74,7 +74,7 @@
                   icon="mdi-view-grid"
                   size="18"
                 />
-                <VTooltip activator="parent" location="bottom">Grid View</VTooltip>
+                <VTooltip activator="parent" location="bottom">{{ t('components.fluxDrive.fileManager.gridView') }}</VTooltip>
               </VBtn>
             </div>
 
@@ -87,7 +87,7 @@
               prepend-icon="mdi-folder-plus"
               @click="createFolder"
             >
-              New Folder
+              {{ t('components.fluxDrive.fileManager.newFolder') }}
             </VBtn>
 
             <VMenu>
@@ -100,7 +100,7 @@
                   append-icon="mdi-chevron-down"
                   v-bind="props"
                 >
-                  Upload
+                  {{ t('components.fluxDrive.fileManager.upload') }}
                 </VBtn>
               </template>
               <VList>
@@ -109,14 +109,14 @@
                   <template #prepend>
                     <VIcon icon="mdi-file-upload" size="20" />
                   </template>
-                  <VListItemTitle>Upload Files</VListItemTitle>
+                  <VListItemTitle>{{ t('components.fluxDrive.fileManager.uploadFiles') }}</VListItemTitle>
                 </VListItem>
                 <VListItem @click="$refs.folderInput?.click()"
                 >
                   <template #prepend>
                     <VIcon icon="mdi-folder-upload" size="20" />
                   </template>
-                  <VListItemTitle>Upload Folder</VListItemTitle>
+                  <VListItemTitle>{{ t('components.fluxDrive.fileManager.uploadFolder') }}</VListItemTitle>
                 </VListItem>
               </VList>
             </VMenu>
@@ -160,7 +160,7 @@
               class="breadcrumb-home"
             >
               <VIcon icon="mdi-home" size="18" class="text-medium-emphasis" />
-              <VTooltip activator="parent" location="bottom">Go to root</VTooltip>
+              <VTooltip activator="parent" location="bottom">{{ t('components.fluxDrive.fileManager.goToRoot') }}</VTooltip>
             </VBtn>
 
             <template v-for="(item, index) in breadcrumbs" :key="item.path">
@@ -214,10 +214,9 @@
           variant="tonal"
           class="my-4"
         >
-          <template #title>Files Missing?</template>
+          <template #title>{{ t('components.fluxDrive.fileManager.filesMissing') }}</template>
           <div class="text-body-2 mb-3">
-            Your storage shows {{ bytesConversion(usedStorage) }} used, but no files are visible.
-            This might mean some files have incorrect folder associations.
+            {{ t('components.fluxDrive.fileManager.filesMissingDescription', { storage: bytesConversion(usedStorage) }) }}
           </div>
           <div class="d-flex gap-2">
             <VBtn
@@ -228,7 +227,7 @@
               @click="loadFiles(false, true)"
             >
               <VIcon icon="mdi-file-search" class="me-2" />
-              Show All Files (Recovery Mode)
+              {{ t('components.fluxDrive.fileManager.showAllFilesRecovery') }}
             </VBtn>
             <VBtn
               v-if="isRecoveryMode"
@@ -238,7 +237,7 @@
               @click="loadFiles(false, false)"
             >
               <VIcon icon="mdi-arrow-left" class="me-2" />
-              Back to Normal Mode
+              {{ t('components.fluxDrive.fileManager.backToNormalMode') }}
             </VBtn>
           </div>
         </VAlert>
@@ -334,10 +333,10 @@
             class="mb-4 text-medium-emphasis"
           />
           <h3 class="text-h6 mb-2">
-            {{ searchQuery.trim() ? 'No files found' : 'This folder is empty' }}
+            {{ searchQuery.trim() ? t('components.fluxDrive.fileManager.noFilesFound') : t('components.fluxDrive.fileManager.folderEmpty') }}
           </h3>
           <p class="text-body-2 text-medium-emphasis mb-4">
-            {{ searchQuery.trim() ? `No files match "${searchQuery.trim()}"` : 'Drop files here or click upload to add files' }}
+            {{ searchQuery.trim() ? t('components.fluxDrive.fileManager.noFilesMatch', { query: searchQuery.trim() }) : t('components.fluxDrive.fileManager.dropFilesHere') }}
           </p>
           <VBtn
             v-if="!searchQuery.trim()"
@@ -345,7 +344,7 @@
             prepend-icon="mdi-upload"
             @click="$refs.fileInput?.click()"
           >
-            Upload Files
+            {{ t('components.fluxDrive.fileManager.uploadFiles') }}
           </VBtn>
         </div>
 
@@ -370,7 +369,7 @@
               density="comfortable"
               item-key="id"
               class="file-list-table"
-              no-data-text="No files or folders found"
+              :no-data-text="t('components.fluxDrive.fileManager.noFilesOrFolders')"
               :key="`table-${files.length}`"
               hide-default-footer
             >
@@ -421,7 +420,7 @@
                 <div
                   class="text-truncate text-no-wrap"
                   style="max-width: 300px;"
-                  :title="item.isGoBack ? 'Go back to parent folder' : item.name"
+                  :title="item.isGoBack ? t('components.fluxDrive.fileManager.goBackToParent') : item.name"
                   :class="{ 'cursor-pointer': item.isFolder || item.isGoBack }"
                   @click="(item.isFolder || item.isGoBack) ? handleOpenFolder(item) : null"
                 >
@@ -461,7 +460,7 @@
                         <template #prepend>
                           <VIcon icon="mdi-eye" size="20" />
                         </template>
-                        <VListItemTitle>Preview</VListItemTitle>
+                        <VListItemTitle>{{ t('components.fluxDrive.fileManager.preview') }}</VListItemTitle>
                       </VListItem>
 
                       <VListItem @click="downloadFile(item)"
@@ -469,7 +468,7 @@
                         <template #prepend>
                           <VIcon icon="mdi-download" size="20" />
                         </template>
-                        <VListItemTitle>Download</VListItemTitle>
+                        <VListItemTitle>{{ t('components.fluxDrive.fileManager.download') }}</VListItemTitle>
                       </VListItem>
 
                       <VListItem
@@ -479,7 +478,7 @@
                         <template #prepend>
                           <VIcon icon="mdi-file-plus" size="20" />
                         </template>
-                        <VListItemTitle>Add Version</VListItemTitle>
+                        <VListItemTitle>{{ t('components.fluxDrive.fileManager.addVersion') }}</VListItemTitle>
                       </VListItem>
 
                       <VListItem
@@ -489,7 +488,7 @@
                         <template #prepend>
                           <VIcon icon="mdi-history" size="20" />
                         </template>
-                        <VListItemTitle>View Versions</VListItemTitle>
+                        <VListItemTitle>{{ t('components.fluxDrive.fileManager.viewVersions') }}</VListItemTitle>
                       </VListItem>
 
                     </template>
@@ -501,7 +500,7 @@
                         <template #prepend>
                           <VIcon icon="mdi-pencil" size="20" />
                         </template>
-                        <VListItemTitle>Rename</VListItemTitle>
+                        <VListItemTitle>{{ t('components.fluxDrive.fileManager.rename') }}</VListItemTitle>
                       </VListItem>
 
                       <VListItem @click="moveItem(item)"
@@ -509,7 +508,7 @@
                         <template #prepend>
                           <VIcon icon="mdi-folder-move" size="20" />
                         </template>
-                        <VListItemTitle>Move To</VListItemTitle>
+                        <VListItemTitle>{{ t('components.fluxDrive.fileManager.moveTo') }}</VListItemTitle>
                       </VListItem>
 
                       <VListItem
@@ -519,7 +518,7 @@
                         <template #prepend>
                           <VIcon icon="mdi-link" size="20" />
                         </template>
-                        <VListItemTitle>Copy Link</VListItemTitle>
+                        <VListItemTitle>{{ t('components.fluxDrive.fileManager.copyLink') }}</VListItemTitle>
                       </VListItem>
 
                       <VListItem
@@ -529,7 +528,7 @@
                         <template #prepend>
                           <VIcon icon="mdi-delete" size="20" color="error" />
                         </template>
-                        <VListItemTitle>Delete</VListItemTitle>
+                        <VListItemTitle>{{ t('components.fluxDrive.fileManager.delete') }}</VListItemTitle>
                       </VListItem>
                     </template>
                   </VList>
@@ -657,8 +656,11 @@
                 color="success"
               >
                 <VIcon icon="mdi-file-multiple-outline" size="14" class="me-1" />
-                {{ (currentPage - 1) * filesPerPage + 1 }}-{{ Math.min(currentPage * filesPerPage, stableFiles.length) }}
-                of {{ stableFiles.length }} items
+                {{ t('components.fluxDrive.fileManager.paginationInfo', {
+                  start: (currentPage - 1) * filesPerPage + 1,
+                  end: Math.min(currentPage * filesPerPage, stableFiles.length),
+                  total: stableFiles.length
+                }) }}
               </VChip>
 
               <!-- Center: Pagination controls -->
@@ -788,7 +790,7 @@
               @click="openEditor(previewingFile)"
             >
               <VIcon icon="mdi-pencil" />
-              <VTooltip activator="parent" location="bottom">Edit</VTooltip>
+              <VTooltip activator="parent" location="bottom">{{ t('components.fluxDrive.fileManager.edit') }}</VTooltip>
             </VBtn>
 
             <VBtn
@@ -798,7 +800,7 @@
               @click="downloadFile(previewingFile)"
             >
               <VIcon icon="mdi-download" />
-              <VTooltip activator="parent" location="bottom">Download</VTooltip>
+              <VTooltip activator="parent" location="bottom">{{ t('components.fluxDrive.fileManager.download') }}</VTooltip>
             </VBtn>
 
             <VMenu>
@@ -817,25 +819,25 @@
                   <template #prepend>
                     <VIcon icon="mdi-pencil" size="20" />
                   </template>
-                  <VListItemTitle>Rename</VListItemTitle>
+                  <VListItemTitle>{{ t('components.fluxDrive.fileManager.rename') }}</VListItemTitle>
                 </VListItem>
                 <VListItem @click="handlePreviewMenuAction('move', previewingFile)">
                   <template #prepend>
                     <VIcon icon="mdi-folder-move" size="20" />
                   </template>
-                  <VListItemTitle>Move To</VListItemTitle>
+                  <VListItemTitle>{{ t('components.fluxDrive.fileManager.moveTo') }}</VListItemTitle>
                 </VListItem>
                 <VListItem v-if="!previewingFile?.isFolder" @click="handlePreviewMenuAction('copy', previewingFile)">
                   <template #prepend>
                     <VIcon icon="mdi-link" size="20" />
                   </template>
-                  <VListItemTitle>Copy Link</VListItemTitle>
+                  <VListItemTitle>{{ t('components.fluxDrive.fileManager.copyLink') }}</VListItemTitle>
                 </VListItem>
                 <VListItem @click="handlePreviewMenuAction('delete', previewingFile)" class="text-error">
                   <template #prepend>
                     <VIcon icon="mdi-delete" size="20" color="error" />
                   </template>
-                  <VListItemTitle>Delete</VListItemTitle>
+                  <VListItemTitle>{{ t('components.fluxDrive.fileManager.delete') }}</VListItemTitle>
                 </VListItem>
               </VList>
             </VMenu>
@@ -861,7 +863,7 @@
               style="width: 100%; height: 100%; object-fit: contain;"
               :poster="previewingFile.thumbnail"
             >
-              Your browser does not support the video tag.
+              {{ t('components.fluxDrive.fileManager.browserNoVideoSupport') }}
             </video>
           </div>
           <div v-else-if="isAudioFile(previewingFile)" class="preview-container d-flex align-center justify-center" style="min-height: 300px;">
@@ -877,7 +879,7 @@
                 autoplay
                 style="width: 300px; display: block;"
               >
-                Your browser does not support the audio tag.
+                {{ t('components.fluxDrive.fileManager.browserNoAudioSupport') }}
               </audio>
             </div>
           </div>
@@ -895,7 +897,7 @@
                 size="64"
                 class="mb-4 text-medium-emphasis"
               />
-              <p class="text-body-1 text-medium-emphasis">Preview not available for this file type</p>
+              <p class="text-body-1 text-medium-emphasis">{{ t('components.fluxDrive.fileManager.previewNotAvailable') }}</p>
               <VBtn
                 color="primary"
                 variant="flat"
@@ -905,7 +907,7 @@
                 rel="noopener noreferrer"
                 prepend-icon="mdi-download"
               >
-                Download File
+                {{ t('components.fluxDrive.fileManager.downloadFile') }}
               </VBtn>
             </div>
           </div>
@@ -943,10 +945,10 @@
             <!-- Upload Text -->
             <div class="text-center mb-4">
               <h3 class="text-h6 font-weight-bold text-primary mb-1">
-                {{ totalFilesToUpload > 1 ? `Uploading Files (${currentUploadIndex + 1}/${totalFilesToUpload})` : 'Uploading File' }}
+                {{ totalFilesToUpload > 1 ? t('components.fluxDrive.fileManager.uploadingFiles', { current: currentUploadIndex + 1, total: totalFilesToUpload }) : t('components.fluxDrive.fileManager.uploadingFile') }}
               </h3>
               <p class="text-body-2 text-medium-emphasis mb-1">
-                {{ currentFileName || 'Please wait while your file is being uploaded' }}
+                {{ currentFileName || t('components.fluxDrive.fileManager.uploadWait') }}
               </p>
               <p v-if="currentFileSize > 0" class="text-caption text-medium-emphasis mb-2">
                 {{ formatFileSize(currentFileSize) }}
@@ -965,9 +967,9 @@
               />
               <div class="text-center">
                 <span class="text-caption text-medium-emphasis">
-                  {{ localUploadProgress }}% complete
+                  {{ t('components.fluxDrive.fileManager.uploadProgress', { progress: localUploadProgress }) }}
                   <span v-if="totalFilesToUpload > 1">
-                    • File {{ currentUploadIndex + 1 }} of {{ totalFilesToUpload }}
+                    • {{ t('components.fluxDrive.fileManager.fileOfTotal', { current: currentUploadIndex + 1, total: totalFilesToUpload }) }}
                   </span>
                 </span>
               </div>
@@ -993,7 +995,7 @@
             color="success"
             class="mb-4"
           />
-          <h3 class="text-h5 mb-2">Downloading...</h3>
+          <h3 class="text-h5 mb-2">{{ t('components.fluxDrive.fileManager.downloading') }}</h3>
           <p class="text-body-1 mb-3">{{ downloadingFile }}</p>
           <VProgressLinear
             :model-value="downloadProgress"
@@ -1002,7 +1004,7 @@
             rounded
             class="mb-2"
           />
-          <p class="text-body-2">{{ downloadProgress }}% complete</p>
+          <p class="text-body-2">{{ t('components.fluxDrive.fileManager.downloadProgress', { progress: downloadProgress }) }}</p>
         </VCardText>
       </VCard>
     </VDialog>
@@ -1016,11 +1018,11 @@
       <VCard>
         <VCardTitle class="d-flex align-center px-3 py-1 bg-primary text-white">
           <VIcon icon="mdi-delete" class="me-3" style="color: rgba(255,255,255,0.9);" />
-          <h3 class="text-subtitle-1 text-white">Confirm Delete</h3>
+          <h3 class="text-subtitle-1 text-white">{{ t('components.fluxDrive.fileManager.confirmDelete') }}</h3>
         </VCardTitle>
         <VCardText class="pa-6 pt-4">
           <p class="text-body-1 mb-4">
-            Are you sure you want to delete this {{ itemToDelete?.isFolder ? 'folder' : 'file' }}?
+            {{ t('components.fluxDrive.fileManager.confirmDeleteMessage', { type: itemToDelete?.isFolder ? t('components.fluxDrive.fileManager.folder') : t('components.fluxDrive.fileManager.file') }) }}
           </p>
           <VCard
             variant="outlined"
@@ -1048,7 +1050,7 @@
             class="text-caption"
             @click="cancelDelete"
           >
-            Cancel
+            {{ t('components.fluxDrive.fileManager.cancel') }}
           </VBtn>
           <VBtn
             variant="flat"
@@ -1057,7 +1059,7 @@
             class="text-caption"
             @click="confirmDelete"
           >
-            Delete
+            {{ t('components.fluxDrive.fileManager.delete') }}
           </VBtn>
         </VCardActions>
       </VCard>
@@ -1073,7 +1075,7 @@
       <VCard>
         <VCardTitle class="d-flex align-center px-3 py-1 bg-primary text-white">
           <VIcon icon="mdi-rocket-launch" class="me-2" style="color: rgba(255,255,255,0.9);" />
-          <h3 class="text-subtitle-1 text-white">Upgrade Your FluxDrive Plan</h3>
+          <h3 class="text-subtitle-1 text-white">{{ t('components.fluxDrive.fileManager.upgradeYourPlan') }}</h3>
           <VSpacer />
           <VBtn
             icon="mdi-close"
@@ -1100,7 +1102,7 @@
       <VCard>
         <VCardTitle class="d-flex align-center px-3 py-1 bg-primary text-white">
           <VIcon icon="mdi-rename-box" class="me-2" style="color: rgba(255,255,255,0.9);" />
-          <h3 class="text-subtitle-1 text-white">Rename {{ itemToRename?.isFolder ? 'Folder' : 'File' }}</h3>
+          <h3 class="text-subtitle-1 text-white">{{ t('components.fluxDrive.fileManager.renameItem', { type: itemToRename?.isFolder ? t('components.fluxDrive.fileManager.folder') : t('components.fluxDrive.fileManager.file') }) }}</h3>
           <VSpacer />
           <VBtn
             icon="mdi-close"
@@ -1112,7 +1114,7 @@
         <VCardText class="pa-6 pt-4">
           <VTextField
             v-model="renameText"
-            label="New name"
+            :label="t('components.fluxDrive.fileManager.newName')"
             variant="outlined"
             density="compact"
             autofocus
@@ -1130,7 +1132,7 @@
             class="text-caption"
             @click="showRenameDialog = false"
           >
-            Cancel
+            {{ t('components.fluxDrive.fileManager.cancel') }}
           </VBtn>
           <VBtn
             variant="flat"
@@ -1140,7 +1142,7 @@
             :disabled="!renameValidation.isValid"
             @click="confirmRename"
           >
-            Rename
+            {{ t('components.fluxDrive.fileManager.rename') }}
           </VBtn>
         </VCardActions>
       </VCard>
@@ -1155,7 +1157,7 @@
       <VCard>
         <VCardTitle class="d-flex align-center px-3 py-1 bg-primary text-white">
           <VIcon icon="mdi-folder-move" class="me-2" style="color: rgba(255,255,255,0.9);" />
-          <h3 class="text-subtitle-1 text-white">Move {{ itemToMove?.isFolder ? 'Folder' : 'File' }}</h3>
+          <h3 class="text-subtitle-1 text-white">{{ t('components.fluxDrive.fileManager.moveItem', { type: itemToMove?.isFolder ? t('components.fluxDrive.fileManager.folder') : t('components.fluxDrive.fileManager.file') }) }}</h3>
           <VSpacer />
           <VBtn
             icon="mdi-close"
@@ -1183,8 +1185,8 @@
           </VCard>
           <VTextField
             v-model="moveDestination"
-            label="Destination folder name (leave empty for root)"
-            placeholder="e.g., xxx"
+            :label="t('components.fluxDrive.fileManager.destinationFolder')"
+            :placeholder="t('components.fluxDrive.fileManager.destinationPlaceholder')"
             variant="outlined"
             density="compact"
             autofocus
@@ -1200,7 +1202,7 @@
             class="text-caption"
             @click="showMoveDialog = false"
           >
-            Cancel
+            {{ t('components.fluxDrive.fileManager.cancel') }}
           </VBtn>
           <VBtn
             variant="flat"
@@ -1209,7 +1211,7 @@
             class="text-caption"
             @click="confirmMove"
           >
-            Move
+            {{ t('components.fluxDrive.fileManager.move') }}
           </VBtn>
         </VCardActions>
       </VCard>
@@ -1225,7 +1227,7 @@
       <VCard>
         <VCardTitle class="d-flex align-center px-3 py-1 bg-primary text-white">
           <VIcon icon="mdi-history" class="me-2" style="color: rgba(255,255,255,0.9);" />
-          <h3 class="text-subtitle-1 text-white">File Versions - {{ fileForVersions?.name }}</h3>
+          <h3 class="text-subtitle-1 text-white">{{ t('components.fluxDrive.fileManager.fileVersionsTitle', { name: fileForVersions?.name }) }}</h3>
           <VSpacer />
           <VBtn
             icon="mdi-close"
@@ -1237,7 +1239,7 @@
         <VCardText class="pa-6 pt-0">
           <div v-if="fileForVersions?.versions?.length > 0">
             <p class="text-body-2 mb-4">
-              This file has {{ fileForVersions.versions.length }} version(s). Click on a version to download it.
+              {{ t('components.fluxDrive.fileManager.fileVersionsDescription', { count: fileForVersions.versions.length }) }}
             </p>
 
             <VList>
@@ -1247,8 +1249,8 @@
                   <VIcon icon="mdi-star" color="primary" />
                 </template>
                 <VListItemTitle>
-                  Current Version
-                  <VChip size="x-small" color="success" class="ml-2">Latest</VChip>
+                  {{ t('components.fluxDrive.fileManager.currentVersion') }}
+                  <VChip size="x-small" color="success" class="ml-2">{{ t('components.fluxDrive.fileManager.latest') }}</VChip>
                 </VListItemTitle>
                 <VListItemSubtitle>
                   Size: {{ convertSize(fileForVersions.size) }} •
@@ -1281,7 +1283,7 @@
                   <VIcon icon="mdi-clock-outline" />
                 </template>
                 <VListItemTitle>
-                  Version {{ fileForVersions.versions.length - index }}
+                  {{ t('components.fluxDrive.fileManager.versionNumber', { number: fileForVersions.versions.length - index }) }}
                 </VListItemTitle>
                 <VListItemSubtitle>
                   Size: {{ convertSize(version.size || 0) }} •
@@ -1308,7 +1310,7 @@
             </VList>
           </div>
           <div v-else>
-            <p class="text-body-1">This file has no previous versions.</p>
+            <p class="text-body-1">{{ t('components.fluxDrive.fileManager.noPreviousVersions') }}</p>
           </div>
         </VCardText>
         <VCardActions class="pa-6 pt-0">
@@ -1320,7 +1322,7 @@
             class="text-caption"
             @click="showVersionsDialog = false"
           >
-            Close
+            {{ t('components.fluxDrive.fileManager.close') }}
           </VBtn>
         </VCardActions>
       </VCard>
@@ -1335,7 +1337,7 @@
       <VCard>
         <VCardTitle class="d-flex align-center px-3 py-1 bg-primary text-white">
           <VIcon icon="mdi-folder-plus" class="me-2" style="color: rgba(255,255,255,0.9);" />
-          <h3 class="text-subtitle-1 text-white">Create New Folder</h3>
+          <h3 class="text-subtitle-1 text-white">{{ t('components.fluxDrive.fileManager.createNewFolder') }}</h3>
           <VSpacer />
           <VBtn
             icon="mdi-close"
@@ -1347,7 +1349,7 @@
         <VCardText class="pa-6 pt-4">
           <VTextField
             v-model="newFolderName"
-            label="Folder name"
+            :label="t('components.fluxDrive.fileManager.folderName')"
             variant="outlined"
             density="compact"
             autofocus
@@ -1363,7 +1365,7 @@
             class="text-caption"
             @click="showCreateFolderDialog = false"
           >
-            Cancel
+            {{ t('components.fluxDrive.fileManager.cancel') }}
           </VBtn>
           <VBtn
             variant="flat"
@@ -1373,7 +1375,7 @@
             :disabled="!newFolderName?.trim()"
             @click="confirmCreateFolder"
           >
-            Create Folder
+            {{ t('components.fluxDrive.fileManager.createFolder') }}
           </VBtn>
         </VCardActions>
       </VCard>
@@ -1400,14 +1402,14 @@
             <template #prepend>
               <VIcon icon="mdi-download" size="20" />
             </template>
-            <VListItemTitle>Download</VListItemTitle>
+            <VListItemTitle>{{ t('components.fluxDrive.fileManager.download') }}</VListItemTitle>
           </VListItem>
 
           <VListItem @click="handleContextMenuAction('addVersion')">
             <template #prepend>
               <VIcon icon="mdi-file-plus" size="20" />
             </template>
-            <VListItemTitle>Add Version</VListItemTitle>
+            <VListItemTitle>{{ t('components.fluxDrive.fileManager.addVersion') }}</VListItemTitle>
           </VListItem>
 
           <VListItem
@@ -1417,7 +1419,7 @@
             <template #prepend>
               <VIcon icon="mdi-history" size="20" />
             </template>
-            <VListItemTitle>View Versions</VListItemTitle>
+            <VListItemTitle>{{ t('components.fluxDrive.fileManager.viewVersions') }}</VListItemTitle>
           </VListItem>
 
         </template>
@@ -1427,28 +1429,28 @@
           <template #prepend>
             <VIcon icon="mdi-pencil" size="20" />
           </template>
-          <VListItemTitle>Rename</VListItemTitle>
+          <VListItemTitle>{{ t('components.fluxDrive.fileManager.rename') }}</VListItemTitle>
         </VListItem>
 
         <VListItem @click="handleContextMenuAction('move')">
           <template #prepend>
             <VIcon icon="mdi-folder-move" size="20" />
           </template>
-          <VListItemTitle>Move To</VListItemTitle>
+          <VListItemTitle>{{ t('components.fluxDrive.fileManager.moveTo') }}</VListItemTitle>
         </VListItem>
 
         <VListItem v-if="!contextMenuItem.isFolder" @click="handleContextMenuAction('copy')">
           <template #prepend>
             <VIcon icon="mdi-link" size="20" />
           </template>
-          <VListItemTitle>Copy Link</VListItemTitle>
+          <VListItemTitle>{{ t('components.fluxDrive.fileManager.copyLink') }}</VListItemTitle>
         </VListItem>
 
         <VListItem @click="handleContextMenuAction('delete')" class="text-error">
           <template #prepend>
             <VIcon icon="mdi-delete" size="20" color="error" />
           </template>
-          <VListItemTitle>Delete</VListItemTitle>
+          <VListItemTitle>{{ t('components.fluxDrive.fileManager.delete') }}</VListItemTitle>
         </VListItem>
       </VList>
     </VMenu>
@@ -1470,7 +1472,7 @@
       <VCard>
         <VCardTitle class="d-flex align-center px-3 py-1 bg-primary text-white">
           <VIcon icon="mdi-plus-circle" class="me-2" style="color: rgba(255,255,255,0.9);" />
-          <h3 class="text-subtitle-1 text-white">Add Version</h3>
+          <h3 class="text-subtitle-1 text-white">{{ t('components.fluxDrive.fileManager.addVersion') }}</h3>
           <VSpacer />
           <VBtn
             icon="mdi-close"
@@ -1484,7 +1486,7 @@
           <!-- File selection -->
           <VFileInput
             ref="versionFileInput"
-            label="Select file to upload as new version"
+            :label="t('components.fluxDrive.fileManager.selectFileToUpload')"
             accept="*/*"
             prepend-icon="mdi-file-upload"
             class="no-wrap-filename"
@@ -1505,7 +1507,7 @@
           <!-- Comment field -->
           <VTextField
             v-model="versionComment"
-            label="Version Comment (optional)"
+            :label="t('components.fluxDrive.fileManager.versionComment')"
             placeholder="e.g., Bug fixes, new features..."
             prepend-icon="mdi-comment-text"
             :counter="100"
@@ -1514,7 +1516,7 @@
           />
 
           <div class="text-caption text-medium-emphasis mt-2">
-            This will create a new version of "{{ fileForAddVersion?.name }}" while keeping the original file accessible through version history.
+            {{ t('components.fluxDrive.fileManager.addVersionDescription', { fileName: fileForAddVersion?.name }) }}
           </div>
         </VCardText>
 
@@ -1526,7 +1528,7 @@
             size="small"
             @click="showAddVersionDialog = false"
           >
-            Cancel
+            {{ t('components.fluxDrive.fileManager.cancel') }}
           </VBtn>
           <VBtn
             color="primary"
@@ -1536,8 +1538,8 @@
             :disabled="!selectedVersionFile"
             @click="uploadVersion"
           >
-            <VIcon icon="mdi-upload" class="me-2" />
-            Add Version
+            <VIcon icon="mdi-upload" class="mr-2" />
+            {{ t('components.fluxDrive.fileManager.addVersion') }}
           </VBtn>
         </VCardActions>
       </VCard>
@@ -1612,7 +1614,7 @@
             <LoadingSpinner
               icon="mdi-file-document-edit"
               :icon-size="50"
-              title="Loading file content..."
+              :title="t('components.fluxDrive.fileManager.loadingFileContent')"
               message=""
             />
           </div>
@@ -1640,6 +1642,7 @@
 
 <script setup>
 import { computed, ref, watch, onMounted, nextTick } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useFluxDrive } from '@/composables/useFluxDrive'
 import PricingPlans from '@/components/FluxDrive/PricingPlans.vue'
 import VersionsDialog from '@/components/FluxDrive/VersionsDialog.vue'
@@ -1648,7 +1651,12 @@ import ClipboardJS from 'clipboard'
 import LoadingSpinner from '@/components/Marketplace/LoadingSpinner.vue'
 
 // Define emit for FileManager
-const emit = defineEmits(['select-plan']) // Local state with persistence
+const emit = defineEmits(['select-plan'])
+
+// Initialize i18n
+const { t } = useI18n()
+
+// Local state with persistence
 const viewType = ref(localStorage.getItem('fluxdrive-view-type') || 'list') // 'list' or 'grid'
 
 // Watch viewType changes to persist to localStorage
@@ -2345,7 +2353,6 @@ const {
   previewingFile,
   resultMessage,
   uploadMessage,
-  fileHeaders,
   ipfsHost,
   bridgeURL,
   getAlertType,
@@ -2382,6 +2389,15 @@ const {
   clearError,
   uploadVersionToFluxCloud,
 } = useFluxDrive()
+
+// Override fileHeaders with translated versions
+const fileHeaders = computed(() => [
+  { title: '', key: 'preview', sortable: false, width: 60 },
+  { title: t('components.fluxDrive.fileManager.columnName'), key: 'name', sortable: true },
+  { title: t('components.fluxDrive.fileManager.columnUpdated'), key: 'timestamp', sortable: true, width: 160 },
+  { title: t('components.fluxDrive.fileManager.columnSize'), key: 'size', sortable: true, width: 90 },
+  { title: '', key: 'actions', sortable: false, width: 40 },
+])
 
 // Override previewFile to automatically open editor for text files
 const previewFile = file => {

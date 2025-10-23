@@ -3,7 +3,7 @@
     <!-- Manage Button -->
     <VTooltip
       v-if="showManage"
-      text="Manage"
+      :text="t('pages.apps.manage.tooltips.manage')"
     >
       <template #activator="{ props: manageBtnProps }">
         <VBtn
@@ -26,7 +26,7 @@
     <!-- Install Button.. -->
     <VTooltip
       v-if="showInstall"
-      text="Install"
+      :text="t('pages.apps.manage.tooltips.install')"
     >
       <template #activator="{ props: installBtnProps }">
         <VBtn
@@ -49,7 +49,7 @@
     <!-- Remove App Button -->
     <VTooltip
       v-if="showControl"
-      text="Remove"
+      :text="t('pages.apps.manage.tooltips.remove')"
     >
       <template #activator="{ props: removeBtnProps }">
         <VBtn
@@ -66,7 +66,7 @@
     </VTooltip>
 
     <!-- Visit Button -->
-    <VTooltip text="Visit">
+    <VTooltip :text="t('pages.apps.manage.tooltips.visit')">
       <template #activator="{ props: visitBtnProps }">
         <VBtn
           v-bind="visitBtnProps"
@@ -83,7 +83,7 @@
     <!-- Confirmation Dialog -->
     <ConfirmCustomDialog
       :target="`manage-installed-app-${row.item.name}`"
-      confirm-button="Manage"
+      :confirm-button="t('pages.apps.manage.confirmButton')"
       @confirm="openAppManagement(row.item.name)"
     />
 
@@ -115,7 +115,7 @@
                   icon="mdi-progress-tag"
                   class="mr-1"
                 />
-                Current Task:
+                {{ t('pages.apps.manage.dialog.currentTask') }}
               </h3>
               <VChip
                 class="current-task-chip"
@@ -150,7 +150,7 @@
                   icon="mdi-progress-download"
                   class="mr-1"
                 />
-                Overall Progress
+                {{ t('pages.apps.manage.dialog.overallProgress') }}
               </h3>
               <VProgressLinear
                 :model-value="(aggregateProgress.current / aggregateProgress.total) * 100"
@@ -170,7 +170,7 @@
                   icon="mdi-text-box-outline"
                   class="mr-1"
                 />
-                Full Logs
+                {{ t('pages.apps.manage.dialog.fullLogs') }}
               </h3>
               <VBtn
                 size="small"
@@ -183,7 +183,7 @@
                   start
                   class="mr-1"
                 />
-                {{ showLogs ? 'Hide Logs' : 'Show Logs' }}
+                {{ showLogs ? t('pages.apps.manage.dialog.hideLogs') : t('pages.apps.manage.dialog.showLogs') }}
               </VBtn>
               <VExpandTransition>
                 <div
@@ -212,7 +212,7 @@
             variant="flat"
             @click="() => { installDialog.show = false; eventBus.emit('updateInstalledApp') }"
           >
-            Close
+            {{ t('pages.apps.manage.dialog.close') }}
           </VBtn>
         </VCardActions>
       </VCard>
@@ -222,6 +222,7 @@
 
 <script setup>
 import { ref, watch, nextTick, computed } from 'vue'
+import { useI18n } from 'vue-i18n'
 import AppsService from '@/services/AppsService'
 import { eventBus } from '@/utils/eventBus'
 
@@ -234,10 +235,12 @@ const props = defineProps({
   showControl: {  type: [Boolean, Function], default: false },
 })
 
+const { t } = useI18n()
+
 const router = useRouter()
 
 const snackbar = ref({ show: false, message: '', color: 'error' })
-const installDialog = ref({ show: false, title: 'Installing App...' })
+const installDialog = ref({ show: false, title: t('pages.apps.manage.dialog.installingTitle') })
 const output = ref([])
 const downloadOutput = ref({})
 const logContainer = ref(null)
@@ -270,8 +273,8 @@ async function openGlobalApp(appName) {
     if (response.data.status === 'success') {
       const location = response.data.data[0]
       if (!location) {
-        showSnackbar('Application is awaiting launching...', 'error')
-        
+        showSnackbar(t('pages.apps.manage.messages.awaitingLaunch'), 'error')
+
         return
       }
       const url = `https://${appName}.app.runonflux.io`
@@ -289,7 +292,7 @@ async function installApp(appName) {
   output.value = []
   downloadOutput.value = {}
   operationTask.value = ''
-  installDialog.value.title = `Installing ${appName}...`
+  installDialog.value.title = t('pages.apps.manage.dialog.installingAppName', { appName })
   installDialog.value.show = true
   showLogs.value = false
 
@@ -348,7 +351,7 @@ async function removeApp(appName) {
   output.value = []
   downloadOutput.value = {}
   operationTask.value = ''
-  installDialog.value.title = `Removing ${appName}...`
+  installDialog.value.title = t('pages.apps.manage.dialog.removingAppName', { appName })
   installDialog.value.show = true
   showLogs.value = false
 
@@ -445,11 +448,11 @@ function fullLogOutput() {
 
   const logs = []
   let buffer = []
-  let currentComponent = 'General'
+  let currentComponent = t('components.checkoutContent.general')
   let appNameFallback = null
 
   const flushBufferTo = comp => {
-    if (!comp) comp = appNameFallback || 'General'
+    if (!comp) comp = appNameFallback || t('components.checkoutContent.general')
     buffer.forEach(({ text, phase }) => {
       logs.push({ component: comp, phase, text })
     })

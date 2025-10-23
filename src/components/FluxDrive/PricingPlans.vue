@@ -12,10 +12,10 @@
     <!-- Pricing Plans -->
     <div class="text-center mb-8">
       <h3 class="text-h3 mb-2">
-        FluxDrive Storage Plans
+        {{ t('components.fluxDrive.pricingPlans.title') }}
       </h3>
       <p class="text-body-1 mb-6">
-        Choose the perfect plan for your decentralized storage needs.
+        {{ t('components.fluxDrive.pricingPlans.subtitle') }}
       </p>
     </div>
 
@@ -74,7 +74,7 @@
                       size="default"
                       class="pricing-chip-small text-body-2 font-weight-medium"
                     >
-                      $0.0017 GB / day
+                      $0.0017 GB {{ t('components.fluxDrive.pricingPlans.perDay') }}
                     </VChip>
                   </div>
 
@@ -89,7 +89,7 @@
                       size="default"
                       class="pricing-chip-large text-h6 font-weight-bold text-white"
                     >
-                      {{ plan.price }} / Month
+                      {{ plan.price }} {{ t('components.fluxDrive.pricingPlans.perMonth') }}
                     </VChip>
                   </div>
                 </div>
@@ -101,7 +101,7 @@
                       size="default"
                       class="pricing-chip-large text-body-1"
                     >
-                      Billed monthly
+                      {{ t('components.fluxDrive.pricingPlans.billedMonthly') }}
                     </VChip>
                   </div>
                 </div>
@@ -113,7 +113,7 @@
                   {{ plan.storage }}
                 </span>
                 <div class="text-body-2 mt-1 text-medium-emphasis">
-                  Storage
+                  {{ t('components.fluxDrive.pricingPlans.storage') }}
                 </div>
               </div>
 
@@ -157,10 +157,15 @@
 </template>
 
 <script setup>
+import { computed } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useFluxDrive } from '@/composables/useFluxDrive'
 
 // Define emit with proper signature
 const emit = defineEmits(['select-plan'])
+
+// i18n
+const { t } = useI18n()
 
 // Use the composable
 const {
@@ -180,7 +185,7 @@ const getButtonConfig = plan => {
   // Enterprise plan always shows Contact Us
   if (plan.id === 'enterprise') {
     return {
-      text: 'Contact Us',
+      text: t('components.fluxDrive.pricingPlans.contactUs'),
       color: 'primary',
       variant: 'flat',
       disabled: false,
@@ -191,7 +196,7 @@ const getButtonConfig = plan => {
   // If not logged in, show Sign In
   if (!isLoggedIn.value) {
     return {
-      text: 'Sign In',
+      text: t('components.fluxDrive.pricingPlans.signIn'),
       color: 'primary',
       variant: 'flat',
       disabled: false,
@@ -205,7 +210,7 @@ const getButtonConfig = plan => {
   switch (status) {
   case 'current':
     return {
-      text: 'Renew',
+      text: t('components.fluxDrive.pricingPlans.renew'),
       color: 'success',
       variant: 'flat',
       disabled: false,
@@ -213,7 +218,7 @@ const getButtonConfig = plan => {
     }
   case 'upgrade':
     return {
-      text: 'Upgrade',
+      text: t('components.fluxDrive.pricingPlans.upgrade'),
       color: 'primary',
       variant: 'flat',
       disabled: false,
@@ -221,7 +226,7 @@ const getButtonConfig = plan => {
     }
   case 'downgrade':
     return {
-      text: 'Downgrade',
+      text: t('components.fluxDrive.pricingPlans.downgrade'),
       color: 'warning',
       variant: 'flat',
       disabled: true,
@@ -230,7 +235,7 @@ const getButtonConfig = plan => {
   case 'signup':
   default:
     return {
-      text: 'Sign Up',
+      text: t('components.fluxDrive.pricingPlans.signUp'),
       color: 'primary',
       variant: 'flat',
       disabled: false,

@@ -7,7 +7,7 @@
     <VCard rounded="xl" class="d-flex flex-column import-dialog-card">
       <VCardTitle class="bg-primary text-white dialog-title flex-shrink-0 d-flex align-center">
         <VIcon>mdi-file-import</VIcon>
-        <span class="ml-2 flex-grow-1">Import Application Specification</span>
+        <span class="ml-2 flex-grow-1">{{ t('components.dialogs.importJsonDialog.title') }}</span>
         <VBtn
           icon="mdi-close"
           variant="text"
@@ -30,11 +30,11 @@
           >
             <VBtn value="file" class="flex-grow-1">
               <VIcon start>mdi-file-upload</VIcon>
-              Upload File
+              {{ t('components.dialogs.importJsonDialog.uploadFile') }}
             </VBtn>
             <VBtn value="paste" class="flex-grow-1">
               <VIcon start>mdi-content-paste</VIcon>
-              Paste Specification
+              {{ t('components.dialogs.importJsonDialog.pasteSpecification') }}
             </VBtn>
           </VBtnToggle>
         </div>
@@ -51,9 +51,9 @@
             @dragleave.prevent="isDragging = false"
           >
             <VIcon size="48" color="grey" class="mb-4">mdi-file-import</VIcon>
-            <div class="text-h6 mb-2">Drop file here or click to browse</div>
+            <div class="text-h6 mb-2">{{ t('components.dialogs.importJsonDialog.dropFileHere') }}</div>
             <div class="text-caption text-medium-emphasis">
-              Application specification or Docker Compose (JSON/YAML)
+              {{ t('components.dialogs.importJsonDialog.fileTypeHint') }}
             </div>
           </div>
 
@@ -69,7 +69,7 @@
           <!-- Drop Overlay -->
           <div v-if="isDragging" class="drop-overlay">
             <VIcon size="48" color="primary">mdi-file-upload</VIcon>
-            <div class="text-h6 mt-2">Drop file here</div>
+            <div class="text-h6 mt-2">{{ t('components.dialogs.importJsonDialog.dropFileHere') }}</div>
           </div>
         </div>
 
@@ -81,7 +81,7 @@
             density="compact"
             class="mb-3"
           >
-            Paste application specification or Docker Compose (JSON/YAML)
+            {{ t('components.dialogs.importJsonDialog.pasteHint') }}
           </VAlert>
           <div class="monaco-editor-wrapper paste-mode-editor">
             <VueMonacoEditor
@@ -103,7 +103,7 @@
             >
               <VIcon size="18">mdi-clipboard-arrow-down</VIcon>
               <VTooltip activator="parent" location="left">
-                Paste from Clipboard
+                {{ t('components.dialogs.importJsonDialog.pasteFromClipboard') }}
               </VTooltip>
             </VBtn>
             <!-- Custom loader overlay -->
@@ -111,7 +111,7 @@
               <LoadingSpinner
                 icon="mdi-content-paste"
                 :icon-size="50"
-                title="Loading editor..."
+                :title="t('components.dialogs.importJsonDialog.loadingEditor')"
                 message=""
               />
             </div>
@@ -124,7 +124,7 @@
             @click="handlePasteLoad"
           >
             <VIcon start size="20">mdi-file-check</VIcon>
-            Load Specification
+            {{ t('components.dialogs.importJsonDialog.loadSpecification') }}
           </VBtn>
         </div>
 
@@ -140,7 +140,7 @@
               <VIcon color="info" class="align-self-center">mdi-information</VIcon>
             </template>
             <div class="d-flex align-center w-100 flex-grow-1">
-              <span class="flex-grow-1">Review and edit before importing</span>
+              <span class="flex-grow-1">{{ t('components.dialogs.importJsonDialog.reviewAndEdit') }}</span>
               <VBtn
                 icon
                 variant="text"
@@ -166,7 +166,7 @@
               <LoadingSpinner
                 icon="mdi-file-import"
                 :icon-size="50"
-                title="Loading editor..."
+                :title="t('components.dialogs.importJsonDialog.loadingEditor')"
                 message=""
               />
             </div>
@@ -181,7 +181,7 @@
           variant="flat"
           @click="handleImport"
         >
-          Import
+          {{ t('components.dialogs.importJsonDialog.import') }}
         </VBtn>
       </VCardActions>
     </VCard>
@@ -208,6 +208,7 @@
 <script setup>
 import { ref, watch, computed } from 'vue'
 import { useTheme } from 'vuetify'
+import { useI18n } from 'vue-i18n'
 import yaml from 'js-yaml'
 import { VueMonacoEditor } from '@guolao/vue-monaco-editor'
 import LoadingSpinner from '@/components/Marketplace/LoadingSpinner.vue'
@@ -221,6 +222,8 @@ const props = defineProps({
 })
 
 const emit = defineEmits(['update:modelValue', 'import'])
+
+const { t } = useI18n()
 
 const theme = useTheme()
 
@@ -305,13 +308,13 @@ async function handleClipboardPaste() {
   try {
     const text = await navigator.clipboard.readText()
     pastedJson.value = text
-    snackbar.value.message = 'Content pasted from clipboard!'
+    snackbar.value.message = t('components.dialogs.importJsonDialog.contentPasted')
     snackbar.value.color = 'success'
     snackbar.value.icon = 'mdi-check-circle'
     snackbar.value.show = true
   } catch (error) {
     console.error('Failed to read clipboard:', error)
-    snackbar.value.message = 'Failed to read clipboard. Please use Ctrl+V to paste.'
+    snackbar.value.message = t('components.dialogs.importJsonDialog.clipboardFailed')
     snackbar.value.color = 'error'
     snackbar.value.icon = 'mdi-alert-circle'
     snackbar.value.show = true
@@ -340,13 +343,13 @@ function handlePasteLoad() {
 
     // Validate that the spec has required fields
     if (!spec.name || typeof spec.name !== 'string') {
-      throw new Error('Invalid specification: "name" field is required and must be a string')
+      throw new Error(t('components.dialogs.importJsonDialog.invalidName'))
     }
     if (!spec.compose || !Array.isArray(spec.compose)) {
-      throw new Error('Invalid specification: "compose" field is required and must be an array')
+      throw new Error(t('components.dialogs.importJsonDialog.invalidCompose'))
     }
     if (spec.compose.length === 0) {
-      throw new Error('Invalid specification: "compose" array cannot be empty')
+      throw new Error(t('components.dialogs.importJsonDialog.emptyCompose'))
     }
 
     // Store the loaded spec and show it for editing
@@ -366,13 +369,13 @@ function handleImport() {
 
     // Validate that the spec has required fields
     if (!spec.name || typeof spec.name !== 'string') {
-      throw new Error('Invalid specification: "name" field is required and must be a string')
+      throw new Error(t('components.dialogs.importJsonDialog.invalidName'))
     }
     if (!spec.compose || !Array.isArray(spec.compose)) {
-      throw new Error('Invalid specification: "compose" field is required and must be an array')
+      throw new Error(t('components.dialogs.importJsonDialog.invalidCompose'))
     }
     if (spec.compose.length === 0) {
-      throw new Error('Invalid specification: "compose" array cannot be empty')
+      throw new Error(t('components.dialogs.importJsonDialog.emptyCompose'))
     }
 
     // Always force version to 8
@@ -559,13 +562,13 @@ async function processFile(file) {
 
     // Validate that the spec has required fields
     if (!spec.name || typeof spec.name !== 'string') {
-      throw new Error('Invalid specification: "name" field is required and must be a string')
+      throw new Error(t('components.dialogs.importJsonDialog.invalidName'))
     }
     if (!spec.compose || !Array.isArray(spec.compose)) {
-      throw new Error('Invalid specification: "compose" field is required and must be an array')
+      throw new Error(t('components.dialogs.importJsonDialog.invalidCompose'))
     }
     if (spec.compose.length === 0) {
-      throw new Error('Invalid specification: "compose" array cannot be empty')
+      throw new Error(t('components.dialogs.importJsonDialog.emptyCompose'))
     }
 
     // Store the loaded spec and show it for editing
@@ -763,5 +766,4 @@ async function processFile(file) {
 .close-title-btn:hover :deep(.v-icon) {
   color: #f44336 !important;
 }
-
 </style>

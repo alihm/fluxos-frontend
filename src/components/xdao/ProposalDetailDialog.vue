@@ -9,7 +9,7 @@
       <VCardTitle class="bg-primary pa-4" style="color: white !important;">
         <div class="d-flex align-center">
           <VIcon icon="mdi-clipboard-text-outline" class="me-3" color="white" />
-          <span class="text-h5" style="color: white !important;">Proposal Details</span>
+          <span class="text-h5" style="color: white !important;">{{ t('components.xdao.proposalDetail.title') }}</span>
         </div>
       </VCardTitle>
 
@@ -25,22 +25,22 @@
               variant="elevated"
               size="large"
             >
-              {{ proposal.status }}
+              {{ formatStatus(proposal.status) }}
             </VChip>
           </div>
 
           <div class="d-flex flex-wrap gap-4 mb-4">
             <div class="d-flex align-center">
               <VIcon icon="mdi-account" class="me-2 text-medium-emphasis" />
-              <span class="text-body-1">{{ proposal.nickName || 'Anonymous' }}</span>
+              <span class="text-body-1">{{ proposal.nickName || t('components.xdao.proposalDetail.anonymous') }}</span>
             </div>
             <div class="d-flex align-center">
               <VIcon icon="mdi-calendar" class="me-2 text-medium-emphasis" />
-              <span class="text-body-1">Submitted: {{ formatDate(proposal.submitDate) }}</span>
+              <span class="text-body-1">{{ t('components.xdao.proposalDetail.submitted') }}: {{ formatDate(proposal.submitDate) }}</span>
             </div>
             <div class="d-flex align-center">
               <VIcon icon="mdi-calendar-end" class="me-2 text-medium-emphasis" />
-              <span class="text-body-1">End Date: {{ formatDate(proposal.voteEndDate) }}</span>
+              <span class="text-body-1">{{ t('components.xdao.proposalDetail.endDate') }}: {{ formatDate(proposal.voteEndDate) }}</span>
             </div>
           </div>
         </div>
@@ -53,7 +53,7 @@
               <VCardTitle class="d-flex align-center justify-space-between pa-4 pb-2">
                 <div class="d-flex align-center">
                   <VIcon icon="mdi-chart-donut" class="me-2" color="primary" size="20" />
-                  <span class="text-h6 font-weight-bold">Vote Progress</span>
+                  <span class="text-h6 font-weight-bold">{{ t('components.xdao.proposalDetail.charts.voteProgress') }}</span>
                 </div>
                 <VChip
                   :color="getProgressColor(proposal)"
@@ -87,7 +87,7 @@
                   <VCard variant="tonal" color="primary" class="stat-card">
                     <VCardText class="pa-2 text-center">
                       <VIcon icon="mdi-target" size="16" class="mb-1" />
-                      <div class="text-caption text-medium-emphasis">Required</div>
+                      <div class="text-caption text-medium-emphasis">{{ t('components.xdao.proposalDetail.charts.required') }}</div>
                       <div class="text-subtitle-1 font-weight-bold">
                         {{ Number(proposal.votesRequired).toLocaleString() }}
                       </div>
@@ -96,7 +96,7 @@
                   <VCard variant="tonal" color="success" class="stat-card">
                     <VCardText class="pa-2 text-center">
                       <VIcon icon="mdi-check-circle" size="16" class="mb-1" />
-                      <div class="text-caption text-medium-emphasis">Received</div>
+                      <div class="text-caption text-medium-emphasis">{{ t('components.xdao.proposalDetail.charts.received') }}</div>
                       <div class="text-subtitle-1 font-weight-bold">
                         {{ useSimulationData ? Math.floor(proposal.votesRequired * 0.655).toLocaleString() : totalVotes.toLocaleString() }}
                       </div>
@@ -112,7 +112,7 @@
               <VCardTitle class="d-flex align-center justify-space-between pa-4 pb-2">
                 <div class="d-flex align-center">
                   <VIcon icon="mdi-chart-pie" class="me-2" color="success" size="20" />
-                  <span class="text-h6 font-weight-bold">Vote Split</span>
+                  <span class="text-h6 font-weight-bold">{{ t('components.xdao.proposalDetail.charts.voteSplit') }}</span>
                 </div>
                 <VChip
                   :color="voteBreakdownSeries[0] >= 50 ? 'success' : 'error'"
@@ -137,7 +137,7 @@
                   <VCard variant="tonal" color="success" class="stat-card">
                     <VCardText class="pa-2 text-center">
                       <VIcon icon="mdi-thumb-up" size="16" class="mb-1" />
-                      <div class="text-caption text-medium-emphasis">Yes Votes</div>
+                      <div class="text-caption text-medium-emphasis">{{ t('components.xdao.proposalDetail.charts.yesVotes') }}</div>
                       <div class="text-subtitle-1 font-weight-bold text-success">
                         {{ useSimulationData ? Math.floor(proposal.votesRequired * 0.474).toLocaleString() : Number(proposal.votesYes).toLocaleString() }}
                       </div>
@@ -146,7 +146,7 @@
                   <VCard variant="tonal" color="error" class="stat-card">
                     <VCardText class="pa-2 text-center">
                       <VIcon icon="mdi-thumb-down" size="16" class="mb-1" />
-                      <div class="text-caption text-medium-emphasis">No Votes</div>
+                      <div class="text-caption text-medium-emphasis">{{ t('components.xdao.proposalDetail.charts.noVotes') }}</div>
                       <div class="text-subtitle-1 font-weight-bold text-error">
                         {{ useSimulationData ? Math.floor(proposal.votesRequired * 0.181).toLocaleString() : Number(proposal.votesNo).toLocaleString() }}
                       </div>
@@ -174,16 +174,16 @@
               <VIcon icon="mdi-vote" size="20" />
             </VAvatar>
             <div>
-              <div class="text-h6 font-weight-bold">Cast Your Vote</div>
-              <div class="text-caption text-medium-emphasis">Make your voice heard</div>
+              <div class="text-h6 font-weight-bold">{{ t('components.xdao.proposalDetail.voting.castYourVote') }}</div>
+              <div class="text-caption text-medium-emphasis">{{ t('components.xdao.proposalDetail.voting.makeYourVoiceHeard') }}</div>
             </div>
           </VCardTitle>
           <VCardText class="pa-4 pt-2">
             <!-- Login Required Message -->
             <div v-if="!isLoggedIn" class="text-center py-6">
-              <h3 class="text-h6 mb-3">Login Required</h3>
+              <h3 class="text-h6 mb-3">{{ t('components.xdao.proposalDetail.voting.loginRequired') }}</h3>
               <p class="text-body-2 text-medium-emphasis">
-                You need to be logged in to participate in voting. Please log in with your Flux wallet to continue.
+                {{ t('components.xdao.proposalDetail.voting.loginRequiredMessage') }}
               </p>
             </div>
 
@@ -202,7 +202,7 @@
                   class="mb-6 modern-alert"
                   density="comfortable"
                 >
-                  Remember: You can't change your vote after voting!
+                  {{ t('components.xdao.proposalDetail.voting.voteWarning') }}
                 </VAlert>
 
                 <!-- Modern Vote Power Display -->
@@ -216,9 +216,9 @@
                     >
                       <VIcon icon="mdi-vote" size="28" />
                     </VAvatar>
-                    <div class="text-caption text-medium-emphasis mb-1">Your Voting Power</div>
+                    <div class="text-caption text-medium-emphasis mb-1">{{ t('components.xdao.proposalDetail.voting.yourVotingPower') }}</div>
                     <div class="text-h5 font-weight-bold text-primary">{{ myNumberOfVotes }}</div>
-                    <div class="text-body-2 text-medium-emphasis">votes available</div>
+                    <div class="text-body-2 text-medium-emphasis">{{ t('components.xdao.proposalDetail.voting.votesAvailable') }}</div>
                   </div>
                 </div>
 
@@ -236,7 +236,7 @@
                     :disabled="hasVoted || isVoting"
                   >
                     <VIcon icon="mdi-thumb-up" class="me-2" size="16" />
-                    Vote YES
+                    {{ t('components.xdao.proposalDetail.voting.voteYes') }}
                   </VBtn>
                   <VBtn
                     color="error"
@@ -250,7 +250,7 @@
                     :disabled="hasVoted || isVoting"
                   >
                     <VIcon icon="mdi-thumb-down" class="me-2" size="16" />
-                    Vote NO
+                    {{ t('components.xdao.proposalDetail.voting.voteNo') }}
                   </VBtn>
                 </div>
               </VCard>
@@ -265,7 +265,7 @@
             >
               <div class="d-flex align-center justify-space-between">
                 <div>
-                  You have voted: <strong class="ms-1">{{ userVote === 'yes' ? 'YES' : 'NO' }}</strong>
+                  {{ t('components.xdao.proposalDetail.voting.youHaveVoted') }}: <strong class="ms-1">{{ userVote === 'yes' ? t('components.xdao.proposalDetail.voting.yes') : t('components.xdao.proposalDetail.voting.no') }}</strong>
                 </div>
                 <VChip
                   :color="userVote === 'yes' ? 'success' : 'error'"
@@ -273,13 +273,13 @@
                   size="small"
                   class="font-weight-bold"
                 >
-                  {{ myNumberOfVotes }} vote(s)
+                  {{ t('components.xdao.proposalDetail.voting.voteCount', { count: myNumberOfVotes }) }}
                 </VChip>
               </div>
             </VAlert>
 
             <div class="text-center mt-4 text-caption text-medium-emphasis">
-              Voting ends: {{ formatDate(proposal.voteEndDate) }}
+              {{ t('components.xdao.proposalDetail.voting.votingEnds') }}: {{ formatDate(proposal.voteEndDate) }}
             </div>
 
             <VProgressLinear
@@ -307,8 +307,8 @@
               <VIcon icon="mdi-cash-multiple" size="20" />
             </VAvatar>
             <div>
-              <div class="text-h6 font-weight-bold">Grant Information</div>
-              <div class="text-caption text-medium-emphasis">Funding Details</div>
+              <div class="text-h6 font-weight-bold">{{ t('components.xdao.proposalDetail.grant.title') }}</div>
+              <div class="text-caption text-medium-emphasis">{{ t('components.xdao.proposalDetail.grant.fundingDetails') }}</div>
             </div>
           </VCardTitle>
           <VCardText class="pa-4 pt-2">
@@ -326,7 +326,7 @@
                       FLUX
                     </VChip>
                   </div>
-                  <div class="text-caption text-medium-emphasis mb-1">Grant Amount</div>
+                  <div class="text-caption text-medium-emphasis mb-1">{{ t('components.xdao.proposalDetail.grant.grantAmount') }}</div>
                   <div class="text-h5 font-weight-bold">
                     {{ Number(proposal.grantValue).toLocaleString() }}
                   </div>
@@ -347,7 +347,7 @@
                       <VIcon icon="mdi-content-copy" size="16" />
                     </VBtn>
                   </div>
-                  <div class="text-caption text-medium-emphasis mb-1">Recipient Address</div>
+                  <div class="text-caption text-medium-emphasis mb-1">{{ t('components.xdao.proposalDetail.grant.recipientAddress') }}</div>
                   <div class="text-body-2 font-mono text-truncate">
                     {{ proposal.grantAddress }}
                   </div>
@@ -361,7 +361,7 @@
                     rel="noopener noreferrer"
                   >
                     <VIcon icon="mdi-open-in-new" size="14" class="me-1" />
-                    View on Explorer
+                    {{ t('components.xdao.proposalDetail.grant.viewOnExplorer') }}
                   </VBtn>
                 </VCardText>
               </VCard>
@@ -373,7 +373,7 @@
         <VCard variant="outlined" class="mb-6">
           <VCardTitle class="text-h6 pa-4 pb-2">
             <VIcon icon="mdi-text" class="me-2" />
-            Description
+            {{ t('components.xdao.proposalDetail.description') }}
           </VCardTitle>
           <VCardText class="pa-4 pt-2">
             <div class="text-body-1 line-height-relaxed description-text">
@@ -387,13 +387,13 @@
           <VExpansionPanel>
             <VExpansionPanelTitle>
               <VIcon icon="mdi-information-outline" class="me-2" />
-              Technical Details
+              {{ t('components.xdao.proposalDetail.technicalDetails.title') }}
             </VExpansionPanelTitle>
             <VExpansionPanelText>
               <VRow>
                 <VCol cols="12" md="6">
                   <div class="mb-3">
-                    <div class="text-body-2 text-medium-emphasis mb-1">Proposal Hash</div>
+                    <div class="text-body-2 text-medium-emphasis mb-1">{{ t('components.xdao.proposalDetail.technicalDetails.proposalHash') }}</div>
                     <div class="text-body-1 font-mono">{{ proposal.hash }}</div>
                     <VBtn
                       size="small"
@@ -401,31 +401,31 @@
                       @click="copyToClipboard(proposal.hash)"
                     >
                       <VIcon icon="mdi-content-copy" class="me-1" size="16" />
-                      Copy
+                      {{ t('components.xdao.proposalDetail.technicalDetails.copy') }}
                     </VBtn>
                   </div>
                 </VCol>
                 <VCol cols="12" md="6">
                   <div class="mb-3">
-                    <div class="text-body-2 text-medium-emphasis mb-1">Submit Date</div>
+                    <div class="text-body-2 text-medium-emphasis mb-1">{{ t('components.xdao.proposalDetail.technicalDetails.submitDate') }}</div>
                     <div class="text-body-1">{{ formatFullDate(proposal.submitDate) }}</div>
                   </div>
                 </VCol>
                 <VCol cols="12" md="6">
                   <div class="mb-3">
-                    <div class="text-body-2 text-medium-emphasis mb-1">Vote End Date</div>
+                    <div class="text-body-2 text-medium-emphasis mb-1">{{ t('components.xdao.proposalDetail.technicalDetails.voteEndDate') }}</div>
                     <div class="text-body-1">{{ formatFullDate(proposal.voteEndDate) }}</div>
                   </div>
                 </VCol>
                 <VCol cols="12" md="6">
                   <div class="mb-3">
-                    <div class="text-body-2 text-medium-emphasis mb-1">Current Status</div>
+                    <div class="text-body-2 text-medium-emphasis mb-1">{{ t('components.xdao.proposalDetail.technicalDetails.currentStatus') }}</div>
                     <VChip
                       :color="getStatusColor(proposal.status)"
                       variant="tonal"
                       size="small"
                     >
-                      {{ proposal.status }}
+                      {{ formatStatus(proposal.status) }}
                     </VChip>
                   </div>
                 </VCol>
@@ -441,7 +441,7 @@
           variant="outlined"
           @click="dialogVisible = false"
         >
-          Close
+          {{ t('common.buttons.close') }}
         </VBtn>
         <VBtn
           v-if="proposal.grantAddress"
@@ -452,7 +452,7 @@
           rel="noopener noreferrer"
         >
           <VIcon icon="mdi-open-in-new" class="me-2" />
-          View Address on Explorer
+          {{ t('components.xdao.proposalDetail.viewAddressOnExplorer') }}
         </VBtn>
       </VCardActions>
     </VCard>
@@ -462,6 +462,7 @@
 <script setup>
 import { ref, computed, watch, onMounted, nextTick } from 'vue'
 import { useTheme } from 'vuetify'
+import { useI18n } from 'vue-i18n'
 import { useFluxStore } from '@/stores/flux'
 import { storeToRefs } from 'pinia'
 import axios from 'axios'
@@ -485,6 +486,9 @@ const props = defineProps({
 })
 
 const emit = defineEmits(['update:modelValue', 'showLogin'])
+
+// i18n
+const { t } = useI18n()
 
 // Theme and stores
 const theme = useTheme()
@@ -733,8 +737,39 @@ const getStatusColor = status => {
   if (status === 'Passed') return 'success'
   if (status === 'Unpaid') return 'info'
   if (status.includes('Rejected')) return 'error'
-  
+
   return 'primary'
+}
+
+// Format status with translation - handles compound statuses like "Rejected Unpaid" or "Rejected <reason>"
+const formatStatus = status => {
+  if (!status) return ''
+
+  // Define translation map
+  const statusMap = {
+    'Open': t('components.xdao.proposalDetail.charts.status.open'),
+    'Passed': t('components.xdao.proposalDetail.charts.status.passed'),
+    'Unpaid': t('components.xdao.proposalDetail.charts.status.unpaid'),
+    'Rejected': t('components.xdao.proposalDetail.charts.status.rejected'),
+    'Not Enough Votes': t('components.xdao.proposalDetail.charts.status.notEnoughVotes'),
+  }
+
+  // Handle "Not Enough Votes" as a single phrase
+  if (status.includes('Not Enough Votes')) {
+    return status.replace('Not Enough Votes', statusMap['Not Enough Votes'])
+      .replace('Rejected', statusMap['Rejected'])
+  }
+
+  // Handle compound status like "Rejected Unpaid" or "Rejected <reason>"
+  if (status.includes(' ')) {
+    const parts = status.split(' ')
+    const translatedParts = parts.map(part => statusMap[part] || part)
+    
+    return translatedParts.join(' ')
+  }
+
+  // Single word status
+  return statusMap[status] || status
 }
 
 const getProgressColor = proposal => {
@@ -752,12 +787,12 @@ const getProgressText = proposal => {
   const totalVotes = proposal.votesYes + proposal.votesNo
   const progress = totalVotes / proposal.votesRequired
   const percentage = Math.round(progress * 100)
-  
+
   if (progress >= 1) {
-    return proposal.votesYes > proposal.votesNo ? 'Voting Complete - Passed' : 'Voting Complete - Rejected'
+    return proposal.votesYes > proposal.votesNo ? t('components.xdao.proposalDetail.charts.votingCompletePassed') : t('components.xdao.proposalDetail.charts.votingCompleteRejected')
   }
-  
-  return `${percentage}% of required votes received`
+
+  return t('components.xdao.proposalDetail.charts.percentageOfVotesReceived', { percentage })
 }
 
 const formatDate = timestamp => {
@@ -799,24 +834,24 @@ const getChartStatusText = proposal => {
   if (!proposal) return ''
 
   // Check the actual status first
-  if (proposal.status === 'Passed') return 'PASSED'
-  if (proposal.status === 'Rejected' || proposal.status.includes('Rejected')) return 'REJECTED'
-  if (proposal.status === 'Unpaid') return 'UNPAID'
+  if (proposal.status === 'Passed') return t('components.xdao.proposalDetail.charts.status.passed')
+  if (proposal.status === 'Rejected' || proposal.status.includes('Rejected')) return t('components.xdao.proposalDetail.charts.status.rejected')
+  if (proposal.status === 'Unpaid') return t('components.xdao.proposalDetail.charts.status.unpaid')
 
   // For Open status, check if voting is complete
   const totalVotes = Number(proposal.votesYes) + Number(proposal.votesNo)
   const progress = totalVotes / proposal.votesRequired
   if (progress >= 1) {
-    return proposal.votesYes > proposal.votesNo ? 'PASSED' : 'REJECTED'
+    return proposal.votesYes > proposal.votesNo ? t('components.xdao.proposalDetail.charts.status.passed') : t('components.xdao.proposalDetail.charts.status.rejected')
   }
 
-  return 'VOTING'
+  return t('components.xdao.proposalDetail.charts.status.voting')
 }
 
 const copyToClipboard = async text => {
   try {
     await navigator.clipboard.writeText(text)
-    showSnackbar('Copied to clipboard!', 'success')
+    showSnackbar(t('components.xdao.proposalDetail.messages.copiedToClipboard'), 'success')
   } catch (error) {
     console.error('Failed to copy to clipboard:', error)
   }
@@ -919,10 +954,10 @@ const initSSP = async () => {
     // Load vote information after getting zelid
     await loadVotes()
 
-    showSnackbar('Successfully signed with SSP', 'success')
+    showSnackbar(t('components.xdao.proposalDetail.messages.successfullySignedWithSSP'), 'success')
   } catch (error) {
     console.error('SSP signing error:', error)
-    showSnackbar(error.message || 'Failed to sign with SSP', 'error')
+    showSnackbar(error.message || t('components.xdao.proposalDetail.messages.failedToSignWithSSP'), 'error')
   }
 }
 
@@ -935,7 +970,7 @@ const initZelcore = async () => {
     console.log('Zelcore signing initiated')
   } catch (error) {
     console.error('Zelcore signing error:', error)
-    showSnackbar(error.message || 'Failed to initiate Zelcore signing', 'error')
+    showSnackbar(error.message || t('components.xdao.proposalDetail.messages.failedToInitiateZelcore'), 'error')
   }
 }
 
@@ -943,32 +978,32 @@ const initZelcore = async () => {
 const castVote = async voteType => {
   // First check if user is logged in
   if (!isLoggedIn.value) {
-    showSnackbar('Please log in first', 'warning')
-    
+    showSnackbar(t('components.xdao.proposalDetail.messages.pleaseLogInFirst'), 'warning')
+
     return
   }
 
   // Prevent voting if already voted
   if (hasVoted.value) {
-    showSnackbar('You have already voted on this proposal!', 'warning')
-    
+    showSnackbar(t('components.xdao.proposalDetail.messages.alreadyVoted'), 'warning')
+
     return
   }
 
   if (!props.proposal?.hash) {
-    showSnackbar('Proposal hash not available', 'error')
-    
+    showSnackbar(t('components.xdao.proposalDetail.messages.proposalHashNotAvailable'), 'error')
+
     return
   }
 
 
   // Check if signature is available
   if (!signature.value || !dataToSign.value) {
-    showSnackbar('Missing signature. Please sign in with your wallet first.', 'warning')
+    showSnackbar(t('components.xdao.proposalDetail.messages.missingSignature'), 'warning')
 
     // Try to initiate signing
     await initSSP()
-    
+
     return
   }
 
@@ -993,7 +1028,7 @@ const castVote = async voteType => {
       console.log('Vote registered successfully!')
       hasVoted.value = true
       userVote.value = voteType
-      showSnackbar('Your vote has been recorded successfully!', 'success')
+      showSnackbar(t('components.xdao.proposalDetail.messages.voteRecordedSuccess'), 'success')
 
       // Update proposal vote counts for immediate UI feedback
       if (voteType === 'yes') {
@@ -1005,11 +1040,11 @@ const castVote = async voteType => {
 
       // Success message auto-hides via snackbar timeout
     } else {
-      throw new Error(response.data.data?.message || response.data.data || 'Vote failed')
+      throw new Error(response.data.data?.message || response.data.data || t('components.xdao.proposalDetail.messages.voteFailed'))
     }
   } catch (error) {
     console.error('Voting error:', error)
-    showSnackbar(error.message || 'Failed to cast vote', 'error')
+    showSnackbar(error.message || t('components.xdao.proposalDetail.messages.failedToCastVote'), 'error')
   } finally {
     isVoting.value = false
   }

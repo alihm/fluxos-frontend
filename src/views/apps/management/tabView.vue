@@ -5,7 +5,7 @@
         <VCol cols="4">
           <VSelect
             v-model="tableOptions.perPage"
-            label="Per Page"
+            :label="t('pages.apps.table.perPage')"
             density="compact"
             :items="tableOptions.pageOptions"
           />
@@ -16,10 +16,10 @@
         >
           <VTextField
             v-model="tableOptions.filter"
-            label="Filter"
+            :label="t('pages.apps.table.filter')"
             density="compact"
             variant="outlined"
-            placeholder="Type to Search"
+            :placeholder="t('pages.apps.table.filterPlaceholder')"
             :clearable="tableOptions.filter?.length > 0"
             class="mr-1"
           >
@@ -44,7 +44,7 @@
                     }"
                   />
                 </template>
-                <span>Open advanced filter options</span>
+                <span>{{ t('pages.apps.table.advancedFilterTooltip') }}</span>
               </VTooltip>
             </template>
 
@@ -56,7 +56,7 @@
                   :items="modeOptions"
                   item-title="text"
                   item-value="value"
-                  label="App Type"
+                  :label="t('pages.apps.table.appType')"
                   density="compact"
                   hide-details
                   class="mt-1"
@@ -74,7 +74,7 @@
                   :items="versionOptions"
                   item-title="text"
                   item-value="value"
-                  label="Version"
+                  :label="t('pages.apps.table.version')"
                   density="compact"
                   hide-details
                   class="mt-1"
@@ -89,7 +89,7 @@
               <VListItem>
                 <VTextField
                   v-model.number="tableOptions.minHdd"
-                  label="Min HDD (GB)"
+                  :label="t('pages.apps.table.minHdd')"
                   type="number"
                   min="1"
                   step="1"
@@ -106,7 +106,7 @@
               <VListItem>
                 <VTextField
                   v-model.number="tableOptions.minRam"
-                  label="Min RAM (MB)"
+                  :label="t('pages.apps.table.minRam')"
                   type="number"
                   min="100"
                   step="100"
@@ -123,7 +123,7 @@
               <VListItem>
                 <VTextField
                   v-model.number="tableOptions.minCpu"
-                  label="Min CPU (Cores)"
+                  :label="t('pages.apps.table.minCpu')"
                   type="number"
                   min="0.1"
                   step="0.1"
@@ -141,7 +141,7 @@
               <VListItem>
                 <VTextField
                   v-model.number="tableOptions.minInstances"
-                  label="Min Instances"
+                  :label="t('pages.apps.table.minInstances')"
                   type="number"
                   density="compact"
                   min="3"
@@ -157,11 +157,11 @@
               <VListItem>
                 <VTextField
                   v-model="inputTag"
-                  label="Repotags"
+                  :label="t('pages.apps.table.repotags')"
                   density="compact"
                   hide-details
                   clearable
-                  placeholder="Type and press enter"
+                  :placeholder="t('pages.apps.table.repotagsPlaceholder')"
                   class="mt-1"
                   @keydown.enter.prevent="addRepotag"
                 >
@@ -172,7 +172,7 @@
                 <div v-if="tableOptions.repotags.length > 0" class="small-checkbox">
                   <VCheckbox
                     v-model="tableOptions.matchAllRepotags"
-                    label="Include all tags (match all)"
+                    :label="t('pages.apps.table.matchAllTags')"
                     density="compact"
                     class="pa-0 ml-1"
                     hide-details
@@ -202,7 +202,7 @@
                   @click="resetFilters"
                 >
                   <VIcon start>mdi-filter-off</VIcon>
-                  Clear All Filters
+                  {{ t('pages.apps.table.clearFilters') }}
                 </VBtn>
               </VListItem>
             </VList>
@@ -240,7 +240,7 @@
                   class="mr-1"
                   size="25"
                 />
-                <div>Loading...</div>
+                <div>{{ t('pages.apps.table.loading') }}</div>
               </div>
               <div
                 v-else-if="!loggedIn && manage"
@@ -265,11 +265,11 @@
                       
                       <!-- Title and Description -->
                       <h1 class="text-h4 font-weight-bold mb-3">
-                        Sign In Required
+                        {{ t('pages.apps.table.signInRequired') }}
                       </h1>
                       
                       <p class="text-body-1 text-medium-emphasis mb-8 px-4">
-                        To manage and monitor your applications on the Flux network, you need to authenticate with your Flux identity.
+                        {{ t('pages.apps.table.signInDescription') }}
                       </p>
                       
                       <!-- Features List -->
@@ -279,21 +279,21 @@
                             <div>
                               <div class="d-flex align-center mb-2">
                                 <VIcon color="success" size="20" class="mr-2 flex-shrink-0">mdi-check-circle</VIcon>
-                                <span class="text-body-2 text-no-wrap">View your apps</span>
+                                <span class="text-body-2 text-no-wrap">{{ t('pages.apps.table.features.viewApps') }}</span>
                               </div>
                               <div class="d-flex align-center mb-2">
                                 <VIcon color="success" size="20" class="mr-2 flex-shrink-0">mdi-check-circle</VIcon>
-                                <span class="text-body-2 text-no-wrap">Manage resources</span>
+                                <span class="text-body-2 text-no-wrap">{{ t('pages.apps.table.features.manageResources') }}</span>
                               </div>
                             </div>
                             <div>
                               <div class="d-flex align-center mb-2">
                                 <VIcon color="success" size="20" class="mr-2 flex-shrink-0">mdi-check-circle</VIcon>
-                                <span class="text-body-2 text-no-wrap">Monitor performance</span>
+                                <span class="text-body-2 text-no-wrap">{{ t('pages.apps.table.features.monitorPerformance') }}</span>
                               </div>
                               <div class="d-flex align-center">
                                 <VIcon color="success" size="20" class="mr-2 flex-shrink-0">mdi-check-circle</VIcon>
-                                <span class="text-body-2 text-no-wrap">Control deployments</span>
+                                <span class="text-body-2 text-no-wrap">{{ t('pages.apps.table.features.controlDeployments') }}</span>
                               </div>
                             </div>
                           </div>
@@ -306,10 +306,10 @@
                           color="primary"
                           variant="flat"
                           size="large"
-                          @click="showLogin = true"
+                          @click="openLoginBottomSheet"
                         >
                           <VIcon size="22" class="mr-2">mdi-login-variant</VIcon>
-                          Sign In
+                          {{ t('pages.apps.table.signIn') }}
                         </VBtn>
                         <VBtn
                           variant="flat"
@@ -319,7 +319,7 @@
                           rel="noopener noreferrer"
                         >
                           <VIcon size="22" class="mr-2">mdi-information-outline</VIcon>
-                          Learn More
+                          {{ t('pages.apps.table.learnMore') }}
                         </VBtn>
                       </div>
                     </div>
@@ -334,7 +334,7 @@
                   icon="mdi-magnify"
                   class="mr-2"
                 />
-                <div>No matching apps found.</div>
+                <div>{{ t('pages.apps.table.noMatchingApps') }}</div>
               </div>
               <div
                 v-else-if="apiError"
@@ -347,7 +347,7 @@
                   color="error"
                 />
                 <div class="text-error">
-                  Unable to connect to the server. Please check your internet or try again later.
+                  {{ t('pages.apps.table.connectionError') }}
                 </div>
               </div>
               <div v-else>
@@ -355,7 +355,7 @@
                   icon="tabler-search-off"
                   class="mr-2"
                 />
-                <div>You don't have any apps.</div>
+                <div>{{ t('pages.apps.table.noApps') }}</div>
               </div>
             </div>
           </template>
@@ -426,7 +426,7 @@
               size="small"
               rounded="pill"
             >
-              {{ appStatusMap.get(item.name) || "checking..." }}
+              {{ appStatusMap.get(item.name) || t('pages.apps.table.checking') }}
             </VChip>
           </template>
 
@@ -465,7 +465,7 @@
                         >
                           mdi-hexagon-multiple
                         </VIcon>
-                        <span class="ml-1">Composition</span>
+                        <span class="ml-1">{{ t('pages.apps.table.composition') }}</span>
                       </VChip>
                     </h3>
 
@@ -537,7 +537,7 @@
                         >
                           mdi-map-marker-radius
                         </VIcon>
-                        <span class="ml-2">Locations</span>
+                        <span class="ml-2">{{ t('pages.apps.table.locations') }}</span>
                       </VChip>
                     </h3>
                     <Locations
@@ -590,22 +590,15 @@
       </div>
     </VCard>
   </div>
-
-  <!-- Login Dialog -->
-  <LoginDialog
-    v-model="showLogin"
-    title="Login Required"
-    @loginSuccess="handleLoginSuccess"
-  />
 </template>
 
 <script setup>
 import { ref, computed, nextTick, onMounted, onUnmounted, watch } from "vue"
+import { useI18n } from "vue-i18n"
+import { useLoginSheet } from '@/composables/useLoginSheet'
 import Manage from "@/views/apps/management/manage.vue"
 import Redeploy from "@/views/apps/management/redeploy.vue"
 import AppsService from "@/services/AppsService"
-import { useI18n } from "vue-i18n"
-import LoginDialog from '@/components/shared/LoginDialog.vue'
 
 const props = defineProps({
   apps: Array,
@@ -639,11 +632,11 @@ const props = defineProps({
     default: '',
   },
 })
-
 const emit = defineEmits(["openAppManagement"])
 const { t } = useI18n()
+const { openLoginBottomSheet, closeLoginBottomSheet } = useLoginSheet()
+
 const activeTabLocalIndexSpec = ref(0)
-const showLogin = ref(false)
 
 const tableOptions = ref({
   perPage: 10,
@@ -659,21 +652,21 @@ const tableOptions = ref({
 
 const inputTag = ref('')
 
-const modeOptions = [
-  { text: 'All', value: 'all', icon: 'mdi-apps-box' },
-  { text: 'Marketplace', value: 'marketplace', icon: 'mdi-basket' },
-  { text: 'Marketplace Excluded', value: 'marketplaceExcluded', icon: 'mdi-basket-off' },
-]
+const modeOptions = computed(() => [
+  { text: t('pages.apps.table.modeOptions.all'), value: 'all', icon: 'mdi-apps-box' },
+  { text: t('pages.apps.table.modeOptions.marketplace'), value: 'marketplace', icon: 'mdi-basket' },
+  { text: t('pages.apps.table.modeOptions.marketplaceExcluded'), value: 'marketplaceExcluded', icon: 'mdi-basket-off' },
+])
 
-const versionOptions = [
-  { text: 'All Versions', value: 'all', icon: 'mdi-tag-multiple' },
-  { text: 'Version 3', value: 3, icon: 'mdi-numeric-3-circle' },
-  { text: 'Version 4', value: 4, icon: 'mdi-numeric-4-circle' },
-  { text: 'Version 5', value: 5, icon: 'mdi-numeric-5-circle' },
-  { text: 'Version 6', value: 6, icon: 'mdi-numeric-6-circle' },
-  { text: 'Version 7', value: 7, icon: 'mdi-numeric-7-circle' },
-  { text: 'Version 8', value: 8, icon: 'mdi-numeric-8-circle' },
-]
+const versionOptions = computed(() => [
+  { text: t('pages.apps.table.versionOptions.all'), value: 'all', icon: 'mdi-tag-multiple' },
+  { text: t('pages.apps.table.versionOptions.v3'), value: 3, icon: 'mdi-numeric-3-circle' },
+  { text: t('pages.apps.table.versionOptions.v4'), value: 4, icon: 'mdi-numeric-4-circle' },
+  { text: t('pages.apps.table.versionOptions.v5'), value: 5, icon: 'mdi-numeric-5-circle' },
+  { text: t('pages.apps.table.versionOptions.v6'), value: 6, icon: 'mdi-numeric-6-circle' },
+  { text: t('pages.apps.table.versionOptions.v7'), value: 7, icon: 'mdi-numeric-7-circle' },
+  { text: t('pages.apps.table.versionOptions.v8'), value: 8, icon: 'mdi-numeric-8-circle' },
+])
 
 function isMarketplaceApp(name) {
   if (name.length >= 14) {
@@ -791,23 +784,23 @@ const pageCount = computed(() =>
 
 const isMobile = ref(false)
 
-const defaultFields = [
+const defaultFields = computed(() => [
   { key: "data-table-expand", title: "", sortable: false, class: "col-expand" },
-  { key: "name", title: "Name", sortable: true, class: "col-name" },
+  { key: "name", title: t('pages.apps.table.headers.name'), sortable: true, class: "col-name" },
   ...(props.showStatus
-    ? [{ key: "status", title: "Status", sortable: false, class: "col-status" }]
+    ? [{ key: "status", title: t('pages.apps.table.headers.status'), sortable: false, class: "col-status" }]
     : []),
-  { key: "description", title: "Description", sortable: false, class: "col-description" },
+  { key: "description", title: t('pages.apps.table.headers.description'), sortable: false, class: "col-description" },
   { key: "actions", title: "", sortable: false, align: "end", class: "col-actions" },
-]
+])
 
-const mobileFields = [
+const mobileFields = computed(() => [
   { key: "data-table-expand", title: "", sortable: false, class: "col-expand" },
-  { key: "name", title: "Name", sortable: true, class: "col-name-mobile" },
+  { key: "name", title: t('pages.apps.table.headers.name'), sortable: true, class: "col-name-mobile" },
   { key: "actions", title: "", sortable: false, align: "end", class: "col-actions" },
-]
+])
 
-const mergedFields = computed(() => isMobile.value ? mobileFields : defaultFields)
+const mergedFields = computed(() => isMobile.value ? mobileFields.value : defaultFields.value)
 
 function openAppManagement(name) {
   emit("openAppManagement", name)
@@ -877,11 +870,11 @@ function getServiceUsage(serviceName, spec) {
 }
 
 function labelForExpire(expire, height) {
-  if (!height) return "Application Expired"
-  if (props.currentBlockHeight === -1) return "Not possible to calculate expiration"
+  if (!height) return t('pages.apps.table.applicationExpired')
+  if (props.currentBlockHeight === -1) return t('pages.apps.table.cannotCalculateExpiration')
   const expires = expire || 22000
   const blocksToExpire = height + expires - props.currentBlockHeight
-  if (blocksToExpire < 1) return "Application Expired"
+  if (blocksToExpire < 1) return t('pages.apps.table.applicationExpired')
   const minutes = blocksToExpire * 2
   const units = { day: 1440, hour: 60, minute: 1 }
   const result = []
@@ -967,8 +960,8 @@ watch(
 
 // Watch for login status changes to close dialog when logged in
 watch(() => props.loggedIn, newValue => {
-  if (newValue && showLogin.value) {
-    showLogin.value = false
+  if (newValue) {
+    closeLoginBottomSheet()
   }
 })
 
@@ -1014,11 +1007,6 @@ const hasActiveFilters = computed(() => {
   )
 })
 
-function handleLoginSuccess() {
-  showLogin.value = false
-
-  // Trigger page refresh to reload data with new login status
-}
 
 function checkMobile() {
   isMobile.value = window.innerWidth <= 960

@@ -1,4 +1,5 @@
 <script setup>
+import { useI18n } from 'vue-i18n'
 import {
   staticPrimaryColor,
   staticPrimaryDarkenColor,
@@ -31,6 +32,8 @@ import { themeConfig } from '@themeConfig'
 import { useStorage } from '@vueuse/core'
 import { PerfectScrollbar } from 'vue3-perfect-scrollbar'
 import { useTheme } from 'vuetify'
+
+const { t } = useI18n()
 
 const isColorPickerActive = ref(false)
 
@@ -104,12 +107,12 @@ const themeMode = computed(() => {
     {
       bgImage: 'tabler-sun',
       value: Theme.Light,
-      label: 'Light',
+      label: t('core.theCustomizer.light'),
     },
     {
       bgImage: 'tabler-moon-stars',
       value: Theme.Dark,
-      label: 'Dark',
+      label: t('core.theCustomizer.dark'),
     },
   ]
 })
@@ -119,12 +122,12 @@ const themeSkin = computed(() => {
     {
       bgImage: defaultSkin,
       value: Skins.Default,
-      label: 'Default',
+      label: t('core.theCustomizer.default'),
     },
     {
       bgImage: borderSkin,
       value: Skins.Bordered,
-      label: 'Bordered',
+      label: t('core.theCustomizer.bordered'),
     },
   ]
 })
@@ -136,37 +139,39 @@ const layouts = computed(() => {
     {
       bgImage: defaultSkin,
       value: Layout.Vertical,
-      label: 'Vertical',
+      label: t('core.theCustomizer.vertical'),
     },
     {
       bgImage: collapsed,
       value: Layout.Collapsed,
-      label: 'Collapsed',
+      label: t('core.theCustomizer.collapsed'),
     },
     {
       bgImage: horizontalLight,
       value: Layout.Horizontal,
-      label: 'Horizontal',
+      label: t('core.theCustomizer.horizontal'),
     },
   ]
 })
 
 const { navbarType } = storeToRefs(configStore)
 
-const navbarTypeOptions = [
-  {
-    title: 'Sticky',
-    value: NavbarType.Sticky,
-    bgImage: collapsed,
-    label: 'Sticky', 
-  },
-  {
-    title: 'Static',
-    value: NavbarType.Static,
-    bgImage: horizontalLight,
-    label: 'Static',
-  },
-]
+const navbarTypeOptions = computed(() => {
+  return [
+    {
+      title: t('core.theCustomizer.sticky'),
+      value: NavbarType.Sticky,
+      bgImage: collapsed,
+      label: t('core.theCustomizer.sticky'),
+    },
+    {
+      title: t('core.theCustomizer.static'),
+      value: NavbarType.Static,
+      bgImage: horizontalLight,
+      label: t('core.theCustomizer.static'),
+    },
+  ]
+})
 
 const selectedNavbarType = computed({
   get: () => navbarType.value,
@@ -210,12 +215,12 @@ const contentWidth = computed(() => {
     {
       bgImage: compact,
       value: ContentWidth.Boxed,
-      label: 'Compact',
+      label: t('core.theCustomizer.compact'),
     },
     {
       bgImage: wideSvg,
       value: ContentWidth.Fluid,
-      label: 'Wide',
+      label: t('core.theCustomizer.wide'),
     },
   ]
 })
@@ -227,12 +232,12 @@ const direction = computed(() => {
     {
       bgImage: ltrSvg,
       value: Direction.Ltr,
-      label: 'Left to right',
+      label: t('core.theCustomizer.leftToRight'),
     },
     {
       bgImage: rtlSvg,
       value: Direction.Rtl,
-      label: 'Right to left',
+      label: t('core.theCustomizer.rightToLeft'),
     },
   ]
 })
@@ -383,10 +388,10 @@ onBeforeUnmount(() => {
       <div class="customizer-heading d-flex align-center justify-space-between">
         <div>
           <h6 class="text-h6">
-            Theme Customizer
+            {{ t('core.theCustomizer.title') }}
           </h6>
           <p class="text-body-2 mb-0">
-            Customize & Preview in Real Time
+            {{ t('core.theCustomizer.subtitle') }}
           </p>
         </div>
 
@@ -437,13 +442,13 @@ onBeforeUnmount(() => {
       >
         <!-- SECTION Theming -->
         <CustomizerSection
-          title="Theming"
+          :title="t('core.theCustomizer.theming')"
           :divider="false"
         >
           <!-- 👉 Primary Color -->
           <div class="d-flex flex-column gap-2">
             <h6 class="text-h6">
-              Primary Color
+              {{ t('core.theCustomizer.primaryColor') }}
             </h6>
 
             <div
@@ -516,7 +521,7 @@ onBeforeUnmount(() => {
           <!-- 👉 Theme -->
           <div class="d-flex flex-column gap-2">
             <h6 class="text-h6">
-              Theme
+              {{ t('core.theCustomizer.theme') }}
             </h6>
 
             <CustomRadiosWithImage
@@ -548,7 +553,7 @@ onBeforeUnmount(() => {
           <!-- 👉 Skin -->
           <div class="d-flex flex-column gap-2">
             <h6 class="text-h6">
-              Skins
+              {{ t('core.theCustomizer.skins') }}
             </h6>
 
             <CustomRadiosWithImage
@@ -572,7 +577,7 @@ onBeforeUnmount(() => {
               for="customizer-semi-dark"
               class="text-h6 text-high-emphasis"
             >
-              Semi Dark Menu
+              {{ t('core.theCustomizer.semiDarkMenu') }}
             </VLabel>
 
             <div>
@@ -587,11 +592,11 @@ onBeforeUnmount(() => {
         <!-- !SECTION -->
 
         <!-- SECTION LAYOUT -->
-        <CustomizerSection title="Layout">
+        <CustomizerSection :title="t('core.theCustomizer.layout')">
           <!-- 👉 Layouts -->
           <div class="d-flex flex-column gap-2">
             <h6 class="text-base font-weight-medium">
-              Menu (Navigation)
+              {{ t('core.theCustomizer.menuNavigation') }}
             </h6>
 
             <CustomRadiosWithImage
@@ -608,7 +613,7 @@ onBeforeUnmount(() => {
 
           <div class="d-flex flex-column gap-2">
             <h6 class="text-base font-weight-medium">
-              Navbar Type
+              {{ t('core.theCustomizer.navbarType') }}
             </h6>
 
             <CustomRadiosWithImage
@@ -626,7 +631,7 @@ onBeforeUnmount(() => {
           <!-- 👉 Content Width -->
           <div class="d-flex flex-column gap-2">
             <h6 class="text-base font-weight-medium">
-              Content
+              {{ t('core.theCustomizer.content') }}
             </h6>
 
             <CustomRadiosWithImage

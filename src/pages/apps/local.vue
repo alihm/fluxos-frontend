@@ -8,7 +8,7 @@
       hide-slider
     >
       <VTab class="tab-chip">
-        Installed Apps
+        {{ t('menu.application.installedApps') }}
         <VBadge
           v-if="installedApps.length"
           :content="installedApps.length"
@@ -23,7 +23,7 @@
         />
       </VTab>
       <VTab class="tab-chip">
-        Available Apps
+        {{ t('menu.application.availableApps') }}
         <VBadge
           v-if="availableApps.length"
           :content="availableApps.length"
@@ -80,6 +80,7 @@
   
 <script setup>
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
+import { useI18n } from 'vue-i18n'
 import MyAppsTab from "@/views/apps/management/tabView.vue"
 import AppsService from "@/services/AppsService"
 import DaemonService from "@/services/DaemonService"
@@ -87,6 +88,8 @@ import qs from "qs"
 import { eventBus } from "@/utils/eventBus"
 import { storeToRefs } from "pinia"
 import { useFluxStore } from "@/stores/flux"
+
+const { t } = useI18n()
 
 const fluxStore = useFluxStore()
 const { privilege } = storeToRefs(fluxStore)

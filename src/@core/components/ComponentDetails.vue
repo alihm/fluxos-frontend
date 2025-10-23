@@ -1,14 +1,14 @@
 <template>
   <div v-if="component" class="component-details-root">
     <ListEntry
-      title="Name"
+      :title="t('core.componentDetails.name')"
       :data="component.name"
       title-icon="mdi-cube-scan"
       title-icon-scale="1.3"
       kbd-variant="secondary"
     />
     <ListEntry
-      title="Description"
+      :title="t('core.componentDetails.description')"
       :data="component.description"
       title-icon="mdi-text-box"
       title-icon-scale="1.3"
@@ -17,7 +17,7 @@
     />
 
     <ListEntry
-      title="Repository"
+      :title="t('core.componentDetails.repository')"
       title-icon="mdi-docker"
       title-icon-scale="1.5"
     >
@@ -40,20 +40,20 @@
     </ListEntry>
 
     <ListEntry
-      title="Repository Authentication"
+      :title="t('core.componentDetails.repositoryAuthentication')"
       title-icon="mdi-lock"
       title-icon-scale="1.4"
     >
       <template #default>
         <kbd class="alert-secondary resource-kbd">
           <VIcon size="18">{{ component?.repoauth ? "mdi-eye-off" : "mdi-eye" }}</VIcon>
-          {{ component?.repoauth ? "Private" : "Public" }}
+          {{ component?.repoauth ? t('core.componentDetails.private') : t('core.componentDetails.public') }}
         </kbd>
       </template>
     </ListEntry>
 
     <ListEntry
-      title="Custom Domains"
+      :title="t('core.componentDetails.customDomains')"
       :data="sanitized(component?.domains) || ''"
       hide-if-empty
       title-icon="mdi-link"
@@ -76,7 +76,7 @@
     </ListEntry>
 
     <ListEntry
-      title="Automatic Domains"
+      :title="t('core.componentDetails.automaticDomains')"
       :data="constructAutomaticDomains(component?.ports, appName, index)"
       title-icon="mdi-earth"
       title-icon-scale="1.2"
@@ -102,7 +102,7 @@
     </ListEntry>
 
     <ListEntry
-      title="Ports"
+      :title="t('core.componentDetails.ports')"
       :data="sanitized(component?.ports)"
       hide-if-empty
       title-icon="mdi-power-plug"
@@ -122,7 +122,7 @@
     </ListEntry>
 
     <ListEntry
-      title="Container Ports"
+      :title="t('core.componentDetails.containerPorts')"
       :data="sanitized(component?.containerPorts)"
       hide-if-empty
       title-icon="mdi-power-plug-outline"
@@ -142,7 +142,7 @@
     </ListEntry>
 
     <ListEntry
-      title="Container Data"
+      :title="t('core.componentDetails.containerData')"
       :data="component?.containerData"
       title-icon="mdi-folder"
       title-icon-scale="1.3"
@@ -165,7 +165,7 @@
     </ListEntry>
 
     <ListEntry
-      title="Environment Parameters"
+      :title="t('core.componentDetails.environmentParameters')"
       :data="
         Array.isArray(component?.environmentParameters)
           ? component.environmentParameters.join(', ')
@@ -178,7 +178,7 @@
     />
 
     <ListEntry
-      title="Commands"
+      :title="t('core.componentDetails.commands')"
       :data="Array.isArray(component?.commands) ? component.commands.join(', ') : ''"
       hide-if-empty
       title-icon="mdi-console"
@@ -188,14 +188,14 @@
 
     <ListEntry
       v-if="component?.secrets"
-      title="Secrets"
+      :title="t('core.componentDetails.secrets')"
       title-icon="mdi-shield-lock"
       title-icon-scale="1.3"
       kbd-variant="secondary"
     >
       <template #default>
         <kbd class="alert-secondary resource-kbd d-inline-flex align-items-center">
-          Content Encrypted
+          {{ t('core.componentDetails.contentEncrypted') }}
         </kbd>
       </template>
     </ListEntry>
@@ -214,7 +214,7 @@
           mdi-chart-box-outline
         </VIcon>
         <span class="ml-1 hardware-chip-text"
-        >Hardware Resources</span>
+        >{{ t('core.componentDetails.hardwareResources') }}</span>
       </VChip>
     </div>
     <div class="hardware-resources-grid">
@@ -289,11 +289,15 @@
 </template>
 
 <script setup>
+import { useI18n } from 'vue-i18n'
+
 const props = defineProps({
   component: Object,
   index: Number,
   appName: String,
 })
+
+const { t } = useI18n()
 
 function getColorHex(color) {
   const colors = {
@@ -378,7 +382,7 @@ function buildResources(component) {
   const calculatePercentages = (value, max) => {
     const actualPercentage = (value / max) * 100
     const visualPercentage = value > 0 ? Math.max(actualPercentage, MIN_VISIBLE_PERCENTAGE) : 0
-    
+
     return {
       percentage: actualPercentage.toFixed(1),
       visualPercentage: visualPercentage.toFixed(1),
@@ -391,26 +395,26 @@ function buildResources(component) {
 
   return [
     {
-      label: "CPU",
+      label: t('core.componentDetails.cpu'),
       icon: "mdi-cpu-64-bit",
       color: "success",
-      value: pluralize(cpuValue, "vCore", "vCores"),
+      value: pluralize(cpuValue, t('core.componentDetails.vCore'), t('core.componentDetails.vCores')),
       percentage: cpuPercentages.percentage,
       visualPercentage: cpuPercentages.visualPercentage,
     },
     {
-      label: "RAM",
+      label: t('core.componentDetails.ram'),
       icon: "mdi-memory",
       color: "warning",
-      value: `${ramValue} MB`,
+      value: t('core.componentDetails.ramValue', { value: ramValue }),
       percentage: ramPercentages.percentage,
       visualPercentage: ramPercentages.visualPercentage,
     },
     {
-      label: "SSD",
+      label: t('core.componentDetails.ssd'),
       icon: "mdi-harddisk",
       color: "info",
-      value: `${hddValue} GB`,
+      value: t('core.componentDetails.ssdValue', { value: hddValue }),
       percentage: hddPercentages.percentage,
       visualPercentage: hddPercentages.visualPercentage,
     },

@@ -7,6 +7,10 @@ import sanitizeHtml from '@/utils/sanitizeHtml'
 import '@core/scss/template/index.scss'
 import '@styles/styles.scss'
 
+// Fonts
+import '@fontsource/montserrat/700.css' // Bold
+import '@fontsource/montserrat/600.css' // Semi-bold
+
 import process from 'process'
 import { Buffer } from 'buffer'
 import { EventEmitter2 } from 'eventemitter2'

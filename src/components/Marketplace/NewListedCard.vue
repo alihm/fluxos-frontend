@@ -5,7 +5,7 @@
         <VAvatar size="32" color="primary" class="title-avatar">
           <VIcon color="white" size="18">mdi-rocket-launch-outline</VIcon>
         </VAvatar>
-        <span class="title-text">NEW LISTED APPLICATIONS</span>
+        <span class="title-text">{{ labels.title }}</span>
       </div>
     </VCardTitle>
 
@@ -21,7 +21,7 @@
 
       <div v-else-if="!displayApps.length" class="empty-container">
         <VIcon size="48" color="grey-lighten-1" class="empty-icon">mdi-package-variant-closed</VIcon>
-        <p class="text-body-1 mt-0 font-weight-medium">No new apps available</p>
+        <p class="text-body-1 mt-0 font-weight-medium">{{ labels.noNewApps }}</p>
       </div>
 
       <div v-else class="apps-list-container">
@@ -41,10 +41,10 @@
               <div class="app-details">
                 <div class="app-main-info">
                   <h4 class="app-name" :title="app.displayName || app.name">
-                    {{ app.displayName || app.name || 'Unknown App' }}
+                    {{ app.displayName || app.name || labels.unknownApp }}
                   </h4>
                   <p class="app-description" :title="app.description">
-                    {{ app.description || 'No description available' }}
+                    {{ app.description || labels.noDescription }}
                   </p>
                 </div>
               </div>
@@ -57,7 +57,7 @@
                   style="height: 25px; font-size: 0.75rem; padding: 0 12px; width: 85px; border-radius: 20px;"
                   @click.stop="navigateToApp(app)"
                 >
-                  View
+                  {{ labels.view }}
                 </VBtn>
               </div>
             </div>
@@ -71,6 +71,7 @@
 <script setup>
 import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import AppIcon from '@/components/Marketplace/AppIcon.vue'
 import { useMarketplaceUtils } from '@/composables/useMarketplaceUtils'
 
@@ -92,8 +93,19 @@ const props = defineProps({
     default: false,
   },
 })
+
+const { t } = useI18n()
+
 const router = useRouter()
 const { formatRelativeTime } = useMarketplaceUtils()
+
+const labels = computed(() => ({
+  title: t('components.marketplace.newListedCard.title'),
+  noNewApps: t('components.marketplace.newListedCard.noNewApps'),
+  unknownApp: t('components.marketplace.newListedCard.unknownApp'),
+  noDescription: t('components.marketplace.newListedCard.noDescription'),
+  view: t('components.marketplace.newListedCard.view'),
+}))
 
 const displayApps = computed(() => {
   return [...props.apps]

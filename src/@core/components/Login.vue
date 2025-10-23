@@ -19,7 +19,7 @@
               size="25"
             />
           </VAvatar>
-          {{ t("login.automatedLogin") }}
+          {{ t("core.login.automatedLogin") }}
         </VCardTitle>
 
         <VRow>
@@ -41,7 +41,7 @@
                   @click="currentTab = 'one'"
                 >
                   <VIcon icon="mdi-wallet" class="me-1" size="16" />
-                  {{ t("login.thirdPartyLogin") }}
+                  {{ t("core.login.thirdPartyLogin") }}
                 </VBtn>
                 <VBtn
                   :variant="currentTab === 'two' ? 'elevated' : 'outlined'"
@@ -50,7 +50,7 @@
                   @click="currentTab = 'two'"
                 >
                   <VIcon icon="mdi-email" class="me-1" size="16" />
-                  {{ t("login.emailPassword") }}
+                  {{ t("core.login.emailPassword") }}
                 </VBtn>
               </div>
             </div>
@@ -83,8 +83,8 @@
                       />
                     </div>
                     <div class="text-center">
-                      <div class="text-h6 font-weight-medium mb-2">{{ t("login.finishingLogin") }}</div>
-                      <div class="text-body-2 text-medium-emphasis">{{ t("login.pleaseWait") }}</div>
+                      <div class="text-h6 font-weight-medium mb-2">{{ t("core.login.finishingLogin") }}</div>
+                      <div class="text-body-2 text-medium-emphasis">{{ t("core.login.pleaseWait") }}</div>
                     </div>
                   </div>
                   <div v-if="showSsoVerify">
@@ -93,16 +93,16 @@
                       color="primary"
                       @click="cancelVerification"
                     >
-                      {{ t("login.cancelVerification") }}
+                      {{ t("core.login.cancelVerification") }}
                     </VBtn>
                     <div>
                       <VProgressCircular
                         indeterminate
                         color="primary"
                       />
-                      <div>{{ t("login.finishingVerification") }}</div>
+                      <div>{{ t("core.login.finishingVerification") }}</div>
                       <div>
-                        <i>{{ t("login.checkEmail") }}</i>
+                        <i>{{ t("core.login.checkEmail") }}</i>
                       </div>
                     </div>
                   </div>
@@ -126,7 +126,7 @@
                           class="ml-2"
                           style="font-size: 14px"
                         >{{
-                          t("login.googleLogin")
+                          t("core.login.googleLogin")
                         }}</span>
                       </VBtn>
 
@@ -143,13 +143,13 @@
                         >
                           mdi-apple
                         </VIcon>
-                        <span style="font-size: 14px">{{ t("login.appleLogin") }}</span>
+                        <span style="font-size: 14px">{{ t("core.login.appleLogin") }}</span>
                       </VBtn>
                       <p
                         class="sso-tos normal-case mt-2 mb-0"
                         style="color: #757575"
                       >
-                        {{ t("login.bySigningIn") }}
+                        {{ t("core.login.bySigningIn") }}
                       </p>
                       <p class="sso-tos normal-case">
                         <a
@@ -157,10 +157,10 @@
                           target="_blank"
                           rel="noopener noreferrer"
                         >
-                          {{ t("login.termsOfService") }}
+                          {{ t("core.login.termsOfService") }}
                         </a>
                         <span style="color: #757575">
-                          &nbsp;{{ t("login.and") }}&nbsp;
+                          &nbsp;{{ t("core.login.and") }}&nbsp;
                         </span>
                         <a
                           :href="privacyLink"
@@ -168,7 +168,7 @@
                           rel="noopener noreferrer"
                         >
                           <span>
-                            {{ t("login.privacyPolicy")
+                            {{ t("core.login.privacyPolicy")
                             }}<span style="color: #757575">.</span>
                           </span>
                         </a>
@@ -194,7 +194,7 @@
                     >
                       <VTextField
                         v-model="emailForm.email"
-                        :label="t('login.email')"
+                        :label="t('core.login.email')"
                         type="email"
                         :rules="emailRules"
                         validate-on="blur submit"
@@ -204,7 +204,7 @@
                     <VCol cols="12">
                       <VTextField
                         v-model="emailForm.password"
-                        :label="t('login.password')"
+                        :label="t('core.login.password')"
                         type="password"
                         :rules="passwordRules"
                         validate-on="blur submit"
@@ -225,7 +225,7 @@
                           />
                         </div>
                         <div v-else>
-                          {{ t("login.login") }}
+                          {{ t("core.login.login") }}
                         </div>
                       </VBtn>
                     </VCol>
@@ -235,7 +235,7 @@
                         class="w-100"
                         @click="createAccount"
                       >
-                        {{ t("login.signUp") }}
+                        {{ t("core.login.signUp") }}
                       </VBtn>
                     </VCol>
                   </VRow>
@@ -255,7 +255,7 @@
                       <VIcon start>
                         mdi-close-circle
                       </VIcon>
-                      {{ t("login.cancelVerification") }}
+                      {{ t("core.login.cancelVerification") }}
                     </VBtn>
                     <div class="text-body-2">
                       <VProgressCircular
@@ -264,9 +264,9 @@
                         size="24"
                         class="mb-2"
                       />
-                      <div>{{ t("login.finishingVerification") }}</div>
+                      <div>{{ t("core.login.finishingVerification") }}</div>
                       <div>
-                        <i>{{ t("login.checkEmail") }}</i>
+                        <i>{{ t("core.login.checkEmail") }}</i>
                       </div>
                     </div>
                   </div>
@@ -295,7 +295,7 @@
                 class="my-2"
               >
                 <div class="text-overline text-disabled">
-                  OR
+                  {{ t("core.login.or") }}
                 </div>
               </VAvatar>
               <VDivider
@@ -320,7 +320,7 @@
                 style="z-index: 1"
               >
                 <div class="text-overline text-disabled">
-                  OR
+                  {{ t("core.login.or") }}
                 </div>
               </VAvatar>
               <VDivider />
@@ -345,16 +345,16 @@
                   icon="mdi-spider-web"
                   size="24"
                 />
-                {{ t("login.decentralizedLogin") }}
+                {{ t("core.login.decentralizedLogin") }}
               </div>
               <div class="text-body-2">
-                {{ t("login.walletLoginInfo") }}
+                {{ t("core.login.walletLoginInfo") }}
               </div>
             </div>
 
             <div class="d-flex flex-wrap justify-center mb-4">
               <a
-                title="Login with Zelcore"
+                :title="t('core.login.loginWithZelcore')"
                 @click="initiateLoginWS"
               >
                 <img
@@ -364,7 +364,7 @@
                 >
               </a>
               <a
-                title="Login with SSP"
+                :title="t('core.login.loginWithSSP')"
                 @click="initSSP"
               >
                 <img
@@ -374,7 +374,7 @@
                 >
               </a>
               <a
-                title="Login with WalletConnect"
+                :title="t('core.login.loginWithWalletConnect')"
                 @click="initWalletConnect"
               >
                 <img
@@ -384,7 +384,7 @@
                 >
               </a>
               <a
-                title="Login with Metamask"
+                :title="t('core.login.loginWithMetamask')"
                 @click="initMetamask"
               >
                 <img
@@ -421,10 +421,10 @@
               size="25"
             />
           </VAvatar>
-          {{ t("login.manualLogin") }}
+          {{ t("core.login.manualLogin") }}
         </VCardTitle>
         <VCardText class="text-center">
-          {{ t("login.signWithWallet") }}
+          {{ t("core.login.signWithWallet") }}
         </VCardText>
         <div class="pa-3">
           <VForm
@@ -435,22 +435,22 @@
               <VCol cols="12">
                 <VTextField
                   v-model="loginForm.loginPhrase"
-                  :label="t('login.message')"
-                  :placeholder="t('login.insertMessage')"
+                  :label="t('core.login.message')"
+                  :placeholder="t('core.login.insertMessage')"
                 />
               </VCol>
               <VCol cols="12">
                 <VTextField
                   v-model="loginForm.zelid"
-                  :label="t('login.address')"
-                  :placeholder="t('login.insertAddress')"
+                  :label="t('core.login.address')"
+                  :placeholder="t('core.login.insertAddress')"
                 />
               </VCol>
               <VCol cols="12">
                 <VTextField
                   v-model="loginForm.signature"
-                  :label="t('login.signature')"
-                  :placeholder="t('login.insertSignature')"
+                  :label="t('core.login.signature')"
+                  :placeholder="t('core.login.insertSignature')"
                 />
               </VCol>
               <VCol cols="12">
@@ -459,7 +459,7 @@
                   class="w-100 mb-4"
                   @click="login"
                 >
-                  {{ t("login.login") }}
+                  {{ t("core.login.login") }}
                 </VBtn>
               </VCol>
             </VRow>
@@ -475,7 +475,7 @@
       >
         <VCard>
           <VCardTitle class="bg-primary modal-title">
-            {{ t("login.createSSO") }}
+            {{ t("core.login.createSSO") }}
           </VCardTitle>
           <VCardText>
             <VForm
@@ -484,7 +484,7 @@
             >
               <VTextField
                 v-model="createSSOForm.email"
-                :label="t('login.email')"
+                :label="t('core.login.email')"
                 type="email"
                 :rules="emailRules"
                 validate-on="blur submit"
@@ -493,7 +493,7 @@
               />
               <VTextField
                 v-model="createSSOForm.pw1"
-                :label="t('login.password')"
+                :label="t('core.login.password')"
                 type="password"
                 :rules="passwordRules"
                 validate-on="blur submit"
@@ -502,7 +502,7 @@
               />
               <VTextField
                 v-model="createSSOForm.pw2"
-                :label="t('login.confirmPassword')"
+                :label="t('core.login.confirmPassword')"
                 type="password"
                 :rules="passwordRulesMatch"
                 validate-on="blur submit"
@@ -514,7 +514,7 @@
               class="sso-tos normal-case mt-2 mb-0"
               style="color: #757575"
             >
-              {{ t("login.bySigningIn") }}
+              {{ t("core.login.bySigningIn") }}
             </p>
             <p class="sso-tos normal-case mb-0">
               <a
@@ -522,16 +522,16 @@
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                {{ t("login.termsOfService") }}
+                {{ t("core.login.termsOfService") }}
               </a>
-              <span style="color: #757575"> &nbsp;{{ t("login.and") }}&nbsp; </span>
+              <span style="color: #757575"> &nbsp;{{ t("core.login.and") }}&nbsp; </span>
               <a
                 :href="privacyLink"
                 target="_blank"
                 rel="noopener noreferrer"
               >
                 <span>
-                  {{ t("login.privacyPolicy") }}<span style="color: #757575">.</span>
+                  {{ t("core.login.privacyPolicy") }}<span style="color: #757575">.</span>
                 </span>
               </a>
             </p>
@@ -542,14 +542,14 @@
               variant="flat"
               @click="cancelModal"
             >
-              {{ t("login.cancel") }}
+              {{ t("core.login.cancel") }}
             </VBtn>
             <VBtn
               color="primary"
               variant="flat"
               @click="handleSubmit"
             >
-              {{ t("login.ok") }}
+              {{ t("core.login.ok") }}
             </VBtn>
           </VCardActions>
         </VCard>
@@ -647,18 +647,18 @@ watch(currentTab, _ => {
 })
 
 const emailRules = [
-  v => !!v || t("login.emailRequired"),
-  v => /^[\w.-]+@[\w.-]+\.\w{2,}$/.test(v) || t("login.emailInvalid"),
+  v => !!v || t("core.login.emailRequired"),
+  v => /^[\w.-]+@[\w.-]+\.\w{2,}$/.test(v) || t("core.login.emailInvalid"),
 ]
 
 const passwordRules = [
-  v => !!v || t("login.passwordRequired"),
-  v => v.length >= 8 || t("login.passwordTooShort"),
+  v => !!v || t("core.login.passwordRequired"),
+  v => v.length >= 8 || t("core.login.passwordTooShort"),
 ]
 
 const passwordRulesMatch = computed(() => [
-  v => !!v || t("login.passwordConfirmRequired"),
-  v => v === createSSOForm.value.pw1 || t("login.passwordMismatch"),
+  v => !!v || t("core.login.passwordConfirmRequired"),
+  v => v === createSSOForm.value.pw1 || t("core.login.passwordMismatch"),
 ])
 
 const appKitAccount = ref(null)
@@ -679,7 +679,7 @@ const loginWithGoogleBtn = async () => {
 
     handleSignInSuccessWithAuthResult(result)
   } catch (e) {
-    showToast("error", t("login.googleError") || e.message)
+    showToast("error", t("core.login.googleError") || e.message)
   }
 }
 
@@ -689,7 +689,7 @@ const loginWithAppleBtn = async () => {
 
     handleSignInSuccessWithAuthResult(result)
   } catch (e) {
-    showToast("error", t("login.appleError") || e.message)
+    showToast("error", t("core.login.appleError") || e.message)
   }
 }
 
@@ -753,7 +753,7 @@ const handleSignedInUser = async user => {
       )
 
       if (fluxLogin.data?.status !== "success")
-        throw new Error("Login Failed, please try again.")
+        throw new Error(t("core.login.loginFailed"))
 
       const authLogin = {
         zelid: fluxLogin.data.public_address,
@@ -787,7 +787,7 @@ const handleSignedInUser = async user => {
       await checkVerification()
     }
   } catch (error) {
-    showToast("error", "Login Failed, please try again.")
+    showToast("error", t("core.login.loginFailed"))
     resetLoginUI()
   }
 }
@@ -799,7 +799,7 @@ const checkVerification = async () => {
       await user.reload()
       user = getUser()
       if (user.emailVerified) {
-        showToast("info", "Email verified")
+        showToast("info", t("core.login.emailVerified"))
         showSsoVerify.value = false
         showEmailVerify.value = false
         ssoVerification.value = false
@@ -810,7 +810,7 @@ const checkVerification = async () => {
       }
     }
   } catch (error) {
-    showToast("warning", "Email verification failed")
+    showToast("warning", t("core.login.emailVerificationFailed"))
     resetLoginUI()
   }
 }
@@ -843,7 +843,7 @@ const emailLogin = async () => {
   } catch (error) {
     showEmailLoginProcessing.value = false
     await nextTick()
-    showToast("error", "Login failed, please try again")
+    showToast("error", t("core.login.loginFailed"))
   }
 }
 
@@ -876,7 +876,7 @@ const handleSubmit = async () => {
     modalShow.value = false
   } catch (error) {
     resetLoginUI()
-    showToast("error", "Account creation failed, try again")
+    showToast("error", t("core.login.accountCreationFailed"))
   }
 }
 
@@ -1037,7 +1037,7 @@ const initWalletConnect = async () => {
     }
   } catch (error) {
     console.log('[Login] 💥 Login error:', error)
-    showToast("error", error.message || "Failed to connect with WalletConnect")
+    showToast("error", error.message || t("core.login.walletConnectError"))
   }
 }
 
@@ -1046,7 +1046,7 @@ const isSigning = ref(false)
 const initMetamask = async () => {
   try {
     if (isSigning.value) {
-      showToast("warning", "Please complete the previous MetaMask request.")
+      showToast("warning", t("core.login.metamaskPendingRequest"))
 
       return
     }
@@ -1077,7 +1077,7 @@ const initMetamask = async () => {
     }
   } catch (error) {
     console.error("MetaMask login failed:", error)
-    showToast("error", error.message || "MetaMask login failed")
+    showToast("error", error.message || t("core.login.metamaskError"))
   } finally {
     isSigning.value = false
   }
@@ -1085,7 +1085,7 @@ const initMetamask = async () => {
 
 const initSSP = async () => {
   try {
-    if (!window.ssp) return showToast("error", "SSP Wallet not installed")
+    if (!window.ssp) return showToast("error", t("core.login.sspNotInstalled"))
     await getZelIdLoginPhrase()
 
     const responseData = await window.ssp.request("sspwid_sign_message", {
@@ -1132,7 +1132,7 @@ const initZelcore = () => {
       document.body.removeChild(hiddenLink)
     }
   } catch (error) {
-    showToast("warning", "Failed to sign message, please try again.")
+    showToast("warning", t("core.login.signMessageFailed"))
   }
 }
 

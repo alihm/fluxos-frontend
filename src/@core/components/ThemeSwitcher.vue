@@ -1,5 +1,6 @@
 <script setup>
 import { useConfigStore } from '@core/stores/config'
+import { useI18n } from 'vue-i18n'
 
 const props = defineProps({
   themes: {
@@ -10,6 +11,7 @@ const props = defineProps({
 
 const configStore = useConfigStore()
 const selectedItem = ref([configStore.theme])
+const { t } = useI18n()
 
 // Update icon if theme is changed from other sources
 watch(() => configStore.theme, () => {
@@ -38,7 +40,7 @@ watch(() => configStore.theme, () => {
           @click="() => { configStore.theme = name }"
         >
           <VListItemTitle class="text-capitalize">
-            {{ name }}
+            {{ t(`common.theme.${name}`) }}
           </VListItemTitle>
         </VListItem>
       </VList>

@@ -25,7 +25,7 @@
           </VOverlay>
           <VCardText>
             <div class="mb-4">
-              {{ card.collateral.toLocaleString() }} FLUX Collateral
+              {{ card.collateral.toLocaleString() }} {{ t('pages.dashboard.rewards.fluxCollateral') }}
             </div>
 
             <VTimeline
@@ -54,7 +54,7 @@
                       ~${{
                         beautifyValue(card.rewards[period.label] * getFiatRate("FLUX"))
                       }}
-                      USD
+                      {{ t('pages.dashboard.rewards.usd') }}
                     </VChip>
                   </div>
                   <span class="app-timeline-meta">{{ period.label }}</span>
@@ -73,7 +73,7 @@
         lg="12"
       >
         <VCard
-          title="Historical Price Chart"
+          :title="t('pages.dashboard.rewards.historicalPriceChart')"
           elevation="2"
           height="350"
           class="py-0"
@@ -109,7 +109,7 @@
           variant="text"
           @click="snackbar.show = false"
         >
-          Close
+          {{ t('pages.dashboard.rewards.close') }}
         </VBtn>
       </template>
     </VSnackbar>
@@ -124,6 +124,9 @@ import axios from "axios"
 import axiosRetry from "axios-retry"
 import { useConfigStore } from "@core/stores/config"
 import { storeToRefs } from "pinia"
+import { useI18n } from "vue-i18n"
+
+const { t } = useI18n()
 
 const configStore = useConfigStore()
 const { theme } = storeToRefs(configStore)
@@ -156,7 +159,7 @@ const lineChart = ref({
   series: [],
   chartOptions: {
     colors: [themeColors.primary],
-    labels: ["Price"],
+    labels: [t("pages.dashboard.rewards.price")],
     grid: { show: false },
     chart: { toolbar: { show: false }, sparkline: { enabled: true }, stacked: true },
     dataLabels: { enabled: false },
@@ -174,7 +177,7 @@ const lineChart = ref({
     yaxis: [{ y: 0 }],
     tooltip: {
       x: { formatter: value => new Date(value).toLocaleString("en-GB") },
-      y: { formatter: value => `$${beautifyValue(value, 2)} USD` },
+      y: { formatter: value => `$${beautifyValue(value, 2)} ${t("pages.dashboard.rewards.usd")}` },
       theme: theme.value,
     },
   },
@@ -191,21 +194,21 @@ const historyPrice = ref(null)
 
 const rewardCards = reactive([
   {
-    title: "Cumulus Total Rewards",
+    title: t("pages.dashboard.rewards.cumulusTotalRewards"),
     collateral: 0,
     type: "cumulus",
     dotColor: "primary",
     rewards: {},
   },
   {
-    title: "Nimbus Total Rewards",
+    title: t("pages.dashboard.rewards.nimbusTotalRewards"),
     collateral: 0,
     type: "nimbus",
     dotColor: "warning",
     rewards: {},
   },
   {
-    title: "Stratus Total Rewards",
+    title: t("pages.dashboard.rewards.stratusTotalRewards"),
     collateral: 0,
     type: "stratus",
     dotColor: "error",
@@ -214,9 +217,9 @@ const rewardCards = reactive([
 ])
 
 const rewardPeriods = [
-  { label: "Per Day", factor: 0.14285714 },
-  { label: "Per Week", factor: 1 },
-  { label: "Per Month", factor: 4.34812141 },
+  { label: t("pages.dashboard.rewards.perDay"), factor: 0.14285714 },
+  { label: t("pages.dashboard.rewards.perWeek"), factor: 1 },
+  { label: t("pages.dashboard.rewards.perMonth"), factor: 4.34812141 },
 ]
 
 watch(theme, newTheme => {
@@ -295,7 +298,7 @@ const getData = async () => {
   } catch (error) {
     isLoading.value = false
     console.error("Error fetching data:", error)
-    showError("Failed to fetch data")
+    showError(t("pages.dashboard.rewards.errors.failedToFetchData"))
   }
 }
 
@@ -306,7 +309,7 @@ const getRates = async () => {
     rates.value = result.data
   } catch (error) {
     console.error("Error fetching rates:", error)
-    showError("Failed to fetch rates")
+    showError(t("pages.dashboard.rewards.errors.failedToFetchRates"))
   }
 }
 
@@ -321,10 +324,10 @@ const getPriceData = async () => {
 
     const priceData = historicalPrices.value.filter((_, i) => i % 3 === 0)
 
-    lineChart.value.series = [{ name: "Price", data: priceData }]
+    lineChart.value.series = [{ name: t("pages.dashboard.rewards.price"), data: priceData }]
   } catch (error) {
     console.error("Error fetching price data:", error)
-    showError("Failed to fetch price data")
+    showError(t("pages.dashboard.rewards.errors.failedToFetchPriceData"))
   } finally {
     loadingPrice.value = false
   }
@@ -350,7 +353,7 @@ const getFluxNodeCount = async () => {
     await generateEconomics(counts)
   } catch (error) {
     console.error("Error fetching node count:", error)
-    showError("Failed to fetch node count")
+    showError(t("pages.dashboard.rewards.errors.failedToFetchNodeCount"))
   }
 }
 
@@ -370,7 +373,7 @@ const generateEconomics = async fluxnodecounts => {
     }
   } catch (error) {
     console.error("Error fetching block reward:", error)
-    showError("Failed to fetch block reward")
+    showError(t("pages.dashboard.rewards.errors.failedToFetchBlockReward"))
   }
 
   const stratuses = fluxnodecounts["stratus-enabled"]

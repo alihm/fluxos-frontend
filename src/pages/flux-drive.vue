@@ -5,7 +5,6 @@
       <div>🔍 Debug Info:</div>
       <div>isLoggedIn: {{ isLoggedIn }}</div>
       <div>hasActiveSubscription: {{ hasActiveSubscription }}</div>
-      <div>showLogin: {{ showLogin }}</div>
     </div>
 
     <!-- Loading state while checking subscription -->
@@ -13,7 +12,7 @@
       v-if="!subscriptionChecked"
       icon="mdi-cloud"
       :icon-size="56"
-      title="Loading FluxDrive..."
+      :title="t('pages.fluxDrive.loading')"
     />
 
     <!-- Show pricing plans for non-subscribers -->
@@ -32,12 +31,6 @@
     </div>
 
 
-    <!-- Login Dialog -->
-    <LoginDialog
-      v-model="showLogin"
-      title="Login Required"
-      @loginSuccess="handleLoginSuccess"
-    />
     <!-- Checkout Dialog -->
     <VDialog
       v-model="showCheckout"
@@ -55,7 +48,7 @@
               class="me-2"
               style="color: white;"
             />
-            FluxDrive {{ selectedActionType === 'renew' ? 'Renewal' : selectedActionType === 'upgrade' ? 'Upgrade' : selectedActionType === 'downgrade' ? 'Downgrade' : 'Checkout' }}
+            FluxDrive {{ checkoutTitle }}
           </h3>
           <VSpacer />
           <VBtn
@@ -82,20 +75,22 @@
 
 <script setup>
 import { onMounted, ref, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useFluxDrive } from '@/composables/useFluxDrive'
-import LoginDialog from '@/components/shared/LoginDialog.vue'
 import LoadingSpinner from '@/components/Marketplace/LoadingSpinner.vue'
 import PricingPlans from '@/components/FluxDrive/PricingPlans.vue'
 import FileManager from '@/components/FluxDrive/FileManager.vue'
 import StorageInfo from '@/components/FluxDrive/StorageInfo.vue'
 import CheckoutContent from '@/components/CheckoutContent.vue'
 
+const { t } = useI18n()
+
 // Use the composable
 const {
   isLoggedIn,
   hasActiveSubscription,
   subscriptionChecked,
-  showLogin,
+  openLoginBottomSheet,
   loadFiles,
   selectPlan,
   checkSubscriptionStatus,
@@ -108,6 +103,7 @@ const {
 
 // Import flux store to refresh user data after login
 import { useFluxStore } from '@/stores/flux'
+import { computed } from 'vue'
 
 const fluxStore = useFluxStore()
 
@@ -115,6 +111,16 @@ const fluxStore = useFluxStore()
 const showCheckout = ref(false)
 const selectedCheckoutPlan = ref('')
 const selectedActionType = ref('')
+
+// Computed title for checkout dialog
+const checkoutTitle = computed(() => {
+  const actionType = selectedActionType.value
+  if (actionType === 'renew') return t('pages.fluxDrive.renewal')
+  if (actionType === 'upgrade') return t('pages.fluxDrive.upgrade')
+  if (actionType === 'downgrade') return t('pages.fluxDrive.downgrade')
+  
+  return t('pages.fluxDrive.checkout')
+})
 
 // FileManager reference
 const fileManagerRef = ref(null)
@@ -129,8 +135,8 @@ const handlePlanSelection = async (planId, actionType = null) => {
   // Handle signin action - just show login dialog without saving plan
   if (actionType === 'signin') {
     console.log('🔐 Sign in action - showing login dialog without plan selection')
-    showLogin.value = true
-    
+    openLoginBottomSheet()
+
     return
   }
 
@@ -186,9 +192,9 @@ const handlePlanSelection = async (planId, actionType = null) => {
   if (!zelidauth || !zelid) {
     // Show login dialog if not logged in
     console.log('🔐 User not logged in - saving plan selection for after login:', planId)
-    showLogin.value = true
+    openLoginBottomSheet()
     selectedCheckoutPlan.value = planId // Save plan for after login
-    
+
     return
   }
 
@@ -214,7 +220,7 @@ const handlePlanSelection = async (planId, actionType = null) => {
         await checkSubscriptionStatus()
 
         // Show success message to user
-        alert('Subscription renewed successfully!')
+        alert(t('pages.fluxDrive.renewalSuccess'))
       } else {
         console.log('⚠️ Unexpected response - opening checkout as fallback')
         selectedCheckoutPlan.value = planId
@@ -228,7 +234,7 @@ const handlePlanSelection = async (planId, actionType = null) => {
       }
     } catch (error) {
       console.error('❌ Renewal failed:', error)
-      alert('Renewal failed: ' + error.message)
+      alert(t('pages.fluxDrive.renewalFailed') + error.message)
 
       // Fallback to checkout dialog
       selectedCheckoutPlan.value = planId
@@ -301,46 +307,46 @@ const handlePlanSelection = async (planId, actionType = null) => {
   showCheckout.value = true
 }
 
-// Handle successful login
-const handleLoginSuccess = async () => {
-  console.log('Login successful - processing...')
+// Watch for login status changes
+watch(isLoggedIn, async (newValue, oldValue) => {
+  // Only handle when user logs in (changes from false to true)
+  if (newValue && !oldValue) {
+    console.log('Login successful - processing...')
 
-  // Close the login dialog immediately
-  showLogin.value = false
+    // Use the composable's post-login handler (which closes the login dialog)
+    await handlePostLogin()
 
-  // Use the composable's post-login handler
-  await handlePostLogin()
+    // If there was a pending plan selection, open checkout
+    if (selectedCheckoutPlan.value) {
+      console.log('🎯 Found pending plan selection:', selectedCheckoutPlan.value)
 
-  // If there was a pending plan selection, open checkout
-  if (selectedCheckoutPlan.value) {
-    console.log('🎯 Found pending plan selection:', selectedCheckoutPlan.value)
-
-    // Determine action type for the selected plan after login
-    if (!selectedActionType.value) {
-      if (hasActiveSubscription.value) {
-        const planStatus = getPlanStatus(selectedCheckoutPlan.value)
-        selectedActionType.value = planStatus === 'current' ? 'renew' :
-          planStatus === 'downgrade' ? 'downgrade' : 'upgrade'
-      } else {
-        selectedActionType.value = 'signup'
+      // Determine action type for the selected plan after login
+      if (!selectedActionType.value) {
+        if (hasActiveSubscription.value) {
+          const planStatus = getPlanStatus(selectedCheckoutPlan.value)
+          selectedActionType.value = planStatus === 'current' ? 'renew' :
+            planStatus === 'downgrade' ? 'downgrade' : 'upgrade'
+        } else {
+          selectedActionType.value = 'signup'
+        }
       }
-    }
-    console.log('💳 Opening checkout for pending plan:', selectedCheckoutPlan.value, 'Action:', selectedActionType.value)
-    showCheckout.value = true
-  } else {
-    // No pending plan selection - user will see appropriate interface based on subscription status
-    // The reactive template will automatically show:
-    // - PricingPlans component if !hasActiveSubscription
-    // - FileManager + StorageInfo if hasActiveSubscription
-    console.log('✅ Login complete - showing appropriate interface based on subscription status')
-    console.log('📊 hasActiveSubscription:', hasActiveSubscription.value)
-    console.log('📊 subscriptionChecked:', subscriptionChecked.value)
+      console.log('💳 Opening checkout for pending plan:', selectedCheckoutPlan.value, 'Action:', selectedActionType.value)
+      showCheckout.value = true
+    } else {
+      // No pending plan selection - user will see appropriate interface based on subscription status
+      // The reactive template will automatically show:
+      // - PricingPlans component if !hasActiveSubscription
+      // - FileManager + StorageInfo if hasActiveSubscription
+      console.log('✅ Login complete - showing appropriate interface based on subscription status')
+      console.log('📊 hasActiveSubscription:', hasActiveSubscription.value)
+      console.log('📊 subscriptionChecked:', subscriptionChecked.value)
 
-    // Clear any pending checkout selections since we're showing the main interface
-    selectedCheckoutPlan.value = ''
-    selectedActionType.value = ''
+      // Clear any pending checkout selections since we're showing the main interface
+      selectedCheckoutPlan.value = ''
+      selectedActionType.value = ''
+    }
   }
-}
+})
 
 // Handle payment success
 const handlePaymentSuccess = async () => {

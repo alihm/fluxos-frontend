@@ -3,7 +3,7 @@
     <VCard variant="outlined" class="mt-2">
       <VCardText>
         <div class="d-flex align-center justify-space-between mb-3">
-          <h4 class="text-h6">Storage Usage</h4>
+          <h4 class="text-h6">{{ t('components.fluxDrive.storageInfo.title') }}</h4>
           <VProgressCircular
             v-if="loadingStorage"
             indeterminate
@@ -22,7 +22,7 @@
 
         <div class="text-center">
           <span class="text-body-2">
-            {{ bytesConversion(usedStorage) }} of {{ convertSize(totalStorage) }} used
+            {{ t('components.fluxDrive.storageInfo.usedOf', { used: bytesConversion(usedStorage), total: convertSize(totalStorage) }) }}
           </span>
           <span class="text-body-2 text-medium-emphasis">
             ({{ storagePercentage }}%)
@@ -32,15 +32,15 @@
         <!-- Additional storage details -->
         <VRow class="mt-4" no-gutters>
           <VCol cols="4" class="text-center">
-            <div class="text-body-2 text-medium-emphasis">Used Space</div>
+            <div class="text-body-2 text-medium-emphasis">{{ t('components.fluxDrive.storageInfo.usedSpace') }}</div>
             <div class="text-h6 text-primary">{{ bytesConversion(usedStorage) }}</div>
           </VCol>
           <VCol cols="4" class="text-center">
-            <div class="text-body-2 text-medium-emphasis">Available</div>
+            <div class="text-body-2 text-medium-emphasis">{{ t('components.fluxDrive.storageInfo.available') }}</div>
             <div class="text-h6 text-success">{{ bytesConversion(totalStorage - usedStorage) }}</div>
           </VCol>
           <VCol cols="4" class="text-center">
-            <div class="text-body-2 text-medium-emphasis">Total</div>
+            <div class="text-body-2 text-medium-emphasis">{{ t('components.fluxDrive.storageInfo.total') }}</div>
             <div class="text-h6">{{ convertSize(totalStorage) }}</div>
           </VCol>
         </VRow>
@@ -53,8 +53,8 @@
           class="mt-4"
           density="compact"
         >
-          <template #title>Storage Almost Full</template>
-          Your storage is {{ storagePercentage }}% full. Consider upgrading your plan or removing unused files.
+          <template #title>{{ t('components.fluxDrive.storageInfo.almostFull') }}</template>
+          {{ t('components.fluxDrive.storageInfo.almostFullMessage', { percentage: storagePercentage }) }}
         </VAlert>
         <VAlert
           v-else-if="storagePercentage >= 75"
@@ -63,8 +63,8 @@
           class="mt-4"
           density="compact"
         >
-          <template #title>Storage Status</template>
-          You're using {{ storagePercentage }}% of your available storage space.
+          <template #title>{{ t('components.fluxDrive.storageInfo.statusTitle') }}</template>
+          {{ t('components.fluxDrive.storageInfo.statusMessage', { percentage: storagePercentage }) }}
         </VAlert>
       </VCardText>
     </VCard>
@@ -73,7 +73,11 @@
 
 <script setup>
 import { onMounted } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useFluxDrive } from '@/composables/useFluxDrive'
+
+// i18n
+const { t } = useI18n()
 
 // Use the composable
 const {

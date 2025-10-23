@@ -16,7 +16,7 @@
         v-if="loading"
         icon="mdi-map-marker-multiple"
         icon-size="40"
-        title="Loading..."
+        :title="t('core.mapComponent.loading')"
         title-class="text-h3 font-weight-bold mb-3"
         class="map-loading-overlay"
       />
@@ -26,6 +26,7 @@
 
 <script setup>
 import { ref, watch, onMounted, nextTick, onUnmounted, computed } from "vue"
+import { useI18n } from 'vue-i18n'
 import * as L from "leaflet"
 import { MarkerClusterGroup } from "leaflet.markercluster"
 import axios from "axios"
@@ -33,18 +34,20 @@ import { useConfigStore } from "@core/stores/config"
 import { storeToRefs } from "pinia"
 import LoadingSpinner from "@/components/Marketplace/LoadingSpinner.vue"
 
+const props = defineProps({
+  nodes: { type: Array, default: () => [] },
+  showAll: { type: Boolean, default: true },
+  filterNodes: { type: Array, default: () => [] },
+})
+
+const { t } = useI18n()
+
 import "leaflet/dist/leaflet.css"
 import "leaflet.markercluster/dist/MarkerCluster.css"
 import "leaflet.markercluster/dist/MarkerCluster.Default.css"
 import iconUrl from "leaflet/dist/images/marker-icon.png"
 import iconRetinaUrl from "leaflet/dist/images/marker-icon-2x.png"
 import shadowUrl from "leaflet/dist/images/marker-shadow.png"
-
-const props = defineProps({
-  nodes: { type: Array, default: () => [] },
-  showAll: { type: Boolean, default: true },
-  filterNodes: { type: Array, default: () => [] },
-})
 
 const { theme } = storeToRefs(useConfigStore())
 

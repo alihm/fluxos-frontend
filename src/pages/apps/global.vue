@@ -8,7 +8,7 @@
       hide-slider
     >
       <VTab class="tab-chip">
-        Active Apps
+        {{ t('menu.application.activeApps') }}
         <VBadge
           v-if="activeApps.length"
           :content="activeApps.length"
@@ -23,7 +23,7 @@
         />
       </VTab>
       <VTab class="tab-chip">
-        Marketplace Apps
+        {{ t('menu.application.marketplaceAppsTab') }}
         <VBadge
           v-if="marketplaceApps.length"
           :content="marketplaceApps.length"
@@ -78,11 +78,13 @@
   
 <script setup>
 import { ref, onMounted } from 'vue'
+import { useI18n } from 'vue-i18n'
 import MyAppsTab from "@/views/apps/management/tabView.vue"
 import AppsService from "@/services/AppsService"
 import DaemonService from "@/services/DaemonService"
 
-  
+const { t } = useI18n()
+
 const activeTab = ref(0)
 const apiError = ref(false)
 const loading = ref(true)

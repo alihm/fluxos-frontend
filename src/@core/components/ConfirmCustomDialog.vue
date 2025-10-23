@@ -7,10 +7,10 @@
   >
     <VCard>
       <VCardTitle class="text-h6 bg-primary">
-        {{ title }}
+        {{ title || t('core.confirmCustomDialog.confirmation') }}
       </VCardTitle>
       <VCardText class="pa-4">
-        {{ message }}
+        {{ message || t('core.confirmCustomDialog.areYouSure') }}
       </VCardText>
       <VCardActions>
         <VSpacer />
@@ -20,7 +20,7 @@
           size="small"
           @click="isDialogOpen = false"
         >
-          Cancel
+          {{ t('core.confirmCustomDialog.cancel') }}
         </VBtn>
         <VBtn
           variant="elevated"
@@ -28,7 +28,7 @@
           size="small"
           @click="confirm"
         >
-          {{ confirmButton }}
+          {{ confirmButton || t('core.confirmCustomDialog.confirm') }}
         </VBtn>
       </VCardActions>
     </VCard>
@@ -37,24 +37,27 @@
 
 <script setup>
 import { ref, watch } from "vue"
+import { useI18n } from 'vue-i18n'
 
 const props = defineProps({
   target: String,
   confirmButton: {
     type: String,
-    default: "Confirm",
+    default: "",
   },
   title: {
     type: String,
-    default: "Confirmation",
+    default: "",
   },
   message: {
     type: String,
-    default: "Are you sure?",
+    default: "",
   },
 })
 
 const emit = defineEmits(["confirm"])
+
+const { t } = useI18n()
 
 const isDialogOpen = ref(false)
 

@@ -32,6 +32,7 @@
 
 <script setup>
 import { computed } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useGameUtils } from '@/composables/useGameUtils'
 import AppConfigCard from '../AppConfigCard.vue'
 import AppGroupCard from '../AppGroupCard.vue'
@@ -49,6 +50,7 @@ const props = defineProps({
 
 const emit = defineEmits(['install'])
 
+const { t } = useI18n()
 const gameUtils = useGameUtils()
 
 // Normalize group titles and deduplicate
@@ -116,9 +118,10 @@ const handleInstall = data => {
 
 .configs-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: 20px;
   width: 100%;
+  justify-content: center;
 }
 
 .groups-container {

@@ -50,6 +50,7 @@ provide('onMenuOpen', handleMenuOpen)
       :item="item"
       :menu-index="index"
     />
+    <slot name="after-nav-items" />
   </ul>
 </template>
 

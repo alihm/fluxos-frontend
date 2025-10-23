@@ -8,7 +8,7 @@
     <VCard>
       <VCardTitle class="d-flex align-center px-3 py-1 bg-primary text-white">
         <VIcon icon="mdi-history" class="me-2" style="color: rgba(255,255,255,0.9);" />
-        <h3 class="text-subtitle-1 text-white">File Versions</h3>
+        <h3 class="text-subtitle-1 text-white">{{ t('components.fluxDrive.versionsDialog.title') }}</h3>
         <VSpacer />
         <VBtn
           icon="mdi-close"
@@ -67,12 +67,12 @@
                         variant="tonal"
                         prepend-icon="mdi-check-circle"
                       >
-                        Current
+                        {{ t('components.fluxDrive.versionsDialog.current') }}
                       </VChip>
                     </div>
                     <div class="text-body-2 text-medium-emphasis mb-1">
                       <VIcon icon="mdi-account" size="18" class="me-1" />
-                      Current Version (Last Updated)
+                      {{ t('components.fluxDrive.versionsDialog.currentVersion') }}
                     </div>
                     <div v-if="file.comment" class="text-body-2 text-medium-emphasis mb-1">
                       <VIcon icon="mdi-comment-text" size="18" class="me-1" />
@@ -99,17 +99,17 @@
                     <VList>
                       <VListItem
                         prepend-icon="mdi-eye"
-                        title="Preview"
+                        :title="t('components.fluxDrive.versionsDialog.preview')"
                         @click="openFile(file)"
                       />
                       <VListItem
                         prepend-icon="mdi-download"
-                        title="Download"
+                        :title="t('components.fluxDrive.versionsDialog.download')"
                         @click="downloadFile(file)"
                       />
                       <VListItem
                         prepend-icon="mdi-link"
-                        title="Copy Link"
+                        :title="t('components.fluxDrive.versionsDialog.copyLink')"
                         @click="copyFileLink(file.hash)"
                       />
                     </VList>
@@ -177,7 +177,7 @@
                         class="ms-1"
                         prepend-icon="mdi-backup-restore"
                       >
-                        Previous
+                        {{ t('components.fluxDrive.versionsDialog.previous') }}
                       </VChip>
                       <VChip
                         v-else-if="index === file.versions.length - 1"
@@ -187,12 +187,12 @@
                         class="ms-1"
                         prepend-icon="mdi-source-commit-start"
                       >
-                        Original
+                        {{ t('components.fluxDrive.versionsDialog.original') }}
                       </VChip>
                     </div>
                     <div class="text-body-2 text-medium-emphasis mb-1">
                       <VIcon icon="mdi-comment-text" size="18" class="me-1" />
-                      {{ version.comment || `Version ${file.versions.length - index}` }}
+                      {{ version.comment || t('components.fluxDrive.versionsDialog.versionNumber', { number: file.versions.length - index }) }}
                     </div>
                     <div class="text-caption text-medium-emphasis">
                       <VIcon icon="mdi-calendar-clock" size="18" class="me-1" />
@@ -217,17 +217,17 @@
                     <VList>
                       <VListItem
                         prepend-icon="mdi-eye"
-                        title="Preview"
+                        :title="t('components.fluxDrive.versionsDialog.preview')"
                         @click="openVersion(version)"
                       />
                       <VListItem
                         prepend-icon="mdi-download"
-                        title="Download"
+                        :title="t('components.fluxDrive.versionsDialog.download')"
                         @click="downloadVersion(version)"
                       />
                       <VListItem
                         prepend-icon="mdi-link"
-                        title="Copy Link"
+                        :title="t('components.fluxDrive.versionsDialog.copyLink')"
                         @click="copyFileLink(version.hash)"
                       />
                     </VList>
@@ -242,8 +242,8 @@
               class="text-center text-medium-emphasis py-8"
             >
               <VIcon icon="mdi-history" size="64" class="mb-4" />
-              <div class="text-h6">No Previous Versions</div>
-              <div class="text-body-2">This file has no previous versions</div>
+              <div class="text-h6">{{ t('components.fluxDrive.versionsDialog.noPreviousVersions') }}</div>
+              <div class="text-body-2">{{ t('components.fluxDrive.versionsDialog.noPreviousVersionsMessage') }}</div>
             </div>
           </div>
 
@@ -253,8 +253,8 @@
             class="text-center text-medium-emphasis py-8"
           >
             <VIcon icon="mdi-file-question" size="64" class="mb-4" />
-            <div class="text-h6">No File Selected</div>
-            <div class="text-body-2">Please select a file to view its versions</div>
+            <div class="text-h6">{{ t('components.fluxDrive.versionsDialog.noFileSelected') }}</div>
+            <div class="text-body-2">{{ t('components.fluxDrive.versionsDialog.noFileSelectedMessage') }}</div>
           </div>
         </div>
       </VCardText>
@@ -272,7 +272,7 @@
       <!-- Header -->
       <VCardTitle class="d-flex align-center px-3 py-1 bg-gradient-primary">
         <VIcon icon="mdi-download" class="me-2" color="white" style="color: rgba(255,255,255,0.9);" />
-        <span class="text-subtitle-1 text-white">Download Progress</span>
+        <span class="text-subtitle-1 text-white">{{ t('components.fluxDrive.versionsDialog.downloadProgress') }}</span>
       </VCardTitle>
 
       <VCardText class="pa-6">
@@ -290,7 +290,7 @@
         <!-- Progress Section -->
         <div class="progress-section">
           <div class="d-flex justify-space-between align-center mb-2">
-            <span class="text-body-2 text-medium-emphasis">Progress</span>
+            <span class="text-body-2 text-medium-emphasis">{{ t('components.fluxDrive.versionsDialog.progress') }}</span>
             <span class="text-body-2 font-weight-medium">{{ downloadProgress }}%</span>
           </div>
 
@@ -308,6 +308,7 @@
 
 <script setup>
 import { ref, computed } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useFluxDrive } from '@/composables/useFluxDrive'
 import { useSnackbar } from '@/composables/useSnackbar'
 import ClipboardJS from 'clipboard'
@@ -324,6 +325,9 @@ const props = defineProps({
 })
 
 const emit = defineEmits(['update:modelValue', 'show-message', 'preview-file'])
+
+// i18n
+const { t } = useI18n()
 
 // Composables
 const {
@@ -534,12 +538,12 @@ const downloadFile = async file => {
 
     // Hide progress dialog
     downloading.value = false
-    showMessage(`${originalName} downloaded successfully`, 'success')
+    showMessage(t('components.fluxDrive.versionsDialog.downloadSuccess', { name: originalName }), 'success')
 
   } catch (error) {
     console.error('📥 Download error:', error)
     downloading.value = false
-    showMessage(`Failed to download "${file.name}": ${error.message}`, 'error')
+    showMessage(t('components.fluxDrive.versionsDialog.downloadFailed', { name: file.name, error: error.message }), 'error')
   }
 }
 
@@ -608,12 +612,12 @@ const downloadVersion = async version => {
 
     // Hide progress dialog
     downloading.value = false
-    showMessage(`${fileName} downloaded successfully`, 'success')
+    showMessage(t('components.fluxDrive.versionsDialog.downloadSuccess', { name: fileName }), 'success')
 
   } catch (error) {
     console.error('📥 Version download error:', error)
     downloading.value = false
-    showMessage(`Failed to download "${fileName}": ${error.message}`, 'error')
+    showMessage(t('components.fluxDrive.versionsDialog.downloadFailed', { name: fileName, error: error.message }), 'error')
   }
 }
 
@@ -632,14 +636,14 @@ const copyFileLink = hash => {
 
     clipboard.on('success', () => {
       console.log('✅ Link copied successfully')
-      showMessage('Link copied to clipboard', 'success')
+      showMessage(t('components.fluxDrive.versionsDialog.linkCopied'), 'success')
       clipboard.destroy()
       document.body.removeChild(button)
     })
 
     clipboard.on('error', err => {
       console.error('❌ ClipboardJS error:', err)
-      showMessage('Failed to copy link to clipboard', 'error')
+      showMessage(t('components.fluxDrive.versionsDialog.linkCopyFailed'), 'error')
       clipboard.destroy()
       document.body.removeChild(button)
     })
@@ -648,7 +652,7 @@ const copyFileLink = hash => {
     button.click()
   } catch (error) {
     console.error('❌ Copy link error:', error)
-    showMessage('Failed to copy link to clipboard', 'error')
+    showMessage(t('components.fluxDrive.versionsDialog.linkCopyFailed'), 'error')
   }
 }
 </script>
