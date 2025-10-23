@@ -142,7 +142,7 @@
     <ListEntry
       v-if="app.hash && app.hash.length === 64"
       title="Expires on Blockheight"
-      :data="app.height + (app.expire || 22000)"
+      :data="adjustedExpiryBlockHeight"
       title-icon="mdi-hourglass"
       title-icon-scale="1.2"
       kbd-variant="success"
@@ -174,8 +174,9 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import geolocations from "@/utils/geolocation"
+import ExplorerService from '@/services/ExplorerService'
 
 const props = defineProps({
   app: Object,
@@ -194,11 +195,46 @@ const props = defineProps({
   },
 })
 
+// PON Fork configuration - block height where chain speed increases 4x
+const FORK_BLOCK_HEIGHT = 2020000
+const currentBlockHeight = ref(-1)
+
 const snackbar = ref({
   show: false,
   message: '',
   color: 'success',
   timeout: 3000,
+})
+
+// Calculate adjusted expiry blockheight accounting for PON Fork
+const adjustedExpiryBlockHeight = computed(() => {
+  if (!props.app?.height) return 0
+
+  const height = props.app.height
+  const expires = props.app.expire || 22000
+  let effectiveExpiry = height + expires
+
+  // If app was registered before the fork (block 2020000) and we're currently past the fork,
+  // adjust the expiry calculation since the blockchain moves 4x faster post-fork
+  if (height < FORK_BLOCK_HEIGHT && currentBlockHeight.value >= FORK_BLOCK_HEIGHT && effectiveExpiry > FORK_BLOCK_HEIGHT) {
+    const remainingBlocksAfterFork = effectiveExpiry - FORK_BLOCK_HEIGHT
+    effectiveExpiry = FORK_BLOCK_HEIGHT + (remainingBlocksAfterFork * 4)
+  }
+
+  return effectiveExpiry
+})
+
+// Fetch current block height on mount
+onMounted(async () => {
+  try {
+    const result = await ExplorerService.getScannedHeight()
+    if (result.data.status === "success") {
+      currentBlockHeight.value = result.data.data.generalScannedHeight
+    }
+  } catch (error) {
+    console.error("Error fetching block height:", error)
+    currentBlockHeight.value = -1
+  }
 })
 
 function isMarketplaceApp(name) {
