@@ -154,7 +154,6 @@ onUnmounted(() => {
   position: relative;
   width: 100%;
   aspect-ratio: 16 / 9;
-  max-height: 500px;
   overflow: hidden;
   border-radius: 16px;
 }
@@ -251,17 +250,7 @@ onUnmounted(() => {
 }
 
 /* Responsive adjustments */
-@media (max-width: 960px) {
-  .carousel-wrapper {
-    max-height: 450px;
-  }
-}
-
 @media (max-width: 600px) {
-  .carousel-wrapper {
-    max-height: 400px;
-  }
-
   .carousel-controls {
     display: none;
   }
