@@ -3360,7 +3360,10 @@ function convertToLatestSpec() {
   }
 }
 
-const renewalOptions = computed(() => [
+// PON (proof of nodes) Fork configuration - block height where chain speed increases 4x
+const FORK_BLOCK_HEIGHT = 2020000
+
+const renewalOptions = ref([
   { value: 5000, label: t('core.subscriptionManager.renewal1Week') },
   { value: 11000, label: t('core.subscriptionManager.renewal2Weeks') },
   { value: 22000, label: t('core.subscriptionManager.renewal1Month') },
@@ -5158,8 +5161,9 @@ const expiryLabel = computed(() => {
       renewalBlocks = 22000
     }
 
-    // Convert blocks to human-readable time
-    const totalMinutes = renewalBlocks * 2
+    // Convert blocks to human-readable time (fork-aware)
+    const minutesPerBlock = blockHeight.value >= FORK_BLOCK_HEIGHT ? 0.5 : 2
+    const totalMinutes = renewalBlocks * minutesPerBlock
     const days = Math.floor(totalMinutes / 1440)
     const hours = Math.floor((totalMinutes % 1440) / 60)
     const minutes = totalMinutes % 60
@@ -5173,7 +5177,7 @@ const expiryLabel = computed(() => {
   }
 
   // For new apps, use the selected renewal option directly
-  // For existing apps, use the original expire value (unless canceling)
+  // For existing apps, use the original expire value (unless canceling or renewal enabled)
   let expire
   if (props.newApp) {
     expire = renewalOptions.value[appDetails.value.renewalIndex]?.value ?? 22000
@@ -5187,9 +5191,11 @@ const expiryLabel = computed(() => {
     }
   }
 
-  // For new apps, just show the selected period duration
-  if (props.newApp) {
-    const totalMinutes = expire * 2
+  // For new apps or renewal enabled, just show the selected period duration
+  if (props.newApp || renewalEnabled.value) {
+    // Block time: 2 minutes before fork, 30 seconds (0.5 minutes) after fork
+    const minutesPerBlock = blockHeight.value >= FORK_BLOCK_HEIGHT ? 0.5 : 2
+    const totalMinutes = expire * minutesPerBlock
     const days = Math.floor(totalMinutes / 1440)
     const hours = Math.floor((totalMinutes % 1440) / 60)
     const minutes = totalMinutes % 60
@@ -5214,7 +5220,9 @@ const expiryLabel = computed(() => {
     : height + expire - current
   if (blocksToExpireLocal < 1) return ''
 
-  const totalMinutes = blocksToExpireLocal * 2
+  // Block time: 2 minutes before fork (block 2020000), 30 seconds (0.5 minutes) after fork
+  const minutesPerBlock = current >= FORK_BLOCK_HEIGHT ? 0.5 : 2
+  const totalMinutes = blocksToExpireLocal * minutesPerBlock
   const days = Math.floor(totalMinutes / 1440)
   const hours = Math.floor((totalMinutes % 1440) / 60)
   const minutes = totalMinutes % 60
@@ -5952,12 +5960,29 @@ async function priceForAppSpec() {
   }
 }
 
+function adjustRenewalOptionsForBlockHeight() {
+  // After block 2020000, the chain works 4x faster, so expire periods need to be multiplied by 4
+  if (blockHeight.value >= FORK_BLOCK_HEIGHT) {
+    renewalOptions.value = [
+      { value: 20000, label: '1 week' },
+      { value: 44000, label: '2 weeks' },
+      { value: 88000, label: '1 month' },
+      { value: 264000, label: '3 months' },
+      { value: 528000, label: '6 months' },
+      { value: 1056000, label: '1 year' },
+    ]
+  }
+}
+
 async function fetchBlockHeight() {
   try {
     const res = await props.executeLocalCommand('/daemon/getblockcount')
 
     if (res?.data?.status === 'success' && typeof res.data?.data === 'number') {
       blockHeight.value = res.data.data
+
+      // Adjust renewal options based on block height
+      adjustRenewalOptionsForBlockHeight()
 
       const expireBlocks = props.appSpec?.expire ?? 22000
 
@@ -5982,10 +6007,12 @@ async function fetchBlockHeight() {
           isExpiryValid.value = true
           console.log('New app - blocks to expire:', blocksToExpire.value, 'isExpiryValid:', isExpiryValid.value)
         } else {
-          // For existing apps doing update without renewal, check if they have at least 5000 blocks (~1 week) remaining
+          // For existing apps doing update without renewal, check if they have at least 1 week remaining
+          // Use dynamic minExpire: 5000 blocks before fork, 20000 blocks after fork (4x faster blockchain)
           // If renewal is enabled or in cancel mode, skip this check
           if (!renewalEnabled.value && managementAction.value !== 'renewal' && managementAction.value !== 'cancel') {
-            isExpiryValid.value = blocksToExpire.value >= 5000
+            const minExpire = blockHeight.value >= FORK_BLOCK_HEIGHT ? 20000 : 5000
+            isExpiryValid.value = blocksToExpire.value >= minExpire
           } else {
             // Renewal or cancel - always valid
             isExpiryValid.value = true

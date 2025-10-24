@@ -1292,9 +1292,22 @@ function labelForExpire(expire, height) {
   if (!height) return t('pages.apps.manage.messages.applicationExpired')
   if (currentBlockHeight.value === -1) return t('pages.apps.manage.messages.cannotCalculateExpiration')
   const expires = expire || 22000
-  const blocksToExpire = height + expires - currentBlockHeight.value
+  const forkBlock = 2020000
+  let effectiveExpiry = height + expires
+
+  // If app was registered before the fork (block 2020000) and we're currently past the fork,
+  // adjust the expiry calculation since the blockchain moves 4x faster post-fork
+  if (height < forkBlock && currentBlockHeight.value >= forkBlock && effectiveExpiry > forkBlock) {
+    const remainingBlocksAfterFork = effectiveExpiry - forkBlock
+    effectiveExpiry = forkBlock + (remainingBlocksAfterFork * 4)
+  }
+
+  const blocksToExpire = effectiveExpiry - currentBlockHeight.value
   if (blocksToExpire < 1) return t('pages.apps.manage.messages.applicationExpired')
-  const minutes = blocksToExpire * 2
+
+  // Block time: 2 minutes before fork (block 2020000), 30 seconds (0.5 minutes) after fork
+  const minutesPerBlock = currentBlockHeight.value >= forkBlock ? 0.5 : 2
+  const minutes = blocksToExpire * minutesPerBlock
   const units = { day: 1440, hour: 60, minute: 1 }
   const result = []
   let value = minutes

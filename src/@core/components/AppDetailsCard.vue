@@ -140,19 +140,19 @@
       kbd-variant="success"
     />
     <ListEntry
-      v-if="app.hash && app.hash.length === 64"
+      v-if="app.hash && app.hash.length === 64 && adjustedExpiryBlockHeight"
       :title="t('core.appDetailsCard.expiresOnBlockheight')"
-      :data="app.height + (app.expire || 22000)"
+      :data="adjustedExpiryBlockHeight"
       title-icon="mdi-hourglass"
       title-icon-scale="1.2"
       kbd-variant="success"
     />
     <ListEntry
       :title="t('core.appDetailsCard.expiresIn')"
-      :data="getNewExpireLabel"
+      :data="expiresInLabel"
       title-icon="mdi-clock-outline"
       title-icon-scale="1.2"
-      :kbd-variant="isExpiringSoon(getNewExpireLabel) ? 'danger' : 'success'"
+      :kbd-variant="isExpiringSoon(expiresInLabel) ? 'danger' : 'success'"
     />
     <ListEntry
       :title="t('core.appDetailsCard.enterpriseNodes')"
@@ -174,13 +174,18 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import geolocations from "@/utils/geolocation"
+import ExplorerService from '@/services/ExplorerService'
 
 const props = defineProps({
   app: Object,
-  getNewExpireLabel: [String, Number, Function],
+  getNewExpireLabel: {
+    type: [String, Number, Function],
+    required: false,
+    default: null,
+  },
   activeAppsTab: {
     type: Boolean,
     default: false,
@@ -197,11 +202,91 @@ const props = defineProps({
 
 const { t } = useI18n()
 
+// PON Fork configuration - block height where chain speed increases 4x
+const FORK_BLOCK_HEIGHT = 2020000
+const currentBlockHeight = ref(-1)
+
 const snackbar = ref({
   show: false,
   message: '',
   color: 'success',
   timeout: 3000,
+})
+
+// Calculate adjusted expiry blockheight accounting for PON Fork
+const adjustedExpiryBlockHeight = computed(() => {
+  if (!props.app?.height) return 0
+
+  const height = props.app.height
+  const expires = props.app.expire || 22000
+  let effectiveExpiry = height + expires
+
+  // If app was registered before the fork (block 2020000) and we're currently past the fork,
+  // adjust the expiry calculation since the blockchain moves 4x faster post-fork
+  if (height < FORK_BLOCK_HEIGHT && currentBlockHeight.value >= FORK_BLOCK_HEIGHT && effectiveExpiry > FORK_BLOCK_HEIGHT) {
+    const remainingBlocksAfterFork = effectiveExpiry - FORK_BLOCK_HEIGHT
+    effectiveExpiry = FORK_BLOCK_HEIGHT + (remainingBlocksAfterFork * 4)
+  }
+
+  return effectiveExpiry
+})
+
+// Calculate fork-aware expiry time label
+const expiresInLabel = computed(() => {
+  if (!adjustedExpiryBlockHeight.value || currentBlockHeight.value < 0) {
+    return 'Not available'
+  }
+
+  const blocksRemaining = adjustedExpiryBlockHeight.value - currentBlockHeight.value
+
+  if (blocksRemaining < 1) {
+    return 'Application Expired'
+  }
+
+  let totalMinutes = 0
+
+  // Before fork: 2 minutes per block
+  // After fork: 0.5 minutes per block (30 seconds)
+  if (currentBlockHeight.value < FORK_BLOCK_HEIGHT) {
+    // We're currently before the fork
+    if (adjustedExpiryBlockHeight.value <= FORK_BLOCK_HEIGHT) {
+      // Expiration is before fork - all blocks at 2 min/block
+      totalMinutes = blocksRemaining * 2
+    } else {
+      // Expiration is after fork - split calculation
+      const blocksUntilFork = FORK_BLOCK_HEIGHT - currentBlockHeight.value
+      const blocksAfterFork = adjustedExpiryBlockHeight.value - FORK_BLOCK_HEIGHT
+      totalMinutes = (blocksUntilFork * 2) + (blocksAfterFork * 0.5)
+    }
+  } else {
+    // We're currently after fork - all remaining blocks at 0.5 min/block
+    totalMinutes = blocksRemaining * 0.5
+  }
+
+  // Convert minutes to human-readable format
+  const days = Math.floor(totalMinutes / 1440)
+  const hours = Math.floor((totalMinutes % 1440) / 60)
+  const minutes = Math.floor(totalMinutes % 60)
+
+  const parts = []
+  if (days > 0) parts.push(`${days} day${days !== 1 ? 's' : ''}`)
+  if (hours > 0) parts.push(`${hours} hour${hours !== 1 ? 's' : ''}`)
+  if (minutes > 0 || parts.length === 0) parts.push(`${minutes} minute${minutes !== 1 ? 's' : ''}`)
+
+  return parts.slice(0, 3).join(', ')
+})
+
+// Fetch current block height on mount
+onMounted(async () => {
+  try {
+    const result = await ExplorerService.getScannedHeight()
+    if (result.data.status === "success") {
+      currentBlockHeight.value = result.data.data.generalScannedHeight
+    }
+  } catch (error) {
+    console.error("Error fetching block height:", error)
+    currentBlockHeight.value = -1
+  }
 })
 
 function isMarketplaceApp(name) {
