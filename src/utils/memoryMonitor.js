@@ -297,24 +297,24 @@ class MemoryMonitor {
 
     // Add heap categories
     breakdown.categories.push({
-      name: 'Used JS Heap',
+      nameKey: 'memoryMonitor.categories.usedHeap',
       size: usedHeap,
       percentage: (usedHeap / snapshot.limit) * 100,
-      description: 'Memory actively used by JavaScript objects',
+      descriptionKey: 'memoryMonitor.categories.usedHeapDesc',
     })
 
     breakdown.categories.push({
-      name: 'Free Heap',
+      nameKey: 'memoryMonitor.categories.freeHeap',
       size: freeHeap,
       percentage: (freeHeap / snapshot.limit) * 100,
-      description: 'Allocated but unused heap space',
+      descriptionKey: 'memoryMonitor.categories.freeHeapDesc',
     })
 
     breakdown.categories.push({
-      name: 'Available',
+      nameKey: 'memoryMonitor.categories.available',
       size: snapshot.limit - allocatedHeap,
       percentage: ((snapshot.limit - allocatedHeap) / snapshot.limit) * 100,
-      description: 'Heap space not yet allocated',
+      descriptionKey: 'memoryMonitor.categories.availableDesc',
     })
 
     // Only analyze DOM if in browser environment
@@ -325,20 +325,22 @@ class MemoryMonitor {
         const domNodes = document.getElementsByTagName('*').length
         breakdown.domNodes = domNodes
         breakdown.categories.push({
-          name: 'DOM Nodes (est.)',
+          nameKey: 'memoryMonitor.categories.domNodes',
           size: (domNodes * 0.001), // Rough estimate: 1KB per node
           percentage: ((domNodes * 0.001) / snapshot.limit) * 100,
-          description: `Approximately ${domNodes} DOM elements`,
+          descriptionKey: 'memoryMonitor.categories.domNodesDesc',
+          count: domNodes,
         })
 
         // Count event listeners (approximation based on DOM nodes)
         const estimatedListeners = domNodes * 2 // Rough estimate
         breakdown.eventListeners = estimatedListeners
         breakdown.categories.push({
-          name: 'Event Listeners (est.)',
+          nameKey: 'memoryMonitor.categories.eventListeners',
           size: (estimatedListeners * 0.0005), // Rough estimate: 0.5KB per listener
           percentage: ((estimatedListeners * 0.0005) / snapshot.limit) * 100,
-          description: `Approximately ${estimatedListeners} event listeners`,
+          descriptionKey: 'memoryMonitor.categories.eventListenersDesc',
+          count: estimatedListeners,
         })
       } catch (error) {
         console.warn('[MemoryMonitor] Could not analyze DOM:', error)
@@ -352,10 +354,11 @@ class MemoryMonitor {
           const vueInstances = window.__VUE_DEVTOOLS_GLOBAL_HOOK__.apps || []
           breakdown.vueApps = vueInstances.length
           breakdown.categories.push({
-            name: 'Vue Apps',
+            nameKey: 'memoryMonitor.categories.vueApps',
             size: vueInstances.length * 0.5, // Rough estimate: 0.5MB per app
             percentage: ((vueInstances.length * 0.5) / snapshot.limit) * 100,
-            description: `${vueInstances.length} Vue application instances`,
+            descriptionKey: 'memoryMonitor.categories.vueAppsDesc',
+            count: vueInstances.length,
           })
         }
       } catch (error) {

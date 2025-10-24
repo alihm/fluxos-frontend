@@ -2641,6 +2641,20 @@
     "loading": "Ładowanie danych pamięci...",
     "statusHigh": "Użycie pamięci jest bardzo wysokie!",
     "statusWarning": "Użycie pamięci jest wysokie",
-    "statusNormal": "Użycie pamięci jest normalne"
+    "statusNormal": "Użycie pamięci jest normalne",
+    "categories": {
+      "usedHeap": "Używana Sterta JS",
+      "usedHeapDesc": "Pamięć aktywnie używana przez obiekty JavaScript",
+      "freeHeap": "Wolna Sterta",
+      "freeHeapDesc": "Przydzielona, ale nieużywana przestrzeń sterty",
+      "available": "Dostępna",
+      "availableDesc": "Przestrzeń sterty jeszcze nieprzydzielona",
+      "domNodes": "Węzły DOM (szac.)",
+      "domNodesDesc": "Około {count} elementów DOM",
+      "eventListeners": "Nasłuchiwacze Zdarzeń (szac.)",
+      "eventListenersDesc": "Około {count} nasłuchiwaczy zdarzeń",
+      "vueApps": "Aplikacje Vue",
+      "vueAppsDesc": "{count} instancji aplikacji Vue"
+    }
   }
 }

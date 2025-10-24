@@ -2642,6 +2642,20 @@
     "loading": "Loading memory data...",
     "statusHigh": "Memory usage is very high!",
     "statusWarning": "Memory usage is high",
-    "statusNormal": "Memory usage is normal"
+    "statusNormal": "Memory usage is normal",
+    "categories": {
+      "usedHeap": "Used JS Heap",
+      "usedHeapDesc": "Memory actively used by JavaScript objects",
+      "freeHeap": "Free Heap",
+      "freeHeapDesc": "Allocated but unused heap space",
+      "available": "Available",
+      "availableDesc": "Heap space not yet allocated",
+      "domNodes": "DOM Nodes (est.)",
+      "domNodesDesc": "Approximately {count} DOM elements",
+      "eventListeners": "Event Listeners (est.)",
+      "eventListenersDesc": "Approximately {count} event listeners",
+      "vueApps": "Vue Apps",
+      "vueAppsDesc": "{count} Vue application instances"
+    }
   }
 }

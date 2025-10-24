@@ -150,12 +150,12 @@
               </VExpansionPanelTitle>
               <VExpansionPanelText>
                 <div
-                  v-for="category in breakdown.categories"
-                  :key="category.name"
+                  v-for="(category, index) in breakdown.categories"
+                  :key="index"
                   class="mb-3"
                 >
                   <div class="d-flex justify-space-between mb-1">
-                    <span class="text-caption">{{ category.name }}</span>
+                    <span class="text-caption">{{ $t(category.nameKey) }}</span>
                     <span class="text-caption font-weight-bold">{{ category.size.toFixed(1) }} MB ({{ category.percentage.toFixed(1) }}%)</span>
                   </div>
                   <VProgressLinear
@@ -165,7 +165,7 @@
                     rounded
                   />
                   <div class="text-caption text-disabled mt-1">
-                    {{ category.description }}
+                    {{ $t(category.descriptionKey, { count: category.count || 0 }) }}
                   </div>
                 </div>
               </VExpansionPanelText>
