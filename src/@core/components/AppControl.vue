@@ -777,6 +777,8 @@
               <ConfirmCustomDialog
                 target="redeploy-app-soft"
                 :confirm-button="t('core.appControl.confirmButtons.softReinstall')"
+                :message="t('core.appControl.confirmMessages.softReinstall')"
+                alert-type="info"
                 @confirm="handleOperation('reinstall-soft')"
               />
             </VCol>
@@ -805,6 +807,8 @@
               <ConfirmCustomDialog
                 target="redeploy-app-hard"
                 :confirm-button="t('core.appControl.confirmButtons.hardReinstall')"
+                :message="t('core.appControl.confirmMessages.hardReinstall')"
+                alert-type="warning"
                 @confirm="handleOperation('reinstall-hard')"
               />
             </VCol>

@@ -164,7 +164,7 @@
             class="ml-2 review-glow-btn"
             style="margin-right: 12px;"
             @click="tab = 99"
-            :disabled="tab !== 2"
+            :disabled="tab !== 3"
           >
             <VIcon size="24" class="mr-1">mdi-check-decagram</VIcon>
             <span v-if="props.newApp">{{ t('core.subscriptionManager.review') }}</span>
@@ -195,19 +195,19 @@
             <div class="d-flex flex-column gap-2 mb-3">
               <VChip color="default" variant="tonal" label style="font-size: 14px;">
                 <VIcon size="22" class="mr-2">mdi-calendar-check</VIcon>
-                <span class="mr-2">Current subscription until:</span>
+                <span class="mr-2">{{ t('core.subscriptionManager.currentSubscriptionUntil') }}</span>
                 <strong>{{ new Date(appRunningTill.current).toLocaleString('en-GB', timeOptions.shortDate) }}</strong>
               </VChip>
               <VChip :color="timeRemainingColor" variant="tonal" label style="font-size: 14px;">
                 <VIcon size="22" class="mr-2">mdi-clock-outline</VIcon>
-                <span class="mr-2">Time left:</span>
+                <span class="mr-2">{{ t('core.subscriptionManager.timeLeft') }}</span>
                 <strong>{{ timeRemaining }}</strong>
               </VChip>
             </div>
             <div class="d-flex flex-column gap-2">
               <VChip color="info" variant="tonal" label style="font-size: 14px;">
                 <VIcon size="22" class="mr-2">mdi-update</VIcon>
-                <span class="mr-2">Renewal period:</span>
+                <span class="mr-2">{{ t('core.subscriptionManager.renewalPeriod') }}</span>
                 <strong>{{ renewalLabels[appDetails.renewalIndex] }}</strong>
               </VChip>
               <div style="height: 32px; display: flex; align-items: center;">
@@ -224,7 +224,7 @@
               </div>
               <VChip color="success" variant="tonal" label style="font-size: 14px;">
                 <VIcon size="22" class="mr-2">mdi-calendar-arrow-right</VIcon>
-                <span class="mr-2">After renewal subscription until:</span>
+                <span class="mr-2">{{ t('core.subscriptionManager.afterRenewalSubscriptionUntil') }}</span>
                 <strong>{{ new Date(appRunningTill.new).toLocaleString('en-GB', timeOptions.shortDate) }}</strong>
               </VChip>
             </div>
@@ -237,7 +237,7 @@
                 size="small"
                 class="mt-3"
               >
-                Your selected subscription period will decrease the current subscription time!
+                {{ t('core.subscriptionManager.subscriptionPeriodDecreaseWarning') }}
               </VAlert>
             </div>
           </div>
@@ -247,24 +247,24 @@
             <div class="d-flex flex-column gap-2 mb-3">
               <VChip color="default" variant="tonal" label style="font-size: 14px;">
                 <VIcon size="22" class="mr-2">mdi-calendar-check</VIcon>
-                <span class="mr-2">Current subscription until:</span>
+                <span class="mr-2">{{ t('core.subscriptionManager.currentSubscriptionUntil') }}</span>
                 <strong>{{ new Date(appRunningTill.current).toLocaleString('en-GB', timeOptions.shortDate) }}</strong>
               </VChip>
               <VChip :color="timeRemainingColor" variant="tonal" label style="font-size: 14px;">
                 <VIcon size="22" class="mr-2">mdi-clock-outline</VIcon>
-                <span class="mr-2">Time left:</span>
+                <span class="mr-2">{{ t('core.subscriptionManager.timeLeft') }}</span>
                 <strong>{{ timeRemaining }}</strong>
               </VChip>
             </div>
             <div class="d-flex flex-column gap-2">
               <VChip color="info" variant="tonal" label style="font-size: 14px;">
                 <VIcon size="22" class="mr-2">mdi-update</VIcon>
-                <span class="mr-2">Renewal period:</span>
+                <span class="mr-2">{{ t('core.subscriptionManager.renewalPeriod') }}</span>
                 <strong>{{ t('core.subscriptionManager.renewal1Month') }}</strong>
               </VChip>
               <VChip color="success" variant="tonal" label style="font-size: 14px;">
                 <VIcon size="22" class="mr-2">mdi-calendar-arrow-right</VIcon>
-                <span class="mr-2">After renewal subscription until:</span>
+                <span class="mr-2">{{ t('core.subscriptionManager.afterRenewalSubscriptionUntil') }}</span>
                 <strong>{{ new Date(appRunningTill.current + 30 * 24 * 60 * 60 * 1000).toLocaleString('en-GB', timeOptions.shortDate) }}</strong>
               </VChip>
             </div>
@@ -279,7 +279,7 @@
               density="compact"
               block
               class="renewal-action-btn"
-              @click="console.log('Renewal button clicked'); tab = 99"
+              @click="tab = 99"
             >
               <VIcon size="22" class="mr-2">mdi-refresh</VIcon>
               <span>{{ t('core.subscriptionManager.renewalAction') }}</span>
@@ -585,7 +585,7 @@
                     size="small"
                     class="mt-1 mx-3"
                   >
-                    Your selected subscription period will decrease the current subscription time!
+                    {{ t('core.subscriptionManager.subscriptionPeriodDecreaseWarning') }}
                   </VAlert>
                 </span>
               </span>
@@ -805,8 +805,8 @@
         </div>
       </VWindowItem>
 
-      <!-- Updated component section (Tab 2) to fix tab separation and dynamic switching -->
-      <VWindowItem :value="2">
+      <!-- Updated component section (Tab 3) - moved after Priority Nodes -->
+      <VWindowItem :value="3">
         <div class="pa-4">
           <div class="d-flex justify-space-between align-center mb-3">
             <!-- Component Tabs -->
@@ -1607,8 +1607,8 @@
         </div>
       </VWindowItem>
       
-      <!-- Priority Nodes Tab (value=3) -->
-      <VWindowItem :value="3">
+      <!-- Priority Nodes Tab (value=2) - moved before Components -->
+      <VWindowItem :value="2">
         <div class="pa-4">
           <div v-if="props.appSpec?.version >= 7">
             <VAlert
@@ -1643,7 +1643,7 @@
                   </VBtn>
                   <VBtn
                     color="primary"
-                    variant="outlined"
+                    variant="flat"
                     size="small"
                     @click="openNodeSelectionDialog"
                   >
@@ -1753,29 +1753,29 @@
                       <VCard flat class="ma-2">
                         <VCardText>
                           <div class="d-flex align-center mb-2">
-                            <strong class="mr-2" style="min-width: 180px;">{{ t('core.subscriptionManager.ipAddress') }}</strong>
+                            <strong class="mr-2" style="min-width: 180px;">{{ t('core.subscriptionManager.ipAddressLabel') }}</strong>
                             <span>{{ item.ip }}</span>
                           </div>
                           <div class="d-flex align-center mb-2">
-                            <strong class="mr-2" style="min-width: 180px;">{{ t('core.subscriptionManager.publicKey') }}</strong>
+                            <strong class="mr-2" style="min-width: 180px;">{{ t('core.subscriptionManager.publicKeyLabel') }}</strong>
                             <span class="text-break">
                               {{ item.pubkey || 'N/A' }}
                             </span>
                           </div>
                           <div class="d-flex align-center mb-2">
-                            <strong class="mr-2" style="min-width: 180px;">{{ t('core.subscriptionManager.nodeAddress') }}</strong>
+                            <strong class="mr-2" style="min-width: 180px;">{{ t('core.subscriptionManager.nodeAddressLabel') }}</strong>
                             <span class="text-break">
                               {{ item.payment_address }}
                             </span>
                           </div>
                           <div v-if="item.txhash && item.outidx" class="d-flex align-center mb-2">
-                            <strong class="mr-2" style="min-width: 180px;">{{ t('core.subscriptionManager.collateral') }}</strong>
+                            <strong class="mr-2" style="min-width: 180px;">{{ t('core.subscriptionManager.collateralLabel') }}</strong>
                             <span class="text-break">
                               {{ item.txhash }}:{{ item.outidx }}
                             </span>
                           </div>
                           <div class="d-flex align-center mb-2">
-                            <strong class="mr-2" style="min-width: 180px;">{{ t('core.subscriptionManager.tier') }}</strong>
+                            <strong class="mr-2" style="min-width: 180px;">{{ t('core.subscriptionManager.tierLabel') }}</strong>
                             {{ item.tier }}
                           </div>
                           <div class="d-flex align-center mb-2">
@@ -1783,7 +1783,7 @@
                             <span>{{ item.score }}</span>
                           </div>
                           <div class="d-flex align-center mb-2">
-                            <strong class="mr-2" style="min-width: 180px;">{{ t('core.subscriptionManager.collateralScore') }}</strong>
+                            <strong class="mr-2" style="min-width: 180px;">{{ t('core.subscriptionManager.collateralScoreLabel') }}</strong>
                             <span>{{ item.collateralPoints }}</span>
                           </div>
                           <div class="d-flex align-center mb-2">
@@ -1791,7 +1791,7 @@
                             <span>{{ item.maturityPoints }}</span>
                           </div>
                           <div class="d-flex align-center mb-2">
-                            <strong class="mr-2" style="min-width: 180px;">{{ t('core.subscriptionManager.publicKeyScore') }}</strong>
+                            <strong class="mr-2" style="min-width: 180px;">{{ t('core.subscriptionManager.publicKeyScoreLabel') }}</strong>
                             <span>{{ item.pubKeyPoints }}</span>
                           </div>
                           <div class="d-flex align-center mb-2">
@@ -1799,7 +1799,7 @@
                             <span>{{ item.enterpriseApps }}</span>
                           </div>
                           <div v-if="item.status" class="d-flex align-center mb-2">
-                            <strong class="mr-2" style="min-width: 180px;">{{ t('core.subscriptionManager.status') }}</strong>
+                            <strong class="mr-2" style="min-width: 180px;">{{ t('core.subscriptionManager.statusLabel') }}</strong>
                             {{ item.status || 'confirmed' }}
                           </div>
                         </VCardText>
@@ -1841,7 +1841,7 @@
           </div>
           <div v-else>
             <VAlert type="warning" variant="tonal">
-              Priority nodes are only available for applications with version 7 or higher.
+              {{ t('core.subscriptionManager.priorityNodesVersionWarning') }}
             </VAlert>
           </div>
         </div>
@@ -2633,18 +2633,22 @@
     max-width="90%"
     persistent
   >
-    <VCard>
+    <VCard rounded="xl">
       <VCardTitle class="d-flex justify-space-between align-center bg-primary">
-        <span class="text-h5 text-white">{{ props.appSpec?.version === 7 ? t('core.subscriptionManager.selectEnterpriseNodes') : t('core.subscriptionManager.selectPriorityNodes') }}</span>
+        <div class="d-flex align-center">
+          <VIcon class="ml-3 mr-2" color="white">mdi-server-network</VIcon>
+          <span class="text-h5 text-white">{{ props.appSpec?.version === 7 ? t('core.subscriptionManager.selectEnterpriseNodes') : t('core.subscriptionManager.selectPriorityNodes') }}</span>
+        </div>
         <VBtn
-          icon
+          icon="mdi-close"
           variant="text"
+          color="white"
+          size="small"
+          class="mr-3 close-btn-hover"
           @click="showNodeSelectionDialog = false"
-        >
-          <VIcon>mdi-close</VIcon>
-        </VBtn>
+        />
       </VCardTitle>
-      
+
       <VCardText>
         <VAlert
           v-if="props.appSpec?.version === 7"
@@ -2720,29 +2724,29 @@
                 <VCard flat class="ma-2">
                   <VCardText>
                     <div class="d-flex align-center mb-2">
-                      <strong class="mr-2" style="min-width: 180px;">{{ t('core.subscriptionManager.ipAddress') }}</strong>
+                      <strong class="mr-2" style="min-width: 180px;">{{ t('core.subscriptionManager.ipAddressLabel') }}</strong>
                       <span>{{ item.ip }}</span>
                     </div>
                     <div class="d-flex align-center mb-2">
-                      <strong class="mr-2" style="min-width: 180px;">{{ t('core.subscriptionManager.publicKey') }}</strong>
+                      <strong class="mr-2" style="min-width: 180px;">{{ t('core.subscriptionManager.publicKeyLabel') }}</strong>
                       <span class="text-break">
                         {{ item.pubkey || 'N/A' }}
                       </span>
                     </div>
                     <div class="d-flex align-center mb-2">
-                      <strong class="mr-2" style="min-width: 180px;">{{ t('core.subscriptionManager.nodeAddress') }}</strong>
+                      <strong class="mr-2" style="min-width: 180px;">{{ t('core.subscriptionManager.nodeAddressLabel') }}</strong>
                       <span class="text-break">
                         {{ item.payment_address }}
                       </span>
                     </div>
                     <div v-if="item.txhash && item.outidx" class="d-flex align-center mb-2">
-                      <strong class="mr-2" style="min-width: 180px;">{{ t('core.subscriptionManager.collateral') }}</strong>
+                      <strong class="mr-2" style="min-width: 180px;">{{ t('core.subscriptionManager.collateralLabel') }}</strong>
                       <span class="text-break">
                         {{ item.txhash }}:{{ item.outidx }}
                       </span>
                     </div>
                     <div class="d-flex align-center mb-2">
-                      <strong class="mr-2" style="min-width: 180px;">{{ t('core.subscriptionManager.tier') }}</strong>
+                      <strong class="mr-2" style="min-width: 180px;">{{ t('core.subscriptionManager.tierLabel') }}</strong>
                       {{ item.tier }}
                     </div>
                     <div class="d-flex align-center mb-2">
@@ -2750,7 +2754,7 @@
                       <span>{{ item.score }}</span>
                     </div>
                     <div class="d-flex align-center mb-2">
-                      <strong class="mr-2" style="min-width: 180px;">{{ t('core.subscriptionManager.collateralScore') }}</strong>
+                      <strong class="mr-2" style="min-width: 180px;">{{ t('core.subscriptionManager.collateralScoreLabel') }}</strong>
                       <span>{{ item.collateralPoints }}</span>
                     </div>
                     <div class="d-flex align-center mb-2">
@@ -2758,7 +2762,7 @@
                       <span>{{ item.maturityPoints }}</span>
                     </div>
                     <div class="d-flex align-center mb-2">
-                      <strong class="mr-2" style="min-width: 180px;">{{ t('core.subscriptionManager.publicKeyScore') }}</strong>
+                      <strong class="mr-2" style="min-width: 180px;">{{ t('core.subscriptionManager.publicKeyScoreLabel') }}</strong>
                       <span>{{ item.pubKeyPoints }}</span>
                     </div>
                     <div class="d-flex align-center mb-2">
@@ -2766,7 +2770,7 @@
                       <span>{{ item.enterpriseApps }}</span>
                     </div>
                     <div v-if="item.status" class="d-flex align-center mb-2">
-                      <strong class="mr-2" style="min-width: 180px;">{{ t('core.subscriptionManager.status') }}</strong>
+                      <strong class="mr-2" style="min-width: 180px;">{{ t('core.subscriptionManager.statusLabel') }}</strong>
                       {{ item.status || 'confirmed' }}
                     </div>
                     <div class="mt-3">
@@ -2844,10 +2848,12 @@
         </div>
       </VCardText>
       
-      <VCardActions class="px-6 pb-4">
+      <VCardActions class="px-6 pb-4 pt-0">
         <VBtn
           variant="flat"
           color="error"
+          size="small"
+          class="ml-3"
           @click="showNodeSelectionDialog = false"
         >
           {{ t('common.buttons.cancel') }}
@@ -2856,6 +2862,8 @@
         <VBtn
           variant="flat"
           color="primary"
+          size="small"
+          class="mr-3"
           @click="saveNodeSelection"
           :disabled="selectedNodes.length === 0"
         >
@@ -3090,19 +3098,19 @@ const tabItems = computed(() => {
     baseItems.push({ label: t('core.subscriptionManager.tabGeolocation'), icon: 'mdi-earth', value: 1 })
   }
 
-  // Components tab always shown
-  baseItems.push({ label: t('core.subscriptionManager.tabComponents'), icon: 'mdi-cube', value: 2 })
-
-  // Only show Priority/Enterprise Nodes tab for v7+ private apps
+  // Only show Priority/Enterprise Nodes tab for v7+ private apps (before Components tab)
   if (props.appSpec?.version >= 7 && isPrivateApp.value) {
     baseItems.push({
       label: props.appSpec?.version === 7
         ? t('core.subscriptionManager.tabEnterpriseNodes')
         : t('core.subscriptionManager.tabPriorityNodes'),
       icon: 'mdi-server-network',
-      value: 3,
+      value: 2,
     })
   }
+
+  // Components tab always shown
+  baseItems.push({ label: t('core.subscriptionManager.tabComponents'), icon: 'mdi-cube', value: 3 })
 
   return baseItems
 })
@@ -4339,7 +4347,7 @@ async function autoSelectNodes() {
     updateAvailableNodes()
     updateNodesInAppSpec()
     
-    showToast('success', `Auto-selected ${nodesToSelect.length} high-quality enterprise nodes`)
+    showToast('success', t('core.subscriptionManager.autoSelectedNodes', { count: nodesToSelect.length }))
     
   } catch (error) {
     console.error('Auto-select error:', error)
@@ -5882,7 +5890,7 @@ async function verifyAppSpec() {
     
     // Handle missing enterprise nodes
     if (errorMsg.includes('select enterprise nodes')) {
-      errorMsg = 'Enterprise app requires selected priority nodes. Please go to the Priority Nodes tab and select nodes.'
+      errorMsg = t('core.subscriptionManager.enterpriseNodesRequired')
     }
     
     verifyAppSpecError.value = errorMsg
@@ -7306,6 +7314,11 @@ async function signMethod() {
 
 
 <style scoped>
+/* Close button hover effect */
+.close-btn-hover:hover {
+  color: rgb(var(--v-theme-error)) !important;
+}
+
 /* Installation output styling */
 .installation-step {
   border-bottom: 1px solid rgba(var(--v-border-color), 0.12);

@@ -3,14 +3,25 @@
   <VDialog
     v-model="isDialogOpen"
     :activator="`#${target}`"
-    width="400"
+    :width="message ? '500' : '400'"
   >
     <VCard>
-      <VCardTitle class="text-h6 bg-primary">
+      <VCardTitle class="text-h5 bg-primary d-flex align-center">
+        <VIcon class="mr-2" color="white">mdi-help-circle-outline</VIcon>
         {{ title || t('core.confirmCustomDialog.confirmation') }}
       </VCardTitle>
       <VCardText class="pa-4">
-        {{ message || t('core.confirmCustomDialog.areYouSure') }}
+        <VAlert
+          v-if="message"
+          :type="alertType"
+          variant="tonal"
+          density="compact"
+        >
+          {{ message }}
+        </VAlert>
+        <div v-else>
+          {{ t('core.confirmCustomDialog.areYouSure') }}
+        </div>
       </VCardText>
       <VCardActions>
         <VSpacer />
@@ -52,6 +63,11 @@ const props = defineProps({
   message: {
     type: String,
     default: "",
+  },
+  alertType: {
+    type: String,
+    default: "info",
+    validator: (value) => ['info', 'warning', 'error', 'success'].includes(value),
   },
 })
 

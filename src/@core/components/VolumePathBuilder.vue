@@ -20,7 +20,7 @@ const baseSyncModes = computed(() => {
   const modes = [
     { value: '', label: t('core.volumePathBuilder.modeNone') },
     { value: 'r', label: t('core.volumePathBuilder.modePhasedMasterMaster') },
-    { value: 'g', label: t('core.volumePathBuilder.modeMasterSlave') },
+    { value: 'g', label: t('core.volumePathBuilder.modePrimaryStandby') },
   ]
 
   // Only include 's' mode if it's already being used in the existing data
@@ -335,7 +335,7 @@ watch(validationLogs, logs => {
           <ul class="mb-4 ml-4" style="font-size: 13px">
             <li v-if="isUsingSMode"><strong>{{ t('core.volumePathBuilder.syncModesMasterMasterLabel') }}</strong> {{ t('core.volumePathBuilder.syncModesMasterMasterDesc') }}</li>
             <li><strong>{{ t('core.volumePathBuilder.syncModesPhasedMasterMasterLabel') }}</strong> {{ t('core.volumePathBuilder.syncModesPhasedMasterMasterDesc') }}</li>
-            <li><strong>{{ t('core.volumePathBuilder.syncModesMasterSlaveLabel') }}</strong> {{ t('core.volumePathBuilder.syncModesMasterSlaveDesc') }}</li>
+            <li><strong>{{ t('core.volumePathBuilder.syncModesPrimaryStandbyLabel') }}</strong> {{ t('core.volumePathBuilder.syncModesPrimaryStandbyDesc') }}</li>
           </ul>
 
           <h4><strong>{{ t('core.volumePathBuilder.rulesTitle') }}</strong></h4>
