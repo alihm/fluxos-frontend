@@ -1,9 +1,25 @@
 <template>
   <VCard
+    v-if="!isHidden"
     icon="mdi-server"
     class="rounded-xl elevation-4 mb-6 pa-2"
-    style="width: 100%;"
+    style="width: 100%; position: relative;"
   >
+    <VTooltip location="left">
+      <template #activator="{ props }">
+        <VBtn
+          icon="mdi-close"
+          size="x-small"
+          variant="text"
+          color="error"
+          class="position-absolute mr-3"
+          style="top: 50%; right: 0; transform: translateY(-50%);"
+          @click="toggleVisibility"
+          v-bind="props"
+        />
+      </template>
+      <span>{{ t('core.statusBar.hideStatusBar') }}</span>
+    </VTooltip>
     <div
       class="d-flex align-center justify-center px-2"
       :style="{
@@ -140,6 +156,29 @@
       </div>
     </div>
   </VCard>
+  <div
+    v-else
+    class="mb-6"
+    style="width: 100%; position: relative; height: 52px; display: flex; align-items: center;"
+  >
+    <VTooltip location="left">
+      <template #activator="{ props }">
+        <VBtn
+          icon
+          size="small"
+          variant="text"
+          color="secondary"
+          class="position-absolute"
+          style="top: 50%; right: -8px; transform: translateY(-50%);"
+          @click="toggleVisibility"
+          v-bind="props"
+        >
+          <VIcon>mdi-eye-outline</VIcon>
+        </VBtn>
+      </template>
+      <span>{{ t('core.statusBar.showStatusBar') }}</span>
+    </VTooltip>
+  </div>
 </template>
 
 <script setup>
@@ -159,6 +198,14 @@ const { fluxVersion } = storeToRefs(fluxStore)
 const windowWidth = ref(0)
 const isNewBackendVersion = ref(false)
 const isNewFrontendVersion = ref(false)
+
+// StatusBar visibility state with localStorage persistence
+const isHidden = ref(localStorage.getItem('statusBarHidden') === 'true')
+
+const toggleVisibility = () => {
+  isHidden.value = !isHidden.value
+  localStorage.setItem('statusBarHidden', isHidden.value.toString())
+}
 
 watch(
   () => i18n.locale,
@@ -258,11 +305,17 @@ onMounted(() => {
     }
   }
 
+  const handleBackendURLChange = () => {
+    fetchFluxVersion()
+    nodeStatus()
+  }
+
+  fetchFluxVersion()
   nodeStatus()
-  eventBus.on("backendURLChanged", nodeStatus)
+  eventBus.on("backendURLChanged", handleBackendURLChange)
 })
 
 onBeforeUnmount(() => {
-  eventBus.off("backendURLChanged", nodeStatus)
+  eventBus.off("backendURLChanged", handleBackendURLChange)
 })
 </script>

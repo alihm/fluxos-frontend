@@ -984,7 +984,9 @@
       "notSyncedMessage": "Blockchain nie jest zsynchronizowany (blok {blocks}/{headers}, {blocksBehind} bloków w tyle)",
       "connectedMessage": "Flux Gravity jest operacyjny i zsynchronizowany z siecią Flux.",
       "connectingMessage": "Łączenie z siecią Flux. Flux Gravity działa z ograniczoną funkcjonalnością.",
-      "disconnectedMessage": "Brak połączenia z siecią Flux. Flux Gravity działa z ograniczoną funkcjonalnością."
+      "disconnectedMessage": "Brak połączenia z siecią Flux. Flux Gravity działa z ograniczoną funkcjonalnością.",
+      "hideStatusBar": "Ukryj pasek statusu",
+      "showStatusBar": "Pokaż pasek statusu"
     }
   },
   "components": {
