@@ -234,13 +234,13 @@ const adjustedExpiryBlockHeight = computed(() => {
 // Calculate fork-aware expiry time label
 const expiresInLabel = computed(() => {
   if (!adjustedExpiryBlockHeight.value || currentBlockHeight.value < 0) {
-    return 'Not available'
+    return t('core.appDetailsCard.notAvailable')
   }
 
   const blocksRemaining = adjustedExpiryBlockHeight.value - currentBlockHeight.value
 
   if (blocksRemaining < 1) {
-    return 'Application Expired'
+    return t('core.appDetailsCard.applicationExpired')
   }
 
   let totalMinutes = 0

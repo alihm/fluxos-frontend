@@ -280,7 +280,9 @@
       "country": ", Kraj: {name}",
       "region": ", Region: {name}",
       "allowedContinent": "Dozwolone: Kontynent: {name}",
-      "forbiddenContinent": "Zabronione: Kontynent: {name}"
+      "forbiddenContinent": "Zabronione: Kontynent: {name}",
+      "notAvailable": "Niedostępne",
+      "applicationExpired": "Aplikacja wygasła"
     },
     "componentDetails": {
       "name": "Nazwa",
