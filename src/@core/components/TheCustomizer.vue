@@ -11,6 +11,13 @@ import {
   Theme,
 } from '@core/enums'
 import { useConfigStore } from '@core/stores/config'
+
+const props = defineProps({
+  hideToggleButton: {
+    type: Boolean,
+    default: false,
+  },
+})
 import borderSkin from '@images/customizer-icons/border-light.svg'
 import collapsed from '@images/customizer-icons/collapsed-light.svg'
 import compact from '@images/customizer-icons/compact-light.svg'
@@ -345,7 +352,9 @@ const handleClickOutside = event => {
 }
 
 const openNavDrawer = event => {
-  event.stopPropagation()
+  if (event && event.stopPropagation) {
+    event.stopPropagation()
+  }
   isNavDrawerOpen.value = true
 }
 
@@ -356,11 +365,18 @@ onMounted(() => {
 onBeforeUnmount(() => {
   document.removeEventListener('click', handleClickOutside)
 })
+
+// Expose the openNavDrawer function and state to parent components
+defineExpose({
+  openNavDrawer,
+  isNavDrawerOpen,
+})
 </script>
 
 <template>
   <div class="d-lg-block d-none">
     <VBtn
+      v-if="!hideToggleButton"
       icon
       class="app-customizer-toggler rounded-s-lg rounded-0"
       style="z-index: 1001;"

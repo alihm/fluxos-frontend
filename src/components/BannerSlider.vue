@@ -6,7 +6,13 @@
         :key="index"
         class="carousel-slide" :class="[{ active: currentSlide === index, prev: prevSlide === index }]"
       >
-        <div class="puzzle-grid">
+        <div
+          class="puzzle-grid"
+          :style="{
+            gridTemplateColumns: `repeat(${gridSize}, 1fr)`,
+            gridTemplateRows: `repeat(${gridSize}, 1fr)`
+          }"
+        >
           <div
             v-for="i in puzzlePieces"
             :key="i"
@@ -37,17 +43,28 @@ const forceUpdate = ref(0)
 let autoPlayInterval = null
 let resizeTimeout = null
 
-// Compute puzzle pieces based on screen size
+// Compute puzzle pieces based on screen size with more granular breakpoints
 const puzzlePieces = computed(() => {
   forceUpdate.value // trigger reactivity
-  
-  return window.innerWidth <= 600 ? 36 : 64 // 6x6 for mobile, 8x8 for desktop
+  const width = window.innerWidth
+
+  // Progressive grid size based on screen width
+  if (width <= 480) return 25      // 5x5 for small mobile
+  if (width <= 768) return 36      // 6x6 for mobile/tablet portrait
+  if (width <= 1024) return 49     // 7x7 for tablet landscape
+  if (width <= 1440) return 64     // 8x8 for desktop
+  return 81                        // 9x9 for large/ultra-wide screens
 })
 
 const gridSize = computed(() => {
   forceUpdate.value // trigger reactivity
-  
-  return window.innerWidth <= 600 ? 6 : 8
+  const width = window.innerWidth
+
+  if (width <= 480) return 5
+  if (width <= 768) return 6
+  if (width <= 1024) return 7
+  if (width <= 1440) return 8
+  return 9
 })
 
 // Dynamically load all banners from public/banner directory
@@ -75,13 +92,21 @@ const getPuzzleStyle = (index, imageUrl) => {
   const row = Math.floor(pieceIndex / cols)
   const col = pieceIndex % cols
 
-  // Calculate exact pixel position to offset the background
-  const xPercent = (col * 100) / (cols - 1)
-  const yPercent = (row * 100) / (rows - 1)
+  // For a puzzle grid, each piece needs to show exactly its portion of the image
+  // If we have N columns, each piece is 1/N wide
+  // The background position for piece at column C should be at C/(N-1) * 100%
+  // This ensures first piece is at 0% and last piece is at 100%
+  const xPercent = cols > 1 ? (col / (cols - 1)) * 100 : 0
+  const yPercent = rows > 1 ? (row / (rows - 1)) * 100 : 0
+
+  // Calculate background-size based on grid size
+  // For an NxN grid, background needs to be N*100% in each direction
+  const backgroundSizePercent = `${cols * 100}% ${rows * 100}%`
 
   return {
     backgroundImage: `url(${imageUrl})`,
     backgroundPosition: `${xPercent}% ${yPercent}%`,
+    backgroundSize: backgroundSizePercent,
     transitionDelay: `${Math.random() * 0.6}s`,
   }
 }
@@ -140,10 +165,15 @@ onUnmounted(() => {
 <style scoped>
 .banner-slider-container {
   overflow: hidden;
-  border-radius: 16px;
+  border-radius: clamp(8px, 1.5vw, 16px);
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
   transition: all 0.3s ease;
   position: relative;
+  margin-bottom: clamp(1rem, 2vw, 1.5rem);
+  /* Viewport-based width constraint - fluid but limited */
+  width: min(100%, 1800px);
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .banner-slider-container:hover {
@@ -153,10 +183,14 @@ onUnmounted(() => {
 .carousel-wrapper {
   position: relative;
   width: 100%;
+  /* Use aspect-ratio for natural responsive scaling */
   aspect-ratio: 16 / 9;
-  max-height: 500px;
+  /* Constrain to available viewport height (accounting for navbar, footer, etc.) */
+  /* Using calc to reserve space: 100vh - navbar (~64px) - footer (~60px) - margins (~40px) */
+  max-height: min(70vh, calc(100vh - 164px));
+  min-height: 250px;
   overflow: hidden;
-  border-radius: 16px;
+  border-radius: clamp(8px, 1.5vw, 16px);
 }
 
 .carousel-slide {
@@ -182,6 +216,7 @@ onUnmounted(() => {
 
 .puzzle-grid {
   display: grid;
+  /* Dynamic grid columns - will be overridden by media queries */
   grid-template-columns: repeat(8, 1fr);
   grid-template-rows: repeat(8, 1fr);
   width: 100%;
@@ -192,7 +227,7 @@ onUnmounted(() => {
   width: 100%;
   height: 100%;
   background-repeat: no-repeat;
-  background-size: 800% 800%;
+  /* background-size is set dynamically via inline style */
   opacity: 0;
   transform: scale(0.8) rotate(45deg);
   transition: all 0.7s cubic-bezier(0.4, 0, 0.2, 1);
@@ -218,14 +253,15 @@ onUnmounted(() => {
   transform: translateY(-50%);
   display: flex;
   justify-content: space-between;
-  padding: 0 20px;
+  padding: 0 clamp(12px, 2vw, 20px);
   z-index: 10;
   pointer-events: none;
 }
 
 .carousel-arrow {
-  width: 48px;
-  height: 48px;
+  /* Fluid button size */
+  width: clamp(40px, 5vw, 56px);
+  height: clamp(40px, 5vw, 56px);
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.15);
   backdrop-filter: blur(10px);
@@ -247,28 +283,44 @@ onUnmounted(() => {
 }
 
 .carousel-arrow :deep(.v-icon) {
-  font-size: 32px;
+  font-size: clamp(24px, 3vw, 32px);
 }
 
-/* Responsive adjustments */
-@media (min-width: 1920px) {
+/* Responsive breakpoints - Mobile First Approach */
+
+/* Extra small devices (phones, less than 480px) */
+@media (max-width: 479.98px) {
   .carousel-wrapper {
-    max-height: 600px;
+    aspect-ratio: 16 / 10; /* Slightly taller on small phones */
+  }
+
+  .carousel-controls {
+    display: none; /* Hide arrows on very small screens */
   }
 }
 
-@media (max-width: 600px) {
-  .carousel-controls {
-    display: none;
+/* Landscape orientation on small screens */
+@media (max-height: 500px) and (orientation: landscape) {
+  .carousel-wrapper {
+    min-height: 200px;
   }
 
-  .puzzle-grid {
-    grid-template-columns: repeat(6, 1fr);
-    grid-template-rows: repeat(6, 1fr);
+  .carousel-arrow {
+    width: 36px;
+    height: 36px;
   }
 
-  .puzzle-piece {
-    background-size: 600% 600%;
+  .carousel-arrow :deep(.v-icon) {
+    font-size: 20px;
+  }
+}
+
+/* High resolution displays */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  .carousel-wrapper,
+  .banner-slider-container {
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: crisp-edges;
   }
 }
 </style>

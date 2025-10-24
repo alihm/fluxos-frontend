@@ -55,6 +55,15 @@ const shouldHideLoginText = isHovered => {
 // Theme-aware FluxCloud logo (dark logo = black text for light backgrounds, light logo = white text for dark backgrounds)
 const fluxLogo = computed(() => theme.value === 'dark' ? fluxCloudLogoLight : fluxCloudLogoDark)
 
+// Customizer ref to open from navbar
+const customizerRef = ref(null)
+
+const openCustomizer = (event) => {
+  if (customizerRef.value && customizerRef.value.openNavDrawer) {
+    customizerRef.value.openNavDrawer(event)
+  }
+}
+
 const handleLoginSuccess = () => {
   closeLoginBottomSheet()
 }
@@ -155,6 +164,15 @@ const handleLoginSuccess = () => {
           <BackendSelector />
         </div>
         <VSpacer />
+        <IconBtn
+          class="d-none d-lg-block"
+          @click="openCustomizer"
+        >
+          <VIcon
+            size="22"
+            icon="tabler-settings"
+          />
+        </IconBtn>
         <NavBarI18n
           v-if="themeConfig.app.i18n.enable && themeConfig.app.i18n.langConfig?.length"
           :languages="themeConfig.app.i18n.langConfig"
@@ -189,7 +207,7 @@ const handleLoginSuccess = () => {
       <Footer />
     </template>
 
-    <TheCustomizer />
+    <TheCustomizer ref="customizerRef" hide-toggle-button />
 
     <!-- Global Snackbar -->
     <VSnackbar

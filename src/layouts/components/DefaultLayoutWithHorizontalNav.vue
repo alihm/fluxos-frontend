@@ -32,6 +32,15 @@ const { t } = useI18n()
 const fluxStore = useFluxStore()
 const { privilege } = storeToRefs(fluxStore)
 
+// Customizer ref to open from navbar
+const customizerRef = ref(null)
+
+const openCustomizer = (event) => {
+  if (customizerRef.value && customizerRef.value.openNavDrawer) {
+    customizerRef.value.openNavDrawer(event)
+  }
+}
+
 const handleLoginSuccess = () => {
   closeLoginBottomSheet()
 }
@@ -53,6 +62,16 @@ const handleLoginSuccess = () => {
       <VDivider vertical class="navbar-divider" />
       <BackendSelector />
       <VSpacer />
+
+      <IconBtn
+        class="d-none d-lg-block"
+        @click="openCustomizer"
+      >
+        <VIcon
+          size="22"
+          icon="tabler-settings"
+        />
+      </IconBtn>
 
       <NavBarI18n
         v-if="themeConfig.app.i18n.enable && themeConfig.app.i18n.langConfig?.length"
@@ -88,7 +107,7 @@ const handleLoginSuccess = () => {
     </template>
 
     <!-- 👉 Customizer -->
-    <TheCustomizer />
+    <TheCustomizer ref="customizerRef" hide-toggle-button />
 
     <!-- Global Snackbar -->
     <VSnackbar
