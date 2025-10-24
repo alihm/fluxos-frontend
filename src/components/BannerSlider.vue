@@ -154,6 +154,7 @@ onUnmounted(() => {
   position: relative;
   width: 100%;
   aspect-ratio: 16 / 9;
+  max-height: 600px;
   overflow: hidden;
   border-radius: 16px;
 }

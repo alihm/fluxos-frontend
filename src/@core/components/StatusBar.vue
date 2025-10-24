@@ -31,10 +31,7 @@
       }"
     >
       <!-- Backend -->
-      <div
-        v-if="fluxVersion"
-        class="d-inline-flex align-center"
-      >
+      <div class="d-inline-flex align-center">
         <VTooltip location="top">
           <template #activator="{ props }">
             <span
@@ -45,7 +42,7 @@
               <VBadge
                 dot
                 bordered
-                :color="isNewBackendVersion ? 'warning' : 'success'"
+                :color="backendVersionError ? 'error' : (isNewBackendVersion ? 'warning' : 'success')"
                 location="top start"
                 offset-x="-1"
                 offset-y="2"
@@ -64,10 +61,10 @@
             </span>
           </template>
           <span>{{
-            isNewBackendVersion ? t("core.statusBar.updateAvailable") : t("core.statusBar.upToDate")
+            backendVersionError ? t("core.statusBar.backendError") : (isNewBackendVersion ? t("core.statusBar.updateAvailable") : t("core.statusBar.upToDate"))
           }}</span>
         </VTooltip>
-        <span>{{ t("core.statusBar.backend") }}: {{ fluxVersion }}</span>
+        <span>{{ t("core.statusBar.backend") }}: {{ backendVersionError ? t("core.statusBar.error") : fluxVersion }}</span>
       </div>
 
       <!-- Frontend -->
@@ -198,6 +195,7 @@ const { fluxVersion } = storeToRefs(fluxStore)
 const windowWidth = ref(0)
 const isNewBackendVersion = ref(false)
 const isNewFrontendVersion = ref(false)
+const backendVersionError = ref(false)
 
 // StatusBar visibility state with localStorage persistence
 const isHidden = ref(localStorage.getItem('statusBarHidden') === 'true')
@@ -273,8 +271,11 @@ const fetchFluxVersion = async () => {
     const version = response.data?.data
 
     fluxVersion.value = version
+    backendVersionError.value = false
   } catch (error) {
     console.error(error)
+    backendVersionError.value = true
+    fluxVersion.value = null
   }
 }
 

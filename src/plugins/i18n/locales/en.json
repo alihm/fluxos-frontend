@@ -987,7 +987,9 @@
       "connectingMessage": "Connecting to the Flux network. Flux Gravity is running with limited capabilities.",
       "disconnectedMessage": "Not connected to the Flux network. Flux Gravity is running with limited capabilities.",
       "hideStatusBar": "Hide status bar",
-      "showStatusBar": "Show status bar"
+      "showStatusBar": "Show status bar",
+      "backendError": "Failed to fetch backend version",
+      "error": "Error"
     }
   },
   "components": {

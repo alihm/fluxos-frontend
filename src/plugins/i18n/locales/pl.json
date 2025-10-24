@@ -986,7 +986,9 @@
       "connectingMessage": "Łączenie z siecią Flux. Flux Gravity działa z ograniczoną funkcjonalnością.",
       "disconnectedMessage": "Brak połączenia z siecią Flux. Flux Gravity działa z ograniczoną funkcjonalnością.",
       "hideStatusBar": "Ukryj pasek statusu",
-      "showStatusBar": "Pokaż pasek statusu"
+      "showStatusBar": "Pokaż pasek statusu",
+      "backendError": "Nie udało się pobrać wersji serwera",
+      "error": "Błąd"
     }
   },
   "components": {
