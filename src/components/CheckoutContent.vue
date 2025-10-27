@@ -547,8 +547,27 @@ import { payWithSSP, payWithZelcore } from '@/utils/walletService'
 import { useTheme } from 'vuetify'
 import { useI18n } from 'vue-i18n'
 
+// Props
+const props = defineProps({
+  planId: {
+    type: String,
+    required: true,
+  },
+  actionType: {
+    type: String,
+    default: 'signup',
+  },
+  gateway: {
+    type: String,
+    default: 'fluxpay',
+  },
+})
+
+// Emits
+const emit = defineEmits(['close', 'success'])
+
 // Helper function to sanitize auth data for logging
-const sanitizeAuthData = (data) => {
+const sanitizeAuthData = data => {
   if (!data || typeof data !== 'object') return data
 
   const sanitized = { ...data }
@@ -571,25 +590,6 @@ const sanitizeAuthData = (data) => {
 import FluxIDImg from '@images/FluxID.svg?url'
 import SSPLogoBlackImg from '@images/ssp-logo-black.svg?url'
 import SSPLogoWhiteImg from '@images/ssp-logo-white.svg?url'
-
-// Props
-const props = defineProps({
-  planId: {
-    type: String,
-    required: true,
-  },
-  actionType: {
-    type: String,
-    default: 'signup',
-  },
-  gateway: {
-    type: String,
-    default: 'fluxpay',
-  },
-})
-
-// Emits
-const emit = defineEmits(['close', 'success'])
 
 // Expose cleanup method for parent component
 const cleanupPaymentMonitoring = () => {
@@ -760,6 +760,7 @@ const loadCurrentSubscription = async () => {
       // Capture payment gateway from current subscription
       if (result.gateway) {
         console.log('💳 Current subscription gateway:', result.gateway)
+
         // Also store in localStorage for consistency
         localStorage.setItem('fluxdrive_gateway', result.gateway)
       }
@@ -1743,6 +1744,7 @@ const monitorPayment = async (paymentId, subId, paymentAddr, paymentType = 'flux
             showSnackbar(successMessage, 'success', 8000)
             emit('success')
           }
+
           // If verification failed, continue monitoring
         } else if (result.error) {
           console.warn('Payment check error:', result.error)
@@ -1821,6 +1823,7 @@ const monitorPayment = async (paymentId, subId, paymentAddr, paymentType = 'flux
             // Network error, timeout, or JSON parse error
             console.warn('⚠️ Failed to check /read endpoint for renewal:', error.message)
             console.log('⏳ Waiting for renewal - network/timeout error, will retry...')
+
             // Continue monitoring, will retry in next interval
           }
         } else if (props.actionType === 'upgrade' || props.actionType === 'downgrade') {

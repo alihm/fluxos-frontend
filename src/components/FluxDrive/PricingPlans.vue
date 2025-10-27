@@ -143,7 +143,7 @@
                 variant="outlined"
                 size="small"
                 class="pricing-btn mt-auto"
-                @click="$emit('cancel-subscription')"
+                @click="$emit('cancelSubscription')"
               >
                 {{ t('pages.fluxDrive.cancel') }}
               </VBtn>
@@ -188,7 +188,7 @@ import { useI18n } from 'vue-i18n'
 import { useFluxDrive } from '@/composables/useFluxDrive'
 
 // Define emit with proper signature
-const emit = defineEmits(['select-plan', 'selectPlan', 'cancel-subscription'])
+const emit = defineEmits(['select-plan', 'selectPlan', 'cancelSubscription'])
 
 // i18n
 const { t } = useI18n()

@@ -312,39 +312,41 @@
         </div>
 
         <!-- Recovery Mode Button - TEMPORARILY DISABLED -->
-        <!-- <VAlert
+        <!--
+          <VAlert
           v-if="usedStorage > 0 && currentFolder === '/' && files.length === 0 && allFiles.length === 0 && !loading && !searchQuery.trim() && !localMessage"
           type="warning"
           variant="tonal"
           class="my-4"
-        >
+          >
           <template #title>{{ t('components.fluxDrive.fileManager.filesMissing') }}</template>
           <div class="text-body-2 mb-3">
-            {{ t('components.fluxDrive.fileManager.filesMissingDescription', { storage: bytesConversion(usedStorage) }) }}
+          {{ t('components.fluxDrive.fileManager.filesMissingDescription', { storage: bytesConversion(usedStorage) }) }}
           </div>
           <div class="d-flex gap-2">
-            <VBtn
-              v-if="!isRecoveryMode"
-              color="warning"
-              variant="flat"
-              size="small"
-              @click="loadFiles(false, true)"
-            >
-              <VIcon icon="mdi-file-search" class="me-2" />
-              {{ t('components.fluxDrive.fileManager.showAllFilesRecovery') }}
-            </VBtn>
-            <VBtn
-              v-if="isRecoveryMode"
-              color="primary"
-              variant="flat"
-              size="small"
-              @click="loadFiles(false, false)"
-            >
-              <VIcon icon="mdi-arrow-left" class="me-2" />
-              {{ t('components.fluxDrive.fileManager.backToNormalMode') }}
-            </VBtn>
+          <VBtn
+          v-if="!isRecoveryMode"
+          color="warning"
+          variant="flat"
+          size="small"
+          @click="loadFiles(false, true)"
+          >
+          <VIcon icon="mdi-file-search" class="me-2" />
+          {{ t('components.fluxDrive.fileManager.showAllFilesRecovery') }}
+          </VBtn>
+          <VBtn
+          v-if="isRecoveryMode"
+          color="primary"
+          variant="flat"
+          size="small"
+          @click="loadFiles(false, false)"
+          >
+          <VIcon icon="mdi-arrow-left" class="me-2" />
+          {{ t('components.fluxDrive.fileManager.backToNormalMode') }}
+          </VBtn>
           </div>
-        </VAlert> -->
+          </VAlert> 
+        -->
 
         <!-- Debug Info (temporary) -->
         <VAlert
@@ -1241,7 +1243,7 @@
           <!-- Show pricing plans component here -->
           <PricingPlans
             @selectPlan="handleUpgradePlan"
-            @cancel-subscription="showCancelDialog = true; showUpgradeDialog = false"
+            @cancelSubscription="showCancelDialog = true; showUpgradeDialog = false"
           />
         </VCardText>
       </VCard>
@@ -2081,6 +2083,7 @@ const uploadVersion = async () => {
       await uploadVersionToFluxCloud(existingFileHash, fileForAddVersion.value.name, selectedVersionFile.value, comment)
     } finally {
       clearInterval(progressInterval)
+
       // Remove from tracking array
       const index = activeIntervals.value.indexOf(progressInterval)
       if (index > -1) {

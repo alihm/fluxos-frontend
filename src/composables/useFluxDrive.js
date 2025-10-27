@@ -10,7 +10,7 @@ const lastApiCall = ref(0)
 const API_RATE_LIMIT = 1000 // 1 second between API calls
 
 // Helper function to sanitize auth data for logging
-const sanitizeAuthData = (data) => {
+const sanitizeAuthData = data => {
   if (!data || typeof data !== 'object') return data
 
   const sanitized = { ...data }
@@ -152,8 +152,8 @@ export function useFluxDrive() {
 
     // Detect current plan from storage, even if subscription is expired
     const detectedPlan = currentStorageGB <= 10 ? 'starter' :
-                         currentStorageGB <= 50 ? 'standard' :
-                         currentStorageGB <= 100 ? 'pro' : 'enterprise'
+      currentStorageGB <= 50 ? 'standard' :
+        currentStorageGB <= 100 ? 'pro' : 'enterprise'
 
     const userPlan = currentPlan.value || detectedPlan
 
@@ -361,6 +361,7 @@ export function useFluxDrive() {
               if (subResult && subResult.gateway) {
                 sharedState.paymentGateway.value = subResult.gateway
                 console.log('💳 Payment gateway captured from subscription API:', subResult.gateway)
+
                 // Also store in localStorage for persistence
                 localStorage.setItem('fluxdrive_gateway', subResult.gateway)
               }
@@ -381,6 +382,7 @@ export function useFluxDrive() {
           }
         } catch (readError) {
           console.warn('⚠️ Could not verify subscription with /read endpoint:', readError)
+
           // Continue with storage result if read check fails
         }
 
@@ -1262,6 +1264,7 @@ export function useFluxDrive() {
         }
 
         console.log('📊 Updated values - hasActiveSubscription:', hasActiveSubscription.value, 'subscriptionChecked:', subscriptionChecked.value, 'periodEnd:', subscriptionPeriodEnd.value)
+
         // Don't return - continue to show files if they exist
       } else if (result.error) {
         if (result.error.indexOf("No active subscription.") > -1) {

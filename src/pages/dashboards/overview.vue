@@ -376,7 +376,7 @@ const { t } = useI18n()
 // Data properties
 const isLoading = ref(true) // Unified loading state
 const totalNodes = ref(0)
-const maxSupply = ref(440000000)
+const maxSupply = ref(560000000)
 const lockedSupply = ref(0)
 const circulatingSupply = ref(0)
 const configStore = useConfigStore()
