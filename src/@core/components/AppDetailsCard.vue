@@ -216,6 +216,8 @@ const snackbar = ref({
 
 // Calculate expiry block height (only for display in "Expires on Blockheight" field)
 // Hash check ensures we only show this for properly registered blockchain apps
+// For pre-fork apps that expire after fork, we need to adjust the block number
+// to account for the fork transition from 2 min/block to 0.5 min/block
 const adjustedExpiryBlockHeight = computed(() => {
   if (!props.app?.height || !props.app?.hash || props.app.hash.length !== 64) {
     return null
@@ -225,7 +227,32 @@ const adjustedExpiryBlockHeight = computed(() => {
   const defaultExpire = props.app.height >= FORK_BLOCK_HEIGHT ? 88000 : 22000
   const expireIn = props.app.expire || defaultExpire
 
-  return props.app.height + expireIn
+  // Calculate naive expiry (registration + expire blocks)
+  const naiveExpiry = props.app.height + expireIn
+
+  // If app was registered before fork and naive expiry is after fork,
+  // we need to adjust to maintain the intended duration
+  if (props.app.height < FORK_BLOCK_HEIGHT && naiveExpiry > FORK_BLOCK_HEIGHT) {
+    // Calculate intended subscription duration based on registration time
+    const blockTimeAtRegistration = 2 // Pre-fork: 2 min/block
+    const subscriptionDurationMinutes = expireIn * blockTimeAtRegistration
+
+    // Calculate pre-fork time consumed
+    const preForkBlocks = FORK_BLOCK_HEIGHT - props.app.height
+    const preForkMinutes = preForkBlocks * 2
+
+    // Calculate remaining time that needs to be in post-fork blocks
+    const remainingMinutes = subscriptionDurationMinutes - preForkMinutes
+
+    // Convert remaining minutes to post-fork blocks
+    const postForkBlocks = remainingMinutes / 0.5
+
+    // Actual expiry block accounting for fork transition
+    return FORK_BLOCK_HEIGHT + postForkBlocks
+  }
+
+  // For post-fork apps or pre-fork apps expiring before fork, use naive calculation
+  return naiveExpiry
 })
 
 // Calculate fork-aware expiry time label
