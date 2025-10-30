@@ -1055,6 +1055,16 @@ export async function payWithZelcore({ address, amount, message, coin = 'zelcash
   try {
     const protocol = `zel:?action=pay&coin=${coin}&address=${address}&amount=${amount}&message=${message}`
 
+    // Try using window.zelcore.protocol if available (extension will intercept this)
+    if (window.zelcore && typeof window.zelcore.protocol === 'function') {
+      console.log('[Zelcore Payment] Using window.zelcore.protocol()')
+      window.zelcore.protocol(protocol)
+    }
+
+    // ALWAYS also trigger the protocol link as fallback
+    // This ensures desktop app opens when extension is not installed
+    // Extension will intercept and prevent desktop app from opening
+    console.log('[Zelcore Payment] Triggering protocol link')
     const a = document.createElement('a')
     a.href = protocol
     a.style.display = 'none'
