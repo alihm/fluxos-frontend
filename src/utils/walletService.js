@@ -1055,12 +1055,20 @@ export async function payWithZelcore({ address, amount, message, coin = 'zelcash
   try {
     const protocol = `zel:?action=pay&coin=${coin}&address=${address}&amount=${amount}&message=${message}`
 
-    const a = document.createElement('a')
-    a.href = protocol
-    a.style.display = 'none'
-    document.body.appendChild(a)
-    a.click()
-    document.body.removeChild(a)
+    // Try using window.zelcore.protocol if available (extension)
+    if (window.zelcore && typeof window.zelcore.protocol === 'function') {
+      console.log('[Zelcore Payment] Using window.zelcore.protocol() - Extension detected')
+      window.zelcore.protocol(protocol)
+    } else {
+      // Fallback to protocol link for desktop app
+      console.log('[Zelcore Payment] Using protocol link - No extension, opening desktop app')
+      const a = document.createElement('a')
+      a.href = protocol
+      a.style.display = 'none'
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+    }
   } catch (error) {
     throw new Error(`Failed to open Zelcore: ${error.message}`)
   }
