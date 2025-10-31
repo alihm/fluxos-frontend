@@ -3061,7 +3061,7 @@ onMounted(() => {
       paymentCompleted.value = true
       paymentMethod.value = methodFromUrl
       if (amount) paymentAmount.value = parseFloat(amount)
-      showToast('success', 'Card payment completed successfully!')
+      showToast('success', t('core.subscriptionManager.cardPaymentCompletedSuccessfully'))
       
       // Clean up URL parameters
       const newUrl = window.location.pathname
@@ -3176,7 +3176,7 @@ const priceMultiplier = computed(() => {
   }
 
   const marketPlaceApp = marketPlaceApps.value.find(
-    app => appName.toLowerCase().startsWith(app.name.toLowerCase())
+    app => appName.toLowerCase().startsWith(app.name.toLowerCase()),
   )
 
   if (marketPlaceApp && marketPlaceApp.multiplier > 1) {
@@ -3893,7 +3893,7 @@ const appRunningTill = computed(() => {
     chosenRenewalBlocks,
     renewalTimeMs: renewalTime,
     renewalTimeDays: renewalTime / (24 * 60 * 60 * 1000),
-    newExpiry: new Date(newExpiry).toLocaleString()
+    newExpiry: new Date(newExpiry).toLocaleString(),
   })
 
   return {
@@ -5551,9 +5551,9 @@ watch(tab, async (newVal, oldVal) => {
     } else {
       console.log('⏭️ Skipping auto-test:', {
         reason: !testSectionVisible ? 'Test section not visible (test not required)' :
-                !registrationHash.value ? 'No registration hash' :
-                testRunning.value ? 'Test already running' :
-                'Unknown'
+          !registrationHash.value ? 'No registration hash' :
+            testRunning.value ? 'Test already running' :
+              'Unknown',
       })
     }
   }
@@ -5881,20 +5881,8 @@ async function verifyAppSpec() {
       if (marketPlaceApp.multiplier > 1) {
         console.log('Marketplace multiplier:', marketPlaceApp.multiplier, '× General:', generalMultiplier.value, '= Combined:', marketPlaceApp.multiplier * generalMultiplier.value)
       }
-      // NOTE: Like Flux Home UI, we do NOT set priceUSD in the spec
-      // Backend will calculate pricing and apply multipliers automatically
     }
 
-    // IMPORTANT: Do NOT set priceUSD in spec - let backend handle all pricing
-    // Backend will automatically apply:
-    // 1. Resource-based pricing (CPU, RAM, SSD)
-    // 2. Time multiplier (subscription duration)
-    // 3. Marketplace multiplier (if marketPlaceApp.multiplier > 1)
-    // 4. General multiplier (e.g., 10)
-    // 5. Hardware discounts
-    // 6. Upgrade credits (for updates)
-
-    // Remove any existing priceUSD to ensure backend calculation
     delete appSpecTemp.priceUSD
     if (appSpecTemp.version >= 8) {
       console.log('Version 8+ app - checking enterprise mode')
@@ -7137,7 +7125,7 @@ const startPaymentMonitoring = async () => {
             console.log('✅ Deployment successful - registrationHash kept for UI stability')
 
             // Show success message
-            showToast('success', appSpecPrice.value?.flux === 0 ? 'Deployment successful! Your application is now running.' : 'Payment confirmed! Your application is now active and running.')
+            showToast('success', appSpecPrice.value?.flux === 0 ? t('core.subscriptionManager.deploymentSuccessfulRunning') : t('core.subscriptionManager.paymentConfirmedActive'))
           }
         }
       } else {
@@ -7179,7 +7167,7 @@ const startPaymentMonitoring = async () => {
             console.log('✅ Deployment successful - registrationHash kept for UI stability')
 
             // Show success message
-            showToast('success', appSpecPrice.value?.flux === 0 ? 'Update deployed successfully!' : 'Payment confirmed! Your application spec has been updated.')
+            showToast('success', appSpecPrice.value?.flux === 0 ? t('core.subscriptionManager.updateDeployedSuccessfully') : t('core.subscriptionManager.paymentConfirmedSpecUpdated'))
           }
         }
       }
@@ -7239,7 +7227,7 @@ const emulatePaymentConfirmed = () => {
   paymentProcessing.value = false
   paymentCompleted.value = true
 
-  showToast('success', 'TEST: Payment confirmed! Your application is now active and running.')
+  showToast('success', t('core.subscriptionManager.testPaymentConfirmed'))
 }
 
 async function initZelcorePay() {
@@ -7319,11 +7307,13 @@ async function initSSPPay() {
       chain: 'flux',
     }
 
+    // Wait for user to confirm payment in SSP wallet (this blocks until user acts)
     const response = await payWithSSP(data)
-    showToast('success', `SSP payment initiated: ${response.txid}`)
 
-    // Note: For crypto payments, we show as "processing" since we need to wait for blockchain confirmation
-    // Start payment monitoring for crypto payment
+    // User confirmed payment - show success with both message and txid (matches Home UI)
+    showToast('success', `${response.data}: ${response.txid}`)
+
+    // Start payment monitoring to detect blockchain confirmation
     startPaymentMonitoring()
   } catch (error) {
     showToast('error', error.message)
