@@ -3120,6 +3120,22 @@ const generateDeploymentMessage = async () => {
   // For WordPress, use props.app.compose directly (not detailedApp) to preserve whitelist IPs
   const baseComponents = isWordPress.value ? (props.app.compose || []) : (detailedApp.value.compose || props.app.compose || [])
 
+  // For WordPress, update ENV variables to use the final app name with timestamp
+  if (isWordPress.value) {
+    const finalAppName = appName
+    for (const component of baseComponents) {
+      if (component.environmentParameters) {
+        component.environmentParameters = component.environmentParameters.map(env => {
+          return env
+            .replace(/fluxoperator_wordpress(?![\d])/g, `fluxoperator_${finalAppName}`)
+            .replace(/fluxmysql_wordpress(?![\d])/g, `fluxmysql_${finalAppName}`)
+            .replace(/CLIENT_APPNAME=wordpress(?![\d])/g, `CLIENT_APPNAME=${finalAppName}`)
+            .replace(/DB_APPNAME=wordpress(?![\d])/g, `DB_APPNAME=${finalAppName}`)
+        })
+      }
+    }
+  }
+
   // Upload environment variables to Flux Storage for WordPress (matching FluxCloud)
   if (isWordPress.value && props.app.uploadEnvToStorage) {
     for (const component of baseComponents) {
@@ -3317,7 +3333,6 @@ const generateDeploymentMessage = async () => {
       throw new Error(`Enterprise encryption failed: ${error.message}`)
     }
   }
-
 
   // Verify app specification with FluxOS backend to get the correct format
   const verifiedAppSpec = await AppsService.appRegistrationVerificaiton(globalAppSpec)
