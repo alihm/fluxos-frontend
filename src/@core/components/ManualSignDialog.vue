@@ -79,7 +79,7 @@ const { t } = useI18n()
 const isOpen = ref(props.modelValue)
 const localSignature = ref('')
 
-watch(() => props.modelValue, (newVal) => {
+watch(() => props.modelValue, newVal => {
   isOpen.value = newVal
   if (!newVal) {
     // Reset signature when dialog closes
@@ -87,7 +87,7 @@ watch(() => props.modelValue, (newVal) => {
   }
 })
 
-watch(isOpen, (newVal) => {
+watch(isOpen, newVal => {
   emit('update:modelValue', newVal)
 })
 

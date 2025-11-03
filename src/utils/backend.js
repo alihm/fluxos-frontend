@@ -4,8 +4,7 @@ export function getDetectedBackendURL() {
     const { protocol, hostname, port } = window.location
     let mybackend = protocol + '//'
 
-    const regex = /[A-Z]/i
-
+    // Check for Flux app domain format (5+ segments with dashes containing IP)
     if (hostname.split('-')[4]) {
       const splitted = hostname.split('-')
       const names = splitted[4].split('.')
@@ -15,12 +14,10 @@ export function getDetectedBackendURL() {
       names[2] = 'api'
       splitted[4] = ''
       mybackend += splitted.join('-') + names.join('.')
-    } else if (regex.test(hostname)) {
-      const names = hostname.split('.')
+    }
 
-      names[0] = 'api'
-      mybackend += names.join('.')
-    } else {
+    // Check for pure IP address (not localhost, not domain)
+    else if (/^(\d{1,3}\.){3}\d{1,3}$/.test(hostname)) {
       mybackend += hostname
 
       const numericPort = parseInt(port, 10)
@@ -31,6 +28,12 @@ export function getDetectedBackendURL() {
       }
     }
 
+    // For localhost or any domain name, use default API
+    else {
+      mybackend = 'https://api.runonflux.io'
+    }
+
+    // Fallback check for malformed URLs
     if (mybackend.endsWith('//api')) {
       mybackend = 'https://api.runonflux.io'
     }
@@ -38,7 +41,7 @@ export function getDetectedBackendURL() {
     return mybackend
   } catch (err) {
     console.error('❌ Failed to detect backend URL:', err)
-    
+
     return 'https://api.runonflux.io'
   }
 }
