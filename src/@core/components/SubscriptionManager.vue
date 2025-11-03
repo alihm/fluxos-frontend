@@ -7546,6 +7546,7 @@ async function initSignManual() {
       showToast('error', t('core.subscriptionManager.noLoginCredentials'))
       isSigning.value = false
       signingFailed.value = true
+      
       return
     }
 
@@ -7568,11 +7569,13 @@ async function initSignManual() {
 function submitManualSignature(sig) {
   if (!sig || !sig.trim()) {
     showToast('error', t('core.subscriptionManager.pleaseEnterSignature'))
+    
     return
   }
   signature.value = sig.trim()
   showManualSignDialog.value = false
   manualSignMessage.value = ''
+
   // Don't set isSigning to false here - let the signature watcher handle it
   // The watcher will detect the signature change and automatically call propagateSignedMessage()
 }

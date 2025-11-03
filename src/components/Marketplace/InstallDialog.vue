@@ -3696,6 +3696,7 @@ const signWithManual = async message => {
       const zelidauth = localStorage.getItem('zelidauth')
       if (!zelidauth) {
         reject(new Error('No login credentials found'))
+        
         return
       }
 
@@ -3712,7 +3713,7 @@ const signWithManual = async message => {
       manualSignDialogVisible.value = true
 
       // Set up handlers for dialog
-      manualSignDialogResolve = (signature) => {
+      manualSignDialogResolve = signature => {
         deploymentSignature.value = {
           signature,
           address: zelid,
