@@ -641,6 +641,31 @@ const wpConfig = ref(null)
 // TOS HTML content
 const tosHtmlContent = ref('')
 
+// Generate timestamp once for consistent app naming (not in computed to avoid regeneration)
+const appTimestamp = ref(Date.now())
+
+// Generate random password and ports once (not in computed to avoid regeneration)
+const generateRandomPassword = (length = 14) => {
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*'
+  let password = ''
+  for (let i = 0; i < length; i++) {
+    password += chars.charAt(Math.floor(Math.random() * chars.length))
+  }
+  return password
+}
+
+const generateRandomPort = () => {
+  return 31000 + Math.floor(Math.random() * 9000)
+}
+
+const dbPassword = ref(generateRandomPassword(14))
+const randomPorts = ref([
+  generateRandomPort(),
+  generateRandomPort(),
+  generateRandomPort(),
+  generateRandomPort(),
+])
+
 // Form data
 const formData = ref({
   appName: '',
@@ -769,50 +794,31 @@ const wordpressApp = computed(() => {
   const opRam = plan.ram[2]
   const opSsd = plan.ssd[2]
 
-  // Generate random password and ports
-  const generateRandomPassword = (length = 14) => {
-    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*'
-    let password = ''
-    for (let i = 0; i < length; i++) {
-      password += chars.charAt(Math.floor(Math.random() * chars.length))
-    }
-    
-    return password
-  }
+  // Use the pre-generated values for consistent app spec across all accesses
+  const password = dbPassword.value
+  const ports = randomPorts.value
 
-  const generateRandomPort = () => {
-    return 31000 + Math.floor(Math.random() * 9000)
-  }
-
-  const dbPassword = generateRandomPassword(14)
-  const randomPorts = [
-    generateRandomPort(),
-    generateRandomPort(),
-    generateRandomPort(),
-    generateRandomPort(),
-  ]
-
-  // Environment parameters for WordPress components
+  // Environment parameters for WordPress components (timestamp will be added by InstallDialog)
   const wpENVs = [
     `WORDPRESS_DB_HOST=fluxoperator_wordpress:3307`,
     `WORDPRESS_DB_USER=root`,
-    `WORDPRESS_DB_PASSWORD=${dbPassword}`,
+    `WORDPRESS_DB_PASSWORD=${password}`,
     `WORDPRESS_DB_NAME=wp`,
   ]
 
   const mysqlENVs = [
-    `MYSQL_ROOT_PASSWORD=${dbPassword}`,
+    `MYSQL_ROOT_PASSWORD=${password}`,
     `MYSQL_ROOT_HOST=172.0.0.0/255.0.0.0`,
   ]
 
   const opENVs = [
     `DB_COMPONENT_NAME=fluxmysql_wordpress`,
     `INIT_DB_NAME=wp`,
-    `DB_INIT_PASS=${dbPassword}`,
+    `DB_INIT_PASS=${password}`,
     `CLIENT_APPNAME=wordpress`,
     `DB_APPNAME=wordpress`,
-    `API_PORT=${randomPorts[2]}`,
-    `DB_PORT=${randomPorts[1]}`,
+    `API_PORT=${ports[2]}`,
+    `DB_PORT=${ports[1]}`,
     ...formData.value.whitelist.map(e => `WHITELIST=${e}`),
   ]
 
@@ -821,7 +827,7 @@ const wordpressApp = computed(() => {
       name: 'wp',
       description: 'wp',
       repotag: 'runonflux/wp-nginx:latest',
-      ports: [randomPorts[0]],
+      ports: [ports[0]],
       containerPorts: [80],
       domains: [formData.value.domainName || ''],
       environmentParameters: wpENVs,
@@ -851,7 +857,7 @@ const wordpressApp = computed(() => {
       name: 'operator',
       description: 'operator',
       repotag: 'runonflux/shared-db:latest',
-      ports: [randomPorts[1], randomPorts[2], randomPorts[3]],
+      ports: [ports[1], ports[2], ports[3]],
       containerPorts: [3307, 7071, 8008],
       domains: ['', '', ''],
       environmentParameters: opENVs,
@@ -872,7 +878,7 @@ const wordpressApp = computed(() => {
   }))
 
   return {
-    name: 'wordpress',  // Backend will add timestamp
+    name: 'wordpress',
     displayName: formData.value.appName || 'WordPress',
     description: 'WordPress on Flux',
     version: 8,
