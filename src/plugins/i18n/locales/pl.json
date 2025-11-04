@@ -146,7 +146,7 @@
       "title": "Strona główna"
     },
     "dashboard": {
-      "title": "Panel informacyjny",
+      "title": "Sieć Flux",
       "overview": "Podsumowanie",
       "resources": "Zasoby",
       "map": "Mapa",
@@ -236,7 +236,7 @@
   },
   "sections": {
     "dashboard": {
-      "title": "Panel informacyjny",
+      "title": "Sieć Flux",
       "description": "Zobacz informacje o stanie sieci Flux, dostępnych zasobach oraz mapę z lokalizacjami serwerów."
     },
     "application": {

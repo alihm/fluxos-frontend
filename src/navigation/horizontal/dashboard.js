@@ -34,6 +34,11 @@ export default [
         to: 'dashboards-list',
         icon: { icon: 'tabler-list', style: { width: '20px', height: '23px' } },
       },
+      {
+        title: 'menu.fluxXdao.title',  // Pass the key for the translation
+        to: 'xdao-app',
+        icon: { icon: 'mdi-account-group', size: 20 },
+      },
     ],
   },
 ]
