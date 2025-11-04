@@ -474,7 +474,7 @@
       "downloadSelected": "Download selected",
       "downloadAll": "Download all",
       "removeAllBackupFiles": "Remove all backup files",
-      "backupListDescription": "List of available backups on the local machine (backups are automatically deleted 24 hours after creation)",
+      "backupListDescription": "Automatic weekly backups are created and maintained while your app is active. The latest backup is always preserved until app expiration. You can also create manual backups anytime.",
       "downloadBackupFile": "Download backup file",
       "removeBackupFile": "Remove backup file",
       "selectComponentsToUpload": "Select application component(s) you would like to upload",
@@ -1158,7 +1158,7 @@
         "cpu": "CPU",
         "ram": "RAM",
         "storage": "Storage",
-        "installNow": "Install Now",
+        "installNow": "Buy Now",
         "perMonth": "/mo",
         "core": "Core",
         "cores": "Cores"
@@ -1188,6 +1188,21 @@
         },
         "headerPanel": {
           "serverHosting": "{name} Server Hosting"
+        },
+        "descriptionPanel": {
+          "keyFeatures": "Key Features"
+        },
+        "serverLocationsPanel": {
+          "noData": "No server data available",
+          "activeServers": "Active Servers",
+          "countries": "Countries",
+          "global": "Global",
+          "coverage": "Coverage"
+        },
+        "relatedGamesPanel": {
+          "title": "More Games to Host",
+          "subtitle": "Explore other popular game servers you can deploy on FluxCloud",
+          "startingAt": "Starting at"
         }
       },
       "installDialog": {
@@ -2499,6 +2514,451 @@
           "gameNotFound": "Game not found",
           "gameNotAvailable": "Game not available",
           "failedToLoad": "Failed to load game"
+        },
+        "palworld": {
+          "description": {
+            "title": "About Palworld Server Hosting",
+            "content": "<p><strong>Palworld</strong> is a multiplayer open-world survival crafting game where mysterious creatures called \"Pals\" inhabit the land. In this game, you can befriend and collect Pals, use them in battles, make them work in your base, and even sell them!</p><p>Running your own Palworld server on the Flux network gives you complete control over your gaming experience. Customize game settings, manage player access, and enjoy lag-free gameplay with your friends. <strong>Server hosting starts at just [[minPrice]]/month</strong> with flexible scaling options as your player base grows.</p><p>Whether you're building the ultimate Pal sanctuary or creating a competitive PvP environment, hosting on Flux provides the reliability and performance you need.</p>",
+            "highlights": [
+              "Up to 32 players per server",
+              "Full customization control",
+              "Persistent world saves",
+              "Mod support ready",
+              "Automatic backups",
+              "DDoS protection included"
+            ]
+          },
+          "features": {
+            "title": "Why Host on FluxCloud?",
+            "subtitle": "Decentralized infrastructure built for gaming performance",
+            "items": [
+              {
+                "icon": "mdi-shield-check",
+                "title": "DDoS Protection",
+                "description": "Built-in protection keeps your server online even during attacks, ensuring uninterrupted gameplay."
+              },
+              {
+                "icon": "mdi-flash",
+                "title": "Instant Deployment",
+                "description": "Your server is ready in minutes, not hours. Deploy, configure, and start playing without the wait."
+              },
+              {
+                "icon": "mdi-access-point-network",
+                "title": "Low Latency Worldwide",
+                "description": "Servers strategically distributed across the globe ensure minimal ping and lag-free gameplay for players everywhere."
+              },
+              {
+                "icon": "mdi-server-network",
+                "title": "Decentralized Network",
+                "description": "Hosted across the global Flux network for maximum uptime and resilience."
+              },
+              {
+                "icon": "mdi-currency-usd",
+                "title": "Affordable Pricing",
+                "description": "Transparent pricing with no hidden fees. Pay only for what you use with flexible pricing tiers."
+              },
+              {
+                "icon": "mdi-chart-line",
+                "title": "Scalable Resources",
+                "description": "Easily upgrade your server resources as your player base grows. Scale up or down anytime."
+              },
+              {
+                "icon": "mdi-clock-check",
+                "title": "99.9% Uptime",
+                "description": "Distributed infrastructure ensures your server stays online. Automatic failover included."
+              }
+            ]
+          },
+          "serverLocations": {
+            "title": "Global Server Network",
+            "subtitle": "Your game hosted on a worldwide decentralized infrastructure with servers across multiple continents, ensuring low latency and high availability for players everywhere."
+          },
+          "faq": {
+            "title": "Frequently Asked Questions",
+            "subtitle": "Everything you need to know about hosting Palworld on FluxCloud",
+            "questions": [
+              {
+                "q": "How do I host a Palworld server on FluxCloud?",
+                "a": "Simply select your preferred server configuration from the options above, click \"Install,\" and follow the deployment wizard. Your server will be ready in just a few minutes!"
+              },
+              {
+                "q": "How much does Palworld hosting cost?",
+                "a": "Pricing starts at just <strong>[[minPrice]]/month</strong> and scales based on capacity. All prices include DDoS protection and automatic backups."
+              },
+              {
+                "q": "Can I customize my server settings?",
+                "a": "Absolutely! You have full control over server settings including difficulty, PvP settings, experience rates, and more. Configure your game via SSH to your game server or using the Volume Browser functionality in application management."
+              },
+              {
+                "q": "What are the minimum requirements?",
+                "a": "For up to 8 players: 2 CPU cores, 4GB RAM, 10GB storage. For larger servers (16-32 players), choose our higher-tier plans."
+              },
+              {
+                "q": "How long does deployment take?",
+                "a": "Server deployment typically completes within <strong>5-10 minutes</strong>. You can start inviting players immediately!"
+              },
+              {
+                "q": "Do you offer refunds?",
+                "a": "Yes! We offer a <strong>30-day money-back guarantee</strong>. Contact support within 30 days for a full refund if you're not satisfied."
+              }
+            ]
+          }
+        },
+        "minecraft": {
+          "description": {
+            "title": "About Minecraft Server Hosting",
+            "content": "<p><strong>Minecraft</strong> is the world's most popular sandbox game, allowing you to build, explore, and survive in an infinite procedurally-generated world. With over 140 million active players worldwide, it's the ultimate creative playground.</p><p>Host your own Minecraft server on Flux for ultimate control, performance, and reliability. Perfect for vanilla, modded, or custom gameplay experiences with friends, communities, or large multiplayer networks. <strong>Minecraft server hosting starts at [[minPrice]]/month</strong> with scalable resources to match your player count.</p><p>Whether you're running a survival server, creative building world, mini-game hub, or modded adventure, Flux provides the infrastructure you need to create unforgettable experiences.</p>",
+            "highlights": [
+              "Unlimited players support",
+              "Mod and plugin support (Bukkit, Spigot, Paper, Forge, Fabric)",
+              "Regular automated backups",
+              "24/7 server uptime guarantee",
+              "DDoS protection included",
+              "Easy world management"
+            ]
+          },
+          "features": {
+            "title": "Why Host on FluxCloud?",
+            "subtitle": "Decentralized infrastructure built for gaming performance",
+            "items": [
+              {
+                "icon": "mdi-shield-check",
+                "title": "DDoS Protection",
+                "description": "Built-in protection keeps your server online even during attacks, ensuring uninterrupted gameplay."
+              },
+              {
+                "icon": "mdi-flash",
+                "title": "Instant Deployment",
+                "description": "Your server is ready in minutes, not hours. Deploy, configure, and start playing without the wait."
+              },
+              {
+                "icon": "mdi-access-point-network",
+                "title": "Low Latency Worldwide",
+                "description": "Servers strategically distributed across the globe ensure minimal ping and lag-free gameplay for players everywhere."
+              },
+              {
+                "icon": "mdi-server-network",
+                "title": "Decentralized Network",
+                "description": "Hosted across the global Flux network for maximum uptime and resilience."
+              },
+              {
+                "icon": "mdi-currency-usd",
+                "title": "Affordable Pricing",
+                "description": "Transparent pricing with no hidden fees. Pay only for what you use with flexible pricing tiers."
+              },
+              {
+                "icon": "mdi-chart-line",
+                "title": "Scalable Resources",
+                "description": "Easily upgrade your server resources as your player base grows. Scale up or down anytime."
+              },
+              {
+                "icon": "mdi-clock-check",
+                "title": "99.9% Uptime",
+                "description": "Distributed infrastructure ensures your server stays online. Automatic failover included."
+              }
+            ]
+          },
+          "serverLocations": {
+            "title": "Global Server Network",
+            "subtitle": "Your game hosted on a worldwide decentralized infrastructure with servers across multiple continents, ensuring low latency and high availability for players everywhere."
+          },
+          "faq": {
+            "title": "Frequently Asked Questions",
+            "subtitle": "Everything you need to know about hosting Minecraft on FluxCloud",
+            "questions": [
+              {
+                "q": "How do I host a Minecraft server on FluxCloud?",
+                "a": "Select your preferred server configuration based on player count, click \"Install,\" and follow our simple deployment wizard. Your server will be live within minutes!"
+              },
+              {
+                "q": "How much does Minecraft hosting cost?",
+                "a": "Plans start at <strong>[[minPrice]]/month</strong> and scale based on RAM, CPU, and player capacity. All plans include DDoS protection and automatic backups."
+              },
+              {
+                "q": "Can I install mods and plugins?",
+                "a": "Yes! Full support for Bukkit, Spigot, Paper, Forge, Fabric, and all major mod loaders. Upload and configure custom plugins and modpacks via SSH to your game server or using the Volume Browser functionality in application management."
+              },
+              {
+                "q": "What Minecraft versions are supported?",
+                "a": "All Minecraft Java Edition versions from 1.8 to the latest release. Switch versions anytime via SSH or the Volume Browser in application management."
+              },
+              {
+                "q": "How do backups work?",
+                "a": "Automatic weekly backups are created and maintained while your app is active. The latest backup is always preserved until app expiration. You can also create manual backups anytime and restore with one click."
+              },
+              {
+                "q": "Can I transfer my existing Minecraft world?",
+                "a": "Absolutely! Upload your existing world files via SSH to your game server or using the Volume Browser functionality in application management. We also offer free migration assistance for servers hosted elsewhere."
+              }
+            ]
+          }
+        },
+        "factorio": {
+          "description": {
+            "title": "About Factorio Server Hosting",
+            "content": "<p><strong>Factorio</strong> is a critically acclaimed game about building and creating automated factories to produce increasingly complex items. Design intricate production lines, automate logistics, and defend against alien attacks in this engineering masterpiece.</p><p>Host your Factorio server on Flux for seamless multiplayer gameplay with friends and colleagues. Build massive factories, collaborate on blueprints, and optimize production chains together on reliable infrastructure. <strong>Factorio server hosting starts at [[minPrice]]/month</strong> and scales with your megabase ambitions.</p><p>Perfect for engineering enthusiasts, automation lovers, and teams looking to build the ultimate factory. From modest beginnings to launching rockets, your factory's success depends on reliable hosting.</p>",
+            "highlights": [
+              "Stable multiplayer performance for complex factories",
+              "Full mod support (via mod portal)",
+              "Auto-save functionality every 5 minutes",
+              "Ultra-low latency connections",
+              "Easy server configuration",
+              "DDoS protection included"
+            ]
+          },
+          "features": {
+            "title": "Why Host on FluxCloud?",
+            "subtitle": "Decentralized infrastructure built for gaming performance",
+            "items": [
+              {
+                "icon": "mdi-shield-check",
+                "title": "DDoS Protection",
+                "description": "Built-in protection keeps your server online even during attacks, ensuring uninterrupted gameplay."
+              },
+              {
+                "icon": "mdi-flash",
+                "title": "Instant Deployment",
+                "description": "Your server is ready in minutes, not hours. Deploy, configure, and start playing without the wait."
+              },
+              {
+                "icon": "mdi-access-point-network",
+                "title": "Low Latency Worldwide",
+                "description": "Servers strategically distributed across the globe ensure minimal ping and lag-free gameplay for players everywhere."
+              },
+              {
+                "icon": "mdi-server-network",
+                "title": "Decentralized Network",
+                "description": "Hosted across the global Flux network for maximum uptime and resilience."
+              },
+              {
+                "icon": "mdi-currency-usd",
+                "title": "Affordable Pricing",
+                "description": "Transparent pricing with no hidden fees. Pay only for what you use with flexible pricing tiers."
+              },
+              {
+                "icon": "mdi-chart-line",
+                "title": "Scalable Resources",
+                "description": "Easily upgrade your server resources as your player base grows. Scale up or down anytime."
+              },
+              {
+                "icon": "mdi-clock-check",
+                "title": "99.9% Uptime",
+                "description": "Distributed infrastructure ensures your server stays online. Automatic failover included."
+              }
+            ]
+          },
+          "serverLocations": {
+            "title": "Global Server Network",
+            "subtitle": "Your game hosted on a worldwide decentralized infrastructure with servers across multiple continents, ensuring low latency and high availability for players everywhere."
+          },
+          "faq": {
+            "title": "Frequently Asked Questions",
+            "subtitle": "Everything you need to know about hosting Factorio on FluxCloud",
+            "questions": [
+              {
+                "q": "How do I host a Factorio server on FluxCloud?",
+                "a": "Choose your server configuration, click \"Install,\" and deploy in minutes. Upload your save file or start fresh. Your factory will be running before the biters reach your walls!"
+              },
+              {
+                "q": "How much does Factorio hosting cost?",
+                "a": "Starting at <strong>[[minPrice]]/month</strong> and scales up to enterprise plans for massive megabases. All plans include automatic backups and DDoS protection."
+              },
+              {
+                "q": "Can I use mods on my server?",
+                "a": "Yes! Full support for the Factorio mod portal. Install and configure mods via SSH to your game server or using the Volume Browser functionality in application management. Popular modpacks like Space Exploration and Krastorio 2 work perfectly."
+              },
+              {
+                "q": "What happens if my factory gets too big?",
+                "a": "Easily upgrade to a higher-tier plan with more CPU and RAM. Your server scales with your megabase ambitions. Live upgrades with minimal downtime."
+              },
+              {
+                "q": "How often are saves backed up?",
+                "a": "Automatic weekly backups are created and maintained while your app is active. The latest backup is always preserved until app expiration. You can also create manual backups anytime."
+              },
+              {
+                "q": "Can I migrate my existing factory?",
+                "a": "Absolutely! Upload your existing save files via SSH to your game server or using the Volume Browser functionality in application management. All mods, blueprints, and research progress transfer seamlessly."
+              }
+            ]
+          }
+        },
+        "satisfactory": {
+          "description": {
+            "title": "About Satisfactory Server Hosting",
+            "content": "<p><strong>Satisfactory</strong> is a first-person open-world factory building game with a dash of exploration and combat. Explore an alien planet, harvest resources, and construct massive automated factories in stunning 3D environments.</p><p>Host your dedicated Satisfactory server on Flux for smooth cooperative gameplay with up to 4 players. Build mega-factories together, explore dangerous biomes, and automate production chains on a reliable, high-performance infrastructure. <strong>Satisfactory server hosting starts at [[minPrice]]/month</strong> with the power to handle even the most complex mega-factories.</p><p>From humble beginnings with basic conveyors to sprawling multi-level factories with trains, drones, and hypertubes - your industrial empire needs rock-solid hosting to handle the complexity.</p>",
+            "highlights": [
+              "Up to 4 players co-op multiplayer",
+              "Persistent world state across sessions",
+              "Regular auto-saves every 5 minutes",
+              "High-performance hosting for mega-factories",
+              "Easy session management",
+              "DDoS protection included"
+            ]
+          },
+          "features": {
+            "title": "Why Host on FluxCloud?",
+            "subtitle": "Decentralized infrastructure built for gaming performance",
+            "items": [
+              {
+                "icon": "mdi-shield-check",
+                "title": "DDoS Protection",
+                "description": "Built-in protection keeps your server online even during attacks, ensuring uninterrupted gameplay."
+              },
+              {
+                "icon": "mdi-flash",
+                "title": "Instant Deployment",
+                "description": "Your server is ready in minutes, not hours. Deploy, configure, and start playing without the wait."
+              },
+              {
+                "icon": "mdi-access-point-network",
+                "title": "Low Latency Worldwide",
+                "description": "Servers strategically distributed across the globe ensure minimal ping and lag-free gameplay for players everywhere."
+              },
+              {
+                "icon": "mdi-server-network",
+                "title": "Decentralized Network",
+                "description": "Hosted across the global Flux network for maximum uptime and resilience."
+              },
+              {
+                "icon": "mdi-currency-usd",
+                "title": "Affordable Pricing",
+                "description": "Transparent pricing with no hidden fees. Pay only for what you use with flexible pricing tiers."
+              },
+              {
+                "icon": "mdi-chart-line",
+                "title": "Scalable Resources",
+                "description": "Easily upgrade your server resources as your player base grows. Scale up or down anytime."
+              },
+              {
+                "icon": "mdi-clock-check",
+                "title": "99.9% Uptime",
+                "description": "Distributed infrastructure ensures your server stays online. Automatic failover included."
+              }
+            ]
+          },
+          "serverLocations": {
+            "title": "Global Server Network",
+            "subtitle": "Your game hosted on a worldwide decentralized infrastructure with servers across multiple continents, ensuring low latency and high availability for players everywhere."
+          },
+          "faq": {
+            "title": "Frequently Asked Questions",
+            "subtitle": "Everything you need to know about hosting Satisfactory on FluxCloud",
+            "questions": [
+              {
+                "q": "How do I host a Satisfactory server on FluxCloud?",
+                "a": "Select your server plan, click \"Install,\" and deploy within minutes. Load your existing save or start fresh. Your factory will be online and ready for co-op building!"
+              },
+              {
+                "q": "How much does Satisfactory hosting cost?",
+                "a": "Plans start at <strong>[[minPrice]]/month</strong> for standard servers and scale up to handle even the most complex mega-factories. DDoS protection and backups included."
+              },
+              {
+                "q": "Can I use mods on my server?",
+                "a": "Yes! Full support for Satisfactory Mod Manager (SMM) mods. Upload and configure mods via SSH to your game server or using the Volume Browser functionality in application management. Popular mods like Refined Power, Smart!, and MAM Enhancer work perfectly. All players need matching mods installed."
+              },
+              {
+                "q": "What are the server requirements?",
+                "a": "Minimum: 4GB RAM for starter factories. Recommended: 8GB RAM for mid-game. Advanced: 16GB RAM for massive late-game factories with trains and drones. CPU scales with factory complexity."
+              },
+              {
+                "q": "How do save files work?",
+                "a": "Automatic weekly backups are created and maintained while your app is active. The latest backup is always preserved until app expiration. You can also create manual backups anytime. Download saves to play offline or transfer between servers."
+              },
+              {
+                "q": "Can I transfer my single-player save?",
+                "a": "Absolutely! Upload your single-player save file via SSH to your game server or using the Volume Browser functionality in application management. Continue your factory with friends exactly where you left off, with all buildings and progress intact."
+              }
+            ]
+          }
+        },
+        "enshrouded": {
+          "description": {
+            "title": "About Enshrouded Server Hosting",
+            "content": "<p><strong>Enshrouded</strong> is a survival action RPG where you can play solo or with up to 16 players in co-op mode. Explore the vast voxel-based world of Embervale, battle fierce enemies, craft powerful equipment, and build epic bases with your friends.</p><p>Run your own Enshrouded server on Flux for an immersive co-op experience. Venture into the deadly Shroud, uncover ancient secrets, build magnificent structures, and survive together in this beautiful yet dangerous world. <strong>Enshrouded server hosting starts at [[minPrice]]/month</strong> with support for up to 16 players.</p><p>Whether you're focused on combat, building, exploration, or crafting, hosting on Flux ensures your adventures are smooth, persistent, and always available for your entire party.</p>",
+            "highlights": [
+              "Up to 16 player co-op multiplayer",
+              "Full world persistence and progression",
+              "Custom server settings and difficulty",
+              "Automated backups every 30 minutes",
+              "High-performance servers for voxel worlds",
+              "DDoS protection included"
+            ]
+          },
+          "features": {
+            "title": "Why Host on FluxCloud?",
+            "subtitle": "Decentralized infrastructure built for gaming performance",
+            "items": [
+              {
+                "icon": "mdi-shield-check",
+                "title": "DDoS Protection",
+                "description": "Built-in protection keeps your server online even during attacks, ensuring uninterrupted gameplay."
+              },
+              {
+                "icon": "mdi-flash",
+                "title": "Instant Deployment",
+                "description": "Your server is ready in minutes, not hours. Deploy, configure, and start playing without the wait."
+              },
+              {
+                "icon": "mdi-access-point-network",
+                "title": "Low Latency Worldwide",
+                "description": "Servers strategically distributed across the globe ensure minimal ping and lag-free gameplay for players everywhere."
+              },
+              {
+                "icon": "mdi-server-network",
+                "title": "Decentralized Network",
+                "description": "Hosted across the global Flux network for maximum uptime and resilience."
+              },
+              {
+                "icon": "mdi-currency-usd",
+                "title": "Affordable Pricing",
+                "description": "Transparent pricing with no hidden fees. Pay only for what you use with flexible pricing tiers."
+              },
+              {
+                "icon": "mdi-chart-line",
+                "title": "Scalable Resources",
+                "description": "Easily upgrade your server resources as your player base grows. Scale up or down anytime."
+              },
+              {
+                "icon": "mdi-clock-check",
+                "title": "99.9% Uptime",
+                "description": "Distributed infrastructure ensures your server stays online. Automatic failover included."
+              }
+            ]
+          },
+          "serverLocations": {
+            "title": "Global Server Network",
+            "subtitle": "Your game hosted on a worldwide decentralized infrastructure with servers across multiple continents, ensuring low latency and high availability for players everywhere."
+          },
+          "faq": {
+            "title": "Frequently Asked Questions",
+            "subtitle": "Everything you need to know about hosting Enshrouded on FluxCloud",
+            "questions": [
+              {
+                "q": "How do I host an Enshrouded server on FluxCloud?",
+                "a": "Choose your server configuration based on player count, click \"Install,\" and deploy in minutes. Your Embervale world will be ready for co-op adventures immediately!"
+              },
+              {
+                "q": "How much does Enshrouded hosting cost?",
+                "a": "Starting at <strong>[[minPrice]]/month</strong> and scales based on player capacity (up to 16 players). All plans include DDoS protection, automatic backups, and high-performance SSD storage."
+              },
+              {
+                "q": "Can I customize server settings?",
+                "a": "Yes! Full control over difficulty, combat settings, resource spawn rates, day/night cycle length, and more. Configure your game via SSH to your game server or using the Volume Browser functionality in application management to match your playstyle."
+              },
+              {
+                "q": "What are the minimum requirements?",
+                "a": "For 8 players: 8GB RAM, 4 CPU cores. For 16 players: 16GB RAM, 6 CPU cores recommended. The voxel-based world benefits from strong CPU performance for terrain generation."
+              },
+              {
+                "q": "How do backups work?",
+                "a": "Automatic weekly backups are created and maintained while your app is active. The latest backup is always preserved until app expiration. You can also create manual backups anytime and restore with one click."
+              },
+              {
+                "q": "Can I transfer my single-player world?",
+                "a": "Yes! Upload your single-player save file via SSH to your game server or using the Volume Browser functionality in application management. Your character, base, progression, and explored areas transfer seamlessly to multiplayer. Continue your journey with friends!"
+              }
+            ]
+          }
         }
       },
       "wordpress": {

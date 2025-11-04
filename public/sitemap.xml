@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9
+        http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">
+
+  <!-- Homepage -->
+  <url>
+    <loc>https://home.runonflux.io/</loc>
+    <priority>1.0</priority>
+    <changefreq>daily</changefreq>
+  </url>
+
+  <!-- Games Landing Page -->
+  <url>
+    <loc>https://home.runonflux.io/marketplace/games</loc>
+    <priority>0.9</priority>
+    <changefreq>weekly</changefreq>
+  </url>
+
+  <!-- Palworld Server Hosting -->
+  <url>
+    <loc>https://home.runonflux.io/marketplace/games/palworld</loc>
+    <priority>0.8</priority>
+    <changefreq>weekly</changefreq>
+  </url>
+
+  <!-- Minecraft Server Hosting -->
+  <url>
+    <loc>https://home.runonflux.io/marketplace/games/minecraftserver</loc>
+    <priority>0.8</priority>
+    <changefreq>weekly</changefreq>
+  </url>
+
+  <!-- Factorio Server Hosting -->
+  <url>
+    <loc>https://home.runonflux.io/marketplace/games/factorio</loc>
+    <priority>0.8</priority>
+    <changefreq>weekly</changefreq>
+  </url>
+
+  <!-- Satisfactory Server Hosting -->
+  <url>
+    <loc>https://home.runonflux.io/marketplace/games/satisfactory</loc>
+    <priority>0.8</priority>
+    <changefreq>weekly</changefreq>
+  </url>
+
+  <!-- Enshrouded Server Hosting -->
+  <url>
+    <loc>https://home.runonflux.io/marketplace/games/enshrouded</loc>
+    <priority>0.8</priority>
+    <changefreq>weekly</changefreq>
+  </url>
+
+  <!-- Marketplace -->
+  <url>
+    <loc>https://home.runonflux.io/marketplace</loc>
+    <priority>0.7</priority>
+    <changefreq>weekly</changefreq>
+  </url>
+
+</urlset>

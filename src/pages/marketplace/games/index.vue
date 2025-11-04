@@ -52,9 +52,10 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { useTheme } from 'vuetify'
 import { useI18n } from 'vue-i18n'
+import { useHead } from '@vueuse/head'
 import { useMarketplace } from '@/composables/useMarketplace'
 import LoadingSpinner from '@/components/Marketplace/LoadingSpinner.vue'
 import MaintenanceCard from '@/components/Marketplace/MaintenanceCard.vue'
@@ -71,6 +72,101 @@ const fluxPlayLogo = computed(() => {
     ? '/images/games/FluxPlay_white.svg'
     : '/images/games/FluxPlay_black.svg'
 })
+
+// SEO meta tags and structured data
+watch(games, (loadedGames) => {
+  if (!loadedGames || loadedGames.length === 0) return
+
+  const pageUrl = 'https://home.runonflux.io/marketplace/games'
+  const title = 'Game Server Hosting - FluxPlay on Flux Network'
+  const description = 'Premium game hosting with global servers, lightning-fast connections, and flexible plans. Host Minecraft, Palworld, Factorio, Satisfactory, and Enshrouded servers on the decentralized Flux network with instant deployment and DDoS protection.'
+  const imageUrl = 'https://home.runonflux.io/images/games/FluxPlay_white.svg'
+
+  // ItemList structured data for game listings
+  const itemListStructuredData = {
+    '@context': 'https://schema.org',
+    '@type': 'ItemList',
+    'itemListElement': loadedGames.map((game, index) => ({
+      '@type': 'ListItem',
+      'position': index + 1,
+      'item': {
+        '@type': 'Product',
+        'name': `${game.displayName || game.name} Server Hosting`,
+        'url': `https://home.runonflux.io/marketplace/games/${game.name.toLowerCase()}`,
+        'image': game.icon || game.logo || imageUrl,
+        'description': game.description || `Host your own ${game.displayName || game.name} server on the Flux network`,
+      },
+    })),
+  }
+
+  // Organization structured data
+  const organizationStructuredData = {
+    '@context': 'https://schema.org',
+    '@type': 'Organization',
+    'name': 'FluxPlay',
+    'url': 'https://home.runonflux.io',
+    'logo': imageUrl,
+    'description': 'Decentralized game server hosting on the Flux network',
+  }
+
+  // Breadcrumb structured data
+  const breadcrumbStructuredData = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    'itemListElement': [
+      {
+        '@type': 'ListItem',
+        'position': 1,
+        'name': 'Home',
+        'item': 'https://home.runonflux.io',
+      },
+      {
+        '@type': 'ListItem',
+        'position': 2,
+        'name': 'Games',
+        'item': pageUrl,
+      },
+    ],
+  }
+
+  useHead({
+    title,
+    meta: [
+      {
+        name: 'description',
+        content: description,
+      },
+      {
+        name: 'keywords',
+        content: 'game server hosting, minecraft hosting, palworld hosting, factorio hosting, satisfactory hosting, enshrouded hosting, decentralized hosting, flux network, dedicated game servers, affordable hosting',
+      },
+      // Open Graph
+      { property: 'og:title', content: title },
+      { property: 'og:description', content: description },
+      { property: 'og:image', content: imageUrl },
+      { property: 'og:url', content: pageUrl },
+      { property: 'og:type', content: 'website' },
+      { property: 'og:site_name', content: 'FluxPlay' },
+      // Twitter Card
+      { name: 'twitter:card', content: 'summary_large_image' },
+      { name: 'twitter:title', content: title },
+      { name: 'twitter:description', content: description },
+      { name: 'twitter:image', content: imageUrl },
+      // Additional SEO
+      { name: 'robots', content: 'index, follow' },
+      { name: 'author', content: 'Flux Network' },
+    ],
+    link: [
+      { rel: 'canonical', href: pageUrl },
+    ],
+    script: [
+      {
+        type: 'application/ld+json',
+        children: JSON.stringify([itemListStructuredData, organizationStructuredData, breadcrumbStructuredData]),
+      },
+    ],
+  })
+}, { immediate: true })
 
 // Load games on mount
 onMounted(async () => {

@@ -5,7 +5,7 @@
         <span class="price-amount">${{ config.price.toFixed(2) }}</span><span class="price-period">{{ labels.perMonth }}</span>
       </div>
       <div class="card-header">
-        <h3 class="config-name">{{ config.name }}</h3>
+        <h3 class="config-name">{{ displayName }}</h3>
       </div>
 
       <div class="config-resources">
@@ -61,9 +61,15 @@ const emit = defineEmits(['install'])
 
 const { t } = useI18n()
 
-const { getConfigResources } = useGameUtils()
+const { getConfigResources, getPlayerBasedConfigName } = useGameUtils()
 
 const resources = computed(() => getConfigResources(props.config))
+
+const displayName = computed(() => {
+  // Use player-based naming for gaming apps
+  const gameName = props.app.name || props.app.displayName || ''
+  return getPlayerBasedConfigName(gameName, props.config)
+})
 
 const cardStyle = computed(() => ({
   borderColor: props.config.highlight || 'rgba(255, 255, 255, 0.1)',
@@ -95,7 +101,7 @@ const labels = computed(() => ({
   height: 380px;
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 16px;
   padding: 24px;
   background: rgba(var(--v-theme-surface), 1);
   border-radius: 16px;
@@ -140,7 +146,8 @@ const labels = computed(() => ({
 .card-header {
   padding-bottom: 16px;
   border-bottom: 1px solid rgba(var(--v-theme-on-surface), 0.12);
-  padding-right: 100px; /* Space for price badge */
+  padding-top: 24px; /* Space to clear price badge */
+  text-align: center;
 }
 
 .config-name {
@@ -150,6 +157,7 @@ const labels = computed(() => ({
   color: rgb(var(--v-theme-on-surface));
   white-space: nowrap;
   overflow: visible;
+  text-align: center;
 }
 
 .price-amount {
@@ -171,7 +179,7 @@ const labels = computed(() => ({
   flex-direction: column;
   gap: 12px;
   flex: 1;
-  min-height: 150px;
+  min-height: 120px;
 }
 
 .resource-row {
