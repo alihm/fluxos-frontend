@@ -1,5 +1,47 @@
 <template>
   <div>
+    <!-- Introduction Section -->
+    <VRow class="mb-6">
+      <VCol cols="12">
+        <VCard flat class="fluxdrive-intro-card">
+          <VCardText>
+            <div class="d-flex align-center mb-3">
+              <VAvatar
+                size="48"
+                color="primary"
+                variant="tonal"
+                class="mr-3"
+              >
+                <VIcon size="28">mdi-cloud-upload</VIcon>
+              </VAvatar>
+              <div>
+                <h2 class="text-h4 mb-1">{{ t('pages.fluxDrive.intro.title') }}</h2>
+                <p class="text-body-2 mb-0 text-medium-emphasis">{{ t('pages.fluxDrive.intro.subtitle') }}</p>
+              </div>
+            </div>
+            <p class="text-body-1 mb-3">
+              {{ t('pages.fluxDrive.intro.description') }}
+            </p>
+            <a
+              href="https://runonflux.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="learn-more-link"
+            >
+              <VBtn
+                color="primary"
+                variant="tonal"
+                prepend-icon="mdi-open-in-new"
+                size="small"
+              >
+                {{ t('pages.fluxDrive.intro.learnMore') }}
+              </VBtn>
+            </a>
+          </VCardText>
+        </VCard>
+      </VCol>
+    </VRow>
+
     <!-- Loading state while checking subscription -->
     <LoadingSpinner
       v-if="!subscriptionChecked"
@@ -69,6 +111,7 @@
 <script setup>
 import { onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { useHead } from '@vueuse/head'
 import { useFluxDrive } from '@/composables/useFluxDrive'
 import LoadingSpinner from '@/components/Marketplace/LoadingSpinner.vue'
 import PricingPlans from '@/components/FluxDrive/PricingPlans.vue'
@@ -77,6 +120,118 @@ import StorageInfo from '@/components/FluxDrive/StorageInfo.vue'
 import CheckoutContent from '@/components/CheckoutContent.vue'
 
 const { t } = useI18n()
+
+// SEO meta tags and structured data
+const pageUrl = 'https://home.runonflux.io/flux-drive'
+const title = 'FluxDrive - Decentralized IPFS Cloud Storage | Flux Network'
+const description = 'Secure decentralized cloud storage powered by IPFS on the Flux network. Store files across distributed FluxNodes with encryption, redundancy, and censorship resistance. No centralized providers needed.'
+const imageUrl = 'https://home.runonflux.io/banner/FluxDriveBanner.png'
+
+// SoftwareApplication structured data
+const softwareApplicationStructuredData = {
+  '@context': 'https://schema.org',
+  '@type': 'SoftwareApplication',
+  'name': 'FluxDrive',
+  'applicationCategory': 'BusinessApplication',
+  'operatingSystem': 'Web',
+  'offers': {
+    '@type': 'AggregateOffer',
+    'priceCurrency': 'USD',
+    'lowPrice': '5',
+    'highPrice': '50',
+    'offerCount': '4',
+  },
+  'description': 'Decentralized cloud storage solution built on IPFS and the Flux network. Encrypted, distributed file storage with censorship resistance.',
+  'url': pageUrl,
+  'image': imageUrl,
+  'provider': {
+    '@type': 'Organization',
+    'name': 'Flux Network',
+    'url': 'https://runonflux.com',
+  },
+  'featureList': [
+    'IPFS-based decentralized storage',
+    'End-to-end encryption',
+    'Distributed across FluxNodes',
+    'Censorship resistant',
+    'No centralized providers',
+    'Permanent file availability',
+    'Redundant storage',
+  ],
+}
+
+// Organization structured data
+const organizationStructuredData = {
+  '@context': 'https://schema.org',
+  '@type': 'Organization',
+  'name': 'Flux Network',
+  'url': 'https://home.runonflux.io',
+  'logo': 'https://home.runonflux.io/logo.png',
+  'description': 'Decentralized Web3 cloud infrastructure powered by FluxNodes worldwide',
+  'sameAs': [
+    'https://twitter.com/RunOnFlux',
+    'https://github.com/RunOnFlux',
+  ],
+}
+
+// Breadcrumb structured data
+const breadcrumbStructuredData = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  'itemListElement': [
+    {
+      '@type': 'ListItem',
+      'position': 1,
+      'name': 'Home',
+      'item': 'https://home.runonflux.io',
+    },
+    {
+      '@type': 'ListItem',
+      'position': 2,
+      'name': 'FluxDrive',
+      'item': pageUrl,
+    },
+  ],
+}
+
+useHead({
+  title,
+  meta: [
+    {
+      name: 'description',
+      content: description,
+    },
+    {
+      name: 'keywords',
+      content: 'decentralized storage, IPFS storage, cloud storage, blockchain storage, distributed storage, encrypted storage, Flux network, censorship resistant storage, Web3 storage, decentralized cloud, permanent storage, IPFS, FluxDrive',
+    },
+    // Open Graph
+    { property: 'og:title', content: title },
+    { property: 'og:description', content: description },
+    { property: 'og:image', content: imageUrl },
+    { property: 'og:url', content: pageUrl },
+    { property: 'og:type', content: 'website' },
+    { property: 'og:site_name', content: 'Flux Network' },
+    // Twitter Card
+    { name: 'twitter:card', content: 'summary_large_image' },
+    { name: 'twitter:title', content: title },
+    { name: 'twitter:description', content: description },
+    { name: 'twitter:image', content: imageUrl },
+    { name: 'twitter:site', content: '@RunOnFlux' },
+    // Additional SEO
+    { name: 'robots', content: 'index, follow' },
+    { name: 'author', content: 'Flux Network' },
+  ],
+  link: [
+    { rel: 'canonical', href: pageUrl },
+  ],
+  script: [
+    {
+      type: 'application/ld+json',
+      children: JSON.stringify([softwareApplicationStructuredData, organizationStructuredData, breadcrumbStructuredData]),
+    },
+  ],
+})
 
 // Use the composable
 const {
@@ -452,5 +607,21 @@ onMounted(async () => {
 </script>
 
 <style scoped>
+.fluxdrive-intro-card {
+  border-radius: 16px;
+  background: linear-gradient(135deg, rgba(var(--v-theme-primary), 0.05) 0%, rgba(var(--v-theme-success), 0.05) 100%);
+  border: 1px solid rgba(var(--v-theme-primary), 0.1);
+  transition: all 0.3s ease;
+}
+
+.fluxdrive-intro-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(var(--v-theme-primary), 0.1);
+}
+
+.learn-more-link {
+  text-decoration: none;
+}
+
 @import '@styles/flux-drive.scss';
 </style>

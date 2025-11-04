@@ -2490,6 +2490,12 @@
       }
     },
     "fluxDrive": {
+      "intro": {
+        "title": "FluxDrive",
+        "subtitle": "Zdecentralizowana pamięć w chmurze zasilana przez IPFS",
+        "description": "FluxDrive to zdecentralizowane rozwiązanie pamięci w chmurze zbudowane na bazie sieci FluxCloud, wykorzystujące technologię IPFS (InterPlanetary File System). Przechowuj swoje pliki w rozproszonej sieci FluxNodes na całym świecie, zapewniając redundancję, odporność na censurę i stałą dostępność. W przeciwieństwie do tradycyjnej pamięci w chmurze, Twoje dane są szyfrowane, fragmentowane i rozproszone na wielu węzłach—co daje Ci prawdziwą własność i kontrolę nad plikami bez polegania na scentralizowanych dostawcach.",
+        "learnMore": "Dowiedz się więcej o FluxDrive"
+      },
       "loading": "Ładowanie FluxDrive...",
       "checkout": "Kasa",
       "renewal": "Odnowienie",

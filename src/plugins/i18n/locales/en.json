@@ -2499,6 +2499,12 @@
       }
     },
     "fluxDrive": {
+      "intro": {
+        "title": "FluxDrive",
+        "subtitle": "Decentralized cloud storage powered by IPFS",
+        "description": "FluxDrive is a decentralized cloud storage solution built on top of the FluxCloud Network, leveraging IPFS (InterPlanetary File System) technology. Store your files across a distributed network of FluxNodes worldwide, ensuring redundancy, censorship resistance, and permanent availability. Unlike traditional cloud storage, your data is encrypted, fragmented, and distributed across multiple nodes—giving you true ownership and control of your files without relying on centralized providers.",
+        "learnMore": "Learn More About FluxDrive"
+      },
       "loading": "Loading FluxDrive...",
       "checkout": "Checkout",
       "renewal": "Renewal",
