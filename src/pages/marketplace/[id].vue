@@ -293,6 +293,120 @@
           </div>
         </div>
       </div>
+
+      <!-- Why Host on Flux Cloud Section -->
+      <div class="info-section why-flux-section">
+        <div class="section-title-modern">
+          <VAvatar size="32" class="section-title-avatar benefits-avatar">
+            <VIcon icon="mdi-rocket-launch" size="18" color="white" />
+          </VAvatar>
+          <span class="section-title-text">{{ t('pages.marketplace.common.whyFlux.title') }}</span>
+        </div>
+        <p class="section-subtitle">{{ t('pages.marketplace.common.whyFlux.subtitle') }}</p>
+
+        <div class="benefits-grid">
+          <div
+            v-for="(benefit, index) in whyFluxBenefits"
+            :key="index"
+            class="benefit-item"
+          >
+            <div class="benefit-icon-wrapper">
+              <VIcon :icon="benefit.icon" size="24" color="primary" />
+            </div>
+            <h4 class="benefit-title">{{ benefit.title }}</h4>
+            <p class="benefit-description">{{ benefit.description }}</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Global Server Network Section -->
+      <div class="info-section network-section">
+        <div class="section-title-modern">
+          <VAvatar size="32" class="section-title-avatar network-avatar">
+            <VIcon icon="mdi-earth" size="18" color="white" />
+          </VAvatar>
+          <span class="section-title-text">Global Server Network</span>
+        </div>
+        <p class="section-subtitle">Deploy your applications across our worldwide decentralized infrastructure</p>
+
+        <!-- Map Component -->
+        <div class="map-container">
+          <VOverlay
+            v-model="isLoadingMap"
+            contained
+            scroll-strategy="none"
+            class="align-center justify-center"
+          >
+            <VProgressCircular indeterminate color="primary" />
+          </VOverlay>
+
+          <MapComponent
+            v-if="fluxList.length > 0"
+            :nodes="fluxList"
+            :show-tier-display="false"
+            class="server-map"
+          />
+
+          <div v-if="!isLoadingMap && fluxList.length === 0" class="no-data">
+            No server data available
+          </div>
+        </div>
+
+        <!-- Stats -->
+        <div v-if="fluxNodeCount > 0" class="stats-container">
+          <div class="stat-item">
+            <VIcon icon="mdi-server-network" size="32" color="primary" />
+            <div class="stat-content">
+              <div class="stat-value">{{ fluxNodeCount.toLocaleString() }}+</div>
+              <div class="stat-label">Active Servers</div>
+            </div>
+          </div>
+          <div class="stat-item">
+            <VIcon icon="mdi-earth" size="32" color="primary" />
+            <div class="stat-content">
+              <div class="stat-value">{{ countryCount }}+</div>
+              <div class="stat-label">Countries</div>
+            </div>
+          </div>
+          <div class="stat-item">
+            <VIcon icon="mdi-web" size="32" color="primary" />
+            <div class="stat-content">
+              <div class="stat-value">Global</div>
+              <div class="stat-label">Coverage</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Frequently Asked Questions Section -->
+      <div class="info-section faq-section">
+        <div class="section-title-modern">
+          <VAvatar size="32" class="section-title-avatar faq-avatar">
+            <VIcon icon="mdi-help-circle" size="18" color="white" />
+          </VAvatar>
+          <span class="section-title-text">{{ t('pages.marketplace.common.genericFAQ.title') }}</span>
+        </div>
+        <p class="section-subtitle">{{ t('pages.marketplace.common.genericFAQ.subtitle') }}</p>
+
+        <VExpansionPanels class="faq-expansion-panels" multiple>
+          <VExpansionPanel
+            v-for="(faq, index) in genericFAQs"
+            :key="index"
+            class="faq-expansion-panel"
+            elevation="0"
+          >
+            <VExpansionPanelTitle class="faq-question">
+              <div class="question-wrapper">
+                <VIcon icon="mdi-help-circle-outline" size="20" color="info" />
+                <span class="question-text">{{ faq.q }}</span>
+              </div>
+            </VExpansionPanelTitle>
+            <VExpansionPanelText class="faq-answer">
+              <div v-html="sanitizeAnswer(faq.a)"></div>
+            </VExpansionPanelText>
+          </VExpansionPanel>
+        </VExpansionPanels>
+      </div>
     </div>
 
     <!-- Image Viewer Dialog -->
@@ -317,6 +431,7 @@
         <!-- Image -->
         <img
           :src="selectedImage"
+          :alt="`${app.displayName || app.name} - Screenshot`"
           class="image-viewer-img"
           style="max-width: calc(100vw - 48px); max-height: calc(100vh - 48px); object-fit: contain; display: block;"
         />
@@ -337,12 +452,18 @@
 import { ref, onMounted, computed, watch, nextTick } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
+import { useHead } from '@vueuse/head'
+import axios from 'axios'
+import DOMPurify from 'dompurify'
 import { useMarketplace } from '@/composables/useMarketplace'
 import LoadingSpinner from '@/components/Marketplace/LoadingSpinner.vue'
 import AppIcon from '@/components/Marketplace/AppIcon.vue'
 import InstallDialog from '@/components/Marketplace/InstallDialog.vue'
+import MapComponent from '@core/components/MapComponent.vue'
+import DashboardService from '@/services/DashboardService'
 
-const { t } = useI18n()
+const i18n = useI18n()
+const { t, tm, te } = i18n
 
 const route = useRoute()
 const router = useRouter()
@@ -363,14 +484,175 @@ const showImageViewer = computed({
   },
 })
 
+// Map data
+const fluxList = ref([])
+const fluxNodeCount = ref(0)
+const isLoadingMap = ref(true)
+
 const validScreenshots = computed(() => {
   if (!app.value?.screenshots) return []
-  
+
   return app.value.screenshots.filter(image => !failedImages.value.has(image))
+})
+
+// Count unique countries
+const countryCount = computed(() => {
+  const countries = new Set()
+  fluxList.value.forEach(flux => {
+    if (flux.geolocation?.country) {
+      countries.add(flux.geolocation.country)
+    }
+  })
+  return countries.size
+})
+
+// Get Why Flux benefits from i18n
+const whyFluxBenefits = computed(() => {
+  const key = 'pages.marketplace.common.whyFlux.benefits'
+
+  // Try direct access via locale messages
+  let benefits = null
+  try {
+    const locale = i18n.locale.value
+    const parts = key.split('.')
+    let value = i18n.messages.value[locale]
+
+    for (const part of parts) {
+      if (value && typeof value === 'object') {
+        value = value[part]
+      } else {
+        break
+      }
+    }
+
+    benefits = value
+  } catch (e) {
+    console.error('Error loading benefits:', e)
+  }
+
+  // Convert to array and unwrap proxy objects
+  if (benefits && typeof benefits === 'object') {
+    let benefitsArray = Array.isArray(benefits) ? benefits : Object.values(benefits)
+
+    // Deep clone to unwrap all proxies
+    try {
+      benefitsArray = JSON.parse(JSON.stringify(benefitsArray))
+    } catch (e) {
+      console.error('Error parsing benefits:', e)
+      return []
+    }
+
+    // Extract actual string values from compiled i18n message objects
+    benefitsArray = benefitsArray.map(benefit => {
+      const extractString = (obj) => {
+        if (typeof obj === 'string') return obj
+        if (obj && typeof obj === 'object') {
+          return obj.body?.static || obj.loc?.source || obj.static || JSON.stringify(obj)
+        }
+        return String(obj)
+      }
+
+      return {
+        icon: extractString(benefit.icon),
+        title: extractString(benefit.title),
+        description: extractString(benefit.description)
+      }
+    })
+
+    return benefitsArray
+  }
+
+  return []
+})
+
+// Get app-specific pricing FAQ
+const appSpecificFAQs = computed(() => {
+  if (!app.value) return []
+
+  const appName = app.value.displayName || app.value.name
+  const appPrice = app.value.price || 0
+  const priceText = appPrice > 0 ? `$${appPrice.toFixed(2)}` : 'free'
+
+  return [
+    {
+      q: `How much does it cost to host ${appName} on Flux Cloud?`,
+      a: `Hosting <strong>${appName}</strong> on Flux Cloud ${appPrice > 0 ? `starts at <strong>${priceText}/month</strong>` : 'is <strong>free</strong>'}. This includes decentralized infrastructure across a global network of nodes, automatic backups, built-in DDoS protection, 99.9% uptime guarantee, and 24/7 support. You can scale resources up or down anytime with our flexible pricing options. No hidden fees or long-term contracts required.`,
+    },
+  ]
+})
+
+// Get Generic FAQ questions from i18n (with pricing question prepended)
+const genericFAQs = computed(() => {
+  const key = 'pages.marketplace.common.genericFAQ.questions'
+
+  // Try direct access via locale messages
+  let questions = null
+  try {
+    const locale = i18n.locale.value
+    const parts = key.split('.')
+    let value = i18n.messages.value[locale]
+
+    for (const part of parts) {
+      if (value && typeof value === 'object') {
+        value = value[part]
+      } else {
+        break
+      }
+    }
+
+    questions = value
+  } catch (e) {
+    console.error('Error loading questions:', e)
+  }
+
+  let questionsArray = []
+
+  // Convert to array and unwrap proxy objects
+  if (questions && typeof questions === 'object') {
+    questionsArray = Array.isArray(questions) ? questions : Object.values(questions)
+
+    // Deep clone to unwrap all proxies
+    try {
+      questionsArray = JSON.parse(JSON.stringify(questionsArray))
+    } catch (e) {
+      console.error('Error parsing questions:', e)
+      questionsArray = []
+    }
+
+    // Extract actual string values from compiled i18n message objects
+    questionsArray = questionsArray.map(faq => {
+      const extractString = (obj) => {
+        if (typeof obj === 'string') return obj
+        if (obj && typeof obj === 'object') {
+          return obj.body?.static || obj.loc?.source || obj.static || JSON.stringify(obj)
+        }
+        return String(obj)
+      }
+
+      return {
+        q: extractString(faq.q),
+        a: extractString(faq.a)
+      }
+    })
+  }
+
+  // Prepend pricing FAQ as the first question
+  if (app.value && appSpecificFAQs.value.length > 0) {
+    return [...appSpecificFAQs.value, ...questionsArray]
+  }
+
+  return questionsArray
 })
 
 const handleImageError = image => {
   failedImages.value.add(image)
+}
+
+const sanitizeAnswer = (answer) => {
+  return DOMPurify.sanitize(answer, {
+    ALLOWED_TAGS: ['p', 'br', 'strong', 'em', 'ul', 'ol', 'li', 'a', 'code'],
+    ALLOWED_ATTR: ['href', 'target', 'rel'],
+  })
 }
 
 
@@ -510,6 +792,25 @@ const handleAppDeployed = deployedApp => {
   // Could also update the UI to show "Manage" instead of "Install"
 }
 
+const getFluxList = async () => {
+  try {
+    const resLoc = await axios.get(
+      'https://stats.runonflux.io/fluxinfo?projection=geolocation,ip,tier',
+    )
+
+    fluxList.value = resLoc.data.data || []
+
+    const resList = await DashboardService.fluxnodeCount()
+    fluxNodeCount.value = resList.data.data.total || 0
+  } catch (error) {
+    console.error('Error fetching flux list:', error)
+    fluxList.value = []
+    fluxNodeCount.value = 0
+  } finally {
+    isLoadingMap.value = false
+  }
+}
+
 const loadAppDetails = async () => {
   const appId = route.params.id
   console.log('Loading app details for ID:', appId)
@@ -543,12 +844,144 @@ const loadAppDetails = async () => {
 // Watch for route changes (immediate: true handles initial load)
 watch(() => route.params.id, loadAppDetails, { immediate: true })
 
-onMounted(() => {
+// Dynamic SEO meta tags and structured data
+watch(app, (newApp) => {
+  if (!newApp) return
+
+  const appTitle = `${newApp.displayName || newApp.name} - Flux Cloud Marketplace`
+  const appDescription = newApp.description || `Deploy ${newApp.displayName || newApp.name} on Flux Cloud. Decentralized cloud hosting with global infrastructure, 99.9% uptime, and affordable pricing.`
+  const appImage = newApp.icon || newApp.logo || 'https://home.runonflux.io/flux-logo.png'
+  const currentUrl = `https://home.runonflux.io/marketplace/${route.params.id}`
+
+  // Build structured data
+  const productStructuredData = {
+    '@context': 'https://schema.org',
+    '@type': 'SoftwareApplication',
+    'name': newApp.displayName || newApp.name,
+    'description': appDescription,
+    'applicationCategory': 'WebApplication',
+    'operatingSystem': 'Web',
+    'offers': {
+      '@type': 'Offer',
+      'price': newApp.price || 0,
+      'priceCurrency': 'USD',
+      'availability': 'https://schema.org/InStock',
+      'url': currentUrl,
+    },
+    'provider': {
+      '@type': 'Organization',
+      'name': 'Flux',
+      'url': 'https://runonflux.io',
+    },
+  }
+
+  // Add developer/company info if available
+  if (newApp.developer || newApp.company) {
+    productStructuredData.author = {
+      '@type': 'Organization',
+      'name': newApp.developer || newApp.company,
+    }
+  }
+
+  // Add rating if available
+  if (newApp.rating) {
+    productStructuredData.aggregateRating = {
+      '@type': 'AggregateRating',
+      'ratingValue': newApp.rating,
+      'ratingCount': 1,
+    }
+  }
+
+  // BreadcrumbList structured data
+  const breadcrumbStructuredData = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    'itemListElement': [
+      {
+        '@type': 'ListItem',
+        'position': 1,
+        'name': 'Home',
+        'item': 'https://home.runonflux.io',
+      },
+      {
+        '@type': 'ListItem',
+        'position': 2,
+        'name': 'Marketplace',
+        'item': 'https://home.runonflux.io/marketplace',
+      },
+      {
+        '@type': 'ListItem',
+        'position': 3,
+        'name': newApp.displayName || newApp.name,
+        'item': currentUrl,
+      },
+    ],
+  }
+
+  // FAQPage structured data (genericFAQs already includes pricing question)
+  const faqStructuredData = {
+    '@type': 'FAQPage',
+    'mainEntity': genericFAQs.value.map(faq => ({
+      '@type': 'Question',
+      'name': faq.q,
+      'acceptedAnswer': {
+        '@type': 'Answer',
+        'text': faq.a.replace(/<[^>]*>/g, ''), // Strip HTML tags for structured data
+      },
+    })),
+  }
+
+  const structuredData = [productStructuredData, breadcrumbStructuredData]
+  if (genericFAQs.value.length > 0) {
+    structuredData.push({ '@context': 'https://schema.org', ...faqStructuredData })
+  }
+
+  useHead({
+    title: appTitle,
+    meta: [
+      { name: 'description', content: appDescription },
+      { name: 'keywords', content: `${newApp.displayName || newApp.name}, Flux, cloud hosting, decentralized hosting, Web3, blockchain hosting` },
+
+      // Open Graph
+      { property: 'og:title', content: appTitle },
+      { property: 'og:description', content: appDescription },
+      { property: 'og:image', content: appImage },
+      { property: 'og:url', content: currentUrl },
+      { property: 'og:type', content: 'website' },
+      { property: 'og:site_name', content: 'Flux' },
+
+      // Twitter Card
+      { name: 'twitter:card', content: 'summary_large_image' },
+      { name: 'twitter:site', content: '@RunOnFlux' },
+      { name: 'twitter:title', content: appTitle },
+      { name: 'twitter:description', content: appDescription },
+      { name: 'twitter:image', content: appImage },
+
+      // Additional meta
+      { name: 'author', content: newApp.developer || newApp.company || 'Flux' },
+      { name: 'robots', content: 'index, follow' },
+    ],
+    link: [
+      { rel: 'canonical', href: currentUrl },
+    ],
+    script: [
+      {
+        type: 'application/ld+json',
+        children: JSON.stringify(structuredData),
+      },
+    ],
+  })
+}, { immediate: true })
+
+onMounted(async () => {
   // Check if user came here with install intent
   if (route.query.action === 'install') {
     // Could show install dialog or scroll to install button
     // In future, could automatically open deploy dialog
   }
+
+  // Load flux network data
+  await getFluxList()
 })
 </script>
 
@@ -1822,5 +2255,340 @@ onMounted(() => {
 /* Smooth Transitions */
 * {
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Global Server Network Section */
+.network-section {
+  grid-column: 1 / -1;
+  margin-top: 24px;
+}
+
+.network-avatar {
+  background: linear-gradient(135deg, rgb(var(--v-theme-info)) 0%, rgb(var(--v-theme-primary)) 100%) !important;
+  box-shadow:
+    0 4px 12px rgba(var(--v-theme-info), 0.3),
+    0 2px 6px rgba(0, 0, 0, 0.1);
+  border: 2px solid rgba(var(--v-theme-info), 0.2);
+}
+
+.map-container {
+  position: relative;
+  min-height: 400px;
+  margin: 24px 0 32px 0;
+  border-radius: 12px;
+  overflow: hidden;
+  background: rgba(var(--v-theme-surface), 0.4);
+  border: 1px solid rgba(var(--v-theme-on-surface), 0.08);
+}
+
+.server-map {
+  border-radius: 12px;
+}
+
+.no-data {
+  text-align: center;
+  font-size: 1rem;
+  color: rgba(var(--v-theme-on-surface), 0.5);
+  padding: 60px 20px;
+}
+
+.stats-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px;
+  margin-top: 24px;
+}
+
+.stat-item {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 20px;
+  background: rgba(var(--v-theme-primary), 0.05);
+  border-radius: 12px;
+  border: 1px solid rgba(var(--v-theme-primary), 0.1);
+  transition: all 0.3s ease;
+}
+
+.stat-item:hover {
+  background: rgba(var(--v-theme-primary), 0.1);
+  border-color: rgba(var(--v-theme-primary), 0.2);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(var(--v-theme-primary), 0.15);
+}
+
+.stat-content {
+  flex: 1;
+}
+
+.stat-value {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: rgb(var(--v-theme-primary));
+  line-height: 1.2;
+}
+
+.stat-label {
+  font-size: 0.875rem;
+  color: rgba(var(--v-theme-on-surface), 0.7);
+  margin-top: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Why Flux Section */
+.why-flux-section {
+  grid-column: 1 / -1;
+  margin-top: 32px;
+}
+
+.section-subtitle {
+  font-size: 1rem;
+  text-align: center;
+  margin-bottom: 32px;
+  opacity: 0.85;
+  line-height: 1.6;
+  color: rgba(var(--v-theme-on-surface), 0.8);
+}
+
+.benefits-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 24px;
+  margin-top: 32px;
+}
+
+.benefit-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 28px 24px;
+  background: linear-gradient(135deg, rgba(var(--v-theme-surface), 0.8) 0%, rgba(var(--v-theme-surface), 0.6) 100%);
+  border-radius: 16px;
+  border: 1px solid rgba(var(--v-theme-primary), 0.1);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.benefit-item::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg,
+    rgb(var(--v-theme-primary)) 0%,
+    rgb(var(--v-theme-success)) 50%,
+    rgb(var(--v-theme-info)) 100%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.benefit-item:hover::before {
+  opacity: 1;
+}
+
+.benefit-item:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 12px 32px rgba(var(--v-theme-primary), 0.2);
+  border-color: rgba(var(--v-theme-primary), 0.3);
+  background: linear-gradient(135deg, rgba(var(--v-theme-surface), 0.9) 0%, rgba(var(--v-theme-surface), 0.7) 100%);
+}
+
+.benefit-icon-wrapper {
+  width: 70px;
+  height: 70px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, rgba(var(--v-theme-primary), 0.15) 0%, rgba(var(--v-theme-success), 0.1) 100%);
+  border-radius: 50%;
+  margin-bottom: 20px;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(var(--v-theme-primary), 0.1);
+}
+
+.benefit-item:hover .benefit-icon-wrapper {
+  background: linear-gradient(135deg, rgba(var(--v-theme-primary), 0.25) 0%, rgba(var(--v-theme-success), 0.2) 100%);
+  transform: scale(1.15) rotate(5deg);
+  box-shadow: 0 6px 20px rgba(var(--v-theme-primary), 0.25);
+}
+
+.benefit-title {
+  font-size: 1.125rem;
+  font-weight: 700;
+  margin-bottom: 12px;
+  color: rgb(var(--v-theme-on-surface));
+  line-height: 1.3;
+}
+
+.benefit-description {
+  font-size: 0.9375rem;
+  line-height: 1.6;
+  color: rgba(var(--v-theme-on-surface), 0.75);
+}
+
+/* FAQ Section */
+.faq-section {
+  grid-column: 1 / -1;
+  margin-top: 32px;
+}
+
+.faq-expansion-panels {
+  margin-top: 24px;
+}
+
+.faq-expansion-panel {
+  margin-bottom: 12px;
+  border-radius: 12px !important;
+  overflow: hidden;
+  background: rgba(var(--v-theme-surface), 0.7) !important;
+  border: 1px solid rgba(var(--v-theme-info), 0.1);
+  transition: all 0.3s ease;
+}
+
+.faq-expansion-panel:hover {
+  border-color: rgba(var(--v-theme-info), 0.3);
+  box-shadow: 0 4px 12px rgba(var(--v-theme-info), 0.1);
+}
+
+.faq-expansion-panel:last-child {
+  margin-bottom: 0;
+}
+
+.faq-question {
+  font-weight: 600;
+  padding: 16px 20px;
+}
+
+.question-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+}
+
+.question-text {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  line-height: 1.5;
+  color: rgb(var(--v-theme-on-surface));
+}
+
+.faq-answer {
+  padding: 0 20px 16px 20px !important;
+  font-size: 0.875rem;
+  line-height: 1.6;
+  color: rgba(var(--v-theme-on-surface), 0.8);
+}
+
+.faq-answer :deep(strong) {
+  font-weight: 700;
+  color: rgb(var(--v-theme-primary));
+}
+
+.faq-answer :deep(a) {
+  color: rgb(var(--v-theme-info));
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.faq-answer :deep(a:hover) {
+  text-decoration: underline;
+}
+
+.benefits-avatar,
+.faq-avatar {
+  background: rgb(var(--v-theme-primary)) !important;
+  box-shadow:
+    0 4px 12px rgba(var(--v-theme-primary), 0.3),
+    0 2px 6px rgba(0, 0, 0, 0.1);
+  border: 2px solid rgba(var(--v-theme-primary), 0.2);
+}
+
+/* Responsive adjustments for new sections */
+@media (max-width: 960px) {
+  .map-container {
+    min-height: 300px;
+  }
+
+  .stats-container {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .stat-value {
+    font-size: 1.5rem;
+  }
+
+  .benefits-grid {
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 20px;
+  }
+
+  .benefit-item {
+    padding: 24px 20px;
+  }
+
+  .benefit-icon-wrapper {
+    width: 64px;
+    height: 64px;
+  }
+}
+
+@media (max-width: 600px) {
+  .map-container {
+    min-height: 250px;
+  }
+
+  .stat-item {
+    padding: 16px;
+  }
+
+  .stat-value {
+    font-size: 1.25rem;
+  }
+
+  .stat-label {
+    font-size: 0.75rem;
+  }
+
+  .benefits-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .benefit-item {
+    padding: 20px 16px;
+  }
+
+  .benefit-icon-wrapper {
+    width: 56px;
+    height: 56px;
+  }
+
+  .benefit-title {
+    font-size: 1rem;
+  }
+
+  .benefit-description {
+    font-size: 0.875rem;
+  }
+
+  .faq-question {
+    padding: 12px 16px;
+  }
+
+  .question-text {
+    font-size: 0.875rem;
+  }
+
+  .faq-answer {
+    padding: 0 16px 12px 16px !important;
+    font-size: 0.8125rem;
+  }
 }
 </style>

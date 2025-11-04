@@ -61,6 +61,7 @@ declare module 'vue' {
     FileUpload: typeof import('./@core/components/FileUpload.vue')['default']
     GameCard: typeof import('./components/Marketplace/GameCard.vue')['default']
     Games: typeof import('./components/Marketplace/games/index.vue')['default']
+    GenericFAQPanel: typeof import('./components/Marketplace/Panels/GenericFAQPanel.vue')['default']
     GroupsPanel: typeof import('./components/Marketplace/Panels/GroupsPanel.vue')['default']
     HeaderPanel: typeof import('./components/Marketplace/Panels/HeaderPanel.vue')['default']
     I18n: typeof import('./@core/components/I18n.vue')['default']
@@ -112,5 +113,6 @@ declare module 'vue' {
     VolumeBrowser: typeof import('./@core/components/VolumeBrowser.vue')['default']
     VolumePathBuilder: typeof import('./@core/components/VolumePathBuilder.vue')['default']
     VueApexCharts: typeof import('vue3-apexcharts')['default']
+    WhyFluxPanel: typeof import('./components/Marketplace/Panels/WhyFluxPanel.vue')['default']
   }
 }

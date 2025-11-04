@@ -18,6 +18,8 @@ import FeaturesPanel from './Panels/FeaturesPanel.vue'
 import ServerLocationsPanel from './Panels/ServerLocationsPanel.vue'
 import FAQPanel from './Panels/FAQPanel.vue'
 import RelatedGamesPanel from './Panels/RelatedGamesPanel.vue'
+import WhyFluxPanel from './Panels/WhyFluxPanel.vue'
+import GenericFAQPanel from './Panels/GenericFAQPanel.vue'
 
 const props = defineProps({
   panel: {
@@ -50,6 +52,10 @@ const panelComponent = computed(() => {
     return FAQPanel
   case 'RelatedGames':
     return RelatedGamesPanel
+  case 'WhyFlux':
+    return WhyFluxPanel
+  case 'GenericFAQ':
+    return GenericFAQPanel
   case 'NodeMap':
     return null // Optional: implement NodeMapPanel later
   case 'Subscription':

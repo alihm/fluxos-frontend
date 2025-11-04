@@ -1203,6 +1203,14 @@
           "title": "More Games to Host",
           "subtitle": "Explore other popular game servers you can deploy on FluxCloud",
           "startingAt": "Starting at"
+        },
+        "whyFluxPanel": {
+          "title": "Why Host on Flux Cloud",
+          "subtitle": "Experience the benefits of decentralized cloud infrastructure powered by Web3 technology"
+        },
+        "genericFAQPanel": {
+          "title": "Frequently Asked Questions",
+          "subtitle": "Common questions about hosting on Flux Cloud"
         }
       },
       "installDialog": {
@@ -2497,6 +2505,91 @@
         "website": "Website",
         "sourceCode": "Source Code",
         "support": "Support"
+      },
+      "common": {
+        "whyFlux": {
+          "title": "Why Host on Flux Cloud",
+          "subtitle": "Experience the power of decentralized cloud infrastructure built on Web3 technology",
+          "benefits": [
+            {
+              "icon": "mdi-web",
+              "title": "Global Network",
+              "description": "Deploy across 62+ countries with our worldwide decentralized infrastructure for low latency everywhere."
+            },
+            {
+              "icon": "mdi-flash",
+              "title": "Lightning Fast Deployment",
+              "description": "Get your applications up and running in minutes with our automated deployment system."
+            },
+            {
+              "icon": "mdi-currency-usd-off",
+              "title": "Cost Effective",
+              "description": "Save up to 70% compared to traditional cloud providers with transparent, competitive pricing."
+            },
+            {
+              "icon": "mdi-server-network",
+              "title": "99.9% Uptime",
+              "description": "Distributed network architecture ensures maximum availability and redundancy."
+            },
+            {
+              "icon": "mdi-chart-line-variant",
+              "title": "Easy Scaling",
+              "description": "Scale your resources up or down instantly to match demand without downtime."
+            },
+            {
+              "icon": "mdi-lock-open",
+              "title": "No Vendor Lock-in",
+              "description": "Full data portability and open standards mean you're never locked into one provider."
+            },
+            {
+              "icon": "mdi-account-heart",
+              "title": "24/7 Support",
+              "description": "Expert support team available around the clock to help with any issues or questions."
+            }
+          ]
+        },
+        "genericFAQ": {
+          "title": "Frequently Asked Questions",
+          "subtitle": "Everything you need to know about hosting on Flux Cloud",
+          "questions": [
+            {
+              "q": "What is Flux Cloud?",
+              "a": "Flux Cloud is a decentralized cloud computing platform powered by Web3 technology. It provides secure, scalable, and cost-effective hosting for applications, games, and services across a global network of nodes."
+            },
+            {
+              "q": "How do I get started?",
+              "a": "Simply browse the marketplace, select your desired application or game, choose your configuration, and deploy. Your instance will be live within minutes. No complex setup required!"
+            },
+            {
+              "q": "What payment methods do you accept?",
+              "a": "We accept FLUX tokens, as well traditional payment methods through our integrated payment processors (Stripe and Paypal)."
+            },
+            {
+              "q": "Can I upgrade or downgrade my plan?",
+              "a": "Yes! You can easily scale your resources up or down at any time through your dashboard. Changes take effect immediately with no downtime."
+            },
+            {
+              "q": "What happens if I need more resources?",
+              "a": "You can instantly upgrade to a higher tier configuration at any time. Simply select the new configuration in your dashboard and the changes will be applied automatically."
+            },
+            {
+              "q": "How is uptime guaranteed?",
+              "a": "Our decentralized architecture distributes your application across multiple nodes, ensuring 99.9% uptime. If one node experiences issues, your application automatically fails over to healthy nodes."
+            },
+            {
+              "q": "Can I cancel anytime?",
+              "a": "Yes, there are no long-term contracts or cancellation fees. You can cancel your subscription at any time ask for a refund in the first 30 days."
+            },
+            {
+              "q": "Do you offer backups?",
+              "a": "Yes, automatic backups are included with all apps that have decentralized persistent data. Your data is weekly backed up and can be restored at any time through your dashboard."
+            },
+            {
+              "q": "What kind of support is available?",
+              "a": "We offer 24/7 support through our Discord community, email support, our AI built-in tool, and our support ticket system at <a href=\"https://support.runonflux.io/\" target=\"_blank\" rel=\"noopener noreferrer\">support.runonflux.io</a>."
+            }
+          ]
+        }
       },
       "games": {
         "index": {

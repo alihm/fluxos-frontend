@@ -396,7 +396,7 @@ const loadGameDetails = async () => {
         // Keep existing Groups panel
         ...existingPanels.filter(p => p.type === 'Groups'),
 
-        // NEW: FAQ Panel (using i18n)
+        // NEW: FAQ Panel (using i18n) - Game-specific FAQs
         {
           type: 'FAQ',
           enabled: true,
