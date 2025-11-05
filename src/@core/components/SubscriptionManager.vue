@@ -192,7 +192,7 @@
         <div v-else class="pa-3">
           <!-- For V6+: Show period slider -->
           <div v-if="versionFlags.supportsExpire" class="px-3">
-            <div class="d-flex flex-column gap-2 mb-3">
+            <div class="d-flex flex-column gap-2 mt-2">
               <VChip color="default" variant="tonal" label style="font-size: 14px;">
                 <VIcon size="22" class="mr-2">mdi-calendar-check</VIcon>
                 <span class="mr-2">{{ t('core.subscriptionManager.currentSubscriptionUntil') }}</span>
@@ -204,7 +204,7 @@
                 <strong>{{ timeRemaining }}</strong>
               </VChip>
             </div>
-            <div class="d-flex flex-column gap-2">
+            <div class="d-flex flex-column gap-2 mt-2">
               <VChip color="info" variant="tonal" label style="font-size: 14px;">
                 <VIcon size="22" class="mr-2">mdi-update</VIcon>
                 <span class="mr-2">{{ t('core.subscriptionManager.renewalPeriod') }}</span>
@@ -244,7 +244,7 @@
 
           <!-- For < V6: Fixed 1 month renewal -->
           <div v-else class="px-3">
-            <div class="d-flex flex-column gap-2 mb-3">
+            <div class="d-flex flex-column gap-2 mt-2">
               <VChip color="default" variant="tonal" label style="font-size: 14px;">
                 <VIcon size="22" class="mr-2">mdi-calendar-check</VIcon>
                 <span class="mr-2">{{ t('core.subscriptionManager.currentSubscriptionUntil') }}</span>
@@ -256,7 +256,7 @@
                 <strong>{{ timeRemaining }}</strong>
               </VChip>
             </div>
-            <div class="d-flex flex-column gap-2">
+            <div class="d-flex flex-column gap-2 mt-2">
               <VChip color="info" variant="tonal" label style="font-size: 14px;">
                 <VIcon size="22" class="mr-2">mdi-update</VIcon>
                 <span class="mr-2">{{ t('core.subscriptionManager.renewalPeriod') }}</span>
