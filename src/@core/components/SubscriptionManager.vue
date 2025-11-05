@@ -192,7 +192,7 @@
         <div v-else class="pa-3">
           <!-- For V6+: Show period slider -->
           <div v-if="versionFlags.supportsExpire" class="px-3">
-            <div class="d-flex flex-column gap-2 mb-3">
+            <div class="d-flex flex-column gap-2 mt-2">
               <VChip color="default" variant="tonal" label style="font-size: 14px;">
                 <VIcon size="22" class="mr-2">mdi-calendar-check</VIcon>
                 <span class="mr-2">{{ t('core.subscriptionManager.currentSubscriptionUntil') }}</span>
@@ -204,7 +204,7 @@
                 <strong>{{ timeRemaining }}</strong>
               </VChip>
             </div>
-            <div class="d-flex flex-column gap-2">
+            <div class="d-flex flex-column gap-2 mt-2">
               <VChip color="info" variant="tonal" label style="font-size: 14px;">
                 <VIcon size="22" class="mr-2">mdi-update</VIcon>
                 <span class="mr-2">{{ t('core.subscriptionManager.renewalPeriod') }}</span>
@@ -244,7 +244,7 @@
 
           <!-- For < V6: Fixed 1 month renewal -->
           <div v-else class="px-3">
-            <div class="d-flex flex-column gap-2 mb-3">
+            <div class="d-flex flex-column gap-2 mt-2">
               <VChip color="default" variant="tonal" label style="font-size: 14px;">
                 <VIcon size="22" class="mr-2">mdi-calendar-check</VIcon>
                 <span class="mr-2">{{ t('core.subscriptionManager.currentSubscriptionUntil') }}</span>
@@ -256,7 +256,7 @@
                 <strong>{{ timeRemaining }}</strong>
               </VChip>
             </div>
-            <div class="d-flex flex-column gap-2">
+            <div class="d-flex flex-column gap-2 mt-2">
               <VChip color="info" variant="tonal" label style="font-size: 14px;">
                 <VIcon size="22" class="mr-2">mdi-update</VIcon>
                 <span class="mr-2">{{ t('core.subscriptionManager.renewalPeriod') }}</span>
@@ -303,7 +303,7 @@
           </li>
           <li class="d-flex align-start mb-3">
             <VIcon size="20" class="mr-2 mt-1" color="warning">mdi-clock-alert</VIcon>
-            <span>{{ t('core.subscriptionManager.afterCancellationExpire') }} <b>{{ new Date(Date.now() + 100 * 2 * 60 * 1000).toLocaleString('en-GB', timeOptions.shortDate) }}</b> (100 {{ t('core.subscriptionManager.blocksFromNow') }}).</span>
+            <span>{{ t('core.subscriptionManager.afterCancellationExpire') }} <b>{{ new Date(Date.now() + 100 * (currentBlockHeight >= 2020000 ? 0.5 : 2) * 60 * 1000).toLocaleString('en-GB', timeOptions.shortDate) }}</b> (100 {{ t('core.subscriptionManager.blocksFromNow') }}).</span>
           </li>
           <li class="d-flex align-start mb-4">
             <VIcon size="20" class="mr-2 mt-1" color="error">mdi-alert-circle</VIcon>
@@ -1945,10 +1945,10 @@
                     <template v-if="props.newApp">
                       <!-- For new apps, show subscription period -->
                       <template v-if="blockHeight">
-                        {{ t('core.subscriptionManager.subscription') }} {{ expiryLabel }}
+                        {{ expiryLabel }}
                       </template>
                       <template v-else>
-                        {{ t('core.subscriptionManager.subscription') }} {{ expiryLabel }}
+                        {{ expiryLabel }}
                       </template>
                     </template>
                     <template v-else-if="blockHeight && props.appSpec?.height">
@@ -2962,6 +2962,7 @@ const props = defineProps({
   executeLocalCommand: Function,
   resetTrigger: Number, // Timestamp to trigger internal tab reset when subscription tab becomes active
   isRedeploy: Boolean, // Flag to indicate if this is a redeploy operation
+  instanceReady: Boolean, // Flag to indicate if instance/location is loaded (for existing apps)
 })
 
 // Define emits
@@ -3545,20 +3546,52 @@ watch(() => props.appSpec, (newSpec, oldSpec) => {
     }
 
     // Set up renewal settings
-    // Fork-aware default: if app was registered after fork, use 88000; otherwise 22000
-    const defaultExpire = (newSpec.height && newSpec.height >= FORK_BLOCK_HEIGHT) ? 88000 : 22000
-    let expire = newSpec.expire ?? defaultExpire
+    // Find the correct renewalIndex based on original expire value with fork-aware conversion
+    let expireForMatching
 
-    // Convert pre-fork expire values to post-fork equivalent for renewalIndex matching
-    // Pre-fork: 22,000 blocks = 1 month (at 2 min/block)
-    // Post-fork: 88,000 blocks = 1 month (at 0.5 min/block)
-    // Renewals always use post-fork values, so convert for display purposes
-    if (newSpec.height && newSpec.height < FORK_BLOCK_HEIGHT) {
-      expire = expire * 4  // Convert pre-fork to post-fork equivalent
+    if (newSpec.version < 6) {
+      // Spec < 6: Always use 88000 (fixed 1 month)
+      expireForMatching = 88000
+    } else {
+      // Spec >= 6: Use original expire value from API
+      const defaultExpire = 88000
+      const originalExpire = newSpec.expire ?? defaultExpire
+      expireForMatching = originalExpire
+
+      // Fork-aware conversion for renewalIndex matching:
+      // Apps registered before fork have expire in pre-fork blocks
+      // Convert to post-fork equivalent to match renewal options
+      if (newSpec.height && newSpec.height < FORK_BLOCK_HEIGHT) {
+        expireForMatching = Math.round(originalExpire * 4)
+        console.log('Fork-aware conversion for renewalIndex: original', originalExpire, '× 4 =', expireForMatching)
+      }
     }
 
-    const foundIndex = renewalOptions.value.findIndex(opt => opt.value === expire)
-    appDetails.value.renewalIndex = foundIndex !== -1 ? foundIndex : 2
+    console.log('Setting renewalIndex - expire for matching:', expireForMatching, 'original expire:', newSpec.expire, 'spec version:', newSpec.version, 'height:', newSpec.height)
+
+    // Find exact match in renewal options
+    let foundIndex = renewalOptions.value.findIndex(opt => opt.value === expireForMatching)
+
+    // If no exact match, find closest renewal option
+    if (foundIndex === -1) {
+      let closestIndex = 2  // Default to 1 month (88000)
+      let closestDiff = Math.abs(renewalOptions.value[2].value - expireForMatching)
+
+      renewalOptions.value.forEach((opt, idx) => {
+        const diff = Math.abs(opt.value - expireForMatching)
+        if (diff < closestDiff) {
+          closestDiff = diff
+          closestIndex = idx
+        }
+      })
+
+      foundIndex = closestIndex
+      console.log('No exact match - closest option at index:', foundIndex, 'value:', renewalOptions.value[foundIndex].value, 'diff:', Math.abs(renewalOptions.value[foundIndex].value - expireForMatching))
+    } else {
+      console.log('Found exact match at index:', foundIndex, 'value:', renewalOptions.value[foundIndex].value)
+    }
+
+    appDetails.value.renewalIndex = foundIndex
     
     // Handle enterprise nodes if applicable
     if (newSpec.nodes && Array.isArray(newSpec.nodes) && newSpec.nodes.length > 0) {
@@ -3649,24 +3682,26 @@ async function getMultiplier() {
 }
 
 async function fetchCurrentBlockHeight() {
-  try {
-    // Try daemon first (more accurate, real-time)
-    const res = await props.executeLocalCommand('/daemon/getblockcount')
-    if (res?.data?.status === 'success' && typeof res.data?.data === 'number') {
-      currentBlockHeight.value = res.data.data
-      
-      return
+  // Try daemon first (more accurate, real-time) - but only if instance is ready
+  if (props.executeLocalCommand && !props.newApp && props.appSpec?.name && props.instanceReady) {
+    try {
+      const res = await props.executeLocalCommand('/daemon/getblockcount')
+      if (res?.data?.status === 'success' && typeof res.data?.data === 'number') {
+        currentBlockHeight.value = res.data.data
+
+        return
+      }
+    } catch (error) {
+      console.log("Daemon block height not available, falling back to explorer:", error)
     }
-  } catch (error) {
-    console.log("Daemon block height not available, falling back to explorer:", error)
   }
 
   try {
-    // Fallback to explorer
+    // Fallback to explorer (always works, doesn't require instance)
     const explorerResult = await ExplorerService.getScannedHeight()
     if (explorerResult.data.status === "success") {
       currentBlockHeight.value = explorerResult.data.data.generalScannedHeight
-      
+
       return
     }
   } catch (error) {
@@ -3804,10 +3839,42 @@ watch(signature, newSignature => {
 })
 
 // 2️⃣  current remaining blocks based on the *original* value
+// FORK-AWARE: Calculate adjusted expiry block height accounting for fork transition
 const originalExpireBlocks = computed(() => {
   if (!currentBlockHeight.value || typeof props.appSpec?.height !== 'number') return null
+  if (!originalExpireSnapshot.value) return null
 
-  return props.appSpec.height + originalExpireSnapshot.value - currentBlockHeight.value
+  const registrationHeight = props.appSpec.height
+  const expireIn = originalExpireSnapshot.value
+
+  // Calculate naive expiry (registration + expire blocks)
+  const naiveExpiry = registrationHeight + expireIn
+
+  let adjustedExpiryBlock = naiveExpiry
+
+  // If app was registered before fork and naive expiry is after fork,
+  // we need to adjust to maintain the intended duration
+  if (registrationHeight < FORK_BLOCK_HEIGHT && naiveExpiry > FORK_BLOCK_HEIGHT) {
+    // Calculate intended subscription duration based on registration time
+    const blockTimeAtRegistration = 2 // Pre-fork: 2 min/block
+    const subscriptionDurationMinutes = expireIn * blockTimeAtRegistration
+
+    // Calculate pre-fork time consumed
+    const preForkBlocks = FORK_BLOCK_HEIGHT - registrationHeight
+    const preForkMinutes = preForkBlocks * 2
+
+    // Calculate remaining time that needs to be in post-fork blocks
+    const remainingMinutes = subscriptionDurationMinutes - preForkMinutes
+
+    // Convert remaining minutes to post-fork blocks
+    const postForkBlocks = remainingMinutes / 0.5
+
+    // Actual expiry block accounting for fork transition
+    adjustedExpiryBlock = FORK_BLOCK_HEIGHT + postForkBlocks
+  }
+
+  // Return remaining blocks: adjusted expiry - current block
+  return adjustedExpiryBlock - currentBlockHeight.value
 })
 
 // 3️⃣  timestamps shown in the UI (fork-aware calculation)
@@ -4001,12 +4068,10 @@ watch(managementAction, (newValue, oldValue) => {
 
     // Determine the correct expire value for the new mode
     if (newValue === 'renewal') {
-      // Switching TO renewal mode: apply selected renewal period
-      const selectedExpire = renewalOptions.value[appDetails.value.renewalIndex]?.value
-      if (selectedExpire) {
-        props.appSpec.expire = selectedExpire
-        console.log('Applied renewal period:', selectedExpire)
-      }
+      // Switching TO renewal mode: apply selected renewal period (with fallback to 88000)
+      const selectedExpire = renewalOptions.value[appDetails.value.renewalIndex]?.value || 88000
+      props.appSpec.expire = selectedExpire
+      console.log('Applied renewal period:', selectedExpire)
     } else if (newValue === 'update') {
       // Switching TO update mode: check if renewal is enabled
       if (renewalEnabled.value) {
@@ -5313,8 +5378,11 @@ const expiryLabel = computed(() => {
   if (props.newApp) {
     expire = renewalOptions.value[appDetails.value.renewalIndex]?.value ?? 88000
   } else {
-    // For cancel mode or renewal enabled, use the actual expire, not the snapshot
-    if (managementAction.value === 'cancel' || renewalEnabled.value) {
+    // Spec < 6 ALWAYS uses fixed 88000 blocks (1 month) regardless of mode
+    if (!versionFlags.value.supportsExpire && managementAction.value !== 'cancel') {
+      expire = 88000
+    } else if (managementAction.value === 'cancel' || renewalEnabled.value) {
+      // For cancel mode or renewal enabled, use the actual expire, not the snapshot
       expire = props.appSpec?.expire ?? 100
     } else {
       // Use original expire snapshot for existing apps when renewal is disabled
@@ -5324,8 +5392,24 @@ const expiryLabel = computed(() => {
     }
   }
 
-  // For new apps or renewal enabled, just show the selected period duration
-  if (props.newApp || renewalEnabled.value) {
+  // For new apps, renewal enabled, cancel mode, or spec < 6 (which always uses fixed 88000 blocks)
+  if (props.newApp || renewalEnabled.value || managementAction.value === 'cancel' || !versionFlags.value.supportsExpire) {
+    // If blockHeight not loaded yet, default to post-fork rate
+    if (!blockHeight.value) {
+      // Default: assume post-fork, use 88000 blocks at 0.5 min/block
+      const totalMinutes = 88000 * 0.5
+      const days = Math.floor(totalMinutes / 1440)
+      const hours = Math.floor((totalMinutes % 1440) / 60)
+      const minutes = totalMinutes % 60
+
+      const parts = []
+      if (days > 0) parts.push(`${days} day${days > 1 ? 's' : ''}`)
+      if (hours > 0) parts.push(`${hours} hour${hours > 1 ? 's' : ''}`)
+      if (minutes > 0) parts.push(`${minutes} minute${minutes !== 1 ? 's' : ''}`)
+
+      return parts.join(', ')
+    }
+
     // Block time: 2 minutes before fork, 30 seconds (0.5 minutes) after fork
     const minutesPerBlock = blockHeight.value >= FORK_BLOCK_HEIGHT ? 0.5 : 2
     const totalMinutes = expire * minutesPerBlock
@@ -5348,15 +5432,30 @@ const expiryLabel = computed(() => {
   if (!current || !height) return ''
 
   // For cancel mode, expire is absolute (100 blocks from now), not relative to registration height
-  const blocksToExpireLocal = managementAction.value === 'cancel'
-    ? expire
-    : height + expire - current
+  // For UPDATE mode spec v6+ without renewal: use fork-aware blocksToExpire if available
+  let blocksToExpireLocal
+  if (managementAction.value === 'cancel') {
+    blocksToExpireLocal = expire
+  } else if (managementAction.value === 'update' && !renewalEnabled.value && versionFlags.value.supportsExpire && blocksToExpire.value !== null) {
+    // Use the fork-aware blocksToExpire calculated in fetchBlockHeight
+    blocksToExpireLocal = blocksToExpire.value
+  } else {
+    // Naive calculation for other cases
+    blocksToExpireLocal = height + expire - current
+  }
+
   if (blocksToExpireLocal < 1) return ''
 
   // Fork-aware calculation: Apps registered before fork need split calculation
   let totalMinutes = 0
 
-  if (height < FORK_BLOCK_HEIGHT && current >= FORK_BLOCK_HEIGHT) {
+  // If we're using pre-calculated fork-aware blocksToExpire (UPDATE mode v6+ without renewal)
+  // then blocksToExpireLocal is already in post-fork blocks, so just convert directly
+  if (managementAction.value === 'update' && !renewalEnabled.value && versionFlags.value.supportsExpire && blocksToExpire.value !== null) {
+    // blocksToExpireLocal is already fork-aware remaining blocks at current rate
+    const minutesPerBlock = current >= FORK_BLOCK_HEIGHT ? 0.5 : 2
+    totalMinutes = blocksToExpireLocal * minutesPerBlock
+  } else if (height < FORK_BLOCK_HEIGHT && current >= FORK_BLOCK_HEIGHT) {
     // App registered before fork, currently after fork
     // Need to calculate: intended duration - elapsed time
 
@@ -5468,6 +5567,43 @@ watch(tab, async newVal => {
     let validated = false
     let checkedExpiry = false
     let calculatedPrice = false
+
+    // FIX: Ensure expire is set correctly before validation
+    console.log('🔄 Tab 99 - Before expire fix:', {
+      managementAction: managementAction.value,
+      renewalEnabled: renewalEnabled.value,
+      currentExpire: props.appSpec?.expire,
+      supportsExpire: versionFlags.value.supportsExpire,
+      newApp: props.newApp
+    })
+
+    if (!props.newApp) {
+      if (managementAction.value === 'renewal') {
+        // RENEWAL mode: use selected renewal period
+        const selectedExpire = renewalOptions.value[appDetails.value.renewalIndex]?.value || 88000
+        props.appSpec.expire = selectedExpire
+        console.log('🔄 Tab 99 - Set expire for renewal mode:', selectedExpire)
+      } else if (managementAction.value === 'update') {
+        // UPDATE mode
+        if (renewalEnabled.value) {
+          // Renewal enabled: use selected renewal period
+          const selectedExpire = renewalOptions.value[appDetails.value.renewalIndex]?.value || 88000
+          props.appSpec.expire = selectedExpire
+          console.log('🔄 Tab 99 - Set expire for update with renewal:', selectedExpire)
+        } else {
+          // Renewal disabled: For v6+, check and fix negative expire
+          console.log('🔄 Tab 99 - Update without renewal, checking expire:', props.appSpec.expire)
+          if (versionFlags.value.supportsExpire && props.appSpec.expire < 0) {
+            props.appSpec.expire = 88000
+            console.log('🔄 Tab 99 - Fixed negative expire for update without renewal:', 88000)
+          } else {
+            console.log('🔄 Tab 99 - Keeping current expire (not negative or not v6+):', props.appSpec.expire)
+          }
+        }
+      }
+    }
+
+    console.log('🔄 Tab 99 - After expire fix:', props.appSpec?.expire)
 
     await fetchBlockHeight()
     checkedExpiry = true
@@ -5888,10 +6024,18 @@ async function verifyAppSpec() {
       if (!appSpecTemp.geolocation) appSpecTemp.geolocation = []
     }
 
-    // Recalculate expire for free updates (only for V6+ specs that support expire, but not for cancel)
-    if (blocksToExpire.value !== 'null' && !renewalEnabled.value && appSpecTemp.version >= 6 && managementAction.value !== 'cancel'){
-      appSpecTemp.expire = blocksToExpire.value
-      console.log(`[V${appSpecTemp.version}] Recalculated expire for free update:`, blocksToExpire.value)
+    // For UPDATE without renewal: Send fork-aware remaining blocks
+    // This represents the time remaining on the current subscription
+    // Backend should recognize this as maintaining current expiry (not extending)
+    if (blocksToExpire.value !== null && !renewalEnabled.value && appSpecTemp.version >= 6 && managementAction.value === 'update'){
+      // Only set expire to blocksToExpire if it's positive (valid remaining blocks)
+      if (blocksToExpire.value > 0) {
+        appSpecTemp.expire = blocksToExpire.value
+        console.log(`[V${appSpecTemp.version}] UPDATE without renewal - sending fork-aware remaining blocks:`, blocksToExpire.value)
+      } else {
+        // If expired/negative, keep original positive value
+        console.log(`[V${appSpecTemp.version}] App expired - keeping original expire:`, appSpecTemp.expire)
+      }
     }
 
     // Check if this is a marketplace app (for tracking/display purposes only)
@@ -6246,6 +6390,15 @@ async function fetchBlockHeight() {
             // 1 week = 7 days = 10,080 minutes
             const minMinutes = 7 * 24 * 60 // 10,080 minutes = 1 week
             isExpiryValid.value = remainingMinutes >= minMinutes
+
+            // FIX: Update blocksToExpire with fork-aware remaining blocks (for spec v6+ free updates)
+            // Convert remainingMinutes back to blocks at current (post-fork) rate
+            if (blockHeight.value >= FORK_BLOCK_HEIGHT && remainingMinutes > 0) {
+              blocksToExpire.value = Math.floor(remainingMinutes / 0.5) // Post-fork: 0.5 min/block
+            } else if (remainingMinutes > 0) {
+              blocksToExpire.value = Math.floor(remainingMinutes / 2) // Pre-fork: 2 min/block
+            }
+            // If remainingMinutes <= 0, keep negative blocksToExpire (will be caught by validation)
 
             console.log('Expiry validation:', {
               height,
