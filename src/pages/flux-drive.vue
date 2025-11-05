@@ -1,46 +1,28 @@
 <template>
-  <div>
-    <!-- Introduction Section -->
-    <VRow class="mb-6">
-      <VCol cols="12">
-        <VCard flat class="fluxdrive-intro-card">
-          <VCardText>
-            <div class="d-flex align-center mb-3">
-              <VAvatar
-                size="48"
-                color="primary"
-                variant="tonal"
-                class="mr-3"
-              >
-                <VIcon size="28">mdi-cloud-upload</VIcon>
-              </VAvatar>
-              <div>
-                <h2 class="text-h4 mb-1">{{ t('pages.fluxDrive.intro.title') }}</h2>
-                <p class="text-body-2 mb-0 text-medium-emphasis">{{ t('pages.fluxDrive.intro.subtitle') }}</p>
-              </div>
-            </div>
-            <p class="text-body-1 mb-3">
-              {{ t('pages.fluxDrive.intro.description') }}
-            </p>
-            <a
-              href="https://runonflux.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              class="learn-more-link"
-            >
-              <VBtn
-                color="primary"
-                variant="tonal"
-                prepend-icon="mdi-open-in-new"
-                size="small"
-              >
-                {{ t('pages.fluxDrive.intro.learnMore') }}
-              </VBtn>
-            </a>
-          </VCardText>
-        </VCard>
-      </VCol>
-    </VRow>
+  <div class="fluxdrive-page">
+    <!-- Breadcrumb Navigation -->
+    <nav class="breadcrumb-nav" aria-label="Breadcrumb">
+      <ol class="breadcrumb-list">
+        <li class="breadcrumb-item">
+          <RouterLink to="/" class="breadcrumb-link">Home</RouterLink>
+          <VIcon class="breadcrumb-separator">mdi-chevron-right</VIcon>
+        </li>
+        <li class="breadcrumb-item breadcrumb-current" aria-current="page">
+          <span>FluxDrive</span>
+        </li>
+      </ol>
+    </nav>
+
+    <!-- Hero Section -->
+    <div class="hero-section" role="banner">
+      <div class="hero-icon-top-right" role="img" aria-label="FluxDrive Cloud Storage">
+        <VIcon icon="mdi-cloud-upload" size="80" color="white" aria-hidden="true" />
+      </div>
+      <div class="hero-content">
+        <h1 class="hero-title">{{ t('pages.fluxDrive.intro.title') }}</h1>
+        <p class="hero-subtitle">{{ t('pages.fluxDrive.intro.subtitle') }}</p>
+      </div>
+    </div>
 
     <!-- Loading state while checking subscription -->
     <LoadingSpinner
@@ -51,10 +33,51 @@
     />
 
     <!-- Show pricing plans only for users who have never had a subscription -->
-    <PricingPlans
-      v-else-if="!hasOrHadSubscription"
-      @selectPlan="(planId, actionType) => handlePlanSelection(planId, actionType)"
-    />
+    <div v-if="!hasOrHadSubscription">
+      <PricingPlans @selectPlan="(planId, actionType) => handlePlanSelection(planId, actionType)"
+      />
+
+      <!-- Features Section -->
+      <VCard class="section-card features-section ma-4">
+        <VCardTitle class="section-title">
+          {{ t('pages.fluxDrive.features.title') }}
+        </VCardTitle>
+        <VCardText>
+          <div class="features-grid">
+            <div
+              v-for="(feature, index) in features"
+              :key="index"
+              class="feature-item"
+            >
+              <div class="feature-icon-wrapper">
+                <VIcon :icon="feature.icon" size="32" :color="feature.color" />
+              </div>
+              <h3 class="feature-title">{{ feature.title }}</h3>
+              <p class="feature-description">{{ feature.description }}</p>
+            </div>
+          </div>
+        </VCardText>
+      </VCard>
+
+      <!-- Benefits Section -->
+      <VCard class="section-card benefits-section ma-4">
+        <VCardTitle class="section-title">
+          {{ t('pages.fluxDrive.benefits.title') }}
+        </VCardTitle>
+        <VCardText class="section-text">
+          <div class="benefits">
+            <div
+              v-for="(benefit, index) in benefits"
+              :key="index"
+              class="benefit-item"
+            >
+              <VIcon :icon="benefit.icon" size="24" :color="benefit.color" />
+              <span>{{ benefit.text }}</span>
+            </div>
+          </div>
+        </VCardText>
+      </VCard>
+    </div>
 
     <!-- Show actual FluxDrive interface for subscribers or users with subscription history -->
     <div v-else>
@@ -194,6 +217,54 @@ const breadcrumbStructuredData = {
   ],
 }
 
+// FAQPage structured data for better SEO
+const faqStructuredData = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  'mainEntity': [
+    {
+      '@type': 'Question',
+      'name': 'What is FluxDrive?',
+      'acceptedAnswer': {
+        '@type': 'Answer',
+        'text': 'FluxDrive is a decentralized cloud storage solution built on IPFS and the Flux network. It provides secure, encrypted file storage distributed across thousands of FluxNodes worldwide, ensuring censorship resistance and permanent file availability.',
+      },
+    },
+    {
+      '@type': 'Question',
+      'name': 'How much does FluxDrive cost?',
+      'acceptedAnswer': {
+        '@type': 'Answer',
+        'text': 'FluxDrive offers flexible pricing starting from $5/month for 100GB of storage. Plans range up to $50/month for 1000GB, with a daily rate of $0.0017 per GB. Enterprise custom plans are also available.',
+      },
+    },
+    {
+      '@type': 'Question',
+      'name': 'Is my data encrypted on FluxDrive?',
+      'acceptedAnswer': {
+        '@type': 'Answer',
+        'text': 'Yes, all files uploaded to FluxDrive are encrypted end-to-end. Your data is secured with strong encryption and distributed across multiple FluxNodes, ensuring privacy and security.',
+      },
+    },
+    {
+      '@type': 'Question',
+      'name': 'How is FluxDrive different from traditional cloud storage?',
+      'acceptedAnswer': {
+        '@type': 'Answer',
+        'text': 'Unlike traditional centralized cloud storage, FluxDrive is completely decentralized. Your files are stored across a global network of FluxNodes using IPFS technology, making them censorship-resistant with no single point of failure. There are no centralized providers that can access or control your data.',
+      },
+    },
+    {
+      '@type': 'Question',
+      'name': 'What happens if I cancel my FluxDrive subscription?',
+      'acceptedAnswer': {
+        '@type': 'Answer',
+        'text': 'If you cancel your subscription, you will retain access to your files until the end of your billing period. After that, your files will be removed from the network. We recommend downloading your files before cancellation.',
+      },
+    },
+  ],
+}
+
 useHead({
   title,
   meta: [
@@ -203,26 +274,32 @@ useHead({
     },
     {
       name: 'keywords',
-      content: 'decentralized storage, IPFS storage, cloud storage, blockchain storage, distributed storage, encrypted storage, Flux network, censorship resistant storage, Web3 storage, decentralized cloud, permanent storage, IPFS, FluxDrive',
+      content: 'decentralized storage, IPFS storage, cloud storage, blockchain storage, distributed storage, encrypted storage, Flux network, censorship resistant storage, Web3 storage, decentralized cloud, permanent storage, IPFS, FluxDrive, file storage, secure storage, private cloud',
     },
 
     // Open Graph
     { property: 'og:title', content: title },
     { property: 'og:description', content: description },
     { property: 'og:image', content: imageUrl },
+    { property: 'og:image:width', content: '1200' },
+    { property: 'og:image:height', content: '630' },
+    { property: 'og:image:alt', content: 'FluxDrive - Decentralized IPFS Cloud Storage' },
     { property: 'og:url', content: pageUrl },
     { property: 'og:type', content: 'website' },
-    { property: 'og:site_name', content: 'Flux Network' },
+    { property: 'og:site_name', content: 'FluxCloud' },
+    { property: 'og:locale', content: 'en_US' },
 
     // Twitter Card
     { name: 'twitter:card', content: 'summary_large_image' },
     { name: 'twitter:title', content: title },
     { name: 'twitter:description', content: description },
     { name: 'twitter:image', content: imageUrl },
+    { name: 'twitter:image:alt', content: 'FluxDrive - Decentralized IPFS Cloud Storage' },
     { name: 'twitter:site', content: '@RunOnFlux' },
+    { name: 'twitter:creator', content: '@RunOnFlux' },
 
     // Additional SEO
-    { name: 'robots', content: 'index, follow' },
+    { name: 'robots', content: 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1' },
     { name: 'author', content: 'Flux Network' },
   ],
   link: [
@@ -231,7 +308,7 @@ useHead({
   script: [
     {
       type: 'application/ld+json',
-      children: JSON.stringify([softwareApplicationStructuredData, organizationStructuredData, breadcrumbStructuredData]),
+      children: JSON.stringify([softwareApplicationStructuredData, organizationStructuredData, breadcrumbStructuredData, faqStructuredData]),
     },
   ],
 })
@@ -272,6 +349,80 @@ const hasOrHadSubscription = computed(() => {
          hasExistingFiles.value ||
          subscriptionPeriodEnd.value !== null
 })
+
+// Features data for landing page
+const features = [
+  {
+    icon: 'mdi-lock-outline',
+    color: 'primary',
+    title: t('pages.fluxDrive.features.encryption.title'),
+    description: t('pages.fluxDrive.features.encryption.description'),
+  },
+  {
+    icon: 'mdi-server-network',
+    color: 'success',
+    title: t('pages.fluxDrive.features.distributed.title'),
+    description: t('pages.fluxDrive.features.distributed.description'),
+  },
+  {
+    icon: 'mdi-shield-check',
+    color: 'warning',
+    title: t('pages.fluxDrive.features.censorship.title'),
+    description: t('pages.fluxDrive.features.censorship.description'),
+  },
+  {
+    icon: 'mdi-cloud-check',
+    color: 'info',
+    title: t('pages.fluxDrive.features.ipfs.title'),
+    description: t('pages.fluxDrive.features.ipfs.description'),
+  },
+  {
+    icon: 'mdi-check-decagram',
+    color: 'success',
+    title: t('pages.fluxDrive.features.permanent.title'),
+    description: t('pages.fluxDrive.features.permanent.description'),
+  },
+  {
+    icon: 'mdi-lightning-bolt',
+    color: 'error',
+    title: t('pages.fluxDrive.features.fast.title'),
+    description: t('pages.fluxDrive.features.fast.description'),
+  },
+]
+
+// Benefits data for landing page
+const benefits = [
+  {
+    icon: 'mdi-check-circle',
+    color: 'success',
+    text: t('pages.fluxDrive.benefits.noCentralized'),
+  },
+  {
+    icon: 'mdi-check-circle',
+    color: 'success',
+    text: t('pages.fluxDrive.benefits.fullControl'),
+  },
+  {
+    icon: 'mdi-check-circle',
+    color: 'success',
+    text: t('pages.fluxDrive.benefits.globalRedundancy'),
+  },
+  {
+    icon: 'mdi-check-circle',
+    color: 'success',
+    text: t('pages.fluxDrive.benefits.transparentPricing'),
+  },
+  {
+    icon: 'mdi-check-circle',
+    color: 'success',
+    text: t('pages.fluxDrive.benefits.noVendorLock'),
+  },
+  {
+    icon: 'mdi-check-circle',
+    color: 'success',
+    text: t('pages.fluxDrive.benefits.openSource'),
+  },
+]
 
 // Checkout dialog state
 const showCheckout = ref(false)
@@ -610,20 +761,289 @@ onMounted(async () => {
 </script>
 
 <style scoped>
-.fluxdrive-intro-card {
+.fluxdrive-page {
+  padding: 8px 24px;
+  max-width: 1400px;
+  margin: 0 auto;
+  min-height: calc(100vh - 100px);
+}
+
+/* Breadcrumb Navigation */
+.breadcrumb-nav {
+  padding: 16px 0;
+  margin-bottom: 24px;
+}
+
+.breadcrumb-list {
+  display: flex;
+  align-items: center;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  flex-wrap: wrap;
+}
+
+.breadcrumb-item {
+  display: flex;
+  align-items: center;
+}
+
+.breadcrumb-link {
+  color: rgb(var(--v-theme-primary));
+  text-decoration: none;
+  transition: opacity 0.2s;
+  font-size: 0.95rem;
+}
+
+.breadcrumb-link:hover {
+  opacity: 0.7;
+  text-decoration: underline;
+}
+
+.breadcrumb-separator {
+  margin: 0 8px;
+  opacity: 0.5;
+  font-size: 14px;
+}
+
+.breadcrumb-current span {
+  color: rgba(var(--v-theme-on-surface), 0.7);
+  font-size: 0.95rem;
+}
+
+/* Hero Section */
+.hero-section {
+  position: relative;
+  border-radius: 24px;
+  padding: 64px 32px;
+  margin-bottom: 48px;
+  text-align: center;
+  background: linear-gradient(135deg, rgba(0, 0, 0, 0.6) 0%, rgba(0, 0, 0, 0.4) 100%),
+              url('/banner/FluxDrive2.png') center center / cover no-repeat;
+  box-shadow: 0 10px 40px rgba(102, 126, 234, 0.3);
+  min-height: 300px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.hero-section::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.1);
+  z-index: 0;
+}
+
+.hero-icon-top-right {
+  position: absolute;
+  top: 32px;
+  right: 32px;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 90px;
+  height: 90px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+.hero-content {
+  position: relative;
+  z-index: 1;
+  max-width: 900px;
+}
+
+.hero-title {
+  font-size: 3rem;
+  font-weight: 700;
+  color: white;
+  margin: 0 0 16px 0;
+  text-shadow: 0 2px 20px rgba(0, 0, 0, 0.5);
+}
+
+.hero-subtitle {
+  font-size: 1.25rem;
+  color: rgba(255, 255, 255, 0.95);
+  margin: 0;
+  max-width: 800px;
+  margin: 0 auto;
+  text-shadow: 0 1px 10px rgba(0, 0, 0, 0.3);
+}
+
+/* Section Cards */
+.section-card {
+  border-radius: 24px;
+  padding: 32px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  margin-top: 32px !important;
+}
+
+.section-title {
+  font-size: 2rem;
+  font-weight: 600;
+  margin-bottom: 24px;
+  text-align: center;
+}
+
+.section-text {
+  font-size: 1.1rem;
+  line-height: 1.8;
+}
+
+/* Features Section */
+.features-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 32px;
+  margin-top: 32px;
+}
+
+.feature-item {
+  text-align: center;
+  padding: 24px;
   border-radius: 16px;
-  background: linear-gradient(135deg, rgba(var(--v-theme-primary), 0.05) 0%, rgba(var(--v-theme-success), 0.05) 100%);
-  border: 1px solid rgba(var(--v-theme-primary), 0.1);
+  background: rgba(var(--v-theme-on-surface), 0.02);
+  transition: all 0.3s ease;
+  border: 1px solid rgba(var(--v-theme-on-surface), 0.06);
+}
+
+.feature-item:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1);
+  background: rgba(var(--v-theme-on-surface), 0.04);
+}
+
+.feature-icon-wrapper {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: rgba(var(--v-theme-primary), 0.1);
+  margin-bottom: 20px;
+}
+
+.feature-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 0 0 12px 0;
+}
+
+.feature-description {
+  font-size: 0.95rem;
+  opacity: 0.8;
+  margin: 0;
+  line-height: 1.6;
+}
+
+/* Benefits Section */
+.benefits {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 16px;
+  margin-top: 24px;
+}
+
+.benefit-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  background: rgba(var(--v-theme-primary), 0.05);
+  border-radius: 12px;
+  border-left: 3px solid rgb(var(--v-theme-primary));
   transition: all 0.3s ease;
 }
 
-.fluxdrive-intro-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 16px rgba(var(--v-theme-primary), 0.1);
+.benefit-item:hover {
+  transform: translateX(8px);
+  background: rgba(var(--v-theme-primary), 0.1);
 }
 
-.learn-more-link {
-  text-decoration: none;
+/* Mobile Responsive */
+@media (max-width: 960px) {
+  .hero-section {
+    padding: 48px 24px;
+    min-height: 250px;
+  }
+
+  .hero-title {
+    font-size: 2rem;
+  }
+
+  .hero-subtitle {
+    font-size: 1.1rem;
+  }
+
+  .hero-icon-top-right {
+    top: 16px;
+    right: 16px;
+    width: 70px;
+    height: 70px;
+  }
+
+  .hero-icon-top-right .v-icon {
+    font-size: 60px !important;
+  }
+
+  .section-card {
+    padding: 24px 16px;
+  }
+
+  .section-title {
+    font-size: 1.75rem;
+  }
+
+  .features-grid {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+
+  .benefits {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 600px) {
+  .fluxdrive-page {
+    padding: 8px 16px;
+  }
+
+  .hero-section {
+    padding: 40px 16px;
+    min-height: 220px;
+    margin-bottom: 32px;
+  }
+
+  .hero-title {
+    font-size: 1.75rem;
+  }
+
+  .hero-subtitle {
+    font-size: 1rem;
+  }
+
+  .section-title {
+    font-size: 1.5rem;
+  }
+
+  .feature-icon-wrapper {
+    width: 64px;
+    height: 64px;
+  }
+
+  .breadcrumb-nav {
+    margin-bottom: 12px;
+  }
 }
 
 @import '@styles/flux-drive.scss';

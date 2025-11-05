@@ -72,6 +72,13 @@ declare global {
   const firebaseApp: typeof import('./utils/firebase.js')['firebaseApp']
   const formatDate: typeof import('./@core/utils/formatters.js')['formatDate']
   const formatDateToMonthShort: typeof import('./@core/utils/formatters.js')['formatDateToMonthShort']
+  const generateBreadcrumbSchema: typeof import('./composables/useSEO.js')['generateBreadcrumbSchema']
+  const generateFAQSchema: typeof import('./composables/useSEO.js')['generateFAQSchema']
+  const generateItemListSchema: typeof import('./composables/useSEO.js')['generateItemListSchema']
+  const generateOrganizationSchema: typeof import('./composables/useSEO.js')['generateOrganizationSchema']
+  const generateProductSchema: typeof import('./composables/useSEO.js')['generateProductSchema']
+  const generateSoftwareApplicationSchema: typeof import('./composables/useSEO.js')['generateSoftwareApplicationSchema']
+  const generateWebApplicationSchema: typeof import('./composables/useSEO.js')['generateWebApplicationSchema']
   const geolocation: typeof import('./utils/geolocation.js')['default']
   const getActivePinia: typeof import('pinia')['getActivePinia']
   const getAndConvertSpec: typeof import('./utils/specConverter.js')['getAndConvertSpec']
@@ -343,6 +350,8 @@ declare global {
   const useRound: typeof import('@vueuse/math')['useRound']
   const useRoute: typeof import('vue-router/auto')['useRoute']
   const useRouter: typeof import('vue-router/auto')['useRouter']
+  const useSEO: typeof import('./composables/useSEO.js')['useSEO']
+  const useSEONoIndex: typeof import('./composables/useSEO.js')['useSEONoIndex']
   const useScreenOrientation: typeof import('@vueuse/core')['useScreenOrientation']
   const useScreenSafeArea: typeof import('@vueuse/core')['useScreenSafeArea']
   const useScriptTag: typeof import('@vueuse/core')['useScriptTag']
@@ -494,6 +503,13 @@ declare module 'vue' {
     readonly firebaseApp: UnwrapRef<typeof import('./utils/firebase.js')['firebaseApp']>
     readonly formatDate: UnwrapRef<typeof import('./@core/utils/formatters.js')['formatDate']>
     readonly formatDateToMonthShort: UnwrapRef<typeof import('./@core/utils/formatters.js')['formatDateToMonthShort']>
+    readonly generateBreadcrumbSchema: UnwrapRef<typeof import('./composables/useSEO.js')['generateBreadcrumbSchema']>
+    readonly generateFAQSchema: UnwrapRef<typeof import('./composables/useSEO.js')['generateFAQSchema']>
+    readonly generateItemListSchema: UnwrapRef<typeof import('./composables/useSEO.js')['generateItemListSchema']>
+    readonly generateOrganizationSchema: UnwrapRef<typeof import('./composables/useSEO.js')['generateOrganizationSchema']>
+    readonly generateProductSchema: UnwrapRef<typeof import('./composables/useSEO.js')['generateProductSchema']>
+    readonly generateSoftwareApplicationSchema: UnwrapRef<typeof import('./composables/useSEO.js')['generateSoftwareApplicationSchema']>
+    readonly generateWebApplicationSchema: UnwrapRef<typeof import('./composables/useSEO.js')['generateWebApplicationSchema']>
     readonly geolocation: UnwrapRef<typeof import('./utils/geolocation.js')['default']>
     readonly getActivePinia: UnwrapRef<typeof import('pinia')['getActivePinia']>
     readonly getAndConvertSpec: UnwrapRef<typeof import('./utils/specConverter.js')['getAndConvertSpec']>
@@ -763,6 +779,8 @@ declare module 'vue' {
     readonly useRound: UnwrapRef<typeof import('@vueuse/math')['useRound']>
     readonly useRoute: UnwrapRef<typeof import('vue-router/auto')['useRoute']>
     readonly useRouter: UnwrapRef<typeof import('vue-router/auto')['useRouter']>
+    readonly useSEO: UnwrapRef<typeof import('./composables/useSEO.js')['useSEO']>
+    readonly useSEONoIndex: UnwrapRef<typeof import('./composables/useSEO.js')['useSEONoIndex']>
     readonly useScreenOrientation: UnwrapRef<typeof import('@vueuse/core')['useScreenOrientation']>
     readonly useScreenSafeArea: UnwrapRef<typeof import('@vueuse/core')['useScreenSafeArea']>
     readonly useScriptTag: UnwrapRef<typeof import('@vueuse/core')['useScriptTag']>

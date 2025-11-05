@@ -1835,6 +1835,14 @@
         "perDay": "/ day",
         "perMonth": "/ Month",
         "billedMonthly": "Billed monthly",
+        "popular": "Popular",
+        "customPricing": "Custom",
+        "pricing": "Pricing",
+        "dailyCost": "Daily Cost",
+        "dailyCostValue": "$0.0017 per GB",
+        "currentPlan": "Current Plan",
+        "getStarted": "Get Started",
+        "downgradeBlocked": "Downgrade Unavailable",
         "plans": {
           "starter": "Starter",
           "standard": "Standard",
@@ -2669,7 +2677,43 @@
       "renewalSuccess": "Subscription renewed successfully!",
       "renewalFailed": "Renewal failed: ",
       "upgradeFailed": "Upgrade failed: ",
-      "cancel": "Cancel"
+      "cancel": "Cancel",
+      "features": {
+        "title": "Why Choose FluxDrive",
+        "encryption": {
+          "title": "End-to-End Encryption",
+          "description": "Your files are encrypted before upload and remain secure across the distributed network. Only you hold the keys."
+        },
+        "distributed": {
+          "title": "Global Distribution",
+          "description": "Files are distributed across thousands of FluxNodes worldwide, ensuring redundancy and fast access from anywhere."
+        },
+        "censorship": {
+          "title": "Censorship Resistant",
+          "description": "No single point of failure or control. Your files remain accessible even if individual nodes go offline."
+        },
+        "ipfs": {
+          "title": "Built on IPFS",
+          "description": "Powered by InterPlanetary File System technology for permanent, content-addressed file storage."
+        },
+        "permanent": {
+          "title": "Permanent Storage",
+          "description": "Your files remain accessible for the duration of your subscription with built-in redundancy."
+        },
+        "fast": {
+          "title": "Fast & Reliable",
+          "description": "Benefit from global CDN-like performance with files distributed across the nearest available nodes."
+        }
+      },
+      "benefits": {
+        "title": "FluxDrive Benefits",
+        "noCentralized": "No centralized provider can access your data",
+        "fullControl": "Full ownership and control of your files",
+        "globalRedundancy": "Global redundancy across 2,600+ nodes",
+        "transparentPricing": "Transparent pricing with no hidden fees",
+        "noVendorLock": "No vendor lock-in or proprietary formats",
+        "openSource": "Built on open-source IPFS technology"
+      }
     },
     "marketplace": {
       "loading": "Loading Marketplace...",

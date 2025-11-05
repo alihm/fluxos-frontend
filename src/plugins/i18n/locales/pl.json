@@ -1826,6 +1826,14 @@
         "perDay": "/ dzień",
         "perMonth": "/ Miesiąc",
         "billedMonthly": "Rozliczane miesięcznie",
+        "popular": "Popularny",
+        "customPricing": "Indywidualny",
+        "pricing": "Wycena",
+        "dailyCost": "Koszt dzienny",
+        "dailyCostValue": "$0.0017 za GB",
+        "currentPlan": "Aktualny Plan",
+        "getStarted": "Rozpocznij",
+        "downgradeBlocked": "Obniżenie niedostępne",
         "plans": {
           "starter": "Starter",
           "standard": "Standard",
@@ -2506,7 +2514,43 @@
       "renewalSuccess": "Subskrypcja odnowiona pomyślnie!",
       "renewalFailed": "Odnowienie nie powiodło się: ",
       "upgradeFailed": "Aktualizacja nie powiodła się: ",
-      "cancel": "Anuluj"
+      "cancel": "Anuluj",
+      "features": {
+        "title": "Dlaczego FluxDrive",
+        "encryption": {
+          "title": "Szyfrowanie End-to-End",
+          "description": "Twoje pliki są szyfrowane przed przesłaniem i pozostają bezpieczne w rozproszonej sieci. Tylko Ty posiadasz klucze."
+        },
+        "distributed": {
+          "title": "Globalna Dystrybucja",
+          "description": "Pliki są dystrybuowane na tysiącach FluxNodes na całym świecie, zapewniając redundancję i szybki dostęp z dowolnego miejsca."
+        },
+        "censorship": {
+          "title": "Odporność na Cenzurę",
+          "description": "Brak pojedynczego punktu awarii lub kontroli. Twoje pliki pozostają dostępne nawet jeśli pojedyncze węzły są offline."
+        },
+        "ipfs": {
+          "title": "Zbudowane na IPFS",
+          "description": "Zasilane technologią InterPlanetary File System do trwałego przechowywania plików z adresowaniem treści."
+        },
+        "permanent": {
+          "title": "Trwała Pamięć",
+          "description": "Twoje pliki pozostają dostępne przez cały okres subskrypcji ze wbudowaną redundancją."
+        },
+        "fast": {
+          "title": "Szybkie i Niezawodne",
+          "description": "Korzystaj z globalnej wydajności podobnej do CDN z plikami dystrybuowanymi na najbliższych dostępnych węzłach."
+        }
+      },
+      "benefits": {
+        "title": "Korzyści FluxDrive",
+        "noCentralized": "Żaden scentralizowany dostawca nie ma dostępu do Twoich danych",
+        "fullControl": "Pełna własność i kontrola nad Twoimi plikami",
+        "globalRedundancy": "Globalna redundancja na ponad 2600 węzłach",
+        "transparentPricing": "Przejrzyste ceny bez ukrytych opłat",
+        "noVendorLock": "Brak uzależnienia od dostawcy lub zastrzeżonych formatów",
+        "openSource": "Zbudowane na technologii IPFS open-source"
+      }
     },
     "marketplace": {
       "loading": "Ładowanie sklepu...",
