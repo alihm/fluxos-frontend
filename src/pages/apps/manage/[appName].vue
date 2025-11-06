@@ -38,15 +38,18 @@
         <VSelect
           v-if="selectedIp"
           v-model="selectedIp"
-          :items="instances.data.map((i) => i.ip)"
+          v-model:menu="ipMenuOpen"
+          :items="filteredIPs"
           variant="outlined"
           density="compact"
           hide-details
           class="flex-grow-1"
           style="min-width: 0"
+          :menu-props="{ maxHeight: 300, scrollToSelectedItem: false }"
           @update:model-value="async (value) => {
             try {
               selectedIp = value
+              ipSearchQuery = ''
               await getInstalledApplicationSpecifics()
               if (currentTab === '4') {
                 initCharts()
@@ -64,6 +67,30 @@
               size="20"
               class="mr-1"
             />
+          </template>
+          <template #item="{ item, props }">
+            <VListItem
+              v-bind="props"
+              :title="item.value"
+              color="success"
+            />
+          </template>
+          <template #prepend-item>
+            <div class="pa-2">
+              <VTextField
+                v-model="ipSearchQuery"
+                density="compact"
+                variant="outlined"
+                placeholder="Search IP..."
+                hide-details
+                clearable
+                @click:clear="() => ipSearchQuery = ''"
+                @keydown.stop
+                @click.stop
+                @mousedown.stop
+              />
+            </div>
+            <VDivider class="mt-2" />
           </template>
         </VSelect>
 
@@ -876,7 +903,7 @@
 
 
 <script setup>
-import { ref, computed, watch } from "vue"
+import { ref, computed, watch, nextTick } from "vue"
 import { useRouter, useRoute } from "vue-router"
 import { eventBus } from "@/utils/eventBus"
 import axios from "axios"
@@ -1128,6 +1155,31 @@ const instances = ref({
   data: [],
 })
 
+const ipSearchQuery = ref('')
+const ipMenuOpen = ref(false)
+
+const filteredIPs = computed(() => {
+  if (!ipSearchQuery.value) {
+    return instances.value.data.map(i => i.ip)
+  }
+  
+  return instances.value.data
+    .map(i => i.ip)
+    .filter(ip => ip.toLowerCase().includes(ipSearchQuery.value.toLowerCase()))
+})
+
+watch(ipMenuOpen, isOpen => {
+  if (isOpen) {
+    nextTick(() => {
+      setTimeout(() => {
+        const menuContent = document.querySelector('.v-overlay--active .v-list')
+        if (menuContent) {
+          menuContent.scrollTop = 0
+        }
+      }, 50)
+    })
+  }
+})
 
 // Chart references
 const diskPersistentChart = shallowRef(null)
@@ -1371,6 +1423,7 @@ async function executeLocalCommand(
     
     apiError.value = false
     getZelidAuthority()
+
     // If logout is in progress or not authorized, silently return without error
     if (!globalZelidAuthorized.value || logoutTrigger.value) return
 
@@ -1565,6 +1618,7 @@ async function logout() {
     await IDService.logoutCurrentSession(zelidauth)
   } catch (e) {
     console.error("Logout API error (suppressed):", e)
+
     // Don't show error to user during auto-logout
   }
 
@@ -1572,6 +1626,7 @@ async function logout() {
     await firebase.auth().signOut()
   } catch (error) {
     console.error("Firebase logout error (suppressed):", error)
+
     // Don't show error to user during auto-logout
   }
 

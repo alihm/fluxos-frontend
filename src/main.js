@@ -19,7 +19,7 @@ window.process = process
 window.Buffer = Buffer
 
 // Handle chunk load failures (stale cache after deployment)
-window.addEventListener('error', (event) => {
+window.addEventListener('error', event => {
   const isChunkLoadError =
     event.message?.includes('Failed to fetch dynamically imported module') ||
     event.message?.includes('Importing a module script failed') ||

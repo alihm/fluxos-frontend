@@ -5574,7 +5574,7 @@ watch(tab, async newVal => {
       renewalEnabled: renewalEnabled.value,
       currentExpire: props.appSpec?.expire,
       supportsExpire: versionFlags.value.supportsExpire,
-      newApp: props.newApp
+      newApp: props.newApp,
     })
 
     if (!props.newApp) {
@@ -6058,6 +6058,7 @@ async function verifyAppSpec() {
         if (!component.hasOwnProperty('repoauth')) {
           component.repoauth = ''
         }
+
         // Also ensure secrets field for v7
         if (appSpecTemp.version === 7 && !component.hasOwnProperty('secrets')) {
           component.secrets = ''
@@ -6412,6 +6413,7 @@ async function fetchBlockHeight() {
             } else if (remainingMinutes > 0) {
               blocksToExpire.value = Math.floor(remainingMinutes / 2) // Pre-fork: 2 min/block
             }
+
             // If remainingMinutes <= 0, keep negative blocksToExpire (will be caught by validation)
 
             console.log('Expiry validation:', {

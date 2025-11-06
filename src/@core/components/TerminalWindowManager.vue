@@ -2,271 +2,271 @@
   <Teleport to="body">
     <div v-if="isOpen" class="terminal-window-manager-overlay">
       <DraggableResizableVue
-      v-model:x="windowX"
-      v-model:y="windowY"
-      v-model:w="windowW"
-      v-model:h="windowH"
-      v-model:active="windowActive"
-      :minWidth="800"
-      :minHeight="600"
-      :maxWidth="viewportWidth"
-      :maxHeight="viewportHeight"
-      :draggable="!isMaximized"
-      :resizable="!isMaximized"
-      :parent="false"
-      :z="99999"
-      :className="isMaximized ? 'terminal-manager-window maximized' : 'terminal-manager-window'"
-      classNameActive="terminal-manager-window-active"
-    >
-      <div class="window-container">
-        <!-- Title Bar -->
-        <div class="window-titlebar" @dblclick="toggleMaximize" @mousedown="isMaximized ? $event.stopPropagation() : null">
-          <div class="titlebar-left">
-            <VIcon size="18" class="mr-2">mdi-console-line</VIcon>
-            <span class="window-title">{{ t('core.terminal.manager.title') }}</span>
-            <VChip size="small" color="success" class="ml-1 terminal-count-chip">{{ terminals.length }}</VChip>
-          </div>
+        v-model:x="windowX"
+        v-model:y="windowY"
+        v-model:w="windowW"
+        v-model:h="windowH"
+        v-model:active="windowActive"
+        :minWidth="800"
+        :minHeight="600"
+        :maxWidth="viewportWidth"
+        :maxHeight="viewportHeight"
+        :draggable="!isMaximized"
+        :resizable="!isMaximized"
+        :parent="false"
+        :z="99999"
+        :className="isMaximized ? 'terminal-manager-window maximized' : 'terminal-manager-window'"
+        classNameActive="terminal-manager-window-active"
+      >
+        <div class="window-container">
+          <!-- Title Bar -->
+          <div class="window-titlebar" @dblclick="toggleMaximize" @mousedown="isMaximized ? $event.stopPropagation() : null">
+            <div class="titlebar-left">
+              <VIcon size="18" class="mr-2">mdi-console-line</VIcon>
+              <span class="window-title">{{ t('core.terminal.manager.title') }}</span>
+              <VChip size="small" color="success" class="ml-1 terminal-count-chip">{{ terminals.length }}</VChip>
+            </div>
 
-          <div class="titlebar-center">
-            <!-- Layout Mode Selector -->
-            <div class="view-toggle-modern">
+            <div class="titlebar-center">
+              <!-- Layout Mode Selector -->
+              <div class="view-toggle-modern">
+                <VBtn
+                  :variant="layoutMode === 'grid' ? 'flat' : 'text'"
+                  :color="layoutMode === 'grid' ? 'primary' : undefined"
+                  size="x-small"
+                  height="24"
+                  width="24"
+                  class="view-toggle-btn"
+                  @click="layoutMode = 'grid'"
+                >
+                  <VIcon icon="mdi-view-grid" size="18" />
+                  <VTooltip activator="parent" location="bottom">{{ t('core.terminal.manager.layoutGrid') }}</VTooltip>
+                </VBtn>
+
+                <VBtn
+                  :variant="layoutMode === 'horizontal' ? 'flat' : 'text'"
+                  :color="layoutMode === 'horizontal' ? 'primary' : undefined"
+                  size="x-small"
+                  height="24"
+                  width="24"
+                  class="view-toggle-btn"
+                  @click="layoutMode = 'horizontal'"
+                >
+                  <VIcon icon="mdi-view-column" size="18" />
+                  <VTooltip activator="parent" location="bottom">{{ t('core.terminal.manager.layoutHorizontal') }}</VTooltip>
+                </VBtn>
+
+                <VBtn
+                  :variant="layoutMode === 'vertical' ? 'flat' : 'text'"
+                  :color="layoutMode === 'vertical' ? 'primary' : undefined"
+                  size="x-small"
+                  height="24"
+                  width="24"
+                  class="view-toggle-btn"
+                  @click="layoutMode = 'vertical'"
+                >
+                  <VIcon icon="mdi-view-stream" size="18" />
+                  <VTooltip activator="parent" location="bottom">{{ t('core.terminal.manager.layoutVertical') }}</VTooltip>
+                </VBtn>
+              </div>
+            </div>
+
+            <div class="titlebar-right">
               <VBtn
-                :variant="layoutMode === 'grid' ? 'flat' : 'text'"
-                :color="layoutMode === 'grid' ? 'primary' : undefined"
-                size="x-small"
-                height="24"
-                width="24"
-                class="view-toggle-btn"
-                @click="layoutMode = 'grid'"
+                icon
+                size="small"
+                variant="text"
+                color=""
+                @click="toggleMaximize"
+                class="control-btn"
               >
-                <VIcon icon="mdi-view-grid" size="18" />
-                <VTooltip activator="parent" location="bottom">{{ t('core.terminal.manager.layoutGrid') }}</VTooltip>
+                <VIcon size="16">{{ isMaximized ? 'mdi-window-restore' : 'mdi-window-maximize' }}</VIcon>
               </VBtn>
-
               <VBtn
-                :variant="layoutMode === 'horizontal' ? 'flat' : 'text'"
-                :color="layoutMode === 'horizontal' ? 'primary' : undefined"
-                size="x-small"
-                height="24"
-                width="24"
-                class="view-toggle-btn"
-                @click="layoutMode = 'horizontal'"
+                icon
+                size="small"
+                variant="text"
+                color=""
+                @click="closeWindow"
+                class="control-btn close-btn"
               >
-                <VIcon icon="mdi-view-column" size="18" />
-                <VTooltip activator="parent" location="bottom">{{ t('core.terminal.manager.layoutHorizontal') }}</VTooltip>
-              </VBtn>
-
-              <VBtn
-                :variant="layoutMode === 'vertical' ? 'flat' : 'text'"
-                :color="layoutMode === 'vertical' ? 'primary' : undefined"
-                size="x-small"
-                height="24"
-                width="24"
-                class="view-toggle-btn"
-                @click="layoutMode = 'vertical'"
-              >
-                <VIcon icon="mdi-view-stream" size="18" />
-                <VTooltip activator="parent" location="bottom">{{ t('core.terminal.manager.layoutVertical') }}</VTooltip>
+                <VIcon size="16">mdi-close</VIcon>
               </VBtn>
             </div>
           </div>
 
-          <div class="titlebar-right">
-            <VBtn
-              icon
-              size="small"
-              variant="text"
-              color=""
-              @click="toggleMaximize"
-              class="control-btn"
-            >
-              <VIcon size="16">{{ isMaximized ? 'mdi-window-restore' : 'mdi-window-maximize' }}</VIcon>
-            </VBtn>
-            <VBtn
-              icon
-              size="small"
-              variant="text"
-              color=""
-              @click="closeWindow"
-              class="control-btn close-btn"
-            >
-              <VIcon size="16">mdi-close</VIcon>
-            </VBtn>
+          <!-- Content Area -->
+          <div class="window-content">
+            <!-- Grid Mode -->
+            <div v-if="layoutMode === 'grid'" class="grid-layout">
+              <div
+                v-for="term in localTerminals"
+                :key="`grid-terminal-${term.id}`"
+                class="grid-item"
+                :class="{ 'dragging': draggedTerminalId === term.id }"
+                :style="getGridItemStyle()"
+                @dragover="onDragOver($event)"
+                @drop="onDrop($event, term.id)"
+              >
+                <div
+                  class="pane-header"
+                  draggable="true"
+                  @dragstart="onDragStart($event, term.id)"
+                  @dragend="onDragEnd"
+                  @mousedown.stop
+                  style="cursor: move;"
+                >
+                  <VIcon size="16" class="mr-1 drag-handle">mdi-drag</VIcon>
+                  <span class="pane-title">{{ term.managerLabel || term.label }}</span>
+                  <div class="pane-buttons">
+                    <VBtn
+                      icon
+                      size="x-small"
+                      variant="text"
+                      color=""
+                      class="control-btn unpin-btn-manager"
+                      @click="unpinTerminal(term.id)"
+                      @mousedown.stop
+                    >
+                      <VIcon size="14">mdi-pin-off</VIcon>
+                      <VTooltip activator="parent" location="left">{{ t('core.terminal.manager.unpinToTabs') }}</VTooltip>
+                    </VBtn>
+                    <VBtn
+                      icon
+                      size="x-small"
+                      variant="text"
+                      color=""
+                      class="control-btn close-btn"
+                      @click="closeTerminal(term.id)"
+                      @mousedown.stop
+                    >
+                      <VIcon size="14">mdi-close</VIcon>
+                      <VTooltip activator="parent" location="left">{{ t('core.terminal.manager.closeTerminal') }}</VTooltip>
+                    </VBtn>
+                  </div>
+                </div>
+                <div
+                  :id="`terminal-${term.id}`"
+                  class="terminal-pane"
+                  @mousedown.stop
+                />
+              </div>
+            </div>
+
+            <!-- Horizontal Split Mode -->
+            <div v-else-if="layoutMode === 'horizontal'" class="horizontal-layout">
+              <div
+                v-for="term in localTerminals"
+                :key="`horiz-terminal-${term.id}`"
+                class="horizontal-item"
+                :class="{ 'dragging': draggedTerminalId === term.id }"
+                :style="{ width: `${100 / localTerminals.length}%` }"
+                @dragover="onDragOver($event)"
+                @drop="onDrop($event, term.id)"
+              >
+                <div
+                  class="pane-header"
+                  draggable="true"
+                  @dragstart="onDragStart($event, term.id)"
+                  @dragend="onDragEnd"
+                  @mousedown.stop
+                  style="cursor: move;"
+                >
+                  <VIcon size="16" class="mr-1 drag-handle">mdi-drag</VIcon>
+                  <span class="pane-title">{{ term.managerLabel || term.label }}</span>
+                  <div class="pane-buttons">
+                    <VBtn
+                      icon
+                      size="x-small"
+                      variant="text"
+                      color=""
+                      class="control-btn unpin-btn-manager"
+                      @click="unpinTerminal(term.id)"
+                      @mousedown.stop
+                    >
+                      <VIcon size="14">mdi-pin-off</VIcon>
+                      <VTooltip activator="parent" location="left">{{ t('core.terminal.manager.unpinToTabs') }}</VTooltip>
+                    </VBtn>
+                    <VBtn
+                      icon
+                      size="x-small"
+                      variant="text"
+                      color=""
+                      class="control-btn close-btn"
+                      @click="closeTerminal(term.id)"
+                      @mousedown.stop
+                    >
+                      <VIcon size="14">mdi-close</VIcon>
+                      <VTooltip activator="parent" location="left">{{ t('core.terminal.manager.closeTerminal') }}</VTooltip>
+                    </VBtn>
+                  </div>
+                </div>
+                <div
+                  :id="`terminal-${term.id}`"
+                  class="terminal-pane"
+                  @mousedown.stop
+                />
+              </div>
+            </div>
+
+            <!-- Vertical Split Mode -->
+            <div v-else-if="layoutMode === 'vertical'" class="vertical-layout">
+              <div
+                v-for="term in localTerminals"
+                :key="`vert-terminal-${term.id}`"
+                class="vertical-item"
+                :class="{ 'dragging': draggedTerminalId === term.id }"
+                :style="{ height: `${100 / localTerminals.length}%` }"
+                @dragover="onDragOver($event)"
+                @drop="onDrop($event, term.id)"
+              >
+                <div
+                  class="pane-header"
+                  draggable="true"
+                  @dragstart="onDragStart($event, term.id)"
+                  @dragend="onDragEnd"
+                  @mousedown.stop
+                  style="cursor: move;"
+                >
+                  <VIcon size="16" class="mr-1 drag-handle">mdi-drag</VIcon>
+                  <span class="pane-title">{{ term.managerLabel || term.label }}</span>
+                  <div class="pane-buttons">
+                    <VBtn
+                      icon
+                      size="x-small"
+                      variant="text"
+                      color=""
+                      class="control-btn unpin-btn-manager"
+                      @click="unpinTerminal(term.id)"
+                      @mousedown.stop
+                    >
+                      <VIcon size="14">mdi-pin-off</VIcon>
+                      <VTooltip activator="parent" location="left">{{ t('core.terminal.manager.unpinToTabs') }}</VTooltip>
+                    </VBtn>
+                    <VBtn
+                      icon
+                      size="x-small"
+                      variant="text"
+                      color=""
+                      class="control-btn close-btn"
+                      @click="closeTerminal(term.id)"
+                      @mousedown.stop
+                    >
+                      <VIcon size="14">mdi-close</VIcon>
+                      <VTooltip activator="parent" location="left">{{ t('core.terminal.manager.closeTerminal') }}</VTooltip>
+                    </VBtn>
+                  </div>
+                </div>
+                <div
+                  :id="`terminal-${term.id}`"
+                  class="terminal-pane"
+                  @mousedown.stop
+                />
+              </div>
+            </div>
           </div>
         </div>
-
-        <!-- Content Area -->
-        <div class="window-content">
-          <!-- Grid Mode -->
-          <div v-if="layoutMode === 'grid'" class="grid-layout">
-            <div
-              v-for="term in localTerminals"
-              :key="`grid-terminal-${term.id}`"
-              class="grid-item"
-              :class="{ 'dragging': draggedTerminalId === term.id }"
-              :style="getGridItemStyle()"
-              @dragover="onDragOver($event)"
-              @drop="onDrop($event, term.id)"
-            >
-              <div
-                class="pane-header"
-                draggable="true"
-                @dragstart="onDragStart($event, term.id)"
-                @dragend="onDragEnd"
-                @mousedown.stop
-                style="cursor: move;"
-              >
-                <VIcon size="16" class="mr-1 drag-handle">mdi-drag</VIcon>
-                <span class="pane-title">{{ term.managerLabel || term.label }}</span>
-                <div class="pane-buttons">
-                  <VBtn
-                    icon
-                    size="x-small"
-                    variant="text"
-                    color=""
-                    class="control-btn unpin-btn-manager"
-                    @click="unpinTerminal(term.id)"
-                    @mousedown.stop
-                  >
-                    <VIcon size="14">mdi-pin-off</VIcon>
-                    <VTooltip activator="parent" location="left">{{ t('core.terminal.manager.unpinToTabs') }}</VTooltip>
-                  </VBtn>
-                  <VBtn
-                    icon
-                    size="x-small"
-                    variant="text"
-                    color=""
-                    class="control-btn close-btn"
-                    @click="closeTerminal(term.id)"
-                    @mousedown.stop
-                  >
-                    <VIcon size="14">mdi-close</VIcon>
-                    <VTooltip activator="parent" location="left">{{ t('core.terminal.manager.closeTerminal') }}</VTooltip>
-                  </VBtn>
-                </div>
-              </div>
-              <div
-                :id="`terminal-${term.id}`"
-                class="terminal-pane"
-                @mousedown.stop
-              />
-            </div>
-          </div>
-
-          <!-- Horizontal Split Mode -->
-          <div v-else-if="layoutMode === 'horizontal'" class="horizontal-layout">
-            <div
-              v-for="term in localTerminals"
-              :key="`horiz-terminal-${term.id}`"
-              class="horizontal-item"
-              :class="{ 'dragging': draggedTerminalId === term.id }"
-              :style="{ width: `${100 / localTerminals.length}%` }"
-              @dragover="onDragOver($event)"
-              @drop="onDrop($event, term.id)"
-            >
-              <div
-                class="pane-header"
-                draggable="true"
-                @dragstart="onDragStart($event, term.id)"
-                @dragend="onDragEnd"
-                @mousedown.stop
-                style="cursor: move;"
-              >
-                <VIcon size="16" class="mr-1 drag-handle">mdi-drag</VIcon>
-                <span class="pane-title">{{ term.managerLabel || term.label }}</span>
-                <div class="pane-buttons">
-                  <VBtn
-                    icon
-                    size="x-small"
-                    variant="text"
-                    color=""
-                    class="control-btn unpin-btn-manager"
-                    @click="unpinTerminal(term.id)"
-                    @mousedown.stop
-                  >
-                    <VIcon size="14">mdi-pin-off</VIcon>
-                    <VTooltip activator="parent" location="left">{{ t('core.terminal.manager.unpinToTabs') }}</VTooltip>
-                  </VBtn>
-                  <VBtn
-                    icon
-                    size="x-small"
-                    variant="text"
-                    color=""
-                    class="control-btn close-btn"
-                    @click="closeTerminal(term.id)"
-                    @mousedown.stop
-                  >
-                    <VIcon size="14">mdi-close</VIcon>
-                    <VTooltip activator="parent" location="left">{{ t('core.terminal.manager.closeTerminal') }}</VTooltip>
-                  </VBtn>
-                </div>
-              </div>
-              <div
-                :id="`terminal-${term.id}`"
-                class="terminal-pane"
-                @mousedown.stop
-              />
-            </div>
-          </div>
-
-          <!-- Vertical Split Mode -->
-          <div v-else-if="layoutMode === 'vertical'" class="vertical-layout">
-            <div
-              v-for="term in localTerminals"
-              :key="`vert-terminal-${term.id}`"
-              class="vertical-item"
-              :class="{ 'dragging': draggedTerminalId === term.id }"
-              :style="{ height: `${100 / localTerminals.length}%` }"
-              @dragover="onDragOver($event)"
-              @drop="onDrop($event, term.id)"
-            >
-              <div
-                class="pane-header"
-                draggable="true"
-                @dragstart="onDragStart($event, term.id)"
-                @dragend="onDragEnd"
-                @mousedown.stop
-                style="cursor: move;"
-              >
-                <VIcon size="16" class="mr-1 drag-handle">mdi-drag</VIcon>
-                <span class="pane-title">{{ term.managerLabel || term.label }}</span>
-                <div class="pane-buttons">
-                  <VBtn
-                    icon
-                    size="x-small"
-                    variant="text"
-                    color=""
-                    class="control-btn unpin-btn-manager"
-                    @click="unpinTerminal(term.id)"
-                    @mousedown.stop
-                  >
-                    <VIcon size="14">mdi-pin-off</VIcon>
-                    <VTooltip activator="parent" location="left">{{ t('core.terminal.manager.unpinToTabs') }}</VTooltip>
-                  </VBtn>
-                  <VBtn
-                    icon
-                    size="x-small"
-                    variant="text"
-                    color=""
-                    class="control-btn close-btn"
-                    @click="closeTerminal(term.id)"
-                    @mousedown.stop
-                  >
-                    <VIcon size="14">mdi-close</VIcon>
-                    <VTooltip activator="parent" location="left">{{ t('core.terminal.manager.closeTerminal') }}</VTooltip>
-                  </VBtn>
-                </div>
-              </div>
-              <div
-                :id="`terminal-${term.id}`"
-                class="terminal-pane"
-                @mousedown.stop
-              />
-            </div>
-          </div>
-        </div>
-      </div>
-    </DraggableResizableVue>
+      </DraggableResizableVue>
     </div>
   </Teleport>
 </template>
@@ -277,21 +277,19 @@ import DraggableResizableVue from 'draggable-resizable-vue3'
 import { useTheme } from 'vuetify'
 import { useI18n } from 'vue-i18n'
 
-const theme = useTheme()
-const { t } = useI18n()
-
 const props = defineProps({
   terminals: {
     type: Array,
-    default: () => []
+    default: () => [],
   },
   isOpen: {
     type: Boolean,
-    default: false
-  }
+    default: false,
+  },
 })
-
-const emit = defineEmits(['close-window', 'close-terminal', 'unpin-terminal', 'terminal-ready', 'update:isOpen', 'reorder-terminals'])
+const emit = defineEmits(['closeWindow', 'closeTerminal', 'unpinTerminal', 'terminalReady', 'update:isOpen', 'reorderTerminals'])
+const theme = useTheme()
+const { t } = useI18n()
 
 // Calculate initial size based on viewport (80% of viewport, max 1200x800)
 // Use clientWidth/clientHeight to exclude scrollbars
@@ -316,11 +314,12 @@ const localTerminals = ref([])
 const draggedTerminalId = ref(null)
 
 // Sync local terminals with props and validate they exist
-watch(() => props.terminals, (newTerminals) => {
+watch(() => props.terminals, newTerminals => {
   // Only include terminals that have valid IDs and aren't duplicates
   const validTerminals = newTerminals.filter((term, index, self) => {
     // Check for valid ID
     if (!term.id) return false
+
     // Check not duplicate
     return index === self.findIndex(t => t.id === term.id)
   })
@@ -340,7 +339,7 @@ const originalW = ref(initialWidth)
 const originalH = ref(initialHeight)
 
 // Maximize window when it opens
-watch(() => props.isOpen, (isOpen) => {
+watch(() => props.isOpen, isOpen => {
   if (isOpen) {
     // Always maximize on open
     windowX.value = 0
@@ -352,7 +351,7 @@ watch(() => props.isOpen, (isOpen) => {
 })
 
 // Watch for terminals being added
-watch(() => props.terminals, (newTerminals) => {
+watch(() => props.terminals, newTerminals => {
   if (newTerminals.length > 0 && !activeTerminalId.value) {
     activeTerminalId.value = newTerminals[0].id
   }
@@ -362,7 +361,7 @@ watch(() => props.terminals, (newTerminals) => {
     newTerminals.forEach(term => {
       const container = document.getElementById(`terminal-${term.id}`)
       if (container) {
-        emit('terminal-ready', term.id)
+        emit('terminalReady', term.id)
       }
     })
   })
@@ -383,6 +382,7 @@ watch(layoutMode, (newMode, oldMode) => {
       const xtermElement = container.querySelector('.xterm')
       if (xtermElement) {
         console.log(`💾 Saving xterm element for terminal ${term.id}`)
+
         // Remove from DOM to prevent Vue from destroying it
         container.removeChild(xtermElement)
         savedXtermElements.set(term.id, xtermElement)
@@ -402,14 +402,16 @@ watch(layoutMode, (newMode, oldMode) => {
         const xtermElement = savedXtermElements.get(term.id)
         if (!xtermElement) {
           console.warn(`  ⚠️ No saved xterm element for terminal ${term.id}`)
-          emit('terminal-ready', term.id)
+          emit('terminalReady', term.id)
+
           return
         }
 
         const newContainer = document.getElementById(`terminal-${term.id}`)
         if (!newContainer) {
           console.error(`  ❌ New container not found for terminal ${term.id}`)
-          emit('terminal-ready', term.id)
+          emit('terminalReady', term.id)
+
           return
         }
 
@@ -419,7 +421,7 @@ watch(layoutMode, (newMode, oldMode) => {
 
         // Wait a bit before emitting ready
         setTimeout(() => {
-          emit('terminal-ready', term.id)
+          emit('terminalReady', term.id)
         }, 50)
       })
 
@@ -455,22 +457,22 @@ function toggleMaximize() {
   // Refit terminals after resize
   setTimeout(() => {
     props.terminals.forEach(term => {
-      emit('terminal-ready', term.id)
+      emit('terminalReady', term.id)
     })
   }, 150)
 }
 
 function closeWindow() {
-  emit('close-window')
+  emit('closeWindow')
   emit('update:isOpen', false)
 }
 
 function unpinTerminal(terminalId) {
-  emit('unpin-terminal', terminalId)
+  emit('unpinTerminal', terminalId)
 }
 
 function closeTerminal(terminalId) {
-  emit('close-terminal', terminalId)
+  emit('closeTerminal', terminalId)
 }
 
 function getGridItemStyle() {
@@ -479,8 +481,10 @@ function getGridItemStyle() {
   if (count === 2) return { width: '50%', height: '100%' }
   if (count === 3) return { width: '33.33%', height: '100%' }
   if (count === 4) return { width: '50%', height: '50%' }
+
   // For more than 4, create a dynamic grid
   const cols = Math.ceil(Math.sqrt(count))
+  
   return { width: `${100 / cols}%`, height: `${100 / Math.ceil(count / cols)}%` }
 }
 
@@ -523,7 +527,7 @@ function onDrop(event, targetTerminalId) {
   draggedTerminalId.value = null
 
   // Emit to parent
-  emit('reorder-terminals', newTerminals.map(t => t.id))
+  emit('reorderTerminals', newTerminals.map(t => t.id))
 
   console.log('✅ Reorder complete')
 }

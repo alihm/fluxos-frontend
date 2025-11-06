@@ -234,11 +234,11 @@
   <TerminalWindowManager
     :terminals="floatingTerminalsData"
     :isOpen="isTerminalManagerOpen"
-    @close-window="closeTerminalManager"
-    @unpin-terminal="unpinTerminalFromManager"
-    @close-terminal="closeTerminalFromManager"
-    @terminal-ready="moveTerminalToManager"
-    @reorder-terminals="handleTerminalReorder"
+    @closeWindow="closeTerminalManager"
+    @unpinTerminal="unpinTerminalFromManager"
+    @closeTerminal="closeTerminalFromManager"
+    @terminalReady="moveTerminalToManager"
+    @reorderTerminals="handleTerminalReorder"
     @update:isOpen="isTerminalManagerOpen = $event"
   />
 </template>
@@ -274,6 +274,7 @@ const theme = useTheme()
 // Terminal theme colors based on Vuetify theme
 const terminalTheme = computed(() => {
   const isLight = theme.global.name.value === 'light'
+  
   return {
     background: isLight ? '#000000' : '#000000',
     foreground: isLight ? '#ffffff' : '#ffffff',
@@ -346,7 +347,7 @@ function addNewTerminal() {
     enableEnvironment: enableEnvironment.value,
     fitAddon: null,
     label: `${selectedApp.value} - ${selectedCmd.value === 'Custom' ? customValue.value : selectedCmd.value}`,
-    managerLabel: `${selectedApp.value} - ${selectedCmd.value === 'Custom' ? customValue.value : selectedCmd.value} (${new Date().toLocaleTimeString()})`
+    managerLabel: `${selectedApp.value} - ${selectedCmd.value === 'Custom' ? customValue.value : selectedCmd.value} (${new Date().toLocaleTimeString()})`,
   }
 
   terminals.value.push(newTerminal)
@@ -375,6 +376,7 @@ function connectTerminal(terminalId, name) {
     console.error('Terminal element not available for terminal ID:', terminalId)
     showToast('danger', 'Terminal element not ready')
     closeTerminal(terminalId)
+    
     return
   }
 
@@ -383,6 +385,7 @@ function connectTerminal(terminalId, name) {
     if (!found) {
       showToast('danger', t('core.terminal.errors.selectContainer'))
       closeTerminal(terminalId)
+      
       return
     }
   }
@@ -390,6 +393,7 @@ function connectTerminal(terminalId, name) {
   if (!termData.selectedCmd || (termData.selectedCmd === 'Custom' && !termData.customValue)) {
     showToast('danger', termData.selectedCmd === 'Custom' ? t('core.terminal.errors.enterCustomCommand') : t('core.terminal.errors.noCommandSelected'))
     closeTerminal(terminalId)
+    
     return
   }
 
@@ -647,12 +651,14 @@ function closeTerminal(terminalId) {
   const termData = terminals.value.find(t => t.id === terminalId)
   if (!termData) {
     console.warn('Terminal not found with ID:', terminalId)
+    
     return
   }
 
   // Prevent multiple close attempts
   if (termData.isClosing) {
     console.log('Terminal is already closing, ignoring duplicate call')
+    
     return
   }
 
@@ -662,6 +668,7 @@ function closeTerminal(terminalId) {
   // Clean up terminal resources
   if (termData.socket) {
     console.log('Disconnecting socket...')
+
     // Remove all listeners before disconnecting to prevent recursive calls
     termData.socket.removeAllListeners()
     termData.socket.disconnect()
@@ -724,12 +731,14 @@ function unpinTerminal(terminalId) {
   const termData = terminals.value.find(t => t.id === terminalId)
   if (!termData) {
     console.warn('Terminal not found with ID:', terminalId)
+    
     return
   }
 
   // Check if already popped out
   if (termData.isPoppedOut) {
     console.log('Terminal already popped out, skipping')
+    
     return
   }
 
@@ -743,7 +752,7 @@ function unpinTerminal(terminalId) {
   floatingTerminalsData.value.push({
     id: terminalId,
     label: termData.label,
-    managerLabel: termData.managerLabel
+    managerLabel: termData.managerLabel,
   })
 
   // Open the terminal manager window
@@ -759,6 +768,7 @@ function unpinAllTerminals() {
 
   if (terminalsToUnpin.length === 0) {
     console.log('No terminals to unpin')
+    
     return
   }
 
@@ -774,7 +784,7 @@ function unpinAllTerminals() {
       floatingTerminalsData.value.push({
         id: termData.id,
         label: termData.label,
-        managerLabel: termData.managerLabel
+        managerLabel: termData.managerLabel,
       })
     }
   })
@@ -815,11 +825,13 @@ function moveTerminalToManager(terminalId) {
   if (!termData) {
     console.error('❌ Terminal data not found for ID:', terminalId)
     console.log('Available terminals:', terminals.value.map(t => t.id))
+    
     return
   }
 
   if (!termData.terminal) {
     console.error('❌ Terminal instance not ready for ID:', terminalId)
+    
     return
   }
 
@@ -839,14 +851,16 @@ function moveTerminalToManager(terminalId) {
 
     if (!container) {
       console.error('❌ Container not found in manager')
+
       // List all terminal containers
       const allTerminalContainers = document.querySelectorAll('[id^="terminal-"]')
       console.log('🔍 All terminal containers in DOM:',
         Array.from(allTerminalContainers).map(c => ({
           id: c.id,
-          parent: c.parentElement?.className
-        }))
+          parent: c.parentElement?.className,
+        })),
       )
+      
       return
     }
 
@@ -854,6 +868,7 @@ function moveTerminalToManager(terminalId) {
     if (container.clientWidth === 0 || container.clientHeight === 0) {
       console.warn('⚠️ Container has zero dimensions, retrying in 200ms...')
       setTimeout(() => moveTerminalToManager(terminalId), 200)
+      
       return
     }
 
@@ -863,6 +878,7 @@ function moveTerminalToManager(terminalId) {
 
       if (existingXterm) {
         console.log('♻️ Terminal already in container, just resizing')
+
         // Verify it's the right terminal by checking if it belongs to this termData
         const xtermViewport = existingXterm.querySelector('.xterm-viewport')
         if (xtermViewport) {
@@ -876,6 +892,7 @@ function moveTerminalToManager(terminalId) {
               console.error('❌ Error fitting terminal:', fitError)
             }
           }, 100)
+          
           return
         }
       }
@@ -908,6 +925,7 @@ function moveTerminalToManager(terminalId) {
           // Skip the target container
           if (possibleContainer === container) {
             console.log('   Skipping target container')
+            
             return
           }
 
@@ -1055,6 +1073,7 @@ watch(activeTerminalId, (newId, oldId) => {
       const activeTerm = terminals.value.find(t => t.id === newId)
       if (!activeTerm || !activeTerm.fitAddon || !activeTerm.element) {
         console.log('   Terminal not ready for fitting')
+        
         return
       }
 
@@ -1123,7 +1142,7 @@ onMounted(() => {
     const validTerminalIds = terminals.value.map(t => t.id)
     const floatingBeforeCleanup = floatingTerminalsData.value.length
     floatingTerminalsData.value = floatingTerminalsData.value.filter(fd =>
-      validTerminalIds.includes(fd.id)
+      validTerminalIds.includes(fd.id),
     )
 
     if (floatingTerminalsData.value.length < floatingBeforeCleanup) {
@@ -1165,6 +1184,7 @@ function pinBackTerminal(terminalId) {
   if (!termData) {
     console.error('❌ Terminal not found with ID:', terminalId)
     console.log('Available terminals:', terminals.value.map(t => ({ id: t.id, label: t.label })))
+    
     return
   }
 
@@ -1173,6 +1193,7 @@ function pinBackTerminal(terminalId) {
   // Check if already pinned back
   if (!termData.isPoppedOut) {
     console.log('⚠️ Terminal already pinned back, skipping')
+    
     return
   }
 
@@ -1186,6 +1207,7 @@ function pinBackTerminal(terminalId) {
 
   if (!mainContainer) {
     console.error('❌ Main container (termData.element) not found')
+    
     return
   }
 
@@ -1228,6 +1250,7 @@ function pinBackTerminal(terminalId) {
     document.querySelectorAll('[id*="terminal"], [class*="terminal"]').forEach(el => {
       console.log('  -', el.id || el.className, 'has .xterm:', !!el.querySelector('.xterm'))
     })
+    
     return
   }
 
@@ -1273,84 +1296,84 @@ function pinBackTerminal(terminalId) {
           console.log('📦 Main container display:', window.getComputedStyle(mainContainer).display)
           console.log('📦 Main container dimensions:', mainContainer.clientWidth, 'x', mainContainer.clientHeight)
 
-        mainContainer.appendChild(xtermElement)
-        console.log('✅ Added xterm to main container')
+          mainContainer.appendChild(xtermElement)
+          console.log('✅ Added xterm to main container')
 
-        // Force reset inline styles that might have been set by the manager window
-        const xtermDiv = mainContainer.querySelector('.xterm')
-        if (xtermDiv) {
+          // Force reset inline styles that might have been set by the manager window
+          const xtermDiv = mainContainer.querySelector('.xterm')
+          if (xtermDiv) {
           // Remove any fixed width/height that might have been set
-          xtermDiv.style.width = ''
-          xtermDiv.style.height = ''
+            xtermDiv.style.width = ''
+            xtermDiv.style.height = ''
 
-          // Also reset viewport and screen styles
-          const viewport = xtermDiv.querySelector('.xterm-viewport')
-          const screen = xtermDiv.querySelector('.xterm-screen')
-          if (viewport) {
-            viewport.style.width = ''
-            viewport.style.height = ''
-          }
-          if (screen) {
-            screen.style.width = ''
-            screen.style.height = ''
-          }
-
-          // Reset all canvas elements (this is critical!)
-          const canvases = xtermDiv.querySelectorAll('canvas')
-          canvases.forEach(canvas => {
-            canvas.style.width = ''
-            canvas.style.height = ''
-          })
-
-          console.log('✅ Reset xterm inline styles (including', canvases.length, 'canvas elements)')
-        }
-
-        // Verify
-        const verify = mainContainer.querySelector('.xterm')
-        console.log('✅ Verification - xterm now in main container:', !!verify)
-
-        // Wait a bit before trying to fit
-        setTimeout(() => {
-          try {
-            console.log('📦 Container dimensions before fit:', mainContainer.clientWidth, 'x', mainContainer.clientHeight)
-            console.log('📺 Terminal cols x rows before fit:', termData.terminal.cols, 'x', termData.terminal.rows)
-
-            console.log('🔧 Fitting terminal to main container...')
-
-            // Reset inline styles first to remove any size constraints from manager window
-            const xtermDiv = mainContainer.querySelector('.xterm')
-            if (xtermDiv) {
-              xtermDiv.style.width = ''
-              xtermDiv.style.height = ''
-              const canvases = xtermDiv.querySelectorAll('canvas')
-              canvases.forEach(canvas => {
-                canvas.style.width = ''
-                canvas.style.height = ''
-              })
-              console.log('✅ Reset xterm inline styles')
+            // Also reset viewport and screen styles
+            const viewport = xtermDiv.querySelector('.xterm-viewport')
+            const screen = xtermDiv.querySelector('.xterm-screen')
+            if (viewport) {
+              viewport.style.width = ''
+              viewport.style.height = ''
+            }
+            if (screen) {
+              screen.style.width = ''
+              screen.style.height = ''
             }
 
-            // Only focus if container is visible (has dimensions)
-            if (mainContainer.clientWidth > 0 && mainContainer.clientHeight > 0) {
+            // Reset all canvas elements (this is critical!)
+            const canvases = xtermDiv.querySelectorAll('canvas')
+            canvases.forEach(canvas => {
+              canvas.style.width = ''
+              canvas.style.height = ''
+            })
+
+            console.log('✅ Reset xterm inline styles (including', canvases.length, 'canvas elements)')
+          }
+
+          // Verify
+          const verify = mainContainer.querySelector('.xterm')
+          console.log('✅ Verification - xterm now in main container:', !!verify)
+
+          // Wait a bit before trying to fit
+          setTimeout(() => {
+            try {
+              console.log('📦 Container dimensions before fit:', mainContainer.clientWidth, 'x', mainContainer.clientHeight)
+              console.log('📺 Terminal cols x rows before fit:', termData.terminal.cols, 'x', termData.terminal.rows)
+
+              console.log('🔧 Fitting terminal to main container...')
+
+              // Reset inline styles first to remove any size constraints from manager window
+              const xtermDiv = mainContainer.querySelector('.xterm')
+              if (xtermDiv) {
+                xtermDiv.style.width = ''
+                xtermDiv.style.height = ''
+                const canvases = xtermDiv.querySelectorAll('canvas')
+                canvases.forEach(canvas => {
+                  canvas.style.width = ''
+                  canvas.style.height = ''
+                })
+                console.log('✅ Reset xterm inline styles')
+              }
+
+              // Only focus if container is visible (has dimensions)
+              if (mainContainer.clientWidth > 0 && mainContainer.clientHeight > 0) {
               // Fit once immediately
-              termData.fitAddon.fit()
-              console.log('📺 Terminal fitted:', termData.terminal.cols, 'x', termData.terminal.rows)
-              termData.terminal.focus()
-              console.log('✅ Terminal fitted and focused in main view')
-
-              // Do one final fit after layout stabilizes
-              setTimeout(() => {
                 termData.fitAddon.fit()
-                console.log('📺 Final fit:', termData.terminal.cols, 'x', termData.terminal.rows)
-              }, 300)
-            } else {
+                console.log('📺 Terminal fitted:', termData.terminal.cols, 'x', termData.terminal.rows)
+                termData.terminal.focus()
+                console.log('✅ Terminal fitted and focused in main view')
+
+                // Do one final fit after layout stabilizes
+                setTimeout(() => {
+                  termData.fitAddon.fit()
+                  console.log('📺 Final fit:', termData.terminal.cols, 'x', termData.terminal.rows)
+                }, 300)
+              } else {
               // Container not visible yet (inactive tab), fit when it becomes active
-              console.log('⚠️ Container not visible, will fit when tab becomes active')
+                console.log('⚠️ Container not visible, will fit when tab becomes active')
+              }
+            } catch (fitError) {
+              console.error('❌ Error fitting terminal:', fitError)
             }
-          } catch (fitError) {
-            console.error('❌ Error fitting terminal:', fitError)
-          }
-        }, 150)
+          }, 150)
         } catch (error) {
           console.error('❌ Error adding terminal to main view:', error)
           console.error('Stack:', error.stack)
