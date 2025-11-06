@@ -20,6 +20,19 @@
         </div>
       </div>
 
+      <!-- Money-Back Guarantee Banner -->
+      <VCard v-if="!loading && games.length > 0" class="guarantee-banner ma-4" elevation="2">
+        <VCardText class="d-flex align-center justify-center pa-6">
+          <VIcon icon="mdi-shield-check" size="48" color="success" class="mr-4" />
+          <div>
+            <h3 class="text-h6 font-weight-bold mb-1">{{ t('common.guarantee.title') }}</h3>
+            <p class="text-body-2 mb-0 text-medium-emphasis">
+              {{ t('common.guarantee.description') }}
+            </p>
+          </div>
+        </VCardText>
+      </VCard>
+
       <!-- Games Grid Section -->
       <div class="games-grid-section">
         <div v-if="loading" style="margin-top: -100px;">

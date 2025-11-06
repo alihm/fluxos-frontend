@@ -77,6 +77,67 @@
           </div>
         </VCardText>
       </VCard>
+
+      <!-- Money-Back Guarantee Section -->
+      <VCard class="section-card guarantee-section ma-4">
+        <VCardText class="text-center pa-8">
+          <div class="guarantee-icon mb-4">
+            <VIcon icon="mdi-shield-check" size="64" color="success" />
+          </div>
+          <h2 class="text-h4 mb-3 font-weight-bold">{{ t('common.guarantee.title') }}</h2>
+          <p class="text-h6 text-medium-emphasis mb-0">
+            {{ t('common.guarantee.description') }}
+          </p>
+        </VCardText>
+      </VCard>
+
+      <!-- Trustpilot Reviews Section -->
+      <VCard class="section-card trustpilot-section ma-4">
+        <VCardText class="pa-8">
+          <div class="trustpilot-header text-center mb-6">
+            <h2 class="text-h4 mb-3 font-weight-bold">{{ t('common.trustpilot.title') }}</h2>
+            <div class="trustpilot-rating-container">
+              <div class="trustpilot-logo mb-3">
+                <VIcon icon="mdi-star" size="32" color="#00b67a" />
+                <span class="text-h6 font-weight-bold ml-2" style="color: #00b67a;">Trustpilot</span>
+              </div>
+              <div class="rating-stars mb-2">
+                <VIcon v-for="i in 4" :key="i" icon="mdi-star" size="32" color="#00b67a" />
+                <VIcon icon="mdi-star-half-full" size="32" color="#00b67a" />
+              </div>
+              <div class="rating-text">
+                <span class="text-h5 font-weight-bold">{{ t('common.trustpilot.ratingLabel') }}</span>
+                <span class="text-h6 ml-2 text-medium-emphasis">{{ t('common.trustpilot.score') }} {{ t('common.trustpilot.outOf') }}</span>
+              </div>
+              <div class="reviews-count text-body-2 text-medium-emphasis mt-1">
+                {{ t('common.trustpilot.basedOn', { count: t('common.trustpilot.reviewsCount') }) }}
+              </div>
+            </div>
+          </div>
+
+          <div class="trustpilot-reviews">
+            <VRow>
+              <VCol v-for="(review, key) in ['review1', 'review2', 'review3']" :key="key" cols="12" md="4">
+                <VCard variant="outlined" class="review-card pa-4">
+                  <div class="review-stars mb-2">
+                    <VIcon v-for="i in parseInt(t(`common.trustpilot.sampleReviews.${review}.rating`))" :key="i" icon="mdi-star" size="20" color="#00b67a" />
+                  </div>
+                  <p class="review-text text-body-2 mb-3">
+                    "{{ t(`common.trustpilot.sampleReviews.${review}.text`) }}"
+                  </p>
+                  <div class="review-author text-caption text-medium-emphasis">
+                    <VIcon icon="mdi-check-circle" size="14" color="success" class="mr-1" />
+                    {{ t(`common.trustpilot.sampleReviews.${review}.author`) }}
+                  </div>
+                  <div class="text-caption text-medium-emphasis">
+                    {{ t('common.trustpilot.verifiedCustomer') }}
+                  </div>
+                </VCard>
+              </VCol>
+            </VRow>
+          </div>
+        </VCardText>
+      </VCard>
     </div>
 
     <!-- Show actual FluxDrive interface for subscribers or users with subscription history -->

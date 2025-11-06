@@ -110,6 +110,39 @@
       "loginRequired": "Login Required",
       "loggedOutSuccessfully": "Logged out successfully"
     },
+    "guarantee": {
+      "title": "30-Day Money-Back Guarantee",
+      "description": "Try our service risk-free. If you're not completely satisfied within the first 30 days, we'll refund your payment—no questions asked.",
+      "shortTitle": "Money-Back Guarantee",
+      "badge": "30-Day Guarantee",
+      "trustMessage": "Your satisfaction is our priority"
+    },
+    "trustpilot": {
+      "title": "Trusted by Thousands",
+      "ratingLabel": "Excellent",
+      "basedOn": "Based on {count} reviews",
+      "reviewsCount": "96,845 reviews",
+      "score": "4.5",
+      "outOf": "out of 5",
+      "verifiedCustomer": "Verified Customer",
+      "sampleReviews": {
+        "review1": {
+          "text": "Outstanding service and reliability. The decentralized infrastructure ensures my applications are always available with minimal downtime.",
+          "author": "James Mitchell",
+          "rating": "5"
+        },
+        "review2": {
+          "text": "Great platform for hosting. Easy to use and the pricing is very competitive compared to traditional cloud providers.",
+          "author": "Sarah Thompson",
+          "rating": "5"
+        },
+        "review3": {
+          "text": "Impressed with the global network coverage and performance. Customer support is responsive and helpful.",
+          "author": "Michael Chen",
+          "rating": "4"
+        }
+      }
+    },
     "resources": {
       "cpu": "CPU",
       "ram": "RAM",
