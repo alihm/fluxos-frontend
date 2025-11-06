@@ -1371,7 +1371,8 @@ async function executeLocalCommand(
     
     apiError.value = false
     getZelidAuthority()
-    if (!globalZelidAuthorized.value) return
+    // If logout is in progress or not authorized, silently return without error
+    if (!globalZelidAuthorized.value || logoutTrigger.value) return
 
     const [host, port = 16127] = selectedIp.value?.split(":") || []
 
@@ -1428,6 +1429,9 @@ function goBack() {
 
 //Instance Switch 
 async function getInstancesForDropDown() {
+  // Skip if logout is in progress or not authorized
+  if (!globalZelidAuthorized.value || logoutTrigger.value) return
+
   const response = await AppsService.getAppLocation(appName.value)
 
   selectedIp.value = ''
@@ -1539,8 +1543,19 @@ async function logout() {
   if (logoutTrigger.value) return
   logoutTrigger.value = true
 
+  // Mark as unauthorized immediately to prevent new API calls
+  globalZelidAuthorized.value = false
+
   const zelidauth = localStorage.getItem("zelidauth")
 
+  // Show logout message FIRST before clearing auth
+  console.log("Session expired, logging out...")
+  showToast("warning", t('pages.apps.manage.messages.sessionExpired'))
+
+  // Small delay to allow toast to show and prevent race with ongoing API calls
+  await delay(300)
+
+  // Now clear auth data
   localStorage.removeItem("zelidauth")
   localStorage.removeItem("loginType")
   fluxStore.setPrivilege("none")
@@ -1549,16 +1564,15 @@ async function logout() {
   try {
     await IDService.logoutCurrentSession(zelidauth)
   } catch (e) {
-    console.log(e)
+    console.error("Logout API error (suppressed):", e)
+    // Don't show error to user during auto-logout
   }
-
-  console.log("Session expired, logging out...")
-  showToast("warning", t('pages.apps.manage.messages.sessionExpired'))
 
   try {
     await firebase.auth().signOut()
   } catch (error) {
-    console.log(error)
+    console.error("Firebase logout error (suppressed):", error)
+    // Don't show error to user during auto-logout
   }
 
   if (route.path === "/") {
@@ -1619,6 +1633,9 @@ async function getApplicationManagementAndStatus(skip = false) {
 // async version – drop into <script setup>
 // ------------------------------------------
 async function getInstalledApplicationSpecifics(silent = false) {
+  // Skip if logout is in progress or not authorized
+  if (!globalZelidAuthorized.value || logoutTrigger.value) return
+
   appSpecification.value = null
   await delay(1000)
   InstalledLoading.value = true
@@ -1734,6 +1751,9 @@ async function getInstalledApplicationSpecifics(silent = false) {
 }
 
 async function getDecryptedEnterpriseFields(options = {}) {
+  // Skip if logout is in progress or not authorized
+  if (!globalZelidAuthorized.value || logoutTrigger.value) return null
+
   const local = options.local ?? false
 
   /* 1. original owner */
@@ -1817,6 +1837,9 @@ async function getDecryptedEnterpriseFields(options = {}) {
 
 
 async function getGlobalApplicationSpecifics(silent = false) {
+  // Skip if logout is in progress or not authorized
+  if (!globalZelidAuthorized.value || logoutTrigger.value) return
+
   const response = await AppsService.getAppSpecifics(appName.value)
 
   if (!response) return

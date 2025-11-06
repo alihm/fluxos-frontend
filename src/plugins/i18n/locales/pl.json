@@ -417,12 +417,22 @@
       "selectCommand": "Wybierz polecenie",
       "connect": "Połącz",
       "disconnect": "Rozłącz",
+      "newTerminal": "Nowy terminal",
+      "popOutAll": "Przypnij wszystkie terminale do menedżera",
       "user": "Użytkownik",
       "environment": "Środowisko",
       "customCommand": "Polecenie niestandardowe",
       "userUid": "UID użytkownika",
       "environmentVariables": "Zmienne środowiskowe (np. VAR1=wartość1,VAR2=wartość2)",
       "copiedToClipboard": "Skopiowano do schowka!",
+      "manager": {
+        "title": "Menedżer terminali",
+        "layoutGrid": "Siatka",
+        "layoutHorizontal": "Podział poziomy",
+        "layoutVertical": "Podział pionowy",
+        "unpinToTabs": "Odepnij do zakładek",
+        "closeTerminal": "Zamknij terminal"
+      },
       "errors": {
         "selectContainer": "Proszę wybrać kontener",
         "enterCustomCommand": "Proszę wprowadzić polecenie niestandardowe",
@@ -430,7 +440,7 @@
         "connectionError": "Błąd połączenia: {error}",
         "connectionErrorWithMessage": "Błąd połączenia: {message}",
         "connectionTimeout": "Przekroczono limit czasu połączenia",
-        "commandNotSupported": "Polecenie {cmd} nie jest obsługiwane przez ten kontener",
+        "commandNotSupported": "Polecenie {cmd} nie jest obsługivane przez ten kontener",
         "clipboardInaccessible": "Brak dostępu do schowka. Spróbuj ponownie.",
         "clipboardError": "Błąd podczas kopiowania do schowka"
       },

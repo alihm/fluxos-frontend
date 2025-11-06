@@ -6051,6 +6051,20 @@ async function verifyAppSpec() {
     }
 
     delete appSpecTemp.priceUSD
+
+    // Ensure all compose components have repoauth field for v7+ apps
+    if (appSpecTemp.version >= 7 && appSpecTemp.compose && Array.isArray(appSpecTemp.compose)) {
+      appSpecTemp.compose.forEach(component => {
+        if (!component.hasOwnProperty('repoauth')) {
+          component.repoauth = ''
+        }
+        // Also ensure secrets field for v7
+        if (appSpecTemp.version === 7 && !component.hasOwnProperty('secrets')) {
+          component.secrets = ''
+        }
+      })
+    }
+
     if (appSpecTemp.version >= 8) {
       console.log('Version 8+ app - checking enterprise mode')
       console.log('UI isPrivateApp state:', isPrivateApp.value)

@@ -36,7 +36,7 @@
           <VBtn
             icon="mdi-close"
             variant="text"
-            size="x-small"
+            size="default"
             @click="closeDialog"
             class="close-btn"
           />
@@ -6026,6 +6026,17 @@ watch(isLoggedIn, (newValue, oldValue) => {
   background: rgba(255, 255, 255, 0.1);
   border-color: rgba(var(--v-theme-primary), 0.7);
   box-shadow: 0 4px 12px rgba(var(--v-theme-primary), 0.3);
+}
+
+.v-theme--light .hardware-card {
+  background: rgba(255, 255, 255, 0.8);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.v-theme--light .hardware-card:hover {
+  background: rgba(255, 255, 255, 1);
+  border-color: rgba(var(--v-theme-primary), 0.5);
+  box-shadow: 0 4px 12px rgba(var(--v-theme-primary), 0.15);
 }
 
 

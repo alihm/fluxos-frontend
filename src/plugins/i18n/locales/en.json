@@ -417,12 +417,22 @@
       "selectCommand": "Select Command",
       "connect": "Connect",
       "disconnect": "Disconnect",
+      "newTerminal": "New Terminal",
+      "popOutAll": "Pin all terminals to manager",
       "user": "User",
       "environment": "Environment",
       "customCommand": "Custom Command",
       "userUid": "User UID",
       "environmentVariables": "Environment Variables (e.g., VAR1=value1,VAR2=value2)",
       "copiedToClipboard": "Copied to clipboard!",
+      "manager": {
+        "title": "Terminal Manager",
+        "layoutGrid": "Grid",
+        "layoutHorizontal": "Horizontal Split",
+        "layoutVertical": "Vertical Split",
+        "unpinToTabs": "Unpin to tabs",
+        "closeTerminal": "Close terminal"
+      },
       "errors": {
         "selectContainer": "Please select a container",
         "enterCustomCommand": "Please enter a custom command",

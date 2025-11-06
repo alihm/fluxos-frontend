@@ -99,6 +99,7 @@ declare module 'vue' {
     SubscriptionManager: typeof import('./@core/components/SubscriptionManager.vue')['default']
     TablePagination: typeof import('./@core/components/TablePagination.vue')['default']
     Terminal: typeof import('./@core/components/Terminal.vue')['default']
+    TerminalWindowManager: typeof import('./@core/components/TerminalWindowManager.vue')['default']
     TheCustomizer: typeof import('./@core/components/TheCustomizer.vue')['default']
     ThemeSwitcher: typeof import('./@core/components/ThemeSwitcher.vue')['default']
     UpgradeSpecDialog: typeof import('./components/dialogs/UpgradeSpecDialog.vue')['default']
@@ -106,6 +107,5 @@ declare module 'vue' {
     VersionsDialog: typeof import('./components/FluxDrive/VersionsDialog.vue')['default']
     VolumeBrowser: typeof import('./@core/components/VolumeBrowser.vue')['default']
     VolumePathBuilder: typeof import('./@core/components/VolumePathBuilder.vue')['default']
-    VueApexCharts: typeof import('vue3-apexcharts')['default']
   }
 }
