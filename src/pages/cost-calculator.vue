@@ -922,12 +922,24 @@ const calculateCost = async (retryCount = 0) => {
         console.log('Enterprise encryption completed, encrypted length:', enterpriseValue.length)
       } catch (encryptError) {
         console.error('Enterprise encryption failed:', encryptError)
-        throw new Error(`Enterprise encryption failed: ${encryptError.message}`)
+
+        // If the error is about Arcane OS requirement, gracefully disable enterprise mode for cost calculation
+        if (encryptError.message?.includes('Arcane OS') || encryptError.message?.includes('public key')) {
+          console.warn('Enterprise mode disabled for cost calculation - requires Arcane OS node')
+          showToast('warning', t('pages.costCalculator.messages.enterpriseCalculationWarning'))
+          formData.enterprise = ''
+          enterpriseValue = ''
+
+          // Continue with standard pricing instead of throwing error
+        } else {
+          throw new Error(`Enterprise encryption failed: ${encryptError.message}`)
+        }
       }
     }
 
     // For version 8+, when enterprise is enabled, compose and contacts are encrypted and moved to enterprise field
-    const isEnterpriseEnabled = formData.enterprise === 'enterprise'
+    // Re-check enterprise status after potential error handling above
+    const isEnterpriseEnabled = enterpriseValue && formData.enterprise === 'enterprise'
     const composeData = isEnterpriseEnabled ? [] : generateComposeArray()
     const contactsData = isEnterpriseEnabled ? [] : [""]
 

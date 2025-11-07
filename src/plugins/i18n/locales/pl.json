@@ -2365,6 +2365,7 @@
       },
       "messages": {
         "enterpriseHttpsWarning": "Funkcje Enterprise wymagają HTTPS lub localhost. Uzyskaj dostęp do tej aplikacji przy użyciu bezpiecznego połączenia.",
+        "enterpriseCalculationWarning": "Obliczanie kosztów Enterprise wymaga węzła Arcane OS. Pokazuję standardowe ceny.",
         "retrying": "Ponawiam... ({count}/3)",
         "apiUnavailable": "Serwer API niedostępny. Spróbuj ponownie później.",
         "invalidConfig": "Nieprawidłowa konfiguracja. Sprawdź swoje ustawienia.",

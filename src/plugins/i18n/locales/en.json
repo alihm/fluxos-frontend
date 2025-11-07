@@ -2366,6 +2366,7 @@
       },
       "messages": {
         "enterpriseHttpsWarning": "Enterprise features require HTTPS or localhost. Please access this application using a secure connection.",
+        "enterpriseCalculationWarning": "Enterprise cost calculation requires Arcane OS node. Showing standard pricing instead.",
         "retrying": "Retrying... ({count}/3)",
         "apiUnavailable": "API server unavailable. Please try again later.",
         "invalidConfig": "Invalid configuration. Please check your settings.",
