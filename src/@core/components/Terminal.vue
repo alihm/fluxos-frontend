@@ -266,6 +266,10 @@ const props = defineProps({
     type: String,
     required: true,
   },
+  logout: {
+    type: Function,
+    required: true,
+  },
 })
 
 const { t } = useI18n()
@@ -569,6 +573,23 @@ function connectTerminal(terminalId, name) {
 
   termData.socket.on('error', err => {
     console.error('❌ Socket error event:', err)
+
+    // Check if error is authorization-related
+    const errorStr = typeof err === 'string' ? err : (err?.message || String(err))
+
+    if (errorStr.toLowerCase().includes('not authorized')) {
+      console.warn('🔒 Authorization error detected, triggering logout')
+      termData.isConnecting = false
+      closeTerminal(terminalId)
+
+      // Trigger logout silently (logout function will show its own message)
+      if (props.logout && typeof props.logout === 'function') {
+        props.logout()
+      }
+
+      return
+    }
+
     showToast('danger', t('core.terminal.errors.connectionError', { error: err }))
     termData.isConnecting = false
     closeTerminal(terminalId)

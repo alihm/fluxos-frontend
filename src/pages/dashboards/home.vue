@@ -1,9 +1,9 @@
 <template>
-  <BannerSlider />
+  <LandingServices />
 </template>
 
 <script setup>
-import BannerSlider from "@/components/BannerSlider.vue"
+import LandingServices from "@/components/LandingServices.vue"
 import { useI18n } from "vue-i18n"
 
 const { t } = useI18n()

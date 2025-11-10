@@ -774,6 +774,7 @@
             <Terminal
               :app-spec="appSpecification"
               :selected-ip="selectedIp"
+              :logout="logout"
             />
             <VolumeBrowser
               :app-spec="appSpecification"
