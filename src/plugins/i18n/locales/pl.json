@@ -270,6 +270,10 @@
       "title": "Flux Drive"
     }
   },
+  "myApps": {
+    "fluxCloudTitle": "Flux Cloud - Zdecentralizowane Zarządzanie Aplikacjami",
+    "fluxCloudDescription": "Monitoruj i zarządzaj wszystkimi swoimi aplikacjami w kontenerach Docker działającymi w zdecentralizowanej sieci chmurowej Flux. Przeglądaj status w czasie rzeczywistym, zużycie zasobów i metryki wydajności swoich rozproszonych aplikacji wdrożonych w naszej globalnej infrastrukturze opartej na blockchain. Kliknij dowolną aplikację, aby uzyskać dostęp do szczegółowych kontroli zarządzania i analiz."
+  },
   "sections": {
     "dashboard": {
       "title": "Sieć Flux",

@@ -1,5 +1,31 @@
 <template>
   <div>
+    <!-- Flux Cloud Info Card -->
+    <VCard
+      class="mb-6"
+      variant="tonal"
+      color="primary"
+    >
+      <VCardText>
+        <div class="d-flex align-start gap-4">
+          <VIcon
+            icon="mdi-cloud-check-outline"
+            size="48"
+            color="primary"
+            class="mt-1"
+          />
+          <div class="flex-grow-1">
+            <h2 class="text-h5 mb-2">
+              {{ t('myApps.fluxCloudTitle') }}
+            </h2>
+            <p class="text-body-1 mb-0">
+              {{ t('myApps.fluxCloudDescription') }}
+            </p>
+          </div>
+        </div>
+      </VCardText>
+    </VCard>
+
     <VTabs
       v-model="tabIndex"
       grow

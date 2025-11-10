@@ -270,6 +270,10 @@
       "title": "Flux Drive"
     }
   },
+  "myApps": {
+    "fluxCloudTitle": "Flux Cloud - Decentralized Application Management",
+    "fluxCloudDescription": "Monitor and manage all your Docker containerized applications running on the Flux decentralized cloud network. View real-time status, resource usage, and performance metrics of your distributed apps deployed across our global blockchain-powered infrastructure. Click on any application to access detailed management controls and analytics."
+  },
   "sections": {
     "dashboard": {
       "title": "Flux Network",
