@@ -125,6 +125,8 @@
       "score": "4.5",
       "outOf": "out of 5",
       "verifiedCustomer": "Verified Customer",
+      "profileUrl": "https://www.trustpilot.com/review/runonflux.com",
+      "viewAllReviews": "View all reviews on Trustpilot",
       "sampleReviews": {
         "review1": {
           "text": "Outstanding service and reliability. The decentralized infrastructure ensures my applications are always available with minimal downtime.",

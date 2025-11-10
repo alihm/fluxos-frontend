@@ -139,23 +139,30 @@
         <VCardText class="pa-8">
           <div class="trustpilot-header text-center mb-6">
             <h2 class="text-h4 mb-3 font-weight-bold">{{ t('common.trustpilot.title') }}</h2>
-            <div class="trustpilot-rating-container">
-              <div class="trustpilot-logo mb-3">
-                <VIcon icon="mdi-star" size="32" color="#00b67a" />
-                <span class="text-h6 font-weight-bold ml-2" style="color: #00b67a;">Trustpilot</span>
+            <a
+              :href="t('common.trustpilot.profileUrl')"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="trustpilot-link"
+            >
+              <div class="trustpilot-rating-container">
+                <div class="trustpilot-logo mb-3">
+                  <VIcon icon="mdi-star" size="32" color="#00b67a" />
+                  <span class="text-h6 font-weight-bold ml-2" style="color: #00b67a;">Trustpilot</span>
+                </div>
+                <div class="rating-stars mb-2">
+                  <VIcon v-for="i in 4" :key="i" icon="mdi-star" size="32" color="#00b67a" />
+                  <VIcon icon="mdi-star-half-full" size="32" color="#00b67a" />
+                </div>
+                <div class="rating-text">
+                  <span class="text-h5 font-weight-bold">{{ t('common.trustpilot.ratingLabel') }}</span>
+                  <span class="text-h6 ml-2 text-medium-emphasis">{{ t('common.trustpilot.score') }} {{ t('common.trustpilot.outOf') }}</span>
+                </div>
+                <div class="reviews-count text-body-2 text-medium-emphasis mt-1">
+                  {{ t('common.trustpilot.basedOn', { count: t('common.trustpilot.reviewsCount') }) }}
+                </div>
               </div>
-              <div class="rating-stars mb-2">
-                <VIcon v-for="i in 4" :key="i" icon="mdi-star" size="32" color="#00b67a" />
-                <VIcon icon="mdi-star-half-full" size="32" color="#00b67a" />
-              </div>
-              <div class="rating-text">
-                <span class="text-h5 font-weight-bold">{{ t('common.trustpilot.ratingLabel') }}</span>
-                <span class="text-h6 ml-2 text-medium-emphasis">{{ t('common.trustpilot.score') }} {{ t('common.trustpilot.outOf') }}</span>
-              </div>
-              <div class="reviews-count text-body-2 text-medium-emphasis mt-1">
-                {{ t('common.trustpilot.basedOn', { count: t('common.trustpilot.reviewsCount') }) }}
-              </div>
-            </div>
+            </a>
           </div>
 
           <div class="trustpilot-reviews">
@@ -178,6 +185,20 @@
                 </VCard>
               </VCol>
             </VRow>
+          </div>
+
+          <div class="text-center mt-6">
+            <VBtn
+              :href="t('common.trustpilot.profileUrl')"
+              target="_blank"
+              rel="noopener noreferrer"
+              color="success"
+              variant="outlined"
+              size="large"
+            >
+              <VIcon start>mdi-open-in-new</VIcon>
+              {{ t('common.trustpilot.viewAllReviews') }}
+            </VBtn>
           </div>
         </VCardText>
       </VCard>
@@ -1090,6 +1111,23 @@ onMounted(async () => {
   opacity: 0.7;
   margin: 0;
   line-height: 1.6;
+}
+
+/* Trustpilot Section */
+.trustpilot-link {
+  text-decoration: none;
+  color: inherit;
+  display: inline-block;
+  transition: all 0.3s ease;
+}
+
+.trustpilot-link:hover {
+  transform: translateY(-2px);
+  opacity: 0.9;
+}
+
+.trustpilot-link .trustpilot-rating-container {
+  cursor: pointer;
 }
 
 /* Server Locations Section */
