@@ -5574,7 +5574,7 @@ watch(tab, async newVal => {
       renewalEnabled: renewalEnabled.value,
       currentExpire: props.appSpec?.expire,
       supportsExpire: versionFlags.value.supportsExpire,
-      newApp: props.newApp
+      newApp: props.newApp,
     })
 
     if (!props.newApp) {
@@ -6051,6 +6051,21 @@ async function verifyAppSpec() {
     }
 
     delete appSpecTemp.priceUSD
+
+    // Ensure all compose components have repoauth field for v7+ apps
+    if (appSpecTemp.version >= 7 && appSpecTemp.compose && Array.isArray(appSpecTemp.compose)) {
+      appSpecTemp.compose.forEach(component => {
+        if (!component.hasOwnProperty('repoauth')) {
+          component.repoauth = ''
+        }
+
+        // Also ensure secrets field for v7
+        if (appSpecTemp.version === 7 && !component.hasOwnProperty('secrets')) {
+          component.secrets = ''
+        }
+      })
+    }
+
     if (appSpecTemp.version >= 8) {
       console.log('Version 8+ app - checking enterprise mode')
       console.log('UI isPrivateApp state:', isPrivateApp.value)
@@ -6398,6 +6413,7 @@ async function fetchBlockHeight() {
             } else if (remainingMinutes > 0) {
               blocksToExpire.value = Math.floor(remainingMinutes / 2) // Pre-fork: 2 min/block
             }
+
             // If remainingMinutes <= 0, keep negative blocksToExpire (will be caught by validation)
 
             console.log('Expiry validation:', {

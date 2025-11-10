@@ -1477,21 +1477,31 @@ loader.init().then(() => {
   display: inline-block;
 }
 
-::v-deep(.progress-glow svg) {
-  filter: drop-shadow(0 0 6px currentColor); /* or whatever color you want */
-  overflow: visible;
+.progress-glow {
+  border-radius: 50% !important;
+  overflow: visible !important;
 }
+
+:deep(.progress-glow .v-progress-circular__overlay) {
+  filter: drop-shadow(0 0 2px currentColor) !important;
+}
+
+:deep(.progress-glow svg) {
+  overflow: visible !important;
+  border-radius: 50%;
+}
+
 .progress-text {
   font-size: 12px;
    font-family: 'Fira Code', monospace; /* or any preferred font */
    letter-spacing: 0.3px;
 }
 
-::v-deep(.v-data-table thead) {
+:deep(.v-data-table thead) {
   background-color: rgb(var(--v-theme-background)) !important;
 }
 
-::v-deep(.v-data-table thead th) {
+:deep(.v-data-table thead th) {
   background-color: rgb(var(--v-theme-background)) !important;
   color: #b6b4b4 !important;
   font-weight: 600;
