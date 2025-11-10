@@ -468,8 +468,8 @@
           >
             <VExpansionPanelTitle class="faq-question">
               <div class="question-wrapper">
-                <VIcon icon="mdi-help-circle-outline" size="20" color="info" />
-                <span class="question-text">{{ faq.q }}</span>
+                <VIcon icon="mdi-help-circle" size="24" color="primary" class="question-icon" />
+                <h3 class="question-text">{{ faq.q }}</h3>
               </div>
             </VExpansionPanelTitle>
             <VExpansionPanelText class="faq-answer">
@@ -2520,14 +2520,14 @@ onMounted(async () => {
   margin-bottom: 12px;
   border-radius: 12px !important;
   overflow: hidden;
-  background: rgba(var(--v-theme-surface), 0.7) !important;
-  border: 1px solid rgba(var(--v-theme-info), 0.1);
+  background: rgba(var(--v-theme-surface), 0.8) !important;
+  border: 1px solid rgba(var(--v-theme-primary), 0.1);
   transition: all 0.3s ease;
 }
 
 .faq-expansion-panel:hover {
-  border-color: rgba(var(--v-theme-info), 0.3);
-  box-shadow: 0 4px 12px rgba(var(--v-theme-info), 0.1);
+  border-color: rgba(var(--v-theme-primary), 0.3);
+  box-shadow: 0 4px 12px rgba(var(--v-theme-primary), 0.1);
 }
 
 .faq-expansion-panel:last-child {
@@ -2536,39 +2536,43 @@ onMounted(async () => {
 
 .faq-question {
   font-weight: 600;
-  padding: 16px 20px;
+  padding: 20px 24px;
 }
 
 .question-wrapper {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 16px;
   width: 100%;
 }
 
+.question-icon {
+  flex-shrink: 0;
+}
+
 .question-text {
-  font-size: 0.9375rem;
+  font-size: 1.0625rem;
   font-weight: 600;
   line-height: 1.5;
+  margin: 0;
   color: rgb(var(--v-theme-on-surface));
 }
 
 .faq-answer {
-  padding: 0 20px 16px 20px !important;
-  font-size: 0.875rem;
-  line-height: 1.6;
-  color: rgba(var(--v-theme-on-surface), 0.8);
+  padding: 0 24px 20px 24px !important;
+  font-size: 1rem;
+  line-height: 1.7;
+  color: rgba(var(--v-theme-on-surface), 0.85);
 }
 
 .faq-answer :deep(strong) {
-  font-weight: 700;
+  font-weight: 600;
   color: rgb(var(--v-theme-primary));
 }
 
 .faq-answer :deep(a) {
-  color: rgb(var(--v-theme-info));
+  color: rgb(var(--v-theme-primary));
   text-decoration: none;
-  font-weight: 500;
 }
 
 .faq-answer :deep(a:hover) {

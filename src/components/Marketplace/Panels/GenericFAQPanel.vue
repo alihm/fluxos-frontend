@@ -18,7 +18,7 @@
           >
             <VExpansionPanelTitle class="generic-faq-question">
               <div class="question-wrapper">
-                <VIcon icon="mdi-help-circle-outline" color="info" size="24" class="question-icon" />
+                <VIcon icon="mdi-help-circle" color="primary" size="24" class="question-icon" />
                 <h3 class="question-text">{{ faq.q || faq.question }}</h3>
               </div>
             </VExpansionPanelTitle>
@@ -170,9 +170,8 @@ const panelStyle = computed(() => ({
 
 .generic-faq-card {
   border-radius: 16px;
-  background: rgba(var(--v-theme-surface), 0.5);
+  background: rgba(var(--v-theme-surface), 0.6);
   backdrop-filter: blur(10px);
-  border: 1px solid rgba(var(--v-theme-info), 0.15);
 }
 
 .generic-faq-title {
@@ -180,7 +179,7 @@ const panelStyle = computed(() => ({
   font-weight: 700;
   margin-bottom: 12px;
   text-align: center;
-  color: rgb(var(--v-theme-info));
+  color: rgb(var(--v-theme-primary));
 }
 
 .generic-faq-subtitle {
@@ -199,14 +198,14 @@ const panelStyle = computed(() => ({
   margin-bottom: 12px;
   border-radius: 12px !important;
   overflow: hidden;
-  background: rgba(var(--v-theme-surface), 0.7) !important;
-  border: 1px solid rgba(var(--v-theme-info), 0.1);
+  background: rgba(var(--v-theme-surface), 0.8) !important;
+  border: 1px solid rgba(var(--v-theme-primary), 0.1);
   transition: all 0.3s ease;
 }
 
 .generic-faq-expansion-panel:hover {
-  border-color: rgba(var(--v-theme-info), 0.3);
-  box-shadow: 0 4px 12px rgba(var(--v-theme-info), 0.1);
+  border-color: rgba(var(--v-theme-primary), 0.3);
+  box-shadow: 0 4px 12px rgba(var(--v-theme-primary), 0.1);
 }
 
 .generic-faq-expansion-panel:last-child {
@@ -254,7 +253,7 @@ const panelStyle = computed(() => ({
 
 .generic-faq-answer :deep(strong) {
   font-weight: 600;
-  color: rgb(var(--v-theme-info));
+  color: rgb(var(--v-theme-primary));
 }
 
 .generic-faq-answer :deep(ul),
@@ -268,7 +267,7 @@ const panelStyle = computed(() => ({
 }
 
 .generic-faq-answer :deep(a) {
-  color: rgb(var(--v-theme-info));
+  color: rgb(var(--v-theme-primary));
   text-decoration: none;
 }
 
@@ -277,7 +276,7 @@ const panelStyle = computed(() => ({
 }
 
 .generic-faq-answer :deep(code) {
-  background: rgba(var(--v-theme-info), 0.1);
+  background: rgba(var(--v-theme-primary), 0.1);
   padding: 2px 6px;
   border-radius: 4px;
   font-family: 'Courier New', monospace;

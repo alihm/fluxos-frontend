@@ -1318,6 +1318,19 @@ onMounted(async () => {
   color: rgba(var(--v-theme-on-surface), 0.85);
 }
 
+.faq-answer :deep(p) {
+  margin-bottom: 12px;
+}
+
+.faq-answer :deep(p:last-child) {
+  margin-bottom: 0;
+}
+
+.faq-answer :deep(strong) {
+  font-weight: 600;
+  color: rgb(var(--v-theme-primary));
+}
+
 .faq-answer :deep(a) {
   color: rgb(var(--v-theme-primary));
   text-decoration: none;
@@ -1325,11 +1338,6 @@ onMounted(async () => {
 
 .faq-answer :deep(a:hover) {
   text-decoration: underline;
-}
-
-.faq-answer :deep(strong) {
-  font-weight: 600;
-  color: rgb(var(--v-theme-primary));
 }
 
 /* Responsive */
