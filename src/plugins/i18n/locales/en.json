@@ -120,6 +120,8 @@
     "trustpilot": {
       "title": "Trusted by Thousands",
       "ratingLabel": "Excellent",
+      "rating": "4.5 out of 5",
+      "reviews": "Based on 96,845 reviews",
       "basedOn": "Based on {count} reviews",
       "reviewsCount": "96,845 reviews",
       "score": "4.5",
@@ -2884,11 +2886,153 @@
       },
       "games": {
         "index": {
-          "title": "Level Up Your Gaming",
-          "subtitle": "Premium game hosting with global servers, lightning-fast connections, and flexible plans for every gamer.",
-          "loading": "Loading Games...",
-          "maintenanceTitle": "Games Marketplace\nUnder Maintenance",
-          "maintenanceSubtitle": "We're currently experiencing technical difficulties with the games marketplace. Our team is working to resolve this issue as quickly as possible."
+          "title": "Game Server Hosting",
+          "subtitle": "Deploy and manage game servers on FluxCloud",
+          "loading": "Loading available games...",
+          "maintenanceTitle": "Games Marketplace Temporarily Unavailable",
+          "maintenanceSubtitle": "We're experiencing temporary issues",
+          "hero": {
+            "title": "Premium Game Server Hosting on FluxCloud",
+            "subtitle": "Deploy your favorite game servers in seconds with global distribution, DDoS protection, and pay-as-you-go pricing powered by blockchain technology.",
+            "cta": "Browse Game Servers",
+            "benefits": {
+              "instant": "Instant Deployment",
+              "global": "Global Servers",
+              "ddos": "DDoS Protection",
+              "pricing": "Transparent Pricing"
+            }
+          },
+          "trust": {
+            "servers": {
+              "value": "1000+",
+              "label": "Active Servers"
+            },
+            "uptime": {
+              "value": "99.9%",
+              "label": "Uptime SLA"
+            },
+            "locations": {
+              "value": "50+",
+              "label": "Countries"
+            },
+            "deployment": {
+              "value": "< 30s",
+              "label": "Deploy Time"
+            }
+          },
+          "features": {
+            "title": "Why Choose FluxPlay for Game Hosting?",
+            "items": {
+              "instant": {
+                "title": "Instant Deployment",
+                "description": "Launch your game server in under 30 seconds with our automated deployment system. No technical knowledge required."
+              },
+              "ddos": {
+                "title": "DDoS Protection Included",
+                "description": "Enterprise-grade DDoS protection keeps your server online and your players connected, even during attacks."
+              },
+              "global": {
+                "title": "Global Server Network",
+                "description": "Choose from 50+ countries worldwide to minimize latency and provide the best gaming experience for your players."
+              },
+              "monitoring": {
+                "title": "24/7 Monitoring",
+                "description": "Real-time performance monitoring with automatic alerts ensures your server stays healthy and responsive."
+              },
+              "paygo": {
+                "title": "Pay-As-You-Go Pricing",
+                "description": "Only pay for the resources you use with transparent, flexible pricing. No hidden fees or long-term contracts."
+              },
+              "blockchain": {
+                "title": "Blockchain-Powered",
+                "description": "Built on decentralized Flux infrastructure for enhanced security, transparency, and resistance to centralized failures."
+              },
+              "uptime": {
+                "title": "99.9% Uptime Guarantee",
+                "description": "Our decentralized infrastructure ensures maximum reliability with a 99.9% uptime SLA, keeping your game server online when your players need it."
+              },
+              "moneyback": {
+                "title": "30-Day Money Back",
+                "description": "Try FluxPlay risk-free with our 30-day money-back guarantee. If you're not satisfied, we'll refund your payment, no questions asked."
+              }
+            }
+          },
+          "content": {
+            "title": "Professional Game Server Hosting Made Simple",
+            "body": "<p><strong>FluxPlay</strong> revolutionizes game server hosting by combining the power of decentralized infrastructure with the simplicity of traditional hosting. Whether you're hosting <strong>Minecraft</strong>, <strong>Palworld</strong>, <strong>Factorio</strong>, <strong>Satisfactory</strong>, or <strong>Enshrouded</strong> servers, our platform delivers unmatched performance and reliability.</p><p>Built on <strong>FluxCloud</strong>, FluxPlay provides enterprise-grade game hosting with automatic scaling, geographic distribution, and military-grade security. Our decentralized architecture ensures your game server remains online even if individual nodes fail, providing superior uptime compared to traditional centralized hosting providers.</p><p>With instant deployment, transparent pricing, and included DDoS protection, FluxPlay is the modern solution for gamers, communities, and server administrators who demand the best.</p>"
+          },
+          "serverLocations": {
+            "title": "Global Server Network",
+            "subtitle": "Our decentralized infrastructure spans across the globe, ensuring low latency and high availability for your game servers wherever your players are."
+          },
+          "gamesTitle": "Available Game Servers",
+          "gamesSubtitle": "Choose a game and deploy your server in seconds",
+          "comparison": {
+            "title": "Why FluxPlay vs Traditional Hosting",
+            "feature": "Feature",
+            "fluxplay": "FluxPlay",
+            "traditional": "Traditional Hosting",
+            "rows": {
+              "setup": "Setup Time",
+              "pricing": "Pricing Model",
+              "ddos": "DDoS Protection",
+              "decentralized": "Decentralized",
+              "locations": "Server Locations",
+              "scaling": "Scaling Speed"
+            },
+            "values": {
+              "instant": "< 30 seconds",
+              "hours": "Hours to days",
+              "transparent": "Transparent Pay-As-You-Go",
+              "hidden": "Hidden fees + contracts",
+              "extra": "Extra cost",
+              "countries": "50+ countries",
+              "limited": "Limited regions",
+              "slow": "Slow manual process"
+            }
+          },
+          "faq": {
+            "title": "Frequently Asked Questions",
+            "items": {
+              "what": {
+                "question": "What is FluxPlay game server hosting?",
+                "answer": "<p>FluxPlay is a decentralized game server hosting platform built on FluxCloud. It allows you to deploy and manage game servers like Minecraft, Palworld, Factorio, and more with instant deployment, global distribution, and enterprise-grade security.</p>"
+              },
+              "different": {
+                "question": "How is FluxPlay different from traditional game hosting?",
+                "answer": "<p>FluxPlay uses <strong>decentralized blockchain infrastructure</strong> instead of centralized data centers. This provides better uptime, transparent pricing, built-in DDoS protection, and resistance to single points of failure. You can deploy servers in under 30 seconds compared to hours or days with traditional providers.</p>"
+              },
+              "games": {
+                "question": "What games can I host on FluxPlay?",
+                "answer": "<p>FluxPlay currently supports popular games including <strong>Minecraft</strong>, <strong>Palworld</strong>, <strong>Factorio</strong>, <strong>Satisfactory</strong>, and <strong>Enshrouded</strong>. We're constantly adding new games based on community demand.</p>"
+              },
+              "deploy": {
+                "question": "How fast can I deploy a game server?",
+                "answer": "<p>Game servers deploy in <strong>under 30 seconds</strong> on average. Simply choose your game, configuration, and server location, then click deploy. Our automated system handles all the technical setup for you.</p>"
+              },
+              "ddosProtection": {
+                "question": "Is DDoS protection included?",
+                "answer": "<p>Yes! <strong>Enterprise-grade DDoS protection is included</strong> with all game servers at no additional cost. Your server is protected against common attack vectors, ensuring players stay connected even during attacks.</p>"
+              },
+              "pricing": {
+                "question": "How does pricing work?",
+                "answer": "<p>FluxPlay uses <strong>transparent pay-as-you-go pricing</strong>. You only pay for the compute resources (CPU, RAM, storage) your server uses. No hidden fees, setup costs, or long-term contracts. Prices vary by game and configuration, starting from $__MIN_PRICE__/month for small servers.</p>"
+              },
+              "support": {
+                "question": "What support is available?",
+                "answer": "<p>All FluxPlay servers include <strong>automated 24/7 monitoring</strong> with real-time alerts. For technical support, you can access our documentation, community forums, and ticket system. Premium support packages are available for enterprise customers.</p>"
+              },
+              "blockchain": {
+                "question": "Do I need cryptocurrency to use FluxPlay?",
+                "answer": "<p>While FluxPlay is built on blockchain technology, you can pay with <strong>traditional payment methods</strong> including credit cards. The blockchain infrastructure provides security and decentralization benefits in the background without you needing to manage cryptocurrency.</p>"
+              }
+            }
+          },
+          "cta": {
+            "title": "Ready to Deploy Your Game Server?",
+            "subtitle": "Join thousands of gamers hosting on the decentralized Flux network",
+            "button": "Get Started Now"
+          }
         },
         "detail": {
           "loadingTitle": "Loading Game Details...",
@@ -3556,6 +3700,170 @@
           "agreement": "I have read and agree to the",
           "link": "Terms of Service",
           "loadError": "Failed to load Terms of Service. Please visit <a href=\"https://runonflux.io/terms\" target=\"_blank\">https://runonflux.io/terms</a>"
+        },
+        "games": {
+          "index": {
+            "title": "Game Server Hosting",
+            "subtitle": "Deploy and manage game servers on FluxCloud",
+            "loading": "Loading available games...",
+            "maintenanceTitle": "Games Marketplace Temporarily Unavailable",
+            "maintenanceSubtitle": "We're experiencing temporary issues",
+            "hero": {
+              "title": "Premium Game Server Hosting on FluxCloud",
+              "subtitle": "Deploy your favorite game servers in seconds with global distribution, DDoS protection, and pay-as-you-go pricing powered by blockchain technology.",
+              "cta": "Browse Game Servers",
+              "benefits": {
+                "instant": "Instant Deployment",
+                "global": "Global Servers",
+                "ddos": "DDoS Protection",
+                "pricing": "Transparent Pricing"
+              }
+            },
+            "trust": {
+              "servers": {
+                "value": "1000+",
+                "label": "Active Servers"
+              },
+              "uptime": {
+                "value": "99.9%",
+                "label": "Uptime SLA"
+              },
+              "locations": {
+                "value": "50+",
+                "label": "Countries"
+              },
+              "deployment": {
+                "value": "< 30s",
+                "label": "Deploy Time"
+              }
+            },
+            "features": {
+              "title": "Why Choose FluxPlay for Game Hosting?",
+              "items": {
+                "instant": {
+                  "title": "Instant Deployment",
+                  "description": "Launch your game server in under 30 seconds with our automated deployment system. No technical knowledge required."
+                },
+                "ddos": {
+                  "title": "DDoS Protection Included",
+                  "description": "Enterprise-grade DDoS protection keeps your server online and your players connected, even during attacks."
+                },
+                "global": {
+                  "title": "Global Server Network",
+                  "description": "Choose from 50+ countries worldwide to minimize latency and provide the best gaming experience for your players."
+                },
+                "monitoring": {
+                  "title": "24/7 Monitoring",
+                  "description": "Real-time performance monitoring with automatic alerts ensures your server stays healthy and responsive."
+                },
+                "paygo": {
+                  "title": "Pay-As-You-Go Pricing",
+                  "description": "Only pay for the resources you use with transparent, flexible pricing. No hidden fees or long-term contracts."
+                },
+                "blockchain": {
+                  "title": "Blockchain-Powered",
+                  "description": "Built on decentralized Flux infrastructure for enhanced security, transparency, and resistance to centralized failures."
+                }
+              }
+            },
+            "content": {
+              "title": "Professional Game Server Hosting Made Simple",
+              "body": "<p><strong>FluxPlay</strong> revolutionizes game server hosting by combining the power of decentralized infrastructure with the simplicity of traditional hosting. Whether you're hosting <strong>Minecraft</strong>, <strong>Palworld</strong>, <strong>Factorio</strong>, <strong>Satisfactory</strong>, or <strong>Enshrouded</strong> servers, our platform delivers unmatched performance and reliability.</p><p>Built on <strong>FluxCloud</strong>, FluxPlay provides enterprise-grade game hosting with automatic scaling, geographic distribution, and military-grade security. Our decentralized architecture ensures your game server remains online even if individual nodes fail, providing superior uptime compared to traditional centralized hosting providers.</p><p>With instant deployment, transparent pricing, and included DDoS protection, FluxPlay is the modern solution for gamers, communities, and server administrators who demand the best.</p>"
+            },
+            "gamesTitle": "Available Game Servers",
+            "gamesSubtitle": "Choose your game and deploy a server in seconds",
+            "comparison": {
+              "title": "Why FluxPlay vs Traditional Hosting",
+              "feature": "Feature",
+              "fluxplay": "FluxPlay",
+              "traditional": "Traditional Hosting",
+              "rows": {
+                "setup": "Setup Time",
+                "pricing": "Pricing Model",
+                "ddos": "DDoS Protection",
+                "decentralized": "Decentralized",
+                "locations": "Server Locations",
+                "scaling": "Scaling Speed"
+              },
+              "values": {
+                "instant": "< 30 seconds",
+                "hours": "Hours to days",
+                "transparent": "Transparent Pay-As-You-Go",
+                "hidden": "Hidden fees + contracts",
+                "extra": "Extra cost",
+                "countries": "50+ countries",
+                "limited": "Limited regions",
+                "slow": "Slow manual process"
+              }
+            },
+            "faq": {
+              "title": "Frequently Asked Questions",
+              "items": {
+                "what": {
+                  "question": "What is FluxPlay game server hosting?",
+                  "answer": "<p>FluxPlay is a decentralized game server hosting platform built on FluxCloud. It allows you to deploy and manage game servers like Minecraft, Palworld, Factorio, and more with instant deployment, global distribution, and enterprise-grade security.</p>"
+                },
+                "different": {
+                  "question": "How is FluxPlay different from traditional game hosting?",
+                  "answer": "<p>FluxPlay uses <strong>decentralized blockchain infrastructure</strong> instead of centralized data centers. This provides superior uptime, transparent pricing, included DDoS protection, and resistance to single points of failure. You can deploy servers in under 30 seconds compared to hours or days with traditional providers.</p>"
+                },
+                "games": {
+                  "question": "What games can I host on FluxPlay?",
+                  "answer": "<p>FluxPlay currently supports popular games including <strong>Minecraft</strong>, <strong>Palworld</strong>, <strong>Factorio</strong>, <strong>Satisfactory</strong>, and <strong>Enshrouded</strong>. We're constantly adding new games based on community demand.</p>"
+                },
+                "deploy": {
+                  "question": "How quickly can I deploy a game server?",
+                  "answer": "<p>Game servers deploy in <strong>under 30 seconds</strong> on average. Simply select your game, choose your configuration and server location, and click deploy. Our automated system handles all the technical setup for you.</p>"
+                },
+                "ddosProtection": {
+                  "question": "Is DDoS protection included?",
+                  "answer": "<p>Yes! <strong>Enterprise-grade DDoS protection is included</strong> with all game servers at no extra cost. Your server is protected against common attack vectors, ensuring your players stay connected even during attacks.</p>"
+                },
+                "pricing": {
+                  "question": "How does pricing work?",
+                  "answer": "<p>FluxPlay uses <strong>transparent pay-as-you-go pricing</strong>. You only pay for the computing resources (CPU, RAM, storage) your server uses. No hidden fees, setup costs, or long-term contracts. Pricing varies by game and configuration, typically starting around $10-15/month for small servers.</p>"
+                },
+                "support": {
+                  "question": "What support is available?",
+                  "answer": "<p>All FluxPlay servers include <strong>24/7 automated monitoring</strong> with real-time alerts. For technical support, you can access our documentation, community forums, and ticketing system. Premium support packages are available for enterprise customers.</p>"
+                },
+                "blockchain": {
+                  "question": "Do I need cryptocurrency to use FluxPlay?",
+                  "answer": "<p>While FluxPlay is built on blockchain technology, you can pay with <strong>traditional payment methods</strong> including credit cards. The blockchain infrastructure provides security and decentralization benefits behind the scenes without requiring you to manage cryptocurrency.</p>"
+                }
+              }
+            },
+            "cta": {
+              "title": "Ready to Deploy Your Game Server?",
+              "subtitle": "Join thousands of gamers hosting on the decentralized Flux network",
+              "button": "Get Started Now"
+            }
+          }
+        },
+        "wordpress": {
+          "loadingTitle": "Loading WordPress Hosting Plans...",
+          "maintenanceTitle": "WordPress Hosting Temporarily Unavailable",
+          "maintenanceSubtitle": "We're experiencing temporary issues",
+          "maintenanceDescription": "Our WordPress hosting service is currently unavailable. Please try again later.",
+          "landing": {
+            "title": "WordPress Hosting on Flux",
+            "subtitle": "Deploy your WordPress site on the decentralized Flux network with instant setup and global distribution",
+            "plans": {
+              "title": "Choose Your WordPress Hosting Plan",
+              "subtitle": "Flexible plans for every need - from personal blogs to enterprise sites",
+              "recommended": "Recommended",
+              "perMonth": "/month",
+              "cpu": "CPU",
+              "ram": "RAM",
+              "storage": "Storage",
+              "instances": "Instances",
+              "getStarted": "Get Started"
+            },
+            "description": {
+              "title": "Professional WordPress Hosting Made Simple",
+              "content": "Experience the future of WordPress hosting with FluxPlay. Our decentralized infrastructure provides enterprise-grade performance, security, and reliability for your WordPress sites. Built on the Flux blockchain network, your site benefits from global distribution, automatic scaling, and superior uptime compared to traditional hosting providers."
+            }
+          }
         }
       }
     },
