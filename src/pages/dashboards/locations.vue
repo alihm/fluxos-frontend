@@ -122,9 +122,26 @@ import axios from "axios"
 import DashboardService from "@/services/DashboardService"
 import { useConfigStore } from "@core/stores/config"
 import { storeToRefs } from "pinia"
+import { useSEO, generateOrganizationSchema, generateBreadcrumbSchema } from '@/composables/useSEO'
 
 // Initialize i18n
 const { t } = useI18n()
+
+// SEO configuration
+useSEO({
+  title: 'Flux Node Locations - Global Network Map | FluxCloud',
+  description: 'Explore the global distribution of 8,000+ FluxNodes. Interactive map showing node locations across 70+ countries. View network decentralization and geographic spread of Flux infrastructure worldwide.',
+  url: 'https://home.runonflux.io/dashboards/locations',
+  keywords: 'flux node map, node locations, global network, geographic distribution, flux nodes worldwide, decentralized network map, node distribution, blockchain network map',
+  structuredData: [
+    generateOrganizationSchema(),
+    generateBreadcrumbSchema([
+      { name: 'Home', url: 'https://home.runonflux.io' },
+      { name: 'Flux Network', url: 'https://home.runonflux.io/dashboards/overview' },
+      { name: 'Locations', url: 'https://home.runonflux.io/dashboards/locations' },
+    ]),
+  ],
+})
 
 // Reactive state
 const fluxList = ref([])

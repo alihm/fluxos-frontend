@@ -134,7 +134,25 @@ import { decryptEnterpriseWithAes, encryptAesKeyWithRsaKey, importRsaPublicKey, 
 import { storeToRefs } from "pinia"
 import { useFluxStore } from "@/stores/flux"
 
+// SEO
+import { useSEO, generateOrganizationSchema, generateBreadcrumbSchema } from '@/composables/useSEO'
+
 const { t } = useI18n()
+
+// SEO configuration
+useSEO({
+  title: 'My Applications - Manage FluxCloud Apps | FluxCloud',
+  description: 'Manage your deployed applications on Flux decentralized cloud. View app status, monitor performance, update configurations, and manage your FluxCloud deployments from a unified dashboard.',
+  url: 'https://home.runonflux.io/apps/management',
+  keywords: 'manage apps, FluxCloud dashboard, app management, deployed apps, monitor apps, app status, flux applications, container management, cloud dashboard',
+  structuredData: [
+    generateOrganizationSchema(),
+    generateBreadcrumbSchema([
+      { name: 'Home', url: 'https://home.runonflux.io' },
+      { name: 'My Applications', url: 'https://home.runonflux.io/apps/management' },
+    ]),
+  ],
+})
 
 const fluxStore = useFluxStore()
 const { privilege } = storeToRefs(fluxStore)

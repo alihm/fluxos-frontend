@@ -167,8 +167,25 @@ import axiosRetry from "axios-retry"
 import { useConfigStore } from "@core/stores/config"
 import { storeToRefs } from "pinia"
 import { useI18n } from "vue-i18n"
+import { useSEO, generateOrganizationSchema, generateBreadcrumbSchema } from '@/composables/useSEO'
 
 const { t } = useI18n()
+
+// SEO configuration
+useSEO({
+  title: 'Flux Node Rewards - FLUX Token Mining & Staking | FluxCloud',
+  description: 'Track Flux node rewards and FLUX token distribution. View real-time rewards for Cumulus, Nimbus, and Stratus nodes. Monitor block rewards, node earnings, and staking returns on the Flux network.',
+  url: 'https://home.runonflux.io/dashboards/rewards',
+  keywords: 'flux rewards, flux token, node rewards, FLUX mining, flux staking, node earnings, flux income, blockchain rewards, passive income, flux node profit',
+  structuredData: [
+    generateOrganizationSchema(),
+    generateBreadcrumbSchema([
+      { name: 'Home', url: 'https://home.runonflux.io' },
+      { name: 'Flux Network', url: 'https://home.runonflux.io/dashboards/overview' },
+      { name: 'Rewards', url: 'https://home.runonflux.io/dashboards/rewards' },
+    ]),
+  ],
+})
 
 const configStore = useConfigStore()
 const { theme } = storeToRefs(configStore)

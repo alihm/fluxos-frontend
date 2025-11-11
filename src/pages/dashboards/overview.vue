@@ -438,6 +438,7 @@
 <script setup>
 import { ref, computed, onMounted, watch, nextTick } from "vue"
 import { useI18n } from "vue-i18n"
+import { useHead } from '@vueuse/head'
 import axios from "axios"
 import tierColors from "@/utils/colors"
 import DashboardService from "@/services/DashboardService"
@@ -445,6 +446,38 @@ import { useConfigStore } from "@core/stores/config"
 import { storeToRefs } from "pinia"
 
 const { t } = useI18n()
+
+// SEO meta tags
+const title = 'Flux Network Overview - Real-Time Node Statistics | FluxCloud'
+const description = 'View real-time statistics of the Flux decentralized network. Track 8,000+ active FluxNodes across Cumulus, Nimbus, and Stratus tiers. Monitor network health, supply, and node distribution worldwide.'
+const pageUrl = 'https://home.runonflux.io/dashboards/overview'
+const imageUrl = 'https://home.runonflux.io/images/logo.png'
+
+useHead({
+  title,
+  meta: [
+    { name: 'description', content: description },
+    { name: 'keywords', content: 'Flux network, FluxNodes, node statistics, blockchain network, decentralized infrastructure, Cumulus, Nimbus, Stratus, network monitoring, node tiers' },
+
+    // Open Graph
+    { property: 'og:title', content: title },
+    { property: 'og:description', content: description },
+    { property: 'og:image', content: imageUrl },
+    { property: 'og:url', content: pageUrl },
+    { property: 'og:type', content: 'website' },
+    { property: 'og:site_name', content: 'FluxCloud' },
+
+    // Twitter
+    { name: 'twitter:card', content: 'summary_large_image' },
+    { name: 'twitter:title', content: title },
+    { name: 'twitter:description', content: description },
+    { name: 'twitter:image', content: imageUrl },
+    { name: 'twitter:site', content: '@RunOnFlux' },
+  ],
+  link: [
+    { rel: 'canonical', href: pageUrl },
+  ],
+})
 
 // Data properties
 const isLoading = ref(true) // Unified loading state

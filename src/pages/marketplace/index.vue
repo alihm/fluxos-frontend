@@ -183,7 +183,7 @@ const {
 
 const pageUrl = 'https://home.runonflux.io/marketplace'
 const title = 'Marketplace - Deploy Decentralized Apps on Flux | FluxCloud'
-const description = 'Browse and deploy decentralized applications on Flux\'s Web3 cloud infrastructure. Discover Docker containers, web apps, APIs, and services running on 2,600+ FluxNodes worldwide. One-click deployment with transparent pricing.'
+const description = 'Browse and deploy decentralized applications on Flux\'s Web3 cloud infrastructure. Discover Docker containers, web apps, APIs, and services running on 8,000+ FluxNodes worldwide. One-click deployment with transparent pricing.'
 const imageUrl = 'https://home.runonflux.io/images/logo.png'
 
 // Generate structured data

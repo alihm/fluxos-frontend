@@ -680,6 +680,11 @@ onMounted(async () => {
   box-shadow: 0 2px 16px rgba(0, 0, 0, 0.08);
 }
 
+/* First section card after hero needs top margin */
+.app-types-section {
+  margin-top: 2rem;
+}
+
 .section-title {
   font-size: 2rem;
   font-weight: 700;

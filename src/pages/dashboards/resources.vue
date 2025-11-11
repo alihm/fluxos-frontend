@@ -312,10 +312,27 @@ import { useDisplay, useTheme } from 'vuetify'
 import { Doughnut } from 'vue-chartjs'
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js'
 import { useI18n } from 'vue-i18n'
+import { useSEO, generateOrganizationSchema, generateBreadcrumbSchema } from '@/composables/useSEO'
 
 ChartJS.register(ArcElement, Tooltip, Legend)
 
 const { t } = useI18n()
+
+// SEO configuration
+useSEO({
+  title: 'Flux Network Resources - Storage & Bandwidth Capacity | FluxCloud',
+  description: 'Monitor Flux network resources in real-time. View storage capacity, bandwidth availability, and resource distribution across Cumulus, Nimbus, and Stratus tiers. Track network capacity for hosting applications.',
+  url: 'https://home.runonflux.io/dashboards/resources',
+  keywords: 'flux resources, network capacity, storage capacity, bandwidth availability, node resources, flux network storage, decentralized storage, network monitoring',
+  structuredData: [
+    generateOrganizationSchema(),
+    generateBreadcrumbSchema([
+      { name: 'Home', url: 'https://home.runonflux.io' },
+      { name: 'Flux Network', url: 'https://home.runonflux.io/dashboards/overview' },
+      { name: 'Resources', url: 'https://home.runonflux.io/dashboards/resources' },
+    ]),
+  ],
+})
 
 const configStore = useConfigStore()
 const { theme } = storeToRefs(configStore)
