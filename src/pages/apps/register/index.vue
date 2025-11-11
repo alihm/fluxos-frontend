@@ -3,44 +3,27 @@
     <!-- Content -->
     <div class="landing-content">
       <!-- Breadcrumb Navigation -->
-      <nav class="breadcrumb-nav" aria-label="Breadcrumb">
-        <ol class="breadcrumb-list">
-          <li class="breadcrumb-item">
-            <RouterLink to="/" class="breadcrumb-link">Home</RouterLink>
-            <VIcon class="breadcrumb-separator">mdi-chevron-right</VIcon>
-          </li>
-          <li class="breadcrumb-item">
-            <RouterLink to="/apps/management" class="breadcrumb-link">Applications</RouterLink>
-            <VIcon class="breadcrumb-separator">mdi-chevron-right</VIcon>
-          </li>
-          <li class="breadcrumb-item breadcrumb-current" aria-current="page">
-            <span>Deploy New App</span>
-          </li>
-        </ol>
-      </nav>
+      <BreadcrumbNav
+        :items="[
+          { text: 'Home', to: '/' },
+          { text: 'Applications', to: '/apps/management' },
+          { text: 'Deploy New App' }
+        ]"
+      />
 
       <!-- Hero Section -->
-      <div class="hero-section" role="banner">
-        <div class="hero-icon-top-right" role="img" aria-label="Flux Cloud Logo">
-          <VIcon icon="mdi-cloud-upload" size="80" color="white" aria-hidden="true" />
-        </div>
-        <div class="hero-content">
-          <h1 class="hero-title">{{ t('pages.apps.register.landing.title') }}</h1>
-          <p class="hero-subtitle">{{ heroSubtitle }}</p>
-          <div class="hero-actions">
-            <VBtn
-              color="white"
-              size="x-large"
-              variant="elevated"
-              class="hero-btn"
-              :to="{ name: 'apps-register-configure' }"
-            >
-              <VIcon start>mdi-rocket-launch</VIcon>
-              {{ t('pages.apps.register.landing.getStarted') }}
-            </VBtn>
-          </div>
-        </div>
-      </div>
+      <HeroSection
+        :title="t('pages.apps.register.landing.title')"
+        :subtitle="heroSubtitle"
+        background-image="/banner/FluxDeploy.png"
+        overlay-gradient="linear-gradient(135deg, rgba(var(--v-theme-primary), 0.5) 0%, rgba(var(--v-theme-secondary), 0.5) 100%)"
+        icon="mdi-cloud-upload"
+        icon-aria-label="Flux Cloud Logo"
+        show-cta
+        :cta-text="t('pages.apps.register.landing.getStarted')"
+        cta-icon="mdi-rocket-launch"
+        :cta-to="{ name: 'apps-register-configure' }"
+      />
 
       <!-- App Types Section -->
       <VCard class="section-card app-types-section">
@@ -66,26 +49,11 @@
       </VCard>
 
       <!-- Benefits Section -->
-      <VCard class="section-card benefits-section">
-        <VCardText>
-          <h2 class="section-title">
-            {{ t('pages.apps.register.landing.benefits.title') }}
-          </h2>
-          <div class="benefits-grid">
-            <div
-              v-for="(benefit, index) in benefits"
-              :key="index"
-              class="benefit-item"
-            >
-              <div class="benefit-icon">
-                <VIcon :icon="benefit.icon" size="40" :color="benefit.color" />
-              </div>
-              <h4 class="benefit-title">{{ benefit.title }}</h4>
-              <p class="benefit-text">{{ benefit.description }}</p>
-            </div>
-          </div>
-        </VCardText>
-      </VCard>
+      <FeatureShowcase
+        :title="t('pages.apps.register.landing.benefits.title')"
+        :items="benefits"
+        grid-min-width="300px"
+      />
 
       <!-- Pricing Comparison Section -->
       <VCard class="section-card pricing-section">
@@ -134,231 +102,42 @@
       </VCard>
 
       <!-- Trustpilot Reviews Section -->
-      <VCard class="section-card trustpilot-section">
-        <VCardText class="pa-8">
-          <div class="trustpilot-header text-center mb-6">
-            <h2 class="text-h4 mb-3 font-weight-bold">{{ t('common.trustpilot.title') }}</h2>
-            <a
-              :href="t('common.trustpilot.profileUrl')"
-              target="_blank"
-              rel="noopener noreferrer"
-              class="trustpilot-link"
-            >
-              <div class="trustpilot-rating-container">
-                <div class="trustpilot-logo mb-3">
-                  <VIcon icon="mdi-star" size="32" color="#00b67a" />
-                  <span class="text-h6 font-weight-bold ml-2" style="color: #00b67a;">Trustpilot</span>
-                </div>
-                <div class="rating-stars mb-2">
-                  <VIcon v-for="i in 4" :key="i" icon="mdi-star" size="32" color="#00b67a" />
-                  <VIcon icon="mdi-star-half-full" size="32" color="#00b67a" />
-                </div>
-                <div class="rating-text">
-                  <span class="text-h5 font-weight-bold">{{ t('common.trustpilot.ratingLabel') }}</span>
-                  <span class="text-h6 ml-2 text-medium-emphasis">{{ t('common.trustpilot.score') }} {{ t('common.trustpilot.outOf') }}</span>
-                </div>
-                <div class="reviews-count text-body-2 text-medium-emphasis mt-1">
-                  {{ t('common.trustpilot.basedOn', { count: t('common.trustpilot.reviewsCount') }) }}
-                </div>
-              </div>
-            </a>
-          </div>
-
-          <div class="trustpilot-reviews">
-            <VRow>
-              <VCol v-for="(review, key) in ['review1', 'review2', 'review3']" :key="key" cols="12" md="4">
-                <VCard variant="outlined" class="review-card pa-4">
-                  <div class="review-stars mb-2">
-                    <VIcon v-for="i in parseInt(t(`common.trustpilot.sampleReviews.${review}.rating`))" :key="i" icon="mdi-star" size="20" color="#00b67a" />
-                  </div>
-                  <p class="review-text text-body-2 mb-3">
-                    "{{ t(`common.trustpilot.sampleReviews.${review}.text`) }}"
-                  </p>
-                  <div class="review-author text-caption text-medium-emphasis">
-                    <VIcon icon="mdi-check-circle" size="14" color="success" class="mr-1" />
-                    {{ t(`common.trustpilot.sampleReviews.${review}.author`) }}
-                  </div>
-                  <div class="text-caption text-medium-emphasis">
-                    {{ t('common.trustpilot.verifiedCustomer') }}
-                  </div>
-                </VCard>
-              </VCol>
-            </VRow>
-          </div>
-
-          <div class="text-center mt-6">
-            <VBtn
-              :href="t('common.trustpilot.profileUrl')"
-              target="_blank"
-              rel="noopener noreferrer"
-              color="success"
-              variant="outlined"
-              size="large"
-            >
-              <VIcon start>mdi-open-in-new</VIcon>
-              {{ t('common.trustpilot.viewAllReviews') }}
-            </VBtn>
-          </div>
-        </VCardText>
-      </VCard>
+      <TrustpilotPanel :stars="4.5" :star-size="32" :show-rating-label="true" />
 
       <!-- Global Server Network Section -->
-      <VCard class="section-card server-locations-section" role="region" aria-labelledby="server-network-title">
-        <VCardText>
-          <h2 id="server-network-title" class="locations-title">{{ t('pages.apps.register.landing.serverNetwork.title') }}</h2>
-          <p class="locations-subtitle">{{ t('pages.apps.register.landing.serverNetwork.subtitle') }}</p>
-
-          <!-- Stats -->
-          <div v-if="fluxNodeCount > 0" class="stats-container">
-            <div class="stat-item">
-              <VIcon icon="mdi-server-network" size="32" color="primary" />
-              <div class="stat-content">
-                <div class="stat-value">{{ fluxNodeCount.toLocaleString() }}+</div>
-                <div class="stat-label">{{ t('pages.apps.register.landing.serverNetwork.activeServers') }}</div>
-              </div>
-            </div>
-            <div class="stat-item">
-              <VIcon icon="mdi-earth" size="32" color="primary" />
-              <div class="stat-content">
-                <div class="stat-value">{{ countryCount }}+</div>
-                <div class="stat-label">{{ t('pages.apps.register.landing.serverNetwork.countries') }}</div>
-              </div>
-            </div>
-            <div class="stat-item">
-              <VIcon icon="mdi-web" size="32" color="primary" />
-              <div class="stat-content">
-                <div class="stat-value">{{ t('pages.apps.register.landing.serverNetwork.global') }}</div>
-                <div class="stat-label">{{ t('pages.apps.register.landing.serverNetwork.coverage') }}</div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Map Component -->
-          <div class="map-container" role="img" aria-label="Interactive map showing FluxCloud server locations worldwide">
-            <VOverlay
-              v-model="isLoadingMap"
-              contained
-              scroll-strategy="none"
-              class="align-center justify-center"
-            >
-              <VProgressCircular indeterminate color="primary" aria-label="Loading server map" />
-            </VOverlay>
-
-            <MapComponent
-              v-if="fluxList.length > 0"
-              :nodes="fluxList"
-              :show-tier-display="false"
-              class="server-map"
-            />
-
-            <div v-if="!isLoadingMap && fluxList.length === 0" class="no-data">
-              {{ t('pages.apps.register.landing.serverNetwork.noData') }}
-            </div>
-          </div>
-        </VCardText>
-      </VCard>
+      <ServerLocationsPanel
+        :panel="serverLocationsPanel"
+        :app="{ name: 'apps-register' }"
+      />
 
       <!-- Features Section -->
-      <VCard class="section-card features-section">
-        <VCardText>
-          <h2 class="section-title">
-            {{ t('pages.apps.register.landing.features.title') }}
-          </h2>
-          <div class="features-grid">
-            <div
-              v-for="(feature, index) in features"
-              :key="index"
-              class="feature-item"
-            >
-              <div class="feature-icon">
-                <VIcon :icon="feature.icon" size="40" :color="feature.color" />
-              </div>
-              <h4 class="feature-title">{{ feature.title }}</h4>
-              <p class="feature-text">{{ feature.description }}</p>
-            </div>
-          </div>
-        </VCardText>
-      </VCard>
+      <FeatureShowcase
+        :title="t('pages.apps.register.landing.features.title')"
+        :items="features"
+        grid-min-width="300px"
+      />
 
       <!-- FAQ Section -->
-      <VCard class="section-card faq-section" role="region" aria-labelledby="faq-title">
-        <VCardText>
-          <h2 id="faq-title" class="faq-title">
-            {{ t('pages.apps.register.landing.faq.title') }}
-          </h2>
-
-          <VExpansionPanels class="faq-expansion-panels" multiple>
-            <VExpansionPanel
-              v-for="(faq, index) in faqs"
-              :key="index"
-              class="faq-expansion-panel"
-              elevation="0"
-            >
-              <VExpansionPanelTitle class="faq-question">
-                <div class="question-wrapper">
-                  <VIcon icon="mdi-help-circle" color="primary" size="24" class="question-icon" />
-                  <h3 class="question-text">{{ faq.question }}</h3>
-                </div>
-              </VExpansionPanelTitle>
-              <VExpansionPanelText class="faq-answer">
-                <div v-html="faq.answer"></div>
-              </VExpansionPanelText>
-            </VExpansionPanel>
-          </VExpansionPanels>
-        </VCardText>
-      </VCard>
+      <FAQPanel :panel="faqPanel" :app="null" :faqs="faqs" :title="t('pages.apps.register.landing.faq.title')" />
 
       <!-- CTA Section -->
-      <VCard class="section-card cta-section">
-        <VCardText class="text-center">
-          <div class="cta-icon">
-            <VIcon icon="mdi-rocket-launch-outline" size="64" color="primary" />
-          </div>
-          <h2 class="cta-title">{{ t('pages.apps.register.landing.cta.title') }}</h2>
-          <p class="cta-subtitle">{{ t('pages.apps.register.landing.cta.subtitle') }}</p>
-          <VBtn
-            color="primary"
-            size="x-large"
-            variant="elevated"
-            class="cta-btn"
-            :to="{ name: 'apps-register-configure' }"
-          >
-            <VIcon start>mdi-plus-circle</VIcon>
-            {{ t('pages.apps.register.landing.cta.button') }}
-          </VBtn>
-        </VCardText>
-      </VCard>
+      <CtaSection
+        :title="t('pages.apps.register.landing.cta.title')"
+        :subtitle="t('pages.apps.register.landing.cta.subtitle')"
+        :button-text="t('pages.apps.register.landing.cta.button')"
+        icon="mdi-rocket-launch-outline"
+        icon-color="primary"
+        button-icon="mdi-plus-circle"
+        button-icon-position="start"
+        :button-to="{ name: 'apps-register-configure' }"
+        padding-class="text-center"
+      />
 
       <!-- Related Links Section -->
-      <VCard class="section-card related-links-section">
-        <VCardText>
-          <h2 class="section-title">
-            {{ t('pages.apps.register.landing.relatedLinks.title') }}
-          </h2>
-          <div class="related-links-grid">
-            <RouterLink to="/marketplace" class="related-link-card">
-              <VIcon class="related-link-icon" color="primary">mdi-storefront</VIcon>
-              <h3 class="related-link-title">{{ t('pages.apps.register.landing.relatedLinks.marketplace') }}</h3>
-              <p class="related-link-description">{{ t('pages.apps.register.landing.relatedLinks.marketplaceDesc') }}</p>
-            </RouterLink>
-            <RouterLink to="/marketplace/wordpress" class="related-link-card">
-              <VIcon class="related-link-icon" color="info">mdi-wordpress</VIcon>
-              <h3 class="related-link-title">{{ t('pages.apps.register.landing.relatedLinks.wordpress') }}</h3>
-              <p class="related-link-description">{{ t('pages.apps.register.landing.relatedLinks.wordpressDesc') }}</p>
-            </RouterLink>
-            <RouterLink to="/marketplace/games" class="related-link-card">
-              <VIcon class="related-link-icon" color="success">mdi-gamepad-variant</VIcon>
-              <h3 class="related-link-title">{{ t('pages.apps.register.landing.relatedLinks.gaming') }}</h3>
-              <p class="related-link-description">{{ t('pages.apps.register.landing.relatedLinks.gamingDesc') }}</p>
-            </RouterLink>
-            <RouterLink to="/cost-calculator" class="related-link-card">
-              <VIcon class="related-link-icon" color="warning">mdi-calculator</VIcon>
-              <h3 class="related-link-title">{{ t('pages.apps.register.landing.relatedLinks.calculator') }}</h3>
-              <p class="related-link-description">{{ t('pages.apps.register.landing.relatedLinks.calculatorDesc') }}</p>
-            </RouterLink>
-          </div>
-        </VCardText>
-      </VCard>
+      <RelatedLinksGrid
+        :title="t('pages.apps.register.landing.relatedLinks.title')"
+        :links="relatedLinks"
+      />
     </div>
   </div>
 </template>
@@ -367,43 +146,38 @@
 import { ref, computed, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useHead } from '@vueuse/head'
-import axios from 'axios'
-import MapComponent from '@core/components/MapComponent.vue'
-import DashboardService from '@/services/DashboardService'
-import Api from '@/services/ApiClient'
+import ServerLocationsPanel from '@/components/Marketplace/Panels/ServerLocationsPanel.vue'
+import TrustpilotPanel from '@/components/Marketplace/Panels/TrustpilotPanel.vue'
+import FAQPanel from '@/components/Marketplace/Panels/FAQPanel.vue'
+import FeatureShowcase from '@/components/FeatureShowcase.vue'
+import RelatedLinksGrid from '@/components/RelatedLinksGrid.vue'
+import HeroSection from '@/components/HeroSection.vue'
+import BreadcrumbNav from '@/components/BreadcrumbNav.vue'
+import CtaSection from '@/components/CtaSection.vue'
 
 const { t } = useI18n()
 
-// Server locations data
-const fluxList = ref([])
-const fluxNodeCount = ref(0)
-const isLoadingMap = ref(true)
+// Server Locations Panel Configuration
+const serverLocationsPanel = {
+  enabled: true,
+  title: 'i18n:pages.apps.register.landing.serverNetwork.title',
+  subtitle: 'i18n:pages.apps.register.landing.serverNetwork.subtitle',
+}
+
+// FAQ Panel Configuration
+const faqPanel = {
+  enabled: true,
+  title: '',
+  subtitle: '',
+  questions: [],
+}
 
 // FluxCloud pricing data
 const fluxCloudPrice = ref('$8.99') // Default fallback price
 const fluxCloudPriceLoading = ref(true)
 
-// Computed country count from flux list
-const countryCount = computed(() => {
-  const countries = new Set()
-  fluxList.value.forEach(flux => {
-    if (flux.geolocation?.country) {
-      countries.add(flux.geolocation.country)
-    }
-  })
-
-  return countries.size
-})
-
-// Dynamic hero subtitle with real data
-const heroSubtitle = computed(() => {
-  if (fluxNodeCount.value > 0 && countryCount.value > 0) {
-    return `Experience the power of truly decentralized cloud computing. Deploy Docker containers, web apps, APIs, and microservices on our global network of ${fluxNodeCount.value.toLocaleString()}+ servers across ${countryCount.value}+ countries.`
-  }
-
-  // Fallback while loading
-  return 'Experience the power of truly decentralized cloud computing. Deploy Docker containers, web apps, APIs, and microservices on our global decentralized network.'
-})
+// Hero subtitle
+const heroSubtitle = 'Experience the power of truly decentralized cloud computing. Deploy Docker containers, web apps, APIs, and microservices on our global decentralized network.'
 
 // App types data
 const appTypes = computed(() => [
@@ -620,6 +394,38 @@ const faqs = computed(() => [
   },
 ])
 
+// Related links data
+const relatedLinks = computed(() => [
+  {
+    to: '/marketplace',
+    icon: 'mdi-storefront',
+    color: 'primary',
+    title: t('pages.apps.register.landing.relatedLinks.marketplace'),
+    description: t('pages.apps.register.landing.relatedLinks.marketplaceDesc'),
+  },
+  {
+    to: '/marketplace/wordpress',
+    icon: 'mdi-wordpress',
+    color: 'info',
+    title: t('pages.apps.register.landing.relatedLinks.wordpress'),
+    description: t('pages.apps.register.landing.relatedLinks.wordpressDesc'),
+  },
+  {
+    to: '/marketplace/games',
+    icon: 'mdi-gamepad-variant',
+    color: 'success',
+    title: t('pages.apps.register.landing.relatedLinks.gaming'),
+    description: t('pages.apps.register.landing.relatedLinks.gamingDesc'),
+  },
+  {
+    to: '/cost-calculator',
+    icon: 'mdi-calculator',
+    color: 'warning',
+    title: t('pages.apps.register.landing.relatedLinks.calculator'),
+    description: t('pages.apps.register.landing.relatedLinks.calculatorDesc'),
+  },
+])
+
 // Structured Data (JSON-LD)
 const breadcrumbSchema = computed(() => ({
   '@context': 'https://schema.org',
@@ -687,24 +493,6 @@ const offerSchema = computed(() => ({
     'name': 'FluxCloud',
   },
 }))
-
-// Load flux nodes for the map
-const getFluxList = async () => {
-  try {
-    const resLoc = await axios.get(
-      'https://stats.runonflux.io/fluxinfo?projection=geolocation,ip,tier',
-    )
-
-    fluxList.value = resLoc.data.data || []
-
-    const resList = await DashboardService.fluxnodeCount()
-    fluxNodeCount.value = resList.data.data.total || 0
-  } catch (error) {
-    console.error('Error fetching flux list:', error)
-    fluxList.value = []
-    fluxNodeCount.value = 0
-  }
-}
 
 // Calculate FluxCloud price from cost calculator API
 const calculateFluxCloudPrice = async () => {
@@ -863,17 +651,11 @@ useHead({
 })
 
 onMounted(async () => {
-  // Load server locations and pricing in parallel
-  isLoadingMap.value = true
+  // Load pricing data
   try {
-    await Promise.all([
-      getFluxList(),
-      calculateFluxCloudPrice(),
-    ])
+    await calculateFluxCloudPrice()
   } catch (error) {
     console.error('Error loading data:', error)
-  } finally {
-    isLoadingMap.value = false
   }
 })
 </script>
@@ -889,115 +671,6 @@ onMounted(async () => {
   max-width: 1400px;
   margin: 0 auto;
   padding: 1rem;
-}
-
-/* Breadcrumb Styles */
-.breadcrumb-nav {
-  margin-bottom: 1.5rem;
-}
-
-.breadcrumb-list {
-  display: flex;
-  align-items: center;
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  flex-wrap: wrap;
-  gap: 0.25rem;
-}
-
-.breadcrumb-item {
-  display: flex;
-  align-items: center;
-  font-size: 0.875rem;
-}
-
-.breadcrumb-link {
-  color: rgb(var(--v-theme-primary));
-  text-decoration: none;
-  transition: opacity 0.2s;
-}
-
-.breadcrumb-link:hover {
-  opacity: 0.8;
-  text-decoration: underline;
-}
-
-.breadcrumb-separator {
-  margin: 0 0.25rem;
-  font-size: 1rem;
-  opacity: 0.6;
-}
-
-.breadcrumb-current {
-  opacity: 0.7;
-}
-
-/* Hero Section */
-.hero-section {
-  position: relative;
-  background: linear-gradient(135deg, rgba(var(--v-theme-primary), 0.5) 0%, rgba(var(--v-theme-secondary), 0.5) 100%), url('/banner/FluxDeploy.png');
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  border-radius: 24px;
-  padding: 4rem 2rem;
-  margin-bottom: 3rem;
-  overflow: hidden;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-}
-
-.hero-icon-top-right {
-  position: absolute;
-  top: 2rem;
-  right: 2rem;
-  opacity: 0.15;
-  transform: rotate(15deg);
-}
-
-.hero-content {
-  position: relative;
-  z-index: 1;
-  max-width: 800px;
-  margin: 0 auto;
-  text-align: center;
-}
-
-.hero-title {
-  font-size: clamp(2rem, 5vw, 3.5rem);
-  font-weight: 800;
-  color: white;
-  margin-bottom: 1rem;
-  line-height: 1.2;
-}
-
-.hero-subtitle {
-  font-size: clamp(1rem, 2.5vw, 1.5rem);
-  color: rgba(255, 255, 255, 0.95);
-  margin-bottom: 2rem;
-  line-height: 1.6;
-}
-
-.hero-actions {
-  display: flex;
-  gap: 1rem;
-  justify-content: center;
-  flex-wrap: wrap;
-}
-
-.hero-btn {
-  font-weight: 600;
-  letter-spacing: 0.5px;
-  text-transform: none;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
-}
-
-.hero-btn-secondary {
-  font-weight: 600;
-  letter-spacing: 0.5px;
-  text-transform: none;
-  color: white !important;
-  border-color: white !important;
 }
 
 /* Section Cards */
@@ -1060,37 +733,6 @@ onMounted(async () => {
   line-height: 1.5;
 }
 
-/* Benefits Grid */
-.benefits-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 2rem;
-  margin-top: 2rem;
-}
-
-.benefit-item {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-  padding: 1.5rem;
-}
-
-.benefit-icon {
-  margin-bottom: 1rem;
-}
-
-.benefit-title {
-  font-size: 1.25rem;
-  font-weight: 600;
-  margin-bottom: 0.75rem;
-}
-
-.benefit-text {
-  font-size: 0.875rem;
-  opacity: 0.8;
-  line-height: 1.6;
-}
 
 /* Pricing Comparison */
 .pricing-comparison {
@@ -1231,37 +873,6 @@ onMounted(async () => {
   margin-top: 0.25rem;
 }
 
-/* Features Grid */
-.features-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 2rem;
-  margin-top: 2rem;
-}
-
-.feature-item {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-  padding: 1.5rem;
-}
-
-.feature-icon {
-  margin-bottom: 1rem;
-}
-
-.feature-title {
-  font-size: 1.25rem;
-  font-weight: 600;
-  margin-bottom: 0.75rem;
-}
-
-.feature-text {
-  font-size: 0.875rem;
-  opacity: 0.8;
-  line-height: 1.6;
-}
 
 /* FAQ Section */
 .faq-section {
@@ -1369,80 +980,6 @@ onMounted(async () => {
   font-size: 0.9em;
 }
 
-/* CTA Section */
-.cta-section {
-  padding: 3rem 2rem;
-  background: linear-gradient(135deg, rgba(var(--v-theme-primary), 0.05) 0%, rgba(var(--v-theme-secondary), 0.05) 100%);
-}
-
-.cta-icon {
-  margin-bottom: 1.5rem;
-}
-
-.cta-title {
-  font-size: 2rem;
-  font-weight: 700;
-  margin-bottom: 1rem;
-  color: rgb(var(--v-theme-primary));
-}
-
-.cta-subtitle {
-  font-size: 1.125rem;
-  opacity: 0.8;
-  margin-bottom: 2rem;
-}
-
-.cta-btn {
-  font-weight: 600;
-  letter-spacing: 0.5px;
-  text-transform: none;
-  box-shadow: 0 4px 16px rgba(var(--v-theme-primary), 0.3);
-}
-
-/* Related Links Grid */
-.related-links-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 1.5rem;
-  margin-top: 1.5rem;
-}
-
-.related-link-card {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-  padding: 2rem 1.5rem;
-  background: rgb(var(--v-theme-surface));
-  border-radius: 12px;
-  text-decoration: none;
-  color: inherit;
-  transition: transform 0.3s, box-shadow 0.3s;
-  border: 1px solid rgba(var(--v-theme-primary), 0.1);
-}
-
-.related-link-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
-}
-
-.related-link-icon {
-  margin-bottom: 1rem;
-  font-size: 3rem;
-}
-
-.related-link-title {
-  font-size: 1.25rem;
-  font-weight: 600;
-  margin-bottom: 0.5rem;
-}
-
-.related-link-description {
-  font-size: 0.875rem;
-  opacity: 0.7;
-  line-height: 1.5;
-}
-
 /* Responsive adjustments */
 @media (max-width: 960px) {
   .comparison-row {
@@ -1489,19 +1026,6 @@ onMounted(async () => {
 }
 
 @media (max-width: 600px) {
-  .hero-section {
-    padding: 3rem 1.5rem;
-  }
-
-  .hero-actions {
-    flex-direction: column;
-  }
-
-  .hero-btn,
-  .hero-btn-secondary {
-    width: 100%;
-  }
-
   .section-title {
     font-size: 1.5rem;
   }

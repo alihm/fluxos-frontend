@@ -45,7 +45,22 @@ const props = defineProps({
   },
   app: {
     type: Object,
-    required: true,
+    default: null,
+  },
+  // Optional: Direct FAQs array (for non-panel usage)
+  faqs: {
+    type: Array,
+    default: null,
+  },
+  // Optional: Title override
+  title: {
+    type: String,
+    default: null,
+  },
+  // Optional: Subtitle override
+  subtitle: {
+    type: String,
+    default: null,
   },
 })
 
@@ -54,8 +69,9 @@ const { t, te, tm, messages } = i18n
 
 const { getMinimumPrice } = useGameUtils()
 
-// Calculate minimum price from app configurations
+// Calculate minimum price from app configurations (only if app is provided)
 const minimumPrice = computed(() => {
+  if (!props.app) return '0.00'
   return getMinimumPrice(props.app)
 })
 
@@ -66,11 +82,14 @@ const isI18nKey = str => {
 
 // Get translated or raw title
 const titleText = computed(() => {
+  // Use title prop override if provided
+  if (props.title) return props.title
+
   if (!props.panel.title) return ''
 
   if (isI18nKey(props.panel.title)) {
     const key = props.panel.title.replace('i18n:', '')
-    
+
     return te(key) ? t(key) : props.panel.title
   }
 
@@ -79,11 +98,14 @@ const titleText = computed(() => {
 
 // Get translated or raw subtitle
 const subtitleText = computed(() => {
+  // Use subtitle prop override if provided
+  if (props.subtitle) return props.subtitle
+
   if (!props.panel.subtitle) return ''
 
   if (isI18nKey(props.panel.subtitle)) {
     const key = props.panel.subtitle.replace('i18n:', '')
-    
+
     return te(key) ? t(key) : props.panel.subtitle
   }
 
@@ -92,6 +114,11 @@ const subtitleText = computed(() => {
 
 // Get translated or raw questions
 const questionsList = computed(() => {
+  // Use faqs prop override if provided
+  if (props.faqs && Array.isArray(props.faqs)) {
+    return props.faqs
+  }
+
   if (!props.panel.questions) {
     return []
   }

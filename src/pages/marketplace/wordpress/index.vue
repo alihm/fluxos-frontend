@@ -21,32 +21,22 @@
     <!-- Content -->
     <div v-else class="landing-content">
       <!-- Breadcrumb Navigation -->
-      <nav class="breadcrumb-nav" aria-label="Breadcrumb">
-        <ol class="breadcrumb-list">
-          <li class="breadcrumb-item">
-            <RouterLink to="/" class="breadcrumb-link">Home</RouterLink>
-            <VIcon class="breadcrumb-separator">mdi-chevron-right</VIcon>
-          </li>
-          <li class="breadcrumb-item">
-            <RouterLink to="/marketplace" class="breadcrumb-link">Marketplace</RouterLink>
-            <VIcon class="breadcrumb-separator">mdi-chevron-right</VIcon>
-          </li>
-          <li class="breadcrumb-item breadcrumb-current" aria-current="page">
-            <span>WordPress Hosting</span>
-          </li>
-        </ol>
-      </nav>
+      <BreadcrumbNav
+        :items="[
+          { text: 'Home', to: '/' },
+          { text: 'Marketplace', to: '/marketplace' },
+          { text: 'WordPress Hosting' }
+        ]"
+      />
 
       <!-- Hero Section -->
-      <div class="hero-section" role="banner">
-        <div class="hero-icon-top-right" role="img" aria-label="WordPress Logo">
-          <VIcon icon="mdi-wordpress" size="80" color="white" aria-hidden="true" />
-        </div>
-        <div class="hero-content">
-          <h1 class="hero-title">{{ t('pages.marketplace.wordpress.landing.title') }}</h1>
-          <p class="hero-subtitle">{{ t('pages.marketplace.wordpress.landing.subtitle') }}</p>
-        </div>
-      </div>
+      <HeroSection
+        :title="t('pages.marketplace.wordpress.landing.title')"
+        :subtitle="t('pages.marketplace.wordpress.landing.subtitle')"
+        background-image="/banner/FluxWPMarketplace.png"
+        icon="mdi-wordpress"
+        icon-aria-label="WordPress Logo"
+      />
 
       <!-- Plans Section -->
       <div class="plans-section">
@@ -120,225 +110,40 @@
         </VCardTitle>
         <VCardText class="section-text">
           <p>{{ t('pages.marketplace.wordpress.landing.description.content') }}</p>
-
-          <div class="highlights">
-            <div
-              v-for="(highlight, index) in highlights"
-              :key="index"
-              class="highlight-item"
-            >
-              <VIcon :icon="highlight.icon" size="24" :color="highlight.color" />
-              <span>{{ highlight.text }}</span>
-            </div>
-          </div>
         </VCardText>
       </VCard>
+
+      <!-- Highlights Section -->
+      <BenefitsGrid
+        :items="highlights"
+        :elevation="0"
+        padding="24px"
+      />
 
       <!-- Trustpilot Reviews Section -->
-      <VCard class="section-card trustpilot-section">
-        <VCardText class="pa-8">
-          <div class="trustpilot-header text-center mb-6">
-            <h2 class="text-h4 mb-3 font-weight-bold">{{ t('common.trustpilot.title') }}</h2>
-            <a
-              :href="t('common.trustpilot.profileUrl')"
-              target="_blank"
-              rel="noopener noreferrer"
-              class="trustpilot-link"
-            >
-              <div class="trustpilot-rating-container">
-                <div class="trustpilot-logo mb-3">
-                  <VIcon icon="mdi-star" size="32" color="#00b67a" />
-                  <span class="text-h6 font-weight-bold ml-2" style="color: #00b67a;">Trustpilot</span>
-                </div>
-                <div class="rating-stars mb-2">
-                  <VIcon v-for="i in 4" :key="i" icon="mdi-star" size="32" color="#00b67a" />
-                  <VIcon icon="mdi-star-half-full" size="32" color="#00b67a" />
-                </div>
-                <div class="rating-text">
-                  <span class="text-h5 font-weight-bold">{{ t('common.trustpilot.ratingLabel') }}</span>
-                  <span class="text-h6 ml-2 text-medium-emphasis">{{ t('common.trustpilot.score') }} {{ t('common.trustpilot.outOf') }}</span>
-                </div>
-                <div class="reviews-count text-body-2 text-medium-emphasis mt-1">
-                  {{ t('common.trustpilot.basedOn', { count: t('common.trustpilot.reviewsCount') }) }}
-                </div>
-              </div>
-            </a>
-          </div>
-
-          <div class="trustpilot-reviews">
-            <VRow>
-              <VCol v-for="(review, key) in ['review1', 'review2', 'review3']" :key="key" cols="12" md="4">
-                <VCard variant="outlined" class="review-card pa-4">
-                  <div class="review-stars mb-2">
-                    <VIcon v-for="i in parseInt(t(`common.trustpilot.sampleReviews.${review}.rating`))" :key="i" icon="mdi-star" size="20" color="#00b67a" />
-                  </div>
-                  <p class="review-text text-body-2 mb-3">
-                    "{{ t(`common.trustpilot.sampleReviews.${review}.text`) }}"
-                  </p>
-                  <div class="review-author text-caption text-medium-emphasis">
-                    <VIcon icon="mdi-check-circle" size="14" color="success" class="mr-1" />
-                    {{ t(`common.trustpilot.sampleReviews.${review}.author`) }}
-                  </div>
-                  <div class="text-caption text-medium-emphasis">
-                    {{ t('common.trustpilot.verifiedCustomer') }}
-                  </div>
-                </VCard>
-              </VCol>
-            </VRow>
-          </div>
-
-          <div class="text-center mt-6">
-            <VBtn
-              :href="t('common.trustpilot.profileUrl')"
-              target="_blank"
-              rel="noopener noreferrer"
-              color="success"
-              variant="outlined"
-              size="large"
-            >
-              <VIcon start>mdi-open-in-new</VIcon>
-              {{ t('common.trustpilot.viewAllReviews') }}
-            </VBtn>
-          </div>
-        </VCardText>
-      </VCard>
+      <TrustpilotPanel :stars="4.5" :star-size="32" :show-rating-label="true" />
 
       <!-- Global Server Network Section -->
-      <VCard class="section-card server-locations-section" role="region" aria-labelledby="server-network-title">
-        <VCardText>
-          <h2 id="server-network-title" class="locations-title">{{ t('pages.marketplace.wordpress.landing.serverNetwork.title') }}</h2>
-          <p class="locations-subtitle">{{ t('pages.marketplace.wordpress.landing.serverNetwork.subtitle') }}</p>
-
-          <!-- Map Component -->
-          <div class="map-container" role="img" aria-label="Interactive map showing FluxCloud server locations worldwide">
-            <VOverlay
-              v-model="isLoadingMap"
-              contained
-              scroll-strategy="none"
-              class="align-center justify-center"
-            >
-              <VProgressCircular indeterminate color="primary" aria-label="Loading server map" />
-            </VOverlay>
-
-            <MapComponent
-              v-if="fluxList.length > 0"
-              :nodes="fluxList"
-              :show-tier-display="false"
-              class="server-map"
-            />
-
-            <div v-if="!isLoadingMap && fluxList.length === 0" class="no-data">
-              {{ t('pages.marketplace.wordpress.landing.serverNetwork.noData') }}
-            </div>
-          </div>
-
-          <!-- Stats -->
-          <div v-if="fluxNodeCount > 0" class="stats-container">
-            <div class="stat-item">
-              <VIcon icon="mdi-server-network" size="32" color="primary" />
-              <div class="stat-content">
-                <div class="stat-value">{{ fluxNodeCount.toLocaleString() }}+</div>
-                <div class="stat-label">{{ t('pages.marketplace.wordpress.landing.serverNetwork.activeServers') }}</div>
-              </div>
-            </div>
-            <div class="stat-item">
-              <VIcon icon="mdi-earth" size="32" color="primary" />
-              <div class="stat-content">
-                <div class="stat-value">{{ countryCount }}+</div>
-                <div class="stat-label">{{ t('pages.marketplace.wordpress.landing.serverNetwork.countries') }}</div>
-              </div>
-            </div>
-            <div class="stat-item">
-              <VIcon icon="mdi-web" size="32" color="primary" />
-              <div class="stat-content">
-                <div class="stat-value">{{ t('pages.marketplace.wordpress.landing.serverNetwork.global') }}</div>
-                <div class="stat-label">{{ t('pages.marketplace.wordpress.landing.serverNetwork.coverage') }}</div>
-              </div>
-            </div>
-          </div>
-        </VCardText>
-      </VCard>
+      <ServerLocationsPanel
+        :panel="serverLocationsPanel"
+        :app="{ name: 'wordpress' }"
+      />
 
       <!-- Features Section -->
-      <VCard class="section-card features-section">
-        <VCardTitle class="section-title">
-          {{ t('pages.marketplace.wordpress.landing.features.title') }}
-        </VCardTitle>
-        <VCardText>
-          <div class="features-grid">
-            <div
-              v-for="(feature, index) in features"
-              :key="index"
-              class="feature-item"
-            >
-              <div class="feature-icon">
-                <VIcon :icon="feature.icon" size="40" :color="feature.color" />
-              </div>
-              <h4 class="feature-title">{{ feature.title }}</h4>
-              <p class="feature-text">{{ feature.description }}</p>
-            </div>
-          </div>
-        </VCardText>
-      </VCard>
+      <FeatureShowcase
+        :title="t('pages.marketplace.wordpress.landing.features.title')"
+        :items="features"
+        grid-min-width="280px"
+      />
 
       <!-- FAQ Section -->
-      <VCard class="section-card faq-section" role="region" aria-labelledby="faq-title">
-        <VCardText>
-          <h2 id="faq-title" class="faq-title">
-            {{ t('pages.marketplace.wordpress.faq.title') }}
-          </h2>
-
-          <VExpansionPanels class="faq-expansion-panels" multiple>
-            <VExpansionPanel
-              v-for="(faq, index) in faqs"
-              :key="index"
-              class="faq-expansion-panel"
-              elevation="0"
-            >
-              <VExpansionPanelTitle class="faq-question">
-                <div class="question-wrapper">
-                  <VIcon icon="mdi-help-circle" color="primary" size="24" class="question-icon" />
-                  <h3 class="question-text">{{ faq.question }}</h3>
-                </div>
-              </VExpansionPanelTitle>
-              <VExpansionPanelText class="faq-answer">
-                <div v-html="faq.answer"></div>
-              </VExpansionPanelText>
-            </VExpansionPanel>
-          </VExpansionPanels>
-        </VCardText>
-      </VCard>
+      <FAQPanel :panel="faqPanel" :app="null" :faqs="faqs" :title="t('pages.marketplace.wordpress.faq.title')" />
 
       <!-- Related Links Section -->
-      <VCard class="section-card related-links-section">
-        <VCardTitle class="section-title">
-          Explore More on FluxCloud
-        </VCardTitle>
-        <VCardText>
-          <div class="related-links-grid">
-            <RouterLink to="/marketplace" class="related-link-card">
-              <VIcon class="related-link-icon" color="primary">mdi-storefront</VIcon>
-              <h3 class="related-link-title">Marketplace</h3>
-              <p class="related-link-description">Browse all available applications</p>
-            </RouterLink>
-            <RouterLink to="/marketplace/games" class="related-link-card">
-              <VIcon class="related-link-icon" color="success">mdi-gamepad-variant</VIcon>
-              <h3 class="related-link-title">Game Servers</h3>
-              <p class="related-link-description">Host your favorite game servers</p>
-            </RouterLink>
-            <RouterLink to="/flux-drive" class="related-link-card">
-              <VIcon class="related-link-icon" color="info">mdi-cloud</VIcon>
-              <h3 class="related-link-title">FluxDrive</h3>
-              <p class="related-link-description">Decentralized file storage</p>
-            </RouterLink>
-            <RouterLink to="/cost-calculator" class="related-link-card">
-              <VIcon class="related-link-icon" color="warning">mdi-calculator</VIcon>
-              <h3 class="related-link-title">Cost Calculator</h3>
-              <p class="related-link-description">Estimate your hosting costs</p>
-            </RouterLink>
-          </div>
-        </VCardText>
-      </VCard>
+      <RelatedLinksGrid
+        title="Explore More on FluxCloud"
+        :links="relatedLinks"
+      />
     </div>
   </div>
 </template>
@@ -348,12 +153,17 @@ import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useHead } from '@vueuse/head'
-import axios from 'axios'
 import { useWordPress } from '@/composables/useWordPress'
 import LoadingSpinner from '@/components/Marketplace/LoadingSpinner.vue'
 import MaintenanceCard from '@/components/Marketplace/MaintenanceCard.vue'
-import MapComponent from '@core/components/MapComponent.vue'
-import DashboardService from '@/services/DashboardService'
+import ServerLocationsPanel from '@/components/Marketplace/Panels/ServerLocationsPanel.vue'
+import TrustpilotPanel from '@/components/Marketplace/Panels/TrustpilotPanel.vue'
+import FAQPanel from '@/components/Marketplace/Panels/FAQPanel.vue'
+import FeatureShowcase from '@/components/FeatureShowcase.vue'
+import BenefitsGrid from '@/components/BenefitsGrid.vue'
+import RelatedLinksGrid from '@/components/RelatedLinksGrid.vue'
+import HeroSection from '@/components/HeroSection.vue'
+import BreadcrumbNav from '@/components/BreadcrumbNav.vue'
 
 const { t, tm, locale, te } = useI18n()
 const router = useRouter()
@@ -363,10 +173,20 @@ const plans = ref([])
 const loadingPlans = ref(false)
 const apiError = ref(false)
 
-// Server locations data
-const fluxList = ref([])
-const fluxNodeCount = ref(0)
-const isLoadingMap = ref(true)
+// Server Locations Panel Configuration
+const serverLocationsPanel = {
+  enabled: true,
+  title: 'i18n:pages.marketplace.wordpress.landing.serverNetwork.title',
+  subtitle: 'i18n:pages.marketplace.wordpress.landing.serverNetwork.subtitle',
+}
+
+// FAQ Panel Configuration
+const faqPanel = {
+  enabled: true,
+  title: '',
+  subtitle: '',
+  questions: [],
+}
 
 // Helper function to get correct Polish plural form for instances
 const getInstancesLabel = count => {
@@ -462,18 +282,6 @@ const features = computed(() => [
   },
 ])
 
-// Count unique countries
-const countryCount = computed(() => {
-  const countries = new Set()
-  fluxList.value.forEach(flux => {
-    if (flux.geolocation?.country) {
-      countries.add(flux.geolocation.country)
-    }
-  })
-  
-  return countries.size
-})
-
 // Helper function to extract string from compiled i18n message objects
 const extractString = obj => {
   if (typeof obj === 'string') return obj
@@ -504,6 +312,38 @@ const faqs = computed(() => {
 
   return []
 })
+
+// Related links
+const relatedLinks = [
+  {
+    to: '/marketplace',
+    icon: 'mdi-storefront',
+    color: 'primary',
+    title: 'Marketplace',
+    description: 'Browse all available applications',
+  },
+  {
+    to: '/marketplace/games',
+    icon: 'mdi-gamepad-variant',
+    color: 'success',
+    title: 'Game Servers',
+    description: 'Host your favorite game servers',
+  },
+  {
+    to: '/flux-drive',
+    icon: 'mdi-cloud',
+    color: 'info',
+    title: 'FluxDrive',
+    description: 'Decentralized file storage',
+  },
+  {
+    to: '/cost-calculator',
+    icon: 'mdi-calculator',
+    color: 'warning',
+    title: 'Cost Calculator',
+    description: 'Estimate your hosting costs',
+  },
+]
 
 // Generate JSON-LD structured data
 const structuredData = computed(() => {
@@ -626,24 +466,6 @@ const selectPlan = plan => {
   })
 }
 
-// Fetch server locations data
-const getFluxList = async () => {
-  try {
-    const resLoc = await axios.get(
-      'https://stats.runonflux.io/fluxinfo?projection=geolocation,ip,tier',
-    )
-
-    fluxList.value = resLoc.data.data || []
-
-    const resList = await DashboardService.fluxnodeCount()
-    fluxNodeCount.value = resList.data.data.total || 0
-  } catch (error) {
-    console.error('Error fetching flux list:', error)
-    fluxList.value = []
-    fluxNodeCount.value = 0
-  }
-}
-
 // SEO
 useHead({
   title: 'WordPress Hosting on FluxCloud - Decentralized & Scalable',
@@ -689,18 +511,8 @@ useHead({
   ),
 })
 
-onMounted(async () => {
+onMounted(() => {
   loadPlans()
-
-  // Load server locations
-  isLoadingMap.value = true
-  try {
-    await getFluxList()
-  } catch (error) {
-    console.error('Error loading server locations:', error)
-  } finally {
-    isLoadingMap.value = false
-  }
 })
 </script>
 
@@ -716,128 +528,6 @@ onMounted(async () => {
   display: flex;
   flex-direction: column;
   gap: 32px;
-}
-
-/* Breadcrumb Navigation */
-.breadcrumb-nav {
-  margin-bottom: 16px;
-}
-
-.breadcrumb-list {
-  display: flex;
-  align-items: center;
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  flex-wrap: wrap;
-  gap: 4px;
-}
-
-.breadcrumb-item {
-  display: flex;
-  align-items: center;
-  font-size: 0.875rem;
-}
-
-.breadcrumb-link {
-  color: rgb(var(--v-theme-primary));
-  text-decoration: none;
-  transition: opacity 0.2s ease;
-}
-
-.breadcrumb-link:hover {
-  opacity: 0.7;
-  text-decoration: underline;
-}
-
-.breadcrumb-current {
-  color: rgba(var(--v-theme-on-surface), 0.7);
-  font-weight: 500;
-}
-
-.breadcrumb-separator {
-  font-size: 16px;
-  margin: 0 4px;
-  opacity: 0.5;
-}
-
-/* Hero Section */
-.hero-section {
-  background-image: url('/banner/FluxWPMarketplace.png');
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  border-radius: 24px;
-  padding: 64px 32px;
-  text-align: center;
-  position: relative;
-  overflow: hidden;
-  box-shadow: 0 10px 40px rgba(102, 126, 234, 0.3);
-  min-height: 400px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.hero-section::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.25);
-  z-index: 0;
-}
-
-.hero-icon-top-right {
-  position: absolute;
-  top: 32px;
-  right: 32px;
-  z-index: 2;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 90px;
-  height: 90px;
-  background: rgba(255, 255, 255, 0.2);
-  border-radius: 50%;
-  backdrop-filter: blur(10px);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-}
-
-@keyframes pulse {
-  0%, 100% {
-    transform: scale(1);
-    opacity: 0.5;
-  }
-  50% {
-    transform: scale(1.1);
-    opacity: 0.8;
-  }
-}
-
-.hero-content {
-  position: relative;
-  z-index: 1;
-  max-width: 900px;
-}
-
-.hero-title {
-  font-size: 3rem;
-  font-weight: 700;
-  color: white;
-  margin: 0 0 16px 0;
-  text-shadow: 0 2px 20px rgba(0, 0, 0, 0.5);
-}
-
-.hero-subtitle {
-  font-size: 1.25rem;
-  color: rgba(255, 255, 255, 0.95);
-  margin: 0;
-  max-width: 800px;
-  margin: 0 auto;
-  text-shadow: 0 1px 10px rgba(0, 0, 0, 0.3);
 }
 
 /* Section Cards */
@@ -866,29 +556,6 @@ onMounted(async () => {
   line-height: 1.8;
 }
 
-/* Highlights */
-.highlights {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 16px;
-  margin-top: 24px;
-}
-
-.highlight-item {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 16px;
-  background: rgba(var(--v-theme-primary), 0.05);
-  border-radius: 12px;
-  border-left: 3px solid rgb(var(--v-theme-primary));
-  transition: all 0.3s ease;
-}
-
-.highlight-item:hover {
-  transform: translateX(8px);
-  background: rgba(var(--v-theme-primary), 0.1);
-}
 
 /* Plans Section */
 .plans-section {
@@ -1069,49 +736,6 @@ onMounted(async () => {
   transform: translateY(-2px);
 }
 
-/* Features Section */
-.features-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 24px;
-}
-
-.feature-item {
-  text-align: center;
-  padding: 24px;
-  background: rgba(var(--v-theme-on-surface), 0.03);
-  border-radius: 16px;
-  transition: all 0.3s ease;
-}
-
-.feature-item:hover {
-  background: rgba(var(--v-theme-on-surface), 0.06);
-  transform: translateY(-4px);
-}
-
-.feature-icon {
-  width: 80px;
-  height: 80px;
-  margin: 0 auto 16px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: rgba(var(--v-theme-primary), 0.1);
-  border-radius: 50%;
-}
-
-.feature-title {
-  font-size: 1.2rem;
-  font-weight: 600;
-  margin: 0 0 8px 0;
-}
-
-.feature-text {
-  font-size: 0.95rem;
-  opacity: 0.7;
-  margin: 0;
-  line-height: 1.6;
-}
 
 /* Trustpilot Section */
 .trustpilot-link {
@@ -1210,51 +834,6 @@ onMounted(async () => {
   letter-spacing: 0.5px;
 }
 
-/* Related Links Section */
-.related-links-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-  gap: 20px;
-  margin-top: 16px;
-}
-
-.related-link-card {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-  padding: 24px;
-  background: rgba(var(--v-theme-on-surface), 0.03);
-  border-radius: 12px;
-  border: 1px solid rgba(var(--v-theme-on-surface), 0.08);
-  transition: all 0.3s ease;
-  text-decoration: none;
-  color: inherit;
-}
-
-.related-link-card:hover {
-  background: rgba(var(--v-theme-on-surface), 0.06);
-  border-color: rgba(var(--v-theme-primary), 0.3);
-  transform: translateY(-4px);
-  box-shadow: 0 8px 24px rgba(var(--v-theme-primary), 0.15);
-}
-
-.related-link-icon {
-  font-size: 48px;
-  margin-bottom: 12px;
-}
-
-.related-link-title {
-  font-size: 1.125rem;
-  font-weight: 600;
-  margin: 0 0 8px 0;
-}
-
-.related-link-description {
-  font-size: 0.875rem;
-  opacity: 0.7;
-  margin: 0;
-}
 
 /* FAQ Section */
 .faq-section .faq-title {
@@ -1360,25 +939,6 @@ onMounted(async () => {
 
 /* Responsive */
 @media (max-width: 960px) {
-  .hero-section {
-    min-height: 350px;
-  }
-
-  .hero-title {
-    font-size: 2.5rem;
-  }
-
-  .hero-icon-top-right {
-    width: 80px;
-    height: 80px;
-    top: 20px;
-    right: 20px;
-  }
-
-  .hero-icon-top-right :deep(.v-icon) {
-    font-size: 60px;
-  }
-
   .plans-grid {
     grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   }
@@ -1431,53 +991,8 @@ onMounted(async () => {
     margin: 0 2px;
   }
 
-  .hero-section {
-    padding: 48px 24px;
-    min-height: 300px;
-  }
-
-  .hero-icon-top-right {
-    width: 60px;
-    height: 60px;
-    top: 16px;
-    right: 16px;
-  }
-
-  .hero-icon-top-right :deep(.v-icon) {
-    font-size: 40px;
-  }
-
-  .hero-title {
-    font-size: 2rem;
-  }
-
-  .hero-subtitle {
-    font-size: 1rem;
-  }
-
   .plans-grid {
     grid-template-columns: 1fr;
-  }
-
-  .features-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .highlights {
-    grid-template-columns: 1fr;
-  }
-
-  .related-links-grid {
-    grid-template-columns: 1fr;
-    gap: 16px;
-  }
-
-  .related-link-card {
-    padding: 20px;
-  }
-
-  .related-link-icon {
-    font-size: 40px;
   }
 
   .server-locations-section .locations-title {

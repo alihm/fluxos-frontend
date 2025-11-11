@@ -1,28 +1,22 @@
 <template>
   <div class="fluxdrive-page">
     <!-- Breadcrumb Navigation -->
-    <nav class="breadcrumb-nav" aria-label="Breadcrumb">
-      <ol class="breadcrumb-list">
-        <li class="breadcrumb-item">
-          <RouterLink to="/" class="breadcrumb-link">Home</RouterLink>
-          <VIcon class="breadcrumb-separator">mdi-chevron-right</VIcon>
-        </li>
-        <li class="breadcrumb-item breadcrumb-current" aria-current="page">
-          <span>FluxDrive</span>
-        </li>
-      </ol>
-    </nav>
+    <BreadcrumbNav
+      :items="[
+        { text: 'Home', to: '/' },
+        { text: 'FluxDrive' }
+      ]"
+    />
 
     <!-- Hero Section -->
-    <div class="hero-section" role="banner">
-      <div class="hero-icon-top-right" role="img" aria-label="FluxDrive Cloud Storage">
-        <VIcon icon="mdi-cloud-upload" size="80" color="white" aria-hidden="true" />
-      </div>
-      <div class="hero-content">
-        <h1 class="hero-title">{{ t('pages.fluxDrive.intro.title') }}</h1>
-        <p class="hero-subtitle">{{ t('pages.fluxDrive.intro.subtitle') }}</p>
-      </div>
-    </div>
+    <HeroSection
+      :title="t('pages.fluxDrive.intro.title')"
+      :subtitle="t('pages.fluxDrive.intro.subtitle')"
+      background-image="/banner/FluxDrive2.png"
+      icon="mdi-cloud-upload"
+      icon-aria-label="FluxDrive Cloud Storage"
+      min-height="300px"
+    />
 
     <!-- Loading state while checking subscription -->
     <LoadingSpinner
@@ -38,114 +32,23 @@
       />
 
       <!-- Features Section -->
-      <VCard class="section-card features-section ma-4">
-        <VCardTitle class="section-title">
-          {{ t('pages.fluxDrive.features.title') }}
-        </VCardTitle>
-        <VCardText>
-          <div class="features-grid">
-            <div
-              v-for="(feature, index) in features"
-              :key="index"
-              class="feature-item"
-            >
-              <div class="feature-icon-wrapper">
-                <VIcon :icon="feature.icon" size="40" :color="feature.color" />
-              </div>
-              <h3 class="feature-title">{{ feature.title }}</h3>
-              <p class="feature-description">{{ feature.description }}</p>
-            </div>
-          </div>
-        </VCardText>
-      </VCard>
+      <FeatureShowcase
+        :title="t('pages.fluxDrive.features.title')"
+        :items="features"
+        class="ma-4"
+        grid-min-width="300px"
+      />
 
       <!-- Benefits Section -->
-      <VCard class="section-card benefits-section ma-4">
-        <VCardTitle class="section-title">
-          {{ t('pages.fluxDrive.benefits.title') }}
-        </VCardTitle>
-        <VCardText class="section-text">
-          <div class="benefits">
-            <div
-              v-for="(benefit, index) in benefits"
-              :key="index"
-              class="benefit-item"
-            >
-              <VIcon :icon="benefit.icon" size="24" :color="benefit.color" />
-              <span>{{ benefit.text }}</span>
-            </div>
-          </div>
-        </VCardText>
-      </VCard>
+      <BenefitsGrid
+        :title="t('pages.fluxDrive.benefits.title')"
+        :items="benefits"
+        grid-template-columns="repeat(auto-fit, minmax(280px, 1fr))"
+        class="ma-4"
+      />
 
       <!-- Trustpilot Reviews Section -->
-      <VCard class="section-card trustpilot-section ma-4">
-        <VCardText class="pa-8">
-          <div class="trustpilot-header text-center mb-6">
-            <h2 class="text-h4 mb-3 font-weight-bold">{{ t('common.trustpilot.title') }}</h2>
-            <a
-              :href="t('common.trustpilot.profileUrl')"
-              target="_blank"
-              rel="noopener noreferrer"
-              class="trustpilot-link"
-            >
-              <div class="trustpilot-rating-container">
-                <div class="trustpilot-logo mb-3">
-                  <VIcon icon="mdi-star" size="32" color="#00b67a" />
-                  <span class="text-h6 font-weight-bold ml-2" style="color: #00b67a;">Trustpilot</span>
-                </div>
-                <div class="rating-stars mb-2">
-                  <VIcon v-for="i in 4" :key="i" icon="mdi-star" size="32" color="#00b67a" />
-                  <VIcon icon="mdi-star-half-full" size="32" color="#00b67a" />
-                </div>
-                <div class="rating-text">
-                  <span class="text-h5 font-weight-bold">{{ t('common.trustpilot.ratingLabel') }}</span>
-                  <span class="text-h6 ml-2 text-medium-emphasis">{{ t('common.trustpilot.score') }} {{ t('common.trustpilot.outOf') }}</span>
-                </div>
-                <div class="reviews-count text-body-2 text-medium-emphasis mt-1">
-                  {{ t('common.trustpilot.basedOn', { count: t('common.trustpilot.reviewsCount') }) }}
-                </div>
-              </div>
-            </a>
-          </div>
-
-          <div class="trustpilot-reviews">
-            <VRow>
-              <VCol v-for="(review, key) in ['review1', 'review2', 'review3']" :key="key" cols="12" md="4">
-                <VCard variant="outlined" class="review-card pa-4">
-                  <div class="review-stars mb-2">
-                    <VIcon v-for="i in parseInt(t(`common.trustpilot.sampleReviews.${review}.rating`))" :key="i" icon="mdi-star" size="20" color="#00b67a" />
-                  </div>
-                  <p class="review-text text-body-2 mb-3">
-                    "{{ t(`common.trustpilot.sampleReviews.${review}.text`) }}"
-                  </p>
-                  <div class="review-author text-caption text-medium-emphasis">
-                    <VIcon icon="mdi-check-circle" size="14" color="success" class="mr-1" />
-                    {{ t(`common.trustpilot.sampleReviews.${review}.author`) }}
-                  </div>
-                  <div class="text-caption text-medium-emphasis">
-                    {{ t('common.trustpilot.verifiedCustomer') }}
-                  </div>
-                </VCard>
-              </VCol>
-            </VRow>
-          </div>
-
-          <div class="text-center mt-6">
-            <VBtn
-              :href="t('common.trustpilot.profileUrl')"
-              target="_blank"
-              rel="noopener noreferrer"
-              color="success"
-              variant="outlined"
-              size="large"
-            >
-              <VIcon start>mdi-open-in-new</VIcon>
-              {{ t('common.trustpilot.viewAllReviews') }}
-            </VBtn>
-          </div>
-        </VCardText>
-      </VCard>
+      <TrustpilotPanel :stars="4.5" :star-size="32" :show-rating-label="true" :add-margin="true" />
     </div>
 
     <!-- Show actual FluxDrive interface for subscribers or users with subscription history -->
@@ -210,6 +113,11 @@ import PricingPlans from '@/components/FluxDrive/PricingPlans.vue'
 import FileManager from '@/components/FluxDrive/FileManager.vue'
 import StorageInfo from '@/components/FluxDrive/StorageInfo.vue'
 import CheckoutContent from '@/components/CheckoutContent.vue'
+import FeatureShowcase from '@/components/FeatureShowcase.vue'
+import TrustpilotPanel from '@/components/Marketplace/Panels/TrustpilotPanel.vue'
+import BenefitsGrid from '@/components/BenefitsGrid.vue'
+import HeroSection from '@/components/HeroSection.vue'
+import BreadcrumbNav from '@/components/BreadcrumbNav.vue'
 
 const { t } = useI18n()
 
@@ -836,121 +744,13 @@ onMounted(async () => {
 </script>
 
 <style scoped>
+@import '@styles/flux-drive.scss';
+
 .fluxdrive-page {
   padding: 8px 24px;
   max-width: 1400px;
   margin: 0 auto;
   min-height: calc(100vh - 100px);
-}
-
-/* Breadcrumb Navigation */
-.breadcrumb-nav {
-  padding: 16px 0;
-  margin-bottom: 24px;
-}
-
-.breadcrumb-list {
-  display: flex;
-  align-items: center;
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  flex-wrap: wrap;
-}
-
-.breadcrumb-item {
-  display: flex;
-  align-items: center;
-}
-
-.breadcrumb-link {
-  color: rgb(var(--v-theme-primary));
-  text-decoration: none;
-  transition: opacity 0.2s;
-  font-size: 0.95rem;
-}
-
-.breadcrumb-link:hover {
-  opacity: 0.7;
-  text-decoration: underline;
-}
-
-.breadcrumb-separator {
-  margin: 0 8px;
-  opacity: 0.5;
-  font-size: 14px;
-}
-
-.breadcrumb-current span {
-  color: rgba(var(--v-theme-on-surface), 0.7);
-  font-size: 0.95rem;
-}
-
-/* Hero Section */
-.hero-section {
-  position: relative;
-  border-radius: 24px;
-  padding: 64px 32px;
-  margin-bottom: 48px;
-  text-align: center;
-  background: linear-gradient(135deg, rgba(0, 0, 0, 0.6) 0%, rgba(0, 0, 0, 0.4) 100%),
-              url('/banner/FluxDrive2.png') center center / cover no-repeat;
-  box-shadow: 0 10px 40px rgba(102, 126, 234, 0.3);
-  min-height: 300px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
-}
-
-.hero-section::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.1);
-  z-index: 0;
-}
-
-.hero-icon-top-right {
-  position: absolute;
-  top: 32px;
-  right: 32px;
-  z-index: 2;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 90px;
-  height: 90px;
-  background: rgba(255, 255, 255, 0.2);
-  border-radius: 50%;
-  backdrop-filter: blur(10px);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-}
-
-.hero-content {
-  position: relative;
-  z-index: 1;
-  max-width: 900px;
-}
-
-.hero-title {
-  font-size: 3rem;
-  font-weight: 700;
-  color: white;
-  margin: 0 0 16px 0;
-  text-shadow: 0 2px 20px rgba(0, 0, 0, 0.5);
-}
-
-.hero-subtitle {
-  font-size: 1.25rem;
-  color: rgba(255, 255, 255, 0.95);
-  margin: 0;
-  max-width: 800px;
-  margin: 0 auto;
-  text-shadow: 0 1px 10px rgba(0, 0, 0, 0.3);
 }
 
 /* Section Cards */
@@ -973,118 +773,15 @@ onMounted(async () => {
   line-height: 1.8;
 }
 
-/* Features Section */
-.features-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 32px;
-  margin-top: 32px;
-}
-
-.feature-item {
-  text-align: center;
-  padding: 24px;
-  border-radius: 16px;
-  background: rgba(var(--v-theme-on-surface), 0.02);
-  transition: all 0.3s ease;
-  border: 1px solid rgba(var(--v-theme-on-surface), 0.06);
-}
-
-.feature-item:hover {
-  transform: translateY(-8px);
-  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1);
-  background: rgba(var(--v-theme-on-surface), 0.04);
-}
-
-.feature-icon-wrapper {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 72px;
-  height: 72px;
-  border-radius: 50%;
-  background: rgba(var(--v-theme-primary), 0.1);
-  margin-bottom: 20px;
-}
-
-.feature-title {
-  font-size: 1.25rem;
-  font-weight: 600;
-  margin: 0 0 12px 0;
-}
-
-.feature-description {
-  font-size: 0.95rem;
-  opacity: 0.8;
-  margin: 0;
-  line-height: 1.6;
-}
-
-/* Benefits Section */
-.benefits {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 16px;
-  margin-top: 24px;
-}
-
-.benefit-item {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 16px;
-  background: rgba(var(--v-theme-primary), 0.05);
-  border-radius: 12px;
-  border-left: 3px solid rgb(var(--v-theme-primary));
-  transition: all 0.3s ease;
-}
-
-.benefit-item:hover {
-  transform: translateX(8px);
-  background: rgba(var(--v-theme-primary), 0.1);
-}
 
 /* Mobile Responsive */
 @media (max-width: 960px) {
-  .hero-section {
-    padding: 48px 24px;
-    min-height: 250px;
-  }
-
-  .hero-title {
-    font-size: 2rem;
-  }
-
-  .hero-subtitle {
-    font-size: 1.1rem;
-  }
-
-  .hero-icon-top-right {
-    top: 16px;
-    right: 16px;
-    width: 70px;
-    height: 70px;
-  }
-
-  .hero-icon-top-right .v-icon {
-    font-size: 60px !important;
-  }
-
   .section-card {
     padding: 24px 16px;
   }
 
   .section-title {
     font-size: 1.75rem;
-  }
-
-  .features-grid {
-    grid-template-columns: 1fr;
-    gap: 24px;
-  }
-
-  .benefits {
-    grid-template-columns: 1fr;
   }
 }
 
@@ -1110,33 +807,12 @@ onMounted(async () => {
     padding: 8px 16px;
   }
 
-  .hero-section {
-    padding: 40px 16px;
-    min-height: 220px;
-    margin-bottom: 32px;
-  }
-
-  .hero-title {
-    font-size: 1.75rem;
-  }
-
-  .hero-subtitle {
-    font-size: 1rem;
-  }
-
   .section-title {
     font-size: 1.5rem;
-  }
-
-  .feature-icon-wrapper {
-    width: 64px;
-    height: 64px;
   }
 
   .breadcrumb-nav {
     margin-bottom: 12px;
   }
 }
-
-@import '@styles/flux-drive.scss';
 </style>

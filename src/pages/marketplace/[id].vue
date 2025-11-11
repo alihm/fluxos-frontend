@@ -296,157 +296,25 @@
 
       <!-- Why Host on Flux Cloud Section -->
       <div class="info-section why-flux-section">
-        <div class="section-title-modern">
-          <VAvatar size="32" class="section-title-avatar benefits-avatar">
-            <VIcon icon="mdi-rocket-launch" size="18" color="white" />
-          </VAvatar>
-          <span class="section-title-text">{{ t('pages.marketplace.common.whyFlux.title') }}</span>
-        </div>
-        <p class="section-subtitle">{{ t('pages.marketplace.common.whyFlux.subtitle') }}</p>
-
-        <div class="benefits-grid">
-          <div
-            v-for="(benefit, index) in whyFluxBenefits"
-            :key="index"
-            class="benefit-item"
-          >
-            <div class="benefit-icon-wrapper">
-              <VIcon :icon="benefit.icon" size="24" color="primary" />
-            </div>
-            <h4 class="benefit-title">{{ benefit.title }}</h4>
-            <p class="benefit-description">{{ benefit.description }}</p>
-          </div>
-        </div>
+        <FeatureShowcase
+          :title="t('pages.marketplace.common.whyFlux.title')"
+          :subtitle="t('pages.marketplace.common.whyFlux.subtitle')"
+          items="i18n:pages.marketplace.common.whyFlux.benefits"
+          icon-size="24"
+        />
       </div>
 
       <!-- Trustpilot Reviews Section -->
-      <div class="info-section trustpilot-section">
-        <VCard elevation="2" class="trustpilot-card">
-          <VCardText class="pa-8">
-            <div class="trustpilot-header text-center mb-6">
-              <h2 class="text-h4 mb-3 font-weight-bold">{{ t('common.trustpilot.title') }}</h2>
-              <a
-                :href="t('common.trustpilot.profileUrl')"
-                target="_blank"
-                rel="noopener noreferrer"
-                class="trustpilot-link"
-              >
-                <div class="trustpilot-rating-container">
-                  <div class="trustpilot-logo mb-3">
-                    <VIcon icon="mdi-star" size="32" color="#00b67a" />
-                    <span class="text-h6 font-weight-bold ml-2" style="color: #00b67a;">Trustpilot</span>
-                  </div>
-                  <div class="rating-stars mb-2">
-                    <VIcon v-for="i in 4" :key="i" icon="mdi-star" size="32" color="#00b67a" />
-                    <VIcon icon="mdi-star-half-full" size="32" color="#00b67a" />
-                  </div>
-                  <div class="rating-text">
-                    <span class="text-h5 font-weight-bold">{{ t('common.trustpilot.ratingLabel') }}</span>
-                    <span class="text-h6 ml-2 text-medium-emphasis">{{ t('common.trustpilot.score') }} {{ t('common.trustpilot.outOf') }}</span>
-                  </div>
-                  <div class="reviews-count text-body-2 text-medium-emphasis mt-1">
-                    {{ t('common.trustpilot.basedOn', { count: t('common.trustpilot.reviewsCount') }) }}
-                  </div>
-                </div>
-              </a>
-            </div>
-
-            <div class="trustpilot-reviews">
-              <VRow>
-                <VCol v-for="(review, key) in ['review1', 'review2', 'review3']" :key="key" cols="12" md="4">
-                  <VCard variant="outlined" class="review-card pa-4">
-                    <div class="review-stars mb-2">
-                      <VIcon v-for="i in parseInt(t(`common.trustpilot.sampleReviews.${review}.rating`))" :key="i" icon="mdi-star" size="20" color="#00b67a" />
-                    </div>
-                    <p class="review-text text-body-2 mb-3">
-                      "{{ t(`common.trustpilot.sampleReviews.${review}.text`) }}"
-                    </p>
-                    <div class="review-author text-caption text-medium-emphasis">
-                      <VIcon icon="mdi-check-circle" size="14" color="success" class="mr-1" />
-                      {{ t(`common.trustpilot.sampleReviews.${review}.author`) }}
-                    </div>
-                    <div class="text-caption text-medium-emphasis">
-                      {{ t('common.trustpilot.verifiedCustomer') }}
-                    </div>
-                  </VCard>
-                </VCol>
-              </VRow>
-            </div>
-
-            <div class="text-center mt-6">
-              <VBtn
-                :href="t('common.trustpilot.profileUrl')"
-                target="_blank"
-                rel="noopener noreferrer"
-                color="success"
-                variant="outlined"
-                size="large"
-              >
-                <VIcon start>mdi-open-in-new</VIcon>
-                {{ t('common.trustpilot.viewAllReviews') }}
-              </VBtn>
-            </div>
-          </VCardText>
-        </VCard>
+      <div class="info-section">
+        <TrustpilotPanel :stars="4.5" :star-size="32" :show-rating-label="true" />
       </div>
 
       <!-- Global Server Network Section -->
       <div class="info-section network-section">
-        <div class="section-title-modern">
-          <VAvatar size="32" class="section-title-avatar network-avatar">
-            <VIcon icon="mdi-earth" size="18" color="white" />
-          </VAvatar>
-          <span class="section-title-text">Global Server Network</span>
-        </div>
-        <p class="section-subtitle">Deploy your applications across our worldwide decentralized infrastructure</p>
-
-        <!-- Map Component -->
-        <div class="map-container">
-          <VOverlay
-            v-model="isLoadingMap"
-            contained
-            scroll-strategy="none"
-            class="align-center justify-center"
-          >
-            <VProgressCircular indeterminate color="primary" />
-          </VOverlay>
-
-          <MapComponent
-            v-if="fluxList.length > 0"
-            :nodes="fluxList"
-            :show-tier-display="false"
-            class="server-map"
-          />
-
-          <div v-if="!isLoadingMap && fluxList.length === 0" class="no-data">
-            No server data available
-          </div>
-        </div>
-
-        <!-- Stats -->
-        <div v-if="fluxNodeCount > 0" class="stats-container">
-          <div class="stat-item">
-            <VIcon icon="mdi-server-network" size="32" color="primary" />
-            <div class="stat-content">
-              <div class="stat-value">{{ fluxNodeCount.toLocaleString() }}+</div>
-              <div class="stat-label">Active Servers</div>
-            </div>
-          </div>
-          <div class="stat-item">
-            <VIcon icon="mdi-earth" size="32" color="primary" />
-            <div class="stat-content">
-              <div class="stat-value">{{ countryCount }}+</div>
-              <div class="stat-label">Countries</div>
-            </div>
-          </div>
-          <div class="stat-item">
-            <VIcon icon="mdi-web" size="32" color="primary" />
-            <div class="stat-content">
-              <div class="stat-value">Global</div>
-              <div class="stat-label">Coverage</div>
-            </div>
-          </div>
-        </div>
+        <ServerLocationsPanel
+          :panel="serverLocationsPanel"
+          :app="app"
+        />
       </div>
 
       <!-- Frequently Asked Questions Section -->
@@ -524,14 +392,14 @@ import { ref, onMounted, computed, watch, nextTick } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useHead } from '@vueuse/head'
-import axios from 'axios'
 import DOMPurify from 'dompurify'
 import { useMarketplace } from '@/composables/useMarketplace'
 import LoadingSpinner from '@/components/Marketplace/LoadingSpinner.vue'
 import AppIcon from '@/components/Marketplace/AppIcon.vue'
 import InstallDialog from '@/components/Marketplace/InstallDialog.vue'
-import MapComponent from '@core/components/MapComponent.vue'
-import DashboardService from '@/services/DashboardService'
+import FeatureShowcase from '@/components/FeatureShowcase.vue'
+import ServerLocationsPanel from '@/components/Marketplace/Panels/ServerLocationsPanel.vue'
+import TrustpilotPanel from '@/components/Marketplace/Panels/TrustpilotPanel.vue'
 
 const i18n = useI18n()
 const { t, tm, te } = i18n
@@ -555,88 +423,17 @@ const showImageViewer = computed({
   },
 })
 
-// Map data
-const fluxList = ref([])
-const fluxNodeCount = ref(0)
-const isLoadingMap = ref(true)
+// Server Locations Panel Configuration
+const serverLocationsPanel = {
+  enabled: true,
+  title: 'Global Server Network',
+  subtitle: 'Deploy your applications across our worldwide decentralized infrastructure',
+}
 
 const validScreenshots = computed(() => {
   if (!app.value?.screenshots) return []
 
   return app.value.screenshots.filter(image => !failedImages.value.has(image))
-})
-
-// Count unique countries
-const countryCount = computed(() => {
-  const countries = new Set()
-  fluxList.value.forEach(flux => {
-    if (flux.geolocation?.country) {
-      countries.add(flux.geolocation.country)
-    }
-  })
-  
-  return countries.size
-})
-
-// Get Why Flux benefits from i18n
-const whyFluxBenefits = computed(() => {
-  const key = 'pages.marketplace.common.whyFlux.benefits'
-
-  // Try direct access via locale messages
-  let benefits = null
-  try {
-    const locale = i18n.locale.value
-    const parts = key.split('.')
-    let value = i18n.messages.value[locale]
-
-    for (const part of parts) {
-      if (value && typeof value === 'object') {
-        value = value[part]
-      } else {
-        break
-      }
-    }
-
-    benefits = value
-  } catch (e) {
-    console.error('Error loading benefits:', e)
-  }
-
-  // Convert to array and unwrap proxy objects
-  if (benefits && typeof benefits === 'object') {
-    let benefitsArray = Array.isArray(benefits) ? benefits : Object.values(benefits)
-
-    // Deep clone to unwrap all proxies
-    try {
-      benefitsArray = JSON.parse(JSON.stringify(benefitsArray))
-    } catch (e) {
-      console.error('Error parsing benefits:', e)
-      
-      return []
-    }
-
-    // Extract actual string values from compiled i18n message objects
-    benefitsArray = benefitsArray.map(benefit => {
-      const extractString = obj => {
-        if (typeof obj === 'string') return obj
-        if (obj && typeof obj === 'object') {
-          return obj.body?.static || obj.loc?.source || obj.static || JSON.stringify(obj)
-        }
-        
-        return String(obj)
-      }
-
-      return {
-        icon: extractString(benefit.icon),
-        title: extractString(benefit.title),
-        description: extractString(benefit.description),
-      }
-    })
-
-    return benefitsArray
-  }
-
-  return []
 })
 
 // Get app-specific pricing FAQ
@@ -867,25 +664,6 @@ const handleAppDeployed = deployedApp => {
   // Could also update the UI to show "Manage" instead of "Install"
 }
 
-const getFluxList = async () => {
-  try {
-    const resLoc = await axios.get(
-      'https://stats.runonflux.io/fluxinfo?projection=geolocation,ip,tier',
-    )
-
-    fluxList.value = resLoc.data.data || []
-
-    const resList = await DashboardService.fluxnodeCount()
-    fluxNodeCount.value = resList.data.data.total || 0
-  } catch (error) {
-    console.error('Error fetching flux list:', error)
-    fluxList.value = []
-    fluxNodeCount.value = 0
-  } finally {
-    isLoadingMap.value = false
-  }
-}
-
 const loadAppDetails = async () => {
   const appId = route.params.id
   console.log('Loading app details for ID:', appId)
@@ -1048,15 +826,12 @@ watch(app, newApp => {
   })
 }, { immediate: true })
 
-onMounted(async () => {
+onMounted(() => {
   // Check if user came here with install intent
   if (route.query.action === 'install') {
     // Could show install dialog or scroll to install button
     // In future, could automatically open deploy dialog
   }
-
-  // Load flux network data
-  await getFluxList()
 })
 </script>
 
@@ -2426,85 +2201,6 @@ onMounted(async () => {
   color: rgba(var(--v-theme-on-surface), 0.8);
 }
 
-.benefits-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  gap: 24px;
-  margin-top: 32px;
-}
-
-.benefit-item {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-  padding: 28px 24px;
-  background: linear-gradient(135deg, rgba(var(--v-theme-surface), 0.8) 0%, rgba(var(--v-theme-surface), 0.6) 100%);
-  border-radius: 16px;
-  border: 1px solid rgba(var(--v-theme-primary), 0.1);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  position: relative;
-  overflow: hidden;
-}
-
-.benefit-item::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 3px;
-  background: linear-gradient(90deg,
-    rgb(var(--v-theme-primary)) 0%,
-    rgb(var(--v-theme-success)) 50%,
-    rgb(var(--v-theme-info)) 100%);
-  opacity: 0;
-  transition: opacity 0.3s ease;
-}
-
-.benefit-item:hover::before {
-  opacity: 1;
-}
-
-.benefit-item:hover {
-  transform: translateY(-6px);
-  box-shadow: 0 12px 32px rgba(var(--v-theme-primary), 0.2);
-  border-color: rgba(var(--v-theme-primary), 0.3);
-  background: linear-gradient(135deg, rgba(var(--v-theme-surface), 0.9) 0%, rgba(var(--v-theme-surface), 0.7) 100%);
-}
-
-.benefit-icon-wrapper {
-  width: 70px;
-  height: 70px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: linear-gradient(135deg, rgba(var(--v-theme-primary), 0.15) 0%, rgba(var(--v-theme-success), 0.1) 100%);
-  border-radius: 50%;
-  margin-bottom: 20px;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 12px rgba(var(--v-theme-primary), 0.1);
-}
-
-.benefit-item:hover .benefit-icon-wrapper {
-  background: linear-gradient(135deg, rgba(var(--v-theme-primary), 0.25) 0%, rgba(var(--v-theme-success), 0.2) 100%);
-  transform: scale(1.15) rotate(5deg);
-  box-shadow: 0 6px 20px rgba(var(--v-theme-primary), 0.25);
-}
-
-.benefit-title {
-  font-size: 1.125rem;
-  font-weight: 700;
-  margin-bottom: 12px;
-  color: rgb(var(--v-theme-on-surface));
-  line-height: 1.3;
-}
-
-.benefit-description {
-  font-size: 0.9375rem;
-  line-height: 1.6;
-  color: rgba(var(--v-theme-on-surface), 0.75);
-}
 
 /* FAQ Section */
 .faq-section {

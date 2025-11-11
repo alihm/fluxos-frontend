@@ -90,73 +90,7 @@
       </div>
 
       <!-- Trustpilot Reviews Section -->
-      <VCard v-if="game" class="trustpilot-section ma-4" elevation="2">
-        <VCardText class="pa-8">
-          <div class="trustpilot-header text-center mb-6">
-            <h2 class="text-h4 mb-3 font-weight-bold">{{ t('common.trustpilot.title') }}</h2>
-            <a
-              :href="t('common.trustpilot.profileUrl')"
-              target="_blank"
-              rel="noopener noreferrer"
-              class="trustpilot-link"
-            >
-              <div class="trustpilot-rating-container">
-                <div class="trustpilot-logo mb-3">
-                  <VIcon icon="mdi-star" size="32" color="#00b67a" />
-                  <span class="text-h6 font-weight-bold ml-2" style="color: #00b67a;">Trustpilot</span>
-                </div>
-                <div class="rating-stars mb-2">
-                  <VIcon v-for="i in 4" :key="i" icon="mdi-star" size="32" color="#00b67a" />
-                  <VIcon icon="mdi-star-half-full" size="32" color="#00b67a" />
-                </div>
-                <div class="rating-text">
-                  <span class="text-h5 font-weight-bold">{{ t('common.trustpilot.ratingLabel') }}</span>
-                  <span class="text-h6 ml-2 text-medium-emphasis">{{ t('common.trustpilot.score') }} {{ t('common.trustpilot.outOf') }}</span>
-                </div>
-                <div class="reviews-count text-body-2 text-medium-emphasis mt-1">
-                  {{ t('common.trustpilot.basedOn', { count: t('common.trustpilot.reviewsCount') }) }}
-                </div>
-              </div>
-            </a>
-          </div>
-
-          <div class="trustpilot-reviews">
-            <VRow>
-              <VCol v-for="(review, key) in ['review1', 'review2', 'review3']" :key="key" cols="12" md="4">
-                <VCard variant="outlined" class="review-card pa-4">
-                  <div class="review-stars mb-2">
-                    <VIcon v-for="i in parseInt(t(`common.trustpilot.sampleReviews.${review}.rating`))" :key="i" icon="mdi-star" size="20" color="#00b67a" />
-                  </div>
-                  <p class="review-text text-body-2 mb-3">
-                    "{{ t(`common.trustpilot.sampleReviews.${review}.text`) }}"
-                  </p>
-                  <div class="review-author text-caption text-medium-emphasis">
-                    <VIcon icon="mdi-check-circle" size="14" color="success" class="mr-1" />
-                    {{ t(`common.trustpilot.sampleReviews.${review}.author`) }}
-                  </div>
-                  <div class="text-caption text-medium-emphasis">
-                    {{ t('common.trustpilot.verifiedCustomer') }}
-                  </div>
-                </VCard>
-              </VCol>
-            </VRow>
-          </div>
-
-          <div class="text-center mt-6">
-            <VBtn
-              :href="t('common.trustpilot.profileUrl')"
-              target="_blank"
-              rel="noopener noreferrer"
-              color="success"
-              variant="outlined"
-              size="large"
-            >
-              <VIcon start>mdi-open-in-new</VIcon>
-              {{ t('common.trustpilot.viewAllReviews') }}
-            </VBtn>
-          </div>
-        </VCardText>
-      </VCard>
+      <TrustpilotPanel v-if="game" :stars="4.5" :star-size="32" :show-rating-label="true" :add-margin="true" />
     </div>
 
     <!-- Install Dialog -->
@@ -182,6 +116,7 @@ import LoadingSpinner from '@/components/Marketplace/LoadingSpinner.vue'
 import PanelRenderer from '@/components/Marketplace/PanelRenderer.vue'
 import AppConfigCard from '@/components/Marketplace/AppConfigCard.vue'
 import InstallDialog from '@/components/Marketplace/InstallDialog.vue'
+import TrustpilotPanel from '@/components/Marketplace/Panels/TrustpilotPanel.vue'
 
 const { t, tm, te } = useI18n()
 
