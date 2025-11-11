@@ -99,6 +99,7 @@
             <div class="comparison-table">
               <div class="comparison-row comparison-header">
                 <div class="comparison-cell">{{ t('pages.apps.register.landing.pricing.provider') }}</div>
+                <div class="comparison-cell">Instances</div>
                 <div class="comparison-cell">{{ t('pages.apps.register.landing.pricing.cpu') }}</div>
                 <div class="comparison-cell">{{ t('pages.apps.register.landing.pricing.ram') }}</div>
                 <div class="comparison-cell">{{ t('pages.apps.register.landing.pricing.storage') }}</div>
@@ -114,6 +115,7 @@
                   <VIcon v-if="provider.highlighted" icon="mdi-star" color="warning" size="20" class="mr-2" />
                   <strong>{{ provider.name }}</strong>
                 </div>
+                <div class="comparison-cell">{{ provider.instances }}</div>
                 <div class="comparison-cell">{{ provider.cpu }}</div>
                 <div class="comparison-cell">{{ provider.ram }}</div>
                 <div class="comparison-cell">{{ provider.storage }}</div>
@@ -363,20 +365,23 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useHead } from '@vueuse/head'
 import axios from 'axios'
 import MapComponent from '@core/components/MapComponent.vue'
 import DashboardService from '@/services/DashboardService'
+import Api from '@/services/ApiClient'
 
 const { t } = useI18n()
-const router = useRouter()
 
 // Server locations data
 const fluxList = ref([])
 const fluxNodeCount = ref(0)
 const isLoadingMap = ref(true)
+
+// FluxCloud pricing data
+const fluxCloudPrice = ref('$8.99') // Default fallback price
+const fluxCloudPriceLoading = ref(true)
 
 // Computed country count from flux list
 const countryCount = computed(() => {
@@ -484,20 +489,34 @@ const benefits = computed(() => [
     title: t('pages.apps.register.landing.benefits.guarantee.title'),
     description: t('pages.apps.register.landing.benefits.guarantee.description'),
   },
+  {
+    icon: 'mdi-domain',
+    color: 'info',
+    title: t('pages.apps.register.landing.benefits.freeDomain.title'),
+    description: t('pages.apps.register.landing.benefits.freeDomain.description'),
+  },
+  {
+    icon: 'mdi-swap-horizontal',
+    color: 'primary',
+    title: t('pages.apps.register.landing.benefits.loadBalancer.title'),
+    description: t('pages.apps.register.landing.benefits.loadBalancer.description'),
+  },
 ])
 
 // Pricing comparison data
 const pricingComparison = computed(() => [
   {
     name: 'FluxCloud',
+    instances: '3',
     cpu: '2 vCPU',
     ram: '4 GB',
     storage: '20 GB SSD',
-    price: '$8.99',
+    price: fluxCloudPriceLoading.value ? t('pages.costCalculator.calculating') : fluxCloudPrice.value,
     highlighted: true,
   },
   {
     name: 'AWS EC2',
+    instances: '1',
     cpu: '2 vCPU',
     ram: '4 GB',
     storage: '20 GB SSD',
@@ -506,6 +525,7 @@ const pricingComparison = computed(() => [
   },
   {
     name: 'Google Cloud',
+    instances: '1',
     cpu: '2 vCPU',
     ram: '4 GB',
     storage: '20 GB SSD',
@@ -514,6 +534,7 @@ const pricingComparison = computed(() => [
   },
   {
     name: 'Azure',
+    instances: '1',
     cpu: '2 vCPU',
     ram: '4 GB',
     storage: '20 GB SSD',
@@ -522,6 +543,7 @@ const pricingComparison = computed(() => [
   },
   {
     name: 'DigitalOcean',
+    instances: '1',
     cpu: '2 vCPU',
     ram: '4 GB',
     storage: '20 GB SSD',
@@ -684,6 +706,71 @@ const getFluxList = async () => {
   }
 }
 
+// Calculate FluxCloud price from cost calculator API
+const calculateFluxCloudPrice = async () => {
+  try {
+    fluxCloudPriceLoading.value = true
+
+    // Specifications matching the pricing comparison table
+    // 2 vCPU, 4 GB RAM, 20 GB SSD, 3 instances (minimum), 1 month
+    // Post-fork: 88000 blocks = 1 month (30 days)
+    const expire = 88000
+
+    const payload = JSON.stringify({
+      version: 8,
+      name: "pricingcalc",
+      description: "Pricing comparison calculation",
+      owner: "176iuPFBqD4yg3Fd7oPVhB3d4NXWxvQyxx",
+      compose: [{
+        name: "component",
+        description: "component",
+        repotag: "runonflux/jetpack2:latest",
+        ports: [3000],
+        domains: [""],
+        environmentParameters: [""],
+        commands: [""],
+        containerPorts: [3000],
+        containerData: "/tmp",
+        cpu: "2",
+        ram: "4000",
+        hdd: "20",
+        tiered: false,
+      }],
+      instances: 3,
+      nodes: [],
+      contacts: [""],
+      geolocation: [""],
+      expire: expire,
+      enterprise: "",
+      staticip: false,
+    })
+
+    const response = await Api().post(
+      '/apps/calculatefiatandfluxprice',
+      payload,
+      {
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        timeout: 10000,
+      },
+    )
+
+    if (response.data.status !== 'error' && response.data.data?.usd) {
+      const usdPrice = parseFloat(response.data.data.usd)
+      fluxCloudPrice.value = `$${usdPrice.toFixed(2)}`
+      console.log('FluxCloud price calculated:', fluxCloudPrice.value)
+    } else {
+      console.warn('Failed to calculate price, using default:', response.data)
+    }
+  } catch (error) {
+    console.error('Error calculating FluxCloud price:', error)
+    // Keep default price on error
+  } finally {
+    fluxCloudPriceLoading.value = false
+  }
+}
+
 // SEO meta tags
 useHead({
   title: 'Deploy Your App on FluxCloud - Decentralized Cloud Computing',
@@ -776,12 +863,15 @@ useHead({
 })
 
 onMounted(async () => {
-  // Load server locations
+  // Load server locations and pricing in parallel
   isLoadingMap.value = true
   try {
-    await getFluxList()
+    await Promise.all([
+      getFluxList(),
+      calculateFluxCloudPrice(),
+    ])
   } catch (error) {
-    console.error('Error loading server locations:', error)
+    console.error('Error loading data:', error)
   } finally {
     isLoadingMap.value = false
   }
@@ -1015,7 +1105,7 @@ onMounted(async () => {
 
 .comparison-row {
   display: grid;
-  grid-template-columns: 2fr 1fr 1fr 1fr 1fr;
+  grid-template-columns: 2fr 0.8fr 1fr 1fr 1fr 1fr;
   gap: 1rem;
   padding: 1rem;
   background: rgb(var(--v-theme-surface));

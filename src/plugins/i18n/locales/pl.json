@@ -120,30 +120,30 @@
     "trustpilot": {
       "title": "Zaufali nam tysiące osób",
       "ratingLabel": "Doskonały",
-      "rating": "4.5 na 5",
-      "reviews": "Na podstawie 96 845 recenzji",
+      "rating": "4.4 na 5",
+      "reviews": "Na podstawie 10 recenzji",
       "basedOn": "Na podstawie {count} recenzji",
-      "reviewsCount": "96 845 recenzji",
-      "score": "4.5",
+      "reviewsCount": "10",
+      "score": "4.4",
       "outOf": "na 5",
       "verifiedCustomer": "Zweryfikowany klient",
       "profileUrl": "https://www.trustpilot.com/review/runonflux.com",
       "viewAllReviews": "Zobacz wszystkie recenzje na Trustpilot",
       "sampleReviews": {
         "review1": {
-          "text": "Wybitna usługa i niezawodność. Zdecentralizowana infrastruktura zapewnia, że moje aplikacje są zawsze dostępne przy minimalnym przestoju.",
-          "author": "James Mitchell",
+          "text": "Udało mi się stosunkowo łatwo wdrożyć moją aplikację na tej platformie.",
+          "author": "Christopher Taylor",
           "rating": "5"
         },
         "review2": {
-          "text": "Świetna platforma do hostingu. Łatwa w użyciu, a ceny są bardzo konkurencyjne w porównaniu z tradycyjnymi dostawcami chmury.",
-          "author": "Sarah Thompson",
+          "text": "Najlepsza wartość jaką znalazłem, nigdy nie padła i super szybko się ładuje.",
+          "author": "Alex Francis Biancheri",
           "rating": "5"
         },
         "review3": {
-          "text": "Jestem pod wrażeniem globalnego zasięgu sieci i wydajności. Obsługa klienta jest responsywna i pomocna.",
-          "author": "Michael Chen",
-          "rating": "4"
+          "text": "Niskie opóźnienia i imponująca wydajność w bardzo przystępnej cenie.",
+          "author": "Valter Nuno Da Silva",
+          "rating": "5"
         }
       }
     },
