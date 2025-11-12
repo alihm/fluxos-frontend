@@ -2042,8 +2042,8 @@
       
       <!-- Test & Pay Tab -->
       <VWindowItem :value="100">
-        <div 
-          class="pa-4" 
+        <div
+          class="pa-4"
           :style="{
             backgroundColor: theme.global.name.value === 'dark' ? 'rgba(76, 175, 80, 0.05)' : 'rgba(76, 175, 80, 0.03)',
             borderRadius: '8px',
@@ -2051,7 +2051,7 @@
           }"
         >
           <!-- Test Installation Section -->
-          <VCard class="mb-4" v-if="!testFinished && specsHaveChanged && (props.newApp || appSpecPrice?.flux !== 0) && !paymentProcessing && !paymentConfirmed">
+          <VCard class="mb-4" v-if="shouldShowTestSection">
             <VCardTitle class="bg-primary text-white">
               <VIcon class="mr-2">mdi-test-tube</VIcon>
               {{ t('core.subscriptionManager.testApplicationInstallation') }}
@@ -2186,7 +2186,7 @@
           </VAlert>
 
           <!-- Payment Section -->
-          <div v-if="(testFinished && !testError) || (!props.newApp && renewalEnabled && !specsHaveChanged) || (!props.newApp && registrationHash && appSpecPrice?.flux === 0) || paymentProcessing || paymentConfirmed">
+          <div v-if="(testFinished && !testError) || (!props.newApp && registrationHash && !testableFieldsHaveChanged) || (!props.newApp && registrationHash && appSpecPrice?.flux === 0) || paymentProcessing || paymentConfirmed">
             <!-- Warning Alert if test had warnings -->
             <VAlert 
               v-if="hasTestWarnings" 
@@ -2208,9 +2208,9 @@
                       borderBottom: theme.global.name.value === 'dark' ? '2px solid rgba(76, 175, 80, 0.3)' : '2px solid rgba(76, 175, 80, 0.4)'
                     }"
                   >
-                    <VIcon 
-                      class="mr-3" 
-                      size="24" 
+                    <VIcon
+                      class="mr-3"
+                      size="24"
                       :style="{
                         color: theme.global.name.value === 'dark' ? 'rgba(165, 214, 167, 1)' : 'rgba(27, 94, 32, 1)'
                       }"
@@ -2228,6 +2228,16 @@
                         }"
                       >{{ t('core.subscriptionManager.appReadyForDeployment') }}</div>
                     </div>
+                    <VSpacer />
+                    <VBtn
+                      v-if="!props.newApp && (managementAction === 'renewal' || managementAction === 'update' || managementAction === 'cancel')"
+                      icon
+                      variant="text"
+                      color="default"
+                      @click="tab = 0"
+                    >
+                      <VIcon>mdi-arrow-left-circle</VIcon>
+                    </VBtn>
                   </VCardTitle>
                   <VCardText class="px-4 pt-4 pb-2">
                     <VList class="bg-transparent payment-info-list">
@@ -3417,6 +3427,7 @@ const testRunning = ref(false)
 const testOutput = ref([])
 const showTestLogs = ref(false)
 const deploymentAddress = ref(null)
+let autoNavigateTimer = null // Timer for auto-navigation to payment tab
 const applicationPrice = ref(null)
 const applicationPriceFluxDiscount = ref(0)
 const stripeEnabled = ref(true)
@@ -3742,6 +3753,7 @@ function getBlockTimeMs(blockHeight) {
 // 1️⃣  Clone once (on mount) – never overwritten
 const originalExpireSnapshot = ref(null)
 const originalAppSpecSnapshot = ref(null)
+const testedSpecSnapshot = ref(null) // Snapshot of spec when test was completed
 
 onMounted(() => {
   // Fork-aware default for original expire snapshot
@@ -3783,9 +3795,81 @@ const specsHaveChanged = computed(() => {
     return hasChanged
   } catch (error) {
     console.error('Error comparing specs:', error)
-    
+
     return true // If comparison fails, assume specs changed
   }
+})
+
+// Computed to check if TESTABLE fields have changed (excludes expire and instances)
+// Instances don't require re-testing because test validates Docker image/compose, not instance count
+const testableFieldsHaveChanged = computed(() => {
+  if (!props.appSpec) return true // No spec means we need to test
+
+  // For new apps, use testedSpecSnapshot if test was completed
+  // For existing apps, use originalAppSpecSnapshot
+  const snapshotToCompare = props.newApp ? testedSpecSnapshot.value : originalAppSpecSnapshot.value
+
+  if (!snapshotToCompare) return true // No snapshot means we need to test
+
+  // Compare current spec (without expire and instances) to snapshot
+  try {
+    const currentSpecCopy = JSON.parse(JSON.stringify(props.appSpec))
+    delete currentSpecCopy.expire
+    delete currentSpecCopy.instances
+
+    const snapshotCopy = JSON.parse(JSON.stringify(snapshotToCompare))
+    delete snapshotCopy.expire
+    delete snapshotCopy.instances
+
+    const hasChanged = JSON.stringify(currentSpecCopy) !== JSON.stringify(snapshotCopy)
+
+    console.log('🧪 Testable fields check:', {
+      hasChanged,
+      isNewApp: props.newApp,
+      usingTestedSnapshot: props.newApp && !!testedSpecSnapshot.value,
+      currentInstances: props.appSpec?.instances,
+      snapshotInstances: snapshotToCompare?.instances,
+    })
+
+    if (hasChanged) {
+      console.log('🔍 Testable fields DIFF:', {
+        current: currentSpecCopy,
+        snapshot: snapshotCopy,
+      })
+    }
+
+    return hasChanged
+  } catch (error) {
+    console.error('Error comparing testable fields:', error)
+
+    return true // If comparison fails, assume specs changed
+  }
+})
+
+// Computed to check if test section should show (with logging)
+const shouldShowTestSection = computed(() => {
+  const result = !testFinished.value &&
+                 testableFieldsHaveChanged.value &&
+                 (props.newApp || appSpecPrice.value?.flux !== 0) &&
+                 !paymentProcessing.value &&
+                 !paymentConfirmed.value &&
+                 (props.newApp || managementAction.value !== 'cancel') &&
+                 (props.newApp || managementAction.value !== 'renewal')
+
+  console.log('🧪 Test Section Visibility Check:', {
+    shouldShow: result,
+    testFinished: testFinished.value,
+    specsHaveChanged: specsHaveChanged.value,
+    testableFieldsHaveChanged: testableFieldsHaveChanged.value,
+    isNewApp: props.newApp,
+    fluxPrice: appSpecPrice.value?.flux,
+    paymentProcessing: paymentProcessing.value,
+    paymentConfirmed: paymentConfirmed.value,
+    managementAction: managementAction.value,
+    renewalEnabled: renewalEnabled.value,
+  })
+
+  return result
 })
 
 // Watch for spec changes and clear registration if user modifies specs after signing
@@ -3794,8 +3878,7 @@ const specsHaveChanged = computed(() => {
 let signedSpecState = ref(null)
 
 watch(() => props.appSpec, newSpec => {
-  if (!newSpec || props.newApp) return // Skip for new apps
-  if (!registrationHash.value) return // No hash to clear
+  if (!newSpec) return
   if (!signedSpecState.value) return // No signed spec to compare against
 
   // If user changes props.appSpec after signing, the old signature is invalid
@@ -3808,13 +3891,59 @@ watch(() => props.appSpec, newSpec => {
 
     // Compare current spec to what was actually signed (appSpecFormated at time of signing)
     if (currentStr !== signedStr) {
-      console.log('⚠️ Spec changed after signing - clearing registration hash')
+      console.log('⚠️ Spec changed after signing - analyzing changes')
 
+      // Check if only instances changed (doesn't require re-test)
+      // Test validates Docker image, compose spec, resources - not instance count
+      const currentSpecForTest = JSON.parse(JSON.stringify(currentSpecCopy))
+
+      // For new apps, compare against testedSpecSnapshot (what was tested)
+      // For existing apps, compare against signedSpecState (what was signed)
+      const baselineSpec = props.newApp && testedSpecSnapshot.value
+        ? testedSpecSnapshot.value
+        : signedSpecState.value
+
+      const signedSpecForTest = JSON.parse(JSON.stringify(baselineSpec))
+      delete currentSpecForTest.instances
+      delete signedSpecForTest.instances
+
+      const testableFieldsChanged = JSON.stringify(currentSpecForTest) !== JSON.stringify(signedSpecForTest)
+
+      console.log('🔍 Spec watcher comparison:', {
+        isNewApp: props.newApp,
+        hasTestedSnapshot: !!testedSpecSnapshot.value,
+        usingTestedSnapshot: props.newApp && !!testedSpecSnapshot.value,
+        currentInstances: newSpec.instances,
+        baselineInstances: baselineSpec.instances,
+      })
+
+      console.log('📊 Change analysis:', {
+        testableFieldsChanged,
+        message: testableFieldsChanged
+          ? 'Testable fields changed (CPU/RAM/image/etc) - clearing test results'
+          : 'Only instances changed - preserving test results (re-sign still required)'
+      })
+
+      // Cancel any pending auto-navigation to payment tab
+      if (autoNavigateTimer) {
+        clearTimeout(autoNavigateTimer)
+        autoNavigateTimer = null
+        console.log('🛑 Cancelled auto-navigation to payment tab due to spec change')
+      }
+
+      // Always clear signature and hash (user must re-sign ANY change)
       registrationHash.value = null
       signature.value = null
-      testFinished.value = false
-      testError.value = false
       signedSpecState.value = null
+
+      // Only clear test results if testable fields changed (not just instances)
+      if (testableFieldsChanged) {
+        testFinished.value = false
+        testError.value = false
+        console.log('🧹 Cleared test results - testable fields changed')
+      } else {
+        console.log('✅ Preserved test results - only instances changed')
+      }
     }
   } catch (error) {
     console.error('Error checking spec changes:', error)
@@ -5530,10 +5659,11 @@ watch(tab, async newVal => {
       // Otherwise, preserve existing test states (including failures)
 
       // Auto-navigate to Test & Pay tab after 1 second
-      setTimeout(() => {
+      autoNavigateTimer = setTimeout(() => {
         if (tab.value === 99) { // Only navigate if still on tab 99
           tab.value = 100
         }
+        autoNavigateTimer = null
       }, 1000)
 
       return
@@ -5541,6 +5671,22 @@ watch(tab, async newVal => {
 
     // Spinner on
     isVeryfitying.value = true
+
+    console.log('🔍 Tab 99 BEFORE preserve logic:', {
+      testFinishedBefore: testFinished.value,
+      testableFieldsHaveChanged: testableFieldsHaveChanged.value,
+      testedSpecSnapshot: !!testedSpecSnapshot.value,
+      isNewApp: props.newApp,
+    })
+
+    // Preserve test results if only instances changed (testable fields unchanged)
+    const preserveTestResults = testFinished.value && !testableFieldsHaveChanged.value
+
+    console.log('🔍 Preserve calculation:', {
+      testFinished: testFinished.value,
+      testableFieldsHaveChanged: testableFieldsHaveChanged.value,
+      result: preserveTestResults,
+    })
 
     // Reset all public state
     // Only clear signature/hash if they don't exist
@@ -5555,9 +5701,21 @@ watch(tab, async newVal => {
     blocksToExpire.value = null
     isPropagating.value = false
     testError.value = false
-    testFinished.value = false
+    testFinished.value = preserveTestResults ? true : false
     testRunning.value = false
-    testOutput.value = []
+    if (!preserveTestResults) {
+      testOutput.value = []
+    }
+
+    console.log('🔍 Tab 99 AFTER preserve logic:', {
+      testFinishedAfter: testFinished.value,
+      preserveTestResults,
+    })
+
+    console.log('🔄 Tab 99 validation:', {
+      preserveTestResults,
+      testableFieldsHaveChanged: testableFieldsHaveChanged.value,
+    })
 
     hasValidatedSpec.value = false
     hasCheckedExpiry.value = false
@@ -5653,21 +5811,15 @@ watch(tab, async (newVal, oldVal) => {
       testError: testError.value,
       testRunning: testRunning.value,
       specsHaveChanged: specsHaveChanged.value,
+      testableFieldsHaveChanged: testableFieldsHaveChanged.value,
+      shouldShowTestSection: shouldShowTestSection.value,
       isNewApp: props.newApp,
       appSpecPrice: appSpecPrice.value?.flux,
     })
 
-    // Auto-run test ONLY if test section is visible (same conditions as v-if in template)
-    // Test section shows when: !testFinished && specsHaveChanged && (newApp || paid update) && !paymentProcessing && !paymentConfirmed
-    const testSectionVisible =
-      !testFinished.value &&
-      specsHaveChanged.value &&
-      (props.newApp || appSpecPrice.value?.flux !== 0) &&
-      !paymentProcessing.value &&
-      !paymentConfirmed.value
-
+    // Auto-run test ONLY if test section is visible (use shouldShowTestSection computed)
     const shouldAutoTest =
-      testSectionVisible &&
+      shouldShowTestSection.value &&
       registrationHash.value &&
       !testRunning.value
 
@@ -5681,7 +5833,7 @@ watch(tab, async (newVal, oldVal) => {
       }, 500)
     } else {
       console.log('⏭️ Skipping auto-test:', {
-        reason: !testSectionVisible ? 'Test section not visible (test not required)' :
+        reason: !shouldShowTestSection.value ? 'Test section not visible (test not required)' :
           !registrationHash.value ? 'No registration hash' :
             testRunning.value ? 'Test already running' :
               'Unknown',
@@ -6523,8 +6675,9 @@ async function propagateSignedMessage() {
 
       // Auto-navigate to Test & Pay tab after 2 seconds
       // The tab watcher will handle auto-starting monitoring for free updates
-      setTimeout(() => {
+      autoNavigateTimer = setTimeout(() => {
         tab.value = 100
+        autoNavigateTimer = null
       }, 2000)
     } else {
       throw new Error(response.data?.data?.message || response.data?.data || 'Registration failed')
@@ -6729,8 +6882,17 @@ async function testAppInstall() {
     testRunning.value = false
     testFinished.value = true
 
+    // Save tested spec snapshot for new apps (to detect if testable fields change later)
+    if (props.newApp && props.appSpec) {
+      const specCopy = JSON.parse(JSON.stringify(props.appSpec))
+      delete specCopy.expire
+      delete specCopy.instances
+      testedSpecSnapshot.value = specCopy
+      console.log('📸 Saved tested spec snapshot for new app')
+    }
+
     await streamTestPhase(t('core.subscriptionManager.testProcessCompleted'), 'info', 200)
-    
+
     console.log('Test completed:', {
       testFinished: testFinished.value,
       testError: testError.value,
