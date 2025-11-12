@@ -1345,6 +1345,8 @@ async function saveContent() {
     console.log('[SAVE] Uploading...')
     await upload(fileToUpload, true)
     showToast('success', t('core.volumeBrowser.fileUpdated'))
+    // Refresh the folder list to show updated file
+    await refreshFolder()
   } catch (error) {
     console.error('[SAVE] Upload failed:', error)
     showToast('danger', t('core.volumeBrowser.errorSavingFile', { error: error.message }))
