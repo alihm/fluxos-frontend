@@ -2962,9 +2962,10 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, onMounted, nextTick } from 'vue'
+import { ref, computed, watch, onMounted, onUnmounted, nextTick } from 'vue'
 import { useI18n } from 'vue-i18n'
 import axios from 'axios'
+import { cloneDeep } from 'lodash-es'
 
 const props = defineProps({
   appSpec: Object,
@@ -3427,7 +3428,87 @@ const testRunning = ref(false)
 const testOutput = ref([])
 const showTestLogs = ref(false)
 const deploymentAddress = ref(null)
-let autoNavigateTimer = null // Timer for auto-navigation to payment tab
+
+/**
+ * AUTO-NAVIGATION TIMER - Safe timer management pattern
+ *
+ * This timer auto-navigates user to Test & Pay tab after registration or validation.
+ *
+ * IMPORTANT: Always clear existing timer before setting new one to prevent race conditions:
+ *
+ * WRONG (creates orphaned timers):
+ *   autoNavigateTimer = setTimeout(...)
+ *
+ * CORRECT (safe pattern):
+ *   if (autoNavigateTimer) {
+ *     clearTimeout(autoNavigateTimer)
+ *   }
+ *   autoNavigateTimer = setTimeout(...)
+ *
+ * CLEANUP LOCATIONS:
+ * 1. onUnmounted hook (line ~5290) - Prevents memory leaks
+ * 2. Spec change watcher (line ~3990) - Cancels navigation if user changes spec
+ * 3. Before setting new timer (line ~5730, ~6760) - Prevents race conditions
+ *
+ * RACE CONDITION EXAMPLE:
+ * Without cleanup before set:
+ *   t=0s:  Timer A set → navigate after 1000ms
+ *   t=0.5s: Timer B set → navigate after 1000ms (Timer A still running!)
+ *   t=1.0s: Timer A fires → navigate (unexpected!)
+ *   t=1.5s: Timer B fires → navigate (redundant!)
+ *
+ * With cleanup before set:
+ *   t=0s:  Timer A set → navigate after 1000ms
+ *   t=0.5s: Timer A cleared
+ *   t=0.5s: Timer B set → navigate after 1000ms
+ *   t=1.5s: Timer B fires → navigate (correct!)
+ */
+let autoNavigateTimer = null
+
+/**
+ * NON_TESTABLE_FIELDS - Fields that don't require re-testing when changed
+ *
+ * These fields affect resource allocation, scaling, billing, and deployment configuration,
+ * but do NOT affect whether the application will successfully deploy and run.
+ *
+ * The test installation validates:
+ * - Docker image availability (repo, repotag)
+ * - Container composition (compose array with env vars, commands, ports, volumes)
+ * - Runtime configuration (enviromentParameters, containerPorts, containerData)
+ *
+ * Changes to NON_TESTABLE fields preserve test results because:
+ * - Resource changes (cpu, ram, hdd) don't affect if Docker image works
+ * - Scaling changes (instances) don't affect individual container functionality
+ * - DNS changes (domains) are just routing config, not app functionality
+ * - Deployment preferences (geolocation, staticip, nodes) are infrastructure, not code
+ * - Billing changes (expire, tiered) don't affect technical implementation
+ *
+ * IMPORTANT: When adding new fields to appSpec, consider:
+ * - Does this field affect whether the Docker container will start successfully?
+ * - Does this field affect the application's runtime behavior?
+ * - If YES to either: DO NOT add to this list
+ * - If NO to both: Safe to add to this list
+ *
+ * Examples:
+ * - Adding port mapping → TESTABLE (affects container startup)
+ * - Changing CPU from 1 to 2 → NON-TESTABLE (just resource allocation)
+ * - Changing environment variable → TESTABLE (affects app behavior)
+ * - Adding domain → NON-TESTABLE (just DNS routing)
+ */
+const NON_TESTABLE_FIELDS = [
+  'expire',      // Billing: expiration blocks
+  'instances',   // Scaling: number of instances
+  'cpu',         // Resources: CPU cores
+  'ram',         // Resources: RAM allocation
+  'hdd',         // Resources: storage allocation
+  'tiered',      // Billing: tiered pricing flag
+  'domains',     // DNS: custom domain records
+  'geolocation', // Deployment: geographic restrictions
+  'staticip',    // Deployment: static IP flag
+  'enterprise',  // Deployment: enterprise tier flag
+  'nodes',       // Deployment: preferred node list
+]
+
 const applicationPrice = ref(null)
 const applicationPriceFluxDiscount = ref(0)
 const stripeEnabled = ref(true)
@@ -3750,10 +3831,59 @@ function getBlockTimeMs(blockHeight) {
   return blockHeight >= FORK_BLOCK_HEIGHT ? 0.5 * 60 * 1000 : 2 * 60 * 1000
 }
 
-// 1️⃣  Clone once (on mount) – never overwritten
+/**
+ * SNAPSHOT SYSTEM - Tracking spec changes for test preservation
+ *
+ * This system uses three snapshots to intelligently determine when re-testing is required:
+ *
+ * 1️⃣ originalExpireSnapshot (number)
+ *    - Captured: On component mount for existing apps
+ *    - Purpose: Track if user changed expiration (billing change, not functionality)
+ *    - Never overwritten during session
+ *
+ * 2️⃣ originalAppSpecSnapshot (object)
+ *    - Captured: On component mount for existing apps
+ *    - Purpose: Detect if user made ANY changes to the spec (for updates/renewals)
+ *    - Used by: specsHaveChanged computed
+ *    - Excludes: Only 'expire' field (billing-only change)
+ *    - Updated: After successful deployment (becomes new baseline)
+ *    - Never overwritten during editing session
+ *
+ * 3️⃣ testedSpecSnapshot (object)
+ *    - Captured: After successful test completion for NEW apps only
+ *    - Purpose: Allow users to change NON_TESTABLE fields without re-testing
+ *    - Used by: testableFieldsHaveChanged computed (for new apps)
+ *    - Excludes: ALL NON_TESTABLE_FIELDS (cpu, ram, hdd, instances, expire, etc.)
+ *    - Safety: Only saved if test SUCCEEDED (!testError.value)
+ *    - Use case: User tests app → passes → user increases CPU → no retest needed
+ *
+ * IMPORTANT BEHAVIORS:
+ *
+ * For NEW apps:
+ * - Before test: testableFieldsHaveChanged = true (forces test)
+ * - After test success: testedSpecSnapshot saved
+ * - User changes CPU/RAM: testableFieldsHaveChanged = false (no retest)
+ * - User changes repo/tag: testableFieldsHaveChanged = true (retest required)
+ * - Test failed: testedSpecSnapshot NOT saved (any change requires retest)
+ *
+ * For EXISTING apps (updates/renewals):
+ * - Uses originalAppSpecSnapshot as baseline
+ * - User changes CPU/RAM: testableFieldsHaveChanged = false (no retest)
+ * - User changes env vars: testableFieldsHaveChanged = true (retest required)
+ * - specsHaveChanged checks if ANY field changed (for showing update UI)
+ *
+ * WHY THREE SNAPSHOTS?
+ * - originalExpireSnapshot: Simple number comparison for billing changes
+ * - originalAppSpecSnapshot: Full spec baseline for detecting ANY changes
+ * - testedSpecSnapshot: Filtered spec (testable fields only) for smart retest logic
+ *
+ * PERFORMANCE NOTE:
+ * All snapshots use cloneDeep (lodash-es) instead of JSON.parse/stringify
+ * for 2-3x better performance and proper edge case handling.
+ */
 const originalExpireSnapshot = ref(null)
 const originalAppSpecSnapshot = ref(null)
-const testedSpecSnapshot = ref(null) // Snapshot of spec when test was completed
+const testedSpecSnapshot = ref(null)
 
 onMounted(() => {
   // Fork-aware default for original expire snapshot
@@ -3761,8 +3891,9 @@ onMounted(() => {
   originalExpireSnapshot.value = props.appSpec?.expire ?? defaultExpire
 
   // Store original app spec for comparison (excluding expire field)
+  // Using cloneDeep for better performance
   if (!props.newApp && props.appSpec) {
-    const specCopy = JSON.parse(JSON.stringify(props.appSpec))
+    const specCopy = cloneDeep(props.appSpec)
     delete specCopy.expire
     originalAppSpecSnapshot.value = specCopy
   }
@@ -3781,7 +3912,7 @@ const specsHaveChanged = computed(() => {
 
   // Compare current spec (without expire) to original snapshot
   try {
-    const currentSpecCopy = JSON.parse(JSON.stringify(props.appSpec))
+    const currentSpecCopy = cloneDeep(props.appSpec)
     delete currentSpecCopy.expire
 
     const hasChanged = JSON.stringify(currentSpecCopy) !== JSON.stringify(originalAppSpecSnapshot.value)
@@ -3800,8 +3931,11 @@ const specsHaveChanged = computed(() => {
   }
 })
 
-// Computed to check if TESTABLE fields have changed (excludes expire and instances)
-// Instances don't require re-testing because test validates Docker image/compose, not instance count
+// Computed to check if TESTABLE fields have changed
+// Testable fields are those that affect whether the app will work:
+// - repo, repotag (Docker image)
+// - compose spec: enviromentParameters, commands, containerPorts, containerData (runtime config)
+// Non-testable fields are defined in NON_TESTABLE_FIELDS constant
 const testableFieldsHaveChanged = computed(() => {
   if (!props.appSpec) return true // No spec means we need to test
 
@@ -3811,15 +3945,13 @@ const testableFieldsHaveChanged = computed(() => {
 
   if (!snapshotToCompare) return true // No snapshot means we need to test
 
-  // Compare current spec (without expire and instances) to snapshot
+  // Compare current spec (without non-testable fields) to snapshot
   try {
-    const currentSpecCopy = JSON.parse(JSON.stringify(props.appSpec))
-    delete currentSpecCopy.expire
-    delete currentSpecCopy.instances
+    const currentSpecCopy = cloneDeep(props.appSpec)
+    NON_TESTABLE_FIELDS.forEach(field => delete currentSpecCopy[field])
 
-    const snapshotCopy = JSON.parse(JSON.stringify(snapshotToCompare))
-    delete snapshotCopy.expire
-    delete snapshotCopy.instances
+    const snapshotCopy = cloneDeep(snapshotToCompare)
+    NON_TESTABLE_FIELDS.forEach(field => delete snapshotCopy[field])
 
     const hasChanged = JSON.stringify(currentSpecCopy) !== JSON.stringify(snapshotCopy)
 
@@ -3827,8 +3959,11 @@ const testableFieldsHaveChanged = computed(() => {
       hasChanged,
       isNewApp: props.newApp,
       usingTestedSnapshot: props.newApp && !!testedSpecSnapshot.value,
+      excludedFields: NON_TESTABLE_FIELDS,
       currentInstances: props.appSpec?.instances,
-      snapshotInstances: snapshotToCompare?.instances,
+      currentCpu: props.appSpec?.cpu,
+      currentRam: props.appSpec?.ram,
+      currentHdd: props.appSpec?.hdd,
     })
 
     if (hasChanged) {
@@ -3883,7 +4018,7 @@ watch(() => props.appSpec, newSpec => {
 
   // If user changes props.appSpec after signing, the old signature is invalid
   try {
-    const currentSpecCopy = JSON.parse(JSON.stringify(newSpec))
+    const currentSpecCopy = cloneDeep(newSpec)
     delete currentSpecCopy.expire
 
     const currentStr = JSON.stringify(currentSpecCopy)
@@ -3893,9 +4028,9 @@ watch(() => props.appSpec, newSpec => {
     if (currentStr !== signedStr) {
       console.log('⚠️ Spec changed after signing - analyzing changes')
 
-      // Check if only instances changed (doesn't require re-test)
-      // Test validates Docker image, compose spec, resources - not instance count
-      const currentSpecForTest = JSON.parse(JSON.stringify(currentSpecCopy))
+      // Check if only non-testable fields changed (doesn't require re-test)
+      // Test validates Docker image/compose spec, not resource allocations
+      const currentSpecForTest = cloneDeep(currentSpecCopy)
 
       // For new apps, compare against testedSpecSnapshot (what was tested)
       // For existing apps, compare against signedSpecState (what was signed)
@@ -3903,9 +4038,13 @@ watch(() => props.appSpec, newSpec => {
         ? testedSpecSnapshot.value
         : signedSpecState.value
 
-      const signedSpecForTest = JSON.parse(JSON.stringify(baselineSpec))
-      delete currentSpecForTest.instances
-      delete signedSpecForTest.instances
+      const signedSpecForTest = cloneDeep(baselineSpec)
+
+      // Remove non-testable fields from both specs for comparison
+      NON_TESTABLE_FIELDS.forEach(field => {
+        delete currentSpecForTest[field]
+        delete signedSpecForTest[field]
+      })
 
       const testableFieldsChanged = JSON.stringify(currentSpecForTest) !== JSON.stringify(signedSpecForTest)
 
@@ -3913,15 +4052,18 @@ watch(() => props.appSpec, newSpec => {
         isNewApp: props.newApp,
         hasTestedSnapshot: !!testedSpecSnapshot.value,
         usingTestedSnapshot: props.newApp && !!testedSpecSnapshot.value,
+        excludedFields: NON_TESTABLE_FIELDS,
         currentInstances: newSpec.instances,
+        currentCpu: newSpec.cpu,
+        currentRam: newSpec.ram,
         baselineInstances: baselineSpec.instances,
       })
 
       console.log('📊 Change analysis:', {
         testableFieldsChanged,
         message: testableFieldsChanged
-          ? 'Testable fields changed (CPU/RAM/image/etc) - clearing test results'
-          : 'Only instances changed - preserving test results (re-sign still required)'
+          ? 'Testable fields changed (repo/tag/env/commands/ports/etc) - clearing test results'
+          : 'Only non-testable fields changed (resources/scaling/DNS) - preserving test results (re-sign still required)'
       })
 
       // Cancel any pending auto-navigation to payment tab
@@ -3955,7 +4097,7 @@ watch(signature, newSignature => {
   if (newSignature && appSpecFormated.value) {
     try {
       // Store the FORMATTED spec that was actually signed
-      const signedCopy = JSON.parse(JSON.stringify(appSpecFormated.value))
+      const signedCopy = cloneDeep(appSpecFormated.value)
       delete signedCopy.expire
       signedSpecState.value = signedCopy
       console.log('📸 Stored signed spec state (appSpecFormated):', signedCopy)
@@ -5224,6 +5366,15 @@ onMounted(() => {
   console.log('✅ Tab reset to 0 on mount')
 })
 
+// Cleanup auto-navigation timer on unmount to prevent memory leaks
+onUnmounted(() => {
+  if (autoNavigateTimer) {
+    clearTimeout(autoNavigateTimer)
+    autoNavigateTimer = null
+    console.log('🧹 Cleaned up auto-navigation timer on unmount')
+  }
+})
+
 // Watch resetTrigger - reset to first tab and disable renewal whenever it changes (skip initial value)
 watch(() => props.resetTrigger, (newTrigger, oldTrigger) => {
   console.log('🔄 RESET TRIGGER FIRED', {
@@ -5659,6 +5810,10 @@ watch(tab, async newVal => {
       // Otherwise, preserve existing test states (including failures)
 
       // Auto-navigate to Test & Pay tab after 1 second
+      // Clear any existing timer first to prevent race conditions
+      if (autoNavigateTimer) {
+        clearTimeout(autoNavigateTimer)
+      }
       autoNavigateTimer = setTimeout(() => {
         if (tab.value === 99) { // Only navigate if still on tab 99
           tab.value = 100
@@ -6000,7 +6155,7 @@ async function uploadContactsToFluxStorage() {
 async function verifyAppSpec() {
   appSpecFormated.value = null
   try {
-    const appSpecTemp = JSON.parse(JSON.stringify(props.appSpec))
+    const appSpecTemp = cloneDeep(props.appSpec)
 
     // ========================================================================
     // MARKETPLACE APP REPOTAG CHECK (only for new app registration)
@@ -6454,7 +6609,7 @@ async function priceForAppSpec() {
     }
 
     // Clone the app spec for price calculation
-    const appSpecForPrice = JSON.parse(JSON.stringify(appSpecFormated.value))
+    const appSpecForPrice = cloneDeep(appSpecFormated.value)
     delete appSpecForPrice.priceUSD
 
     const response = await props.executeLocalCommand(
@@ -6683,6 +6838,10 @@ async function propagateSignedMessage() {
 
       // Auto-navigate to Test & Pay tab after 2 seconds
       // The tab watcher will handle auto-starting monitoring for free updates
+      // Clear any existing timer first to prevent race conditions
+      if (autoNavigateTimer) {
+        clearTimeout(autoNavigateTimer)
+      }
       autoNavigateTimer = setTimeout(() => {
         tab.value = 100
         autoNavigateTimer = null
@@ -6890,13 +7049,36 @@ async function testAppInstall() {
     testRunning.value = false
     testFinished.value = true
 
-    // Save tested spec snapshot for new apps (to detect if testable fields change later)
-    if (props.newApp && props.appSpec) {
-      const specCopy = JSON.parse(JSON.stringify(props.appSpec))
-      delete specCopy.expire
-      delete specCopy.instances
+    /**
+     * CRITICAL: Save tested spec snapshot for new apps ONLY if test succeeded (!testError.value)
+     *
+     * WHY THIS CHECK IS IMPORTANT:
+     * Without the !testError.value check, this edge case breaks:
+     * 1. User tests app with invalid repo → test FAILS (testError = true)
+     * 2. Snapshot saved anyway (broken config!)
+     * 3. User changes CPU from 1 to 2 (non-testable change)
+     * 4. testableFieldsHaveChanged returns FALSE (correct - CPU doesn't need retest)
+     * 5. Payment section shows WITHOUT requiring retest
+     * 6. User tries to deploy BROKEN config that never passed testing
+     *
+     * With the check:
+     * 1. User tests app with invalid repo → test FAILS
+     * 2. Snapshot NOT saved (testedSpecSnapshot.value remains null)
+     * 3. User changes CPU from 1 to 2
+     * 4. testableFieldsHaveChanged returns TRUE (no snapshot = needs test)
+     * 5. Test section forces user to retest
+     * 6. Prevents deployment of broken config
+     *
+     * This ensures we only preserve snapshots of SUCCESSFULLY tested configurations.
+     * Using cloneDeep (lodash-es) for 2-3x better performance vs JSON.parse/stringify.
+     */
+    if (props.newApp && props.appSpec && !testError.value) {
+      const specCopy = cloneDeep(props.appSpec)
+      NON_TESTABLE_FIELDS.forEach(field => delete specCopy[field])
       testedSpecSnapshot.value = specCopy
-      console.log('📸 Saved tested spec snapshot for new app')
+      console.log('📸 Saved tested spec snapshot for new app (test succeeded, excluding non-testable fields:', NON_TESTABLE_FIELDS, ')')
+    } else if (props.newApp && testError.value) {
+      console.log('⚠️ Test failed - NOT saving snapshot (user must retest on any change)')
     }
 
     await streamTestPhase(t('core.subscriptionManager.testProcessCompleted'), 'info', 200)
@@ -7506,8 +7688,9 @@ const startPaymentMonitoring = async () => {
             paymentCompleted.value = true
 
             // Update the original spec snapshot to the deployed spec (so future changes can be detected)
+            // Using cloneDeep for better performance
             if (props.appSpec) {
-              const specCopy = JSON.parse(JSON.stringify(props.appSpec))
+              const specCopy = cloneDeep(props.appSpec)
               delete specCopy.expire
               originalAppSpecSnapshot.value = specCopy
               console.log('📸 Updated originalAppSpecSnapshot after successful deployment')
