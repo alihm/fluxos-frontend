@@ -555,6 +555,7 @@ const currentView = ref('methods') // 'methods', 'email', 'wallet', 'manual'
 
 const showView = view => {
   currentView.value = view
+
   // Auto-fetch loginPhrase when showing manual login
   if (view === 'manual') {
     getZelIdLoginPhrase()
@@ -872,8 +873,10 @@ const getEmergencyLoginPhrase = () => {
 const copyLoginPhrase = () => {
   if (!loginForm.value.loginPhrase) {
     showToast("error", t("core.login.noLoginPhraseToDownload"))
+    
     return
   }
+
   // ClipboardJS will handle the actual copy via initClipboard()
 }
 
@@ -890,14 +893,14 @@ const initClipboard = () => {
 
     // Create new clipboard instance
     clipboardInstance = new ClipboardJS(el, {
-      text: () => loginForm.value.loginPhrase
+      text: () => loginForm.value.loginPhrase,
     })
 
     clipboardInstance.on('success', () => {
       showToast('success', t('core.login.copiedToClipboard'))
     })
 
-    clipboardInstance.on('error', (e) => {
+    clipboardInstance.on('error', e => {
       console.error('ClipboardJS failed:', e)
       showToast('error', t('common.messages.failedToCopy'))
     })
@@ -1088,7 +1091,7 @@ const initSSP = async () => {
     if (response.data.status === "success") {
       fluxStore.setPrivilege(response.data.data.privilage)
       fluxStore.setZelid(sspLogin.zelid)
-      localStorage.setItem("logintype", 'ssp')
+      localStorage.setItem("loginType", 'ssp')
       localStorage.setItem("zelidauth", qs.stringify(sspLogin))
       emit('loginSuccess')
       showToast("success", response.data.data.message)
