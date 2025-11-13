@@ -404,6 +404,7 @@ module.exports = {
     "useToggle": true,
     "useTransition": true,
     "useTrunc": true,
+    "useTrustpilot": true,
     "useUrlSearchParams": true,
     "useUserMedia": true,
     "useVModel": true,
