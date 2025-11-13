@@ -8,8 +8,8 @@ const isLoading = ref(false)
 const isFetched = ref(false)
 const fetchError = ref(null)
 
-// Cache duration (1 hour)
-const CACHE_DURATION = 60 * 60 * 1000
+// Cache duration (12 hours)
+const CACHE_DURATION = 12 * 60 * 60 * 1000
 const CACHE_KEY = 'trustpilot_cache'
 
 /**
