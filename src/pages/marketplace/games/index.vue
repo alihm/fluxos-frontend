@@ -30,6 +30,20 @@
           min-height="300px"
         />
 
+        <!-- Games Grid Section -->
+        <div id="games-grid" class="games-grid-section">
+          <h2 class="games-section-title">{{ t('pages.marketplace.games.index.gamesTitle') }}</h2>
+          <p class="games-section-subtitle">{{ t('pages.marketplace.games.index.gamesSubtitle') }}</p>
+
+          <div class="games-grid">
+            <GameCard
+              v-for="game in games"
+              :key="game.uuid || game.name"
+              :game="game"
+            />
+          </div>
+        </div>
+
         <!-- SEO Content Section -->
         <VCard class="section-card seo-content-section">
           <VCardText>
@@ -50,20 +64,6 @@
           :items="translatedFeatures"
           grid-min-width="300px"
         />
-
-        <!-- Games Grid Section -->
-        <div id="games-grid" class="games-grid-section">
-          <h2 class="games-section-title">{{ t('pages.marketplace.games.index.gamesTitle') }}</h2>
-          <p class="games-section-subtitle">{{ t('pages.marketplace.games.index.gamesSubtitle') }}</p>
-
-          <div class="games-grid">
-            <GameCard
-              v-for="game in games"
-              :key="game.uuid || game.name"
-              :game="game"
-            />
-          </div>
-        </div>
 
         <!-- Why FluxPlay Comparison Section -->
         <VCard class="section-card comparison-section">
