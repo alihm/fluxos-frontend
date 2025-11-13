@@ -616,6 +616,7 @@ import Api from '@/services/ApiClient'
 import axios from 'axios'
 import { encryptEnterpriseWithAes, encryptAesKeyWithRsaKey, importRsaPublicKey, isWebCryptoAvailable } from '@/utils/enterpriseCrypto'
 import AppsService from '@/services/AppsService'
+import { generateFAQSchema } from '@/composables/useSEO'
 
 const { t } = useI18n()
 
@@ -717,6 +718,34 @@ const breadcrumbStructuredData = {
   ],
 }
 
+// FAQ structured data for cost calculator
+const faqStructuredData = generateFAQSchema([
+  {
+    question: t('pages.costCalculator.faq.items.pricing.question'),
+    answer: t('pages.costCalculator.faq.items.pricing.answer'),
+  },
+  {
+    question: t('pages.costCalculator.faq.items.comparison.question'),
+    answer: t('pages.costCalculator.faq.items.comparison.answer'),
+  },
+  {
+    question: t('pages.costCalculator.faq.items.paymentMethods.question'),
+    answer: t('pages.costCalculator.faq.items.paymentMethods.answer'),
+  },
+  {
+    question: t('pages.costCalculator.faq.items.hiddenFees.question'),
+    answer: t('pages.costCalculator.faq.items.hiddenFees.answer'),
+  },
+  {
+    question: t('pages.costCalculator.faq.items.planChanges.question'),
+    answer: t('pages.costCalculator.faq.items.planChanges.answer'),
+  },
+  {
+    question: t('pages.costCalculator.faq.items.resourceExceeded.question'),
+    answer: t('pages.costCalculator.faq.items.resourceExceeded.answer'),
+  },
+])
+
 useHead({
   title,
   meta: [
@@ -754,7 +783,7 @@ useHead({
   script: [
     {
       type: 'application/ld+json',
-      children: JSON.stringify([webApplicationStructuredData, serviceStructuredData, organizationStructuredData, breadcrumbStructuredData]),
+      children: JSON.stringify([webApplicationStructuredData, serviceStructuredData, organizationStructuredData, breadcrumbStructuredData, faqStructuredData]),
     },
   ],
 })

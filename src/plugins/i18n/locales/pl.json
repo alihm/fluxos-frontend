@@ -2429,7 +2429,65 @@
         "calculationError": "Błąd obliczania. Spróbuj ponownie.",
         "httpsWarning": "Funkcje Enterprise wymagają HTTPS. Tylko standardowe wdrożenia dostępne przez HTTP."
       },
-      "helpTitle": "Pomoc"
+      "helpTitle": "Pomoc",
+      "faq": {
+        "items": {
+          "pricing": {
+            "question": "Ile kosztuje hosting aplikacji na Flux?",
+            "answer": "Hosting na Flux zaczyna się od zaledwie $0.99/miesiąc. Końcowa cena zależy od wymagań dotyczących zasobów (CPU, RAM, pamięć) oraz liczby instancji. Użyj kalkulatora kosztów powyżej, aby uzyskać dokładną cenę dla swoich potrzeb. Oferujemy przejrzyste ceny pay-as-you-go bez ukrytych opłat i długoterminowych umów."
+          },
+          "comparison": {
+            "question": "Jak ceny Flux wypadają w porównaniu z tradycyjnymi dostawcami chmury?",
+            "answer": "Flux zazwyczaj kosztuje 50-80% mniej niż tradycyjni dostawcy chmury, tacy jak AWS, Google Cloud czy Azure. Nasza zdecentralizowana sieć eliminuje pośredników i przekazuje oszczędności Tobie. Na przykład hosting podstawowej aplikacji webowej, który kosztuje $50/miesiąc na AWS, zazwyczaj kosztuje około $10-15/miesiąc na Flux."
+          },
+          "paymentMethods": {
+            "question": "Jakie metody płatności akceptuje Flux?",
+            "answer": "Flux akceptuje kryptowalutę FLUX (natywne monety FLUX na głównym łańcuchu), a także tradycyjne metody płatności za pośrednictwem zintegrowanych bramek płatniczych. Możesz płacić miesięcznie bez długoterminowego zobowiązania."
+          },
+          "hiddenFees": {
+            "question": "Czy są jakieś ukryte opłaty lub dodatkowe koszty?",
+            "answer": "Nie. Cena obliczona w naszym kalkulatorze kosztów to dokładna kwota, którą płacisz. Nie ma opłat za konfigurację, ukrytych opłat za transfer danych ani niespodziewanych rachunków. Wszystkie koszty są przejrzyste i zawarte w pokazanej cenie miesięcznej."
+          },
+          "planChanges": {
+            "question": "Czy mogę zmienić plan hostingowy po wdrożeniu?",
+            "answer": "Tak! Flux oferuje elastyczne skalowanie. Możesz łatwo zwiększyć lub zmniejszyć CPU, RAM i pamięć w dowolnym momencie. Wystarczy dostosować specyfikacje, a ceny zostaną odpowiednio zaktualizowane. Zmiany wchodzą w życie natychmiast i płacisz tylko za to, czego używasz."
+          },
+          "resourceExceeded": {
+            "question": "Co się stanie, jeśli moja aplikacja przekroczy przydzielone zasoby?",
+            "answer": "Twoja aplikacja zostanie ograniczona, aby zapobiec użyciu większej liczby zasobów niż przydzielone. Chroni to innych użytkowników w sieci. Jeśli potrzebujesz więcej zasobów, możesz łatwo ulepszyć swój plan za pośrednictwem panelu Flux. Zalecamy monitorowanie użycia aplikacji i proaktywne dostosowywanie zasobów."
+          }
+        }
+      },
+      "relatedResources": {
+        "title": "Gotowy do wdrożenia?",
+        "subtitle": "Przeglądaj nasz marketplace i wdróż swoją aplikację już dziś",
+        "links": [
+          {
+            "title": "Hosting Serwerów Gier",
+            "description": "Wdrażaj serwery Minecraft, Palworld, Factorio i innych popularnych gier natychmiast",
+            "url": "/marketplace/games",
+            "icon": "mdi-gamepad-variant"
+          },
+          {
+            "title": "Hosting WordPress",
+            "description": "Uruchom witryny WordPress z automatycznymi kopiami zapasowymi i ochroną DDoS",
+            "url": "/marketplace/wordpress",
+            "icon": "mdi-wordpress"
+          },
+          {
+            "title": "Aplikacje Niestandardowe",
+            "description": "Zarejestruj i wdróż dowolną aplikację Docker w sieci Flux",
+            "url": "/apps/register",
+            "icon": "mdi-docker"
+          },
+          {
+            "title": "Przeglądaj Marketplace",
+            "description": "Odkryj wstępnie skonfigurowane aplikacje gotowe do wdrożenia",
+            "url": "/marketplace",
+            "icon": "mdi-apps"
+          }
+        ]
+      }
     },
     "dashboard": {
       "overview": {
@@ -2970,6 +3028,65 @@
               {
                 "q": "Czy mogę przenieść mój istniejący świat Minecraft?",
                 "a": "Absolutnie! Prześlij swoje istniejące pliki świata przez SSH do serwera gry lub używając funkcji Przeglądarki Woluminów w zarządzaniu aplikacją. Oferujemy również bezpłatną pomoc w migracji dla serwerów hostowanych gdzie indziej."
+              }
+            ]
+          },
+          "gettingStarted": {
+            "title": "Jak Zacząć z Hostingiem Serwera Minecraft",
+            "subtitle": "Uruchom swój serwer Minecraft w 3 prostych krokach",
+            "steps": [
+              {
+                "number": "1",
+                "title": "Wybierz Swoją Konfigurację",
+                "description": "Wybierz RAM, CPU i pamięć w oparciu o spodziewaną liczbę graczy. Oferujemy konfiguracje od małych prywatnych serwerów (5-10 graczy) do dużych sieci wieloosobowych (100+ graczy)."
+              },
+              {
+                "number": "2",
+                "title": "Wdróż Swój Serwer",
+                "description": "Kliknij przycisk wdrażania, a nasz automatyczny system zapewni Twój serwer Minecraft w zdecentralizowanej sieci Flux. Twój serwer będzie gotowy w mniej niż 5 minut z najnowszą wersją Minecraft."
+              },
+              {
+                "number": "3",
+                "title": "Dostosuj i Graj",
+                "description": "Uzyskaj dostęp do serwera przez SSH lub Przeglądarkę Woluminów, aby zainstalować mody, skonfigurować ustawienia i przesłać niestandardowe światy. Udostępnij adres IP serwera znajomym i zacznij grać natychmiast!"
+              }
+            ]
+          },
+          "technicalSpecs": {
+            "title": "Specyfikacje Techniczne",
+            "subtitle": "Co otrzymujesz z hostingiem Minecraft na FluxCloud",
+            "specs": [
+              {
+                "label": "Typ Serwera",
+                "value": "Java Edition (wszystkie wersje)"
+              },
+              {
+                "label": "Wspierane Platformy",
+                "value": "Vanilla, Bukkit, Spigot, Paper, Forge, Fabric"
+              },
+              {
+                "label": "Panel Sterowania",
+                "value": "Przeglądarka Woluminów w sieci + dostęp SSH"
+              },
+              {
+                "label": "Częstotliwość Kopii Zapasowych",
+                "value": "Cotygodniowe automatyczne + manualne na żądanie"
+              },
+              {
+                "label": "Ochrona przed DDoS",
+                "value": "Klasy korporacyjnej, wliczona za darmo"
+              },
+              {
+                "label": "Gwarancja Czasu Działania",
+                "value": "99.9% gwarantowane"
+              },
+              {
+                "label": "Czas Wdrożenia",
+                "value": "< 5 minut średnio"
+              },
+              {
+                "label": "Skalowanie Graczy",
+                "value": "Od 5 do 500+ równoczesnych graczy"
               }
             ]
           }
@@ -3580,6 +3697,36 @@
               "title": "Gotowy do Wdrożenia Serwera Gry?",
               "subtitle": "Dołącz do tysięcy graczy hostujących w zdecentralizowanej sieci Flux",
               "button": "Rozpocznij Teraz"
+            },
+            "relatedResources": {
+              "title": "Odkryj Więcej Usług FluxCloud",
+              "subtitle": "Poznaj inne sposoby wykorzystania zdecentralizowanej infrastruktury",
+              "links": [
+                {
+                  "title": "Kalkulator Kosztów",
+                  "description": "Oblicz dokładne koszty hostingu dla swoich aplikacji z przejrzystymi cenami",
+                  "url": "/cost-calculator",
+                  "icon": "mdi-calculator"
+                },
+                {
+                  "title": "Hosting WordPress",
+                  "description": "Wdrażaj witryny WordPress na zdecentralizowanej infrastrukturze z instalacją jednym kliknięciem",
+                  "url": "/marketplace/wordpress",
+                  "icon": "mdi-wordpress"
+                },
+                {
+                  "title": "Wdrożenie Niestandardowej Aplikacji",
+                  "description": "Zarejestruj i wdróż niestandardowe aplikacje Docker w sieci Flux",
+                  "url": "/apps/register",
+                  "icon": "mdi-application-cog"
+                },
+                {
+                  "title": "Pełny Marketplace",
+                  "description": "Przeglądaj wszystkie dostępne aplikacje, gry i usługi na FluxCloud",
+                  "url": "/marketplace",
+                  "icon": "mdi-store"
+                }
+              ]
             }
           }
         },
@@ -3737,8 +3884,8 @@
       "pageNotFoundTitle": "Strona nie znaleziona ⚠️",
       "pageNotFoundDescription": "Nie mogliśmy znaleźć strony, której szukasz.",
       "backToHome": "Powrót do strony głównej",
-      "error404Alt": "błąd 404",
-      "footerImageAlt": "obraz stopki"
+      "error404Alt": "404 Strona nie znaleziona - Ilustracja błędu",
+      "footerImageAlt": "Dekoracyjny obraz stopki"
     },
     "successCheckout": {
       "title": "Płatność zakończona pomyślnie! 🎉",
@@ -3746,12 +3893,14 @@
       "deploymentTime": "Może to potrwać do 45 minut",
       "deploymentMessage": "zanim Twoja aplikacja zostanie wdrożona w sieci Flux.",
       "autoCloseMessage": "To okno zamknie się automatycznie za {seconds} sekund",
-      "safeToClose": "Możesz teraz bezpiecznie zamknąć to okno"
+      "safeToClose": "Możesz teraz bezpiecznie zamknąć to okno",
+      "footerImageAlt": "Dekoracyjny obraz stopki strony sukcesu"
     },
     "unauthorized": {
       "title": "Nie masz autoryzacji! 🔐",
       "description": "Nie masz uprawnień do dostępu do tej strony.",
-      "backToHome": "Powrót do strony głównej"
+      "backToHome": "Powrót do strony głównej",
+      "footerImageAlt": "Dekoracyjny obraz stopki strony braku autoryzacji"
     }
   },
   "$vuetify": {

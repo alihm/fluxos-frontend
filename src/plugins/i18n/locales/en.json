@@ -2604,7 +2604,65 @@
         "calculationError": "Calculation error. Please try again.",
         "httpsWarning": "Enterprise features require HTTPS. Only standard deployments available on HTTP."
       },
-      "helpTitle": "Help & FAQ"
+      "helpTitle": "Help & FAQ",
+      "faq": {
+        "items": {
+          "pricing": {
+            "question": "How much does it cost to host an application on Flux?",
+            "answer": "Hosting on Flux starts at just $0.99/month. Final pricing depends on your resource requirements (CPU, RAM, storage) and the number of instances. Use our cost calculator above to get an exact price for your specific needs. We offer transparent, pay-as-you-go pricing with no hidden fees or long-term contracts."
+          },
+          "comparison": {
+            "question": "How does Flux pricing compare to traditional cloud providers?",
+            "answer": "Flux typically costs 50-80% less than traditional cloud providers like AWS, Google Cloud, or Azure. Our decentralized network eliminates middlemen and passes the savings to you. For example, hosting a basic web app that costs $50/month on AWS typically costs around $10-15/month on Flux."
+          },
+          "paymentMethods": {
+            "question": "What payment methods does Flux accept?",
+            "answer": "Flux accepts FLUX cryptocurrency (native FLUX coins on the main chain) as well as traditional payment methods through our integrated payment gateways. You can pay month-to-month with no long-term commitment required."
+          },
+          "hiddenFees": {
+            "question": "Are there any hidden fees or additional costs?",
+            "answer": "No. The price calculated in our cost calculator is the exact amount you pay. There are no setup fees, no hidden bandwidth charges, and no surprise bills. All costs are transparent and included in the monthly price shown."
+          },
+          "planChanges": {
+            "question": "Can I change my hosting plan after deployment?",
+            "answer": "Yes! Flux offers flexible scaling. You can easily upgrade or downgrade your CPU, RAM, and storage at any time. Simply adjust your specifications and the pricing will update accordingly. Changes take effect immediately, and you only pay for what you use."
+          },
+          "resourceExceeded": {
+            "question": "What happens if my app exceeds the allocated resources?",
+            "answer": "Your application will be throttled to prevent it from using more resources than allocated. This protects other users on the network. If you need more resources, you can easily upgrade your plan through the Flux dashboard. We recommend monitoring your app usage and adjusting resources proactively."
+          }
+        }
+      },
+      "relatedResources": {
+        "title": "Ready to Deploy?",
+        "subtitle": "Explore our marketplace and deploy your application today",
+        "links": [
+          {
+            "title": "Game Server Hosting",
+            "description": "Deploy Minecraft, Palworld, Factorio, and other popular game servers instantly",
+            "url": "/marketplace/games",
+            "icon": "mdi-gamepad-variant"
+          },
+          {
+            "title": "WordPress Hosting",
+            "description": "Launch WordPress sites with automatic backups and DDoS protection",
+            "url": "/marketplace/wordpress",
+            "icon": "mdi-wordpress"
+          },
+          {
+            "title": "Custom Applications",
+            "description": "Register and deploy any Docker application on the Flux network",
+            "url": "/apps/register",
+            "icon": "mdi-docker"
+          },
+          {
+            "title": "Browse Marketplace",
+            "description": "Explore pre-configured applications ready to deploy",
+            "url": "/marketplace",
+            "icon": "mdi-apps"
+          }
+        ]
+      }
     },
     "dashboard": {
       "overview": {
@@ -3237,6 +3295,65 @@
                 "a": "Absolutely! Upload your existing world files via SSH to your game server or using the Volume Browser functionality in application management. We also offer free migration assistance for servers hosted elsewhere."
               }
             ]
+          },
+          "gettingStarted": {
+            "title": "How to Get Started with Minecraft Server Hosting",
+            "subtitle": "Launch your Minecraft server in 3 easy steps",
+            "steps": [
+              {
+                "number": "1",
+                "title": "Choose Your Configuration",
+                "description": "Select the RAM, CPU, and storage based on your expected player count. We offer configurations from small private servers (5-10 players) to large multiplayer networks (100+ players)."
+              },
+              {
+                "number": "2",
+                "title": "Deploy Your Server",
+                "description": "Click the deploy button and our automated system will provision your Minecraft server across the Flux decentralized network. Your server will be ready in under 5 minutes with the latest Minecraft version."
+              },
+              {
+                "number": "3",
+                "title": "Customize and Play",
+                "description": "Access your server via SSH or the Volume Browser to install mods, configure settings, and upload custom worlds. Share your server IP with friends and start playing immediately!"
+              }
+            ]
+          },
+          "technicalSpecs": {
+            "title": "Technical Specifications",
+            "subtitle": "What you get with Minecraft hosting on FluxCloud",
+            "specs": [
+              {
+                "label": "Server Type",
+                "value": "Java Edition (all versions)"
+              },
+              {
+                "label": "Supported Platforms",
+                "value": "Vanilla, Bukkit, Spigot, Paper, Forge, Fabric"
+              },
+              {
+                "label": "Control Panel",
+                "value": "Web-based Volume Browser + SSH access"
+              },
+              {
+                "label": "Backup Frequency",
+                "value": "Weekly automatic + manual on-demand"
+              },
+              {
+                "label": "DDoS Protection",
+                "value": "Enterprise-grade, included free"
+              },
+              {
+                "label": "Uptime SLA",
+                "value": "99.9% guaranteed"
+              },
+              {
+                "label": "Deployment Time",
+                "value": "< 5 minutes average"
+              },
+              {
+                "label": "Player Scaling",
+                "value": "From 5 to 500+ concurrent players"
+              }
+            ]
           }
         },
         "factorio": {
@@ -3845,6 +3962,36 @@
               "title": "Ready to Deploy Your Game Server?",
               "subtitle": "Join thousands of gamers hosting on the decentralized Flux network",
               "button": "Get Started Now"
+            },
+            "relatedResources": {
+              "title": "Explore More FluxCloud Services",
+              "subtitle": "Discover other ways to leverage decentralized infrastructure",
+              "links": [
+                {
+                  "title": "Cost Calculator",
+                  "description": "Calculate exact hosting costs for your applications with transparent pricing",
+                  "url": "/cost-calculator",
+                  "icon": "mdi-calculator"
+                },
+                {
+                  "title": "WordPress Hosting",
+                  "description": "Deploy WordPress sites on decentralized infrastructure with one-click installation",
+                  "url": "/marketplace/wordpress",
+                  "icon": "mdi-wordpress"
+                },
+                {
+                  "title": "Custom App Deployment",
+                  "description": "Register and deploy custom Docker applications on the Flux network",
+                  "url": "/apps/register",
+                  "icon": "mdi-application-cog"
+                },
+                {
+                  "title": "Full Marketplace",
+                  "description": "Browse all available applications, games, and services on FluxCloud",
+                  "url": "/marketplace",
+                  "icon": "mdi-store"
+                }
+              ]
             }
           }
         },
@@ -3924,8 +4071,8 @@
       "pageNotFoundTitle": "Page Not Found ⚠️",
       "pageNotFoundDescription": "We couldn't find the page you are looking for.",
       "backToHome": "Back to Home",
-      "error404Alt": "error 404",
-      "footerImageAlt": "misc-footer-img"
+      "error404Alt": "404 Page Not Found - Error Illustration",
+      "footerImageAlt": "Decorative footer image"
     },
     "successCheckout": {
       "title": "Payment Completed Successfully! 🎉",
@@ -3933,12 +4080,14 @@
       "deploymentTime": "It can take up to 45 minutes",
       "deploymentMessage": "for your application to be deployed on the Flux network.",
       "autoCloseMessage": "This window will close automatically in {seconds} seconds",
-      "safeToClose": "You can safely close this window now"
+      "safeToClose": "You can safely close this window now",
+      "footerImageAlt": "Success page decorative footer image"
     },
     "unauthorized": {
       "title": "You are not authorized! 🔐",
       "description": "You don't have permission to access this page.",
-      "backToHome": "Back To Home"
+      "backToHome": "Back To Home",
+      "footerImageAlt": "Unauthorized access decorative footer image"
     }
   },
   "$vuetify": {

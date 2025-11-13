@@ -3,6 +3,7 @@ import { useI18n } from 'vue-i18n'
 import miscMaskDark from '@images/pages/misc-mask-dark.png'
 import miscMaskLight from '@images/pages/misc-mask-light.png'
 import { useGenerateImageVariant } from '@core/composable/useGenerateImageVariant'
+import { useSEONoIndex } from '@/composables/useSEO'
 
 const { t } = useI18n()
 
@@ -15,6 +16,9 @@ definePage({
 })
 
 const authThemeMask = useGenerateImageVariant(miscMaskLight, miscMaskDark)
+
+// Prevent indexing of unauthorized access page
+useSEONoIndex()
 </script>
 
 <template>
@@ -47,8 +51,9 @@ const authThemeMask = useGenerateImageVariant(miscMaskLight, miscMaskDark)
     <img
       class="misc-footer-img d-none d-md-block"
       :src="authThemeMask"
-      alt="misc-footer-img"
+      :alt="t('pages.unauthorized.footerImageAlt')"
       height="320"
+      loading="lazy"
     >
   </div>
 </template>

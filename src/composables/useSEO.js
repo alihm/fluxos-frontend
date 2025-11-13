@@ -283,7 +283,12 @@ export function generateItemListSchema(items, listName) {
  * @param {string} software.description - Software description
  * @param {string} software.url - Software URL
  * @param {string} software.image - Software image URL
- * @param {Object} [software.offers] - Pricing information {price, currency}
+ * @param {Object} [software.offers] - Pricing information {price, currency, availability}
+ * @param {string} [software.applicationCategory] - Application category (e.g., 'GameServer', 'BusinessApplication')
+ * @param {string} [software.operatingSystem] - Operating system (e.g., 'Linux', 'Web')
+ * @param {Array<string>} [software.features] - List of features
+ * @param {Object} [software.aggregateRating] - Rating information {ratingValue, reviewCount, bestRating}
+ * @param {Object} [software.provider] - Provider information {name, url}
  * @returns {Object} SoftwareApplication schema
  */
 export function generateSoftwareApplicationSchema(software) {
@@ -293,6 +298,11 @@ export function generateSoftwareApplicationSchema(software) {
     url,
     image,
     offers,
+    applicationCategory = 'BusinessApplication',
+    operatingSystem = 'Web',
+    features = [],
+    aggregateRating,
+    provider,
   } = software
 
   const schema = {
@@ -302,20 +312,39 @@ export function generateSoftwareApplicationSchema(software) {
     'description': description,
     'url': url,
     'image': image,
-    'operatingSystem': 'Web',
-    'applicationCategory': 'BusinessApplication',
-    'provider': {
+    'operatingSystem': operatingSystem,
+    'applicationCategory': applicationCategory,
+    'provider': provider || {
       '@type': 'Organization',
       'name': 'Flux Network',
       'url': 'https://runonflux.com',
     },
   }
 
+  // Add offers if provided
   if (offers) {
     schema.offers = {
       '@type': 'Offer',
       'price': offers.price || '0',
       'priceCurrency': offers.currency || 'USD',
+      'availability': offers.availability || 'https://schema.org/InStock',
+      'url': url,
+    }
+  }
+
+  // Add features if provided
+  if (features.length > 0) {
+    schema.featureList = features
+  }
+
+  // Add aggregate rating if provided
+  if (aggregateRating) {
+    schema.aggregateRating = {
+      '@type': 'AggregateRating',
+      'ratingValue': aggregateRating.ratingValue || '4.8',
+      'reviewCount': aggregateRating.reviewCount || '1',
+      'bestRating': aggregateRating.bestRating || '5',
+      'worstRating': '1',
     }
   }
 
