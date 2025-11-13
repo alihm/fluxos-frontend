@@ -64,7 +64,6 @@ declare module 'vue' {
     FileUpload: typeof import('./@core/components/FileUpload.vue')['default']
     GameCard: typeof import('./components/Marketplace/GameCard.vue')['default']
     Games: typeof import('./components/Marketplace/games/index.vue')['default']
-    GenericFAQPanel: typeof import('./components/Marketplace/Panels/GenericFAQPanel.vue')['default']
     GroupsPanel: typeof import('./components/Marketplace/Panels/GroupsPanel.vue')['default']
     HeaderPanel: typeof import('./components/Marketplace/Panels/HeaderPanel.vue')['default']
     HeroSection: typeof import('./components/HeroSection.vue')['default']
