@@ -3072,11 +3072,14 @@ function isCryptoPayment(method) {
 
 // Check for payment success on page load
 onMounted(() => {
+  // Initialize i18n labels after component is mounted
+  updateRenewalLabels()
+
   const urlParams = new URLSearchParams(window.location.search)
   const paymentSuccess = urlParams.get('payment_success')
   const paymentMethod = urlParams.get('payment_method')
   const amount = urlParams.get('amount')
-  
+
   if (paymentSuccess === 'true') {
     // Only handle URL parameter success for card payments (Stripe/PayPal)
     const methodFromUrl = urlParams.get('payment_method')
@@ -3085,7 +3088,7 @@ onMounted(() => {
       paymentMethod.value = methodFromUrl
       if (amount) paymentAmount.value = parseFloat(amount)
       showToast('success', t('core.subscriptionManager.cardPaymentCompletedSuccessfully'))
-      
+
       // Clean up URL parameters
       const newUrl = window.location.pathname
       window.history.replaceState(null, '', newUrl)
@@ -3399,16 +3402,6 @@ const FORK_BLOCK_HEIGHT = 2020000
 // All renewal options use post-fork values since renewals happen NOW (post-fork)
 const BLOCKS_PER_MONTH = 88000
 
-// Renewal options (always post-fork values since we're renewing NOW)
-const renewalOptions = ref([
-  { value: Math.round(BLOCKS_PER_MONTH * (1/4)), label: t('core.subscriptionManager.renewal1Week') },     // ~1 week (22,000 blocks)
-  { value: Math.round(BLOCKS_PER_MONTH * (1/2)), label: t('core.subscriptionManager.renewal2Weeks') },    // ~2 weeks (44,000 blocks)
-  { value: BLOCKS_PER_MONTH, label: t('core.subscriptionManager.renewal1Month') },                         // 1 month (88,000 blocks)
-  { value: BLOCKS_PER_MONTH * 3, label: t('core.subscriptionManager.renewal3Months') },                    // 3 months (264,000 blocks)
-  { value: BLOCKS_PER_MONTH * 6, label: t('core.subscriptionManager.renewal6Months') },                    // 6 months (528,000 blocks)
-  { value: BLOCKS_PER_MONTH * 12, label: t('core.subscriptionManager.renewal1Year') },                     // 1 year (1,056,000 blocks)
-])
-
 const timeOptions = { shortDate: { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' } }
 
 // State
@@ -3525,8 +3518,6 @@ const hasValidatedSpec = ref(false)
 const hasCalculatedPrice = ref(false)
 const hasCheckedExpiry = ref(false)
 
-const renewalLabels = computed(() => renewalOptions.value.map(opt => opt.label))
-
 // Check if test output contains warnings
 const hasTestWarnings = computed(() => {
   return testOutput.value.some(output => output.status === 'warning')
@@ -3578,6 +3569,11 @@ function cancelSubscription() {
     showToast('error', 'Cancel subscription is only available for V6+ applications')
   }
 }
+
+// Forward declaration: renewal options will be properly defined later
+// This is needed because the watcher below (with immediate:true) needs to access it
+// but the full definition depends on reactive refs that come later
+let renewalOptionsForWatcher = null
 
 // Watch for changes in appSpec to update appDetails
 watch(() => props.appSpec, (newSpec, oldSpec) => {
@@ -3662,28 +3658,36 @@ watch(() => props.appSpec, (newSpec, oldSpec) => {
     console.log('Setting renewalIndex - expire for matching:', expireForMatching, 'original expire:', newSpec.expire, 'spec version:', newSpec.version, 'height:', newSpec.height)
 
     // Find exact match in renewal options
-    let foundIndex = renewalOptions.value.findIndex(opt => opt.value === expireForMatching)
+    // Use the forward declaration to avoid temporal dead zone errors on first run
+    const options = renewalOptionsForWatcher
+    if (options && options.length > 0) {
+      let foundIndex = options.findIndex(opt => opt.value === expireForMatching)
 
-    // If no exact match, find closest renewal option
-    if (foundIndex === -1) {
-      let closestIndex = 2  // Default to 1 month (88000)
-      let closestDiff = Math.abs(renewalOptions.value[2].value - expireForMatching)
+      // If no exact match, find closest renewal option
+      if (foundIndex === -1) {
+        let closestIndex = 2  // Default to 1 month (88000)
+        let closestDiff = Math.abs(options[2].value - expireForMatching)
 
-      renewalOptions.value.forEach((opt, idx) => {
-        const diff = Math.abs(opt.value - expireForMatching)
-        if (diff < closestDiff) {
-          closestDiff = diff
-          closestIndex = idx
-        }
-      })
+        options.forEach((opt, idx) => {
+          const diff = Math.abs(opt.value - expireForMatching)
+          if (diff < closestDiff) {
+            closestDiff = diff
+            closestIndex = idx
+          }
+        })
 
-      foundIndex = closestIndex
-      console.log('No exact match - closest option at index:', foundIndex, 'value:', renewalOptions.value[foundIndex].value, 'diff:', Math.abs(renewalOptions.value[foundIndex].value - expireForMatching))
+        foundIndex = closestIndex
+        console.log('No exact match - closest option at index:', foundIndex, 'value:', options[foundIndex].value, 'diff:', Math.abs(options[foundIndex].value - expireForMatching))
+      } else {
+        console.log('Found exact match at index:', foundIndex, 'value:', options[foundIndex].value)
+      }
+
+      appDetails.value.renewalIndex = foundIndex
     } else {
-      console.log('Found exact match at index:', foundIndex, 'value:', renewalOptions.value[foundIndex].value)
+      // Options not available yet (first immediate run), use default
+      console.log('renewalOptions not yet initialized, using default index 2')
+      appDetails.value.renewalIndex = 2  // Default to 1 month
     }
-
-    appDetails.value.renewalIndex = foundIndex
     
     // Handle enterprise nodes if applicable
     if (newSpec.nodes && Array.isArray(newSpec.nodes) && newSpec.nodes.length > 0) {
@@ -4147,6 +4151,65 @@ const originalExpireBlocks = computed(() => {
   // Return remaining blocks: adjusted expiry - current block
   return adjustedExpiryBlock - currentBlockHeight.value
 })
+
+// Renewal block values (reactively computed with currentExpire)
+// MUST be defined AFTER originalExpireBlocks to avoid initialization errors
+const renewalValues = computed(() => {
+  // Safe fallback: use 0 if originalExpireBlocks is null/undefined/NaN
+  let currentExpire = originalExpireBlocks.value
+  if (currentExpire == null || isNaN(currentExpire)) {
+    currentExpire = 0
+  }
+
+  return [
+    Math.round(BLOCKS_PER_MONTH * (1/4) + currentExpire),     // ~1 week (22,000 blocks)
+    Math.round(BLOCKS_PER_MONTH * (1/2) + currentExpire),    // ~2 weeks (44,000 blocks)
+    BLOCKS_PER_MONTH + currentExpire,                         // 1 month (88,000 blocks)
+    BLOCKS_PER_MONTH * 3 + currentExpire,                    // 3 months (264,000 blocks)
+    BLOCKS_PER_MONTH * 6 + currentExpire,                    // 6 months (528,000 blocks)
+    BLOCKS_PER_MONTH * 12 + currentExpire,                   // 1 year (1,056,000 blocks)
+  ]
+})
+
+// Renewal option labels (i18n)
+// Use ref instead of computed to avoid calling t() during component transitions
+const renewalOptionLabels = ref(['1 Week', '2 Weeks', '1 Month', '3 Months', '6 Months', '1 Year'])
+
+// Function to update labels with i18n (called after mount and on locale change)
+function updateRenewalLabels() {
+  try {
+    renewalOptionLabels.value = [
+      t('core.subscriptionManager.renewal1Week'),
+      t('core.subscriptionManager.renewal2Weeks'),
+      t('core.subscriptionManager.renewal1Month'),
+      t('core.subscriptionManager.renewal3Months'),
+      t('core.subscriptionManager.renewal6Months'),
+      t('core.subscriptionManager.renewal1Year'),
+    ]
+  } catch (error) {
+    console.error('Error getting renewal labels:', error)
+    // Keep fallback values
+  }
+}
+
+// Combined renewal options (values + labels)
+const renewalOptions = computed(() => {
+  const values = renewalValues.value
+  const labels = renewalOptionLabels.value
+
+  const options = values.map((value, index) => ({
+    value,
+    label: labels[index] || `Option ${index + 1}`,
+  }))
+
+  // Update forward declaration for watcher access
+  renewalOptionsForWatcher = options
+
+  return options
+})
+
+// Convenience accessor for labels array (used in template)
+const renewalLabels = computed(() => renewalOptions.value.map(opt => opt.label))
 
 // 3️⃣  timestamps shown in the UI (fork-aware calculation)
 // Renewal is calculated from NOW, not from current expiry
