@@ -6698,29 +6698,12 @@ async function priceForAppSpec() {
   }
 }
 
-function adjustRenewalOptionsForBlockHeight() {
-  // After block 2020000, the chain works 4x faster, so expire periods need to be multiplied by 4
-  if (blockHeight.value >= FORK_BLOCK_HEIGHT) {
-    renewalOptions.value = [
-      { value: 20000, label: '1 week' },
-      { value: 44000, label: '2 weeks' },
-      { value: 88000, label: '1 month' },
-      { value: 264000, label: '3 months' },
-      { value: 528000, label: '6 months' },
-      { value: 1056000, label: '1 year' },
-    ]
-  }
-}
-
 async function fetchBlockHeight() {
   try {
     const res = await props.executeLocalCommand('/daemon/getblockcount')
 
     if (res?.data?.status === 'success' && typeof res.data?.data === 'number') {
       blockHeight.value = res.data.data
-
-      // Adjust renewal options based on block height
-      adjustRenewalOptionsForBlockHeight()
 
       // Fork-aware default expire
       const defaultExpire = (props.appSpec?.height && props.appSpec.height >= FORK_BLOCK_HEIGHT) ? 88000 : 22000
