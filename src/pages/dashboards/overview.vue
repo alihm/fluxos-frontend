@@ -79,8 +79,7 @@
       lg="6"
       xxl="4"
     >
-      <VCard
-        style="position: relative; min-height: 320px"
+      <VCard style="position: relative; min-height: 320px"
       >
         <VCardTitle class="d-flex justify-space-between align-center">
           <div>
@@ -217,8 +216,7 @@
       lg="6"
       xxl="8"
     >
-      <VCard
-        style="position: relative; min-height: 320px; height: 100%; overflow: hidden;"
+      <VCard style="position: relative; min-height: 320px; height: 100%; overflow: hidden;"
       >
         <VCardTitle class="d-flex justify-space-between align-center">
           <h2 class="mt-2 truncate text-h4">
@@ -255,8 +253,7 @@
       lg="6"
       xxl="4"
     >
-      <VCard
-        style="position: relative; min-height: 320px"
+      <VCard style="position: relative; min-height: 320px"
       >
         <VOverlay
           v-model="isLoading"
@@ -373,8 +370,7 @@
       lg="6"
       xxl="8"
     >
-      <VCard
-        style="position: relative; min-height: 320px"
+      <VCard style="position: relative; min-height: 320px"
       >
         <VOverlay
           v-model="isLoading"
@@ -768,6 +764,7 @@ const versionLog = ref({})
 const legacyPercentage = computed(() => {
   const legacyCount = versionLog.value['legacy'] || 0
   const total = Object.values(versionLog.value).reduce((sum, count) => sum + count, 0)
+  
   return total > 0 ? (legacyCount / total) * 100 : 0
 })
 
@@ -775,6 +772,7 @@ const arcanePercentage = computed(() => {
   const legacyCount = versionLog.value['legacy'] || 0
   const total = Object.values(versionLog.value).reduce((sum, count) => sum + count, 0)
   const arcaneCount = total - legacyCount
+  
   return total > 0 ? (arcaneCount / total) * 100 : 0
 })
 
@@ -792,6 +790,7 @@ const getFluxVersionData = async () => {
       // Put legacy first
       if (a[0] === 'legacy') return -1
       if (b[0] === 'legacy') return 1
+
       // Then sort by count descending
       return b[1] - a[1]
     })

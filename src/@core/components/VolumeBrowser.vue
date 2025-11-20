@@ -491,14 +491,6 @@
 
 <script setup>
 import hljs from 'highlight.js'
-// Lazy-load Monaco Editor to reduce main bundle size
-const VueMonacoEditor = defineAsyncComponent(() =>
-  import('@guolao/vue-monaco-editor').then(m => m.VueMonacoEditor)
-)
-import { storeToRefs } from "pinia"
-import { useConfigStore } from "@core/stores/config"
-import { useI18n } from "vue-i18n"
-import { useDisplay } from 'vuetify'
 
 const props = defineProps({
   appSpec: {
@@ -523,6 +515,15 @@ const props = defineProps({
   },
 
 })
+
+// Lazy-load Monaco Editor to reduce main bundle size
+const VueMonacoEditor = defineAsyncComponent(() =>
+  import('@guolao/vue-monaco-editor').then(m => m.VueMonacoEditor),
+)
+import { storeToRefs } from "pinia"
+import { useConfigStore } from "@core/stores/config"
+import { useI18n } from "vue-i18n"
+import { useDisplay } from 'vuetify'
 
 const { smAndDown } = useDisplay()
 const configStore = useConfigStore()

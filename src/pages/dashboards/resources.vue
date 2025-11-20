@@ -1007,7 +1007,7 @@ const generateSSDHistory = async () => {
 const CACHE_KEY_RESOURCES = 'fluxResourcesCache'
 const CACHE_KEY_HISTORY = 'fluxHistoryStatsCache'
 
-const loadCachedData = (key) => {
+const loadCachedData = key => {
   try {
     const cached = localStorage.getItem(key)
     if (!cached) return null
@@ -1045,7 +1045,7 @@ const saveCachedData = (key, data) => {
   }
 }
 
-const processResourceData = (fluxTierBenchList) => {
+const processResourceData = fluxTierBenchList => {
   fluxTierBenchList.forEach(node => {
     if (node.tier === "CUMULUS" && node.benchmark && node.benchmark.bench) {
       cumulusCpuValue.value +=

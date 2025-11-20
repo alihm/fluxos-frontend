@@ -1,5 +1,5 @@
 <template>
-  <VCard :class="['related-links-card', { 'has-background': backgroundColor }]" :elevation="elevation">
+  <VCard class="related-links-card" :class="[{ 'has-background': backgroundColor }]" :elevation="elevation">
     <VCardText :style="containerStyle">
       <h2 v-if="resolvedTitle" class="links-title">{{ resolvedTitle }}</h2>
       <p v-if="resolvedSubtitle" class="links-subtitle">{{ resolvedSubtitle }}</p>
@@ -81,6 +81,7 @@ const resolveI18nValue = value => {
 
   if (isI18nKey(value)) {
     const key = value.replace('i18n:', '')
+    
     return te(key) ? t(key) : value
   }
 
@@ -133,6 +134,7 @@ const resolvedLinks = computed(() => {
           if (obj && typeof obj === 'object') {
             return obj.body?.static || obj.loc?.source || obj.static || JSON.stringify(obj)
           }
+          
           return String(obj)
         }
 

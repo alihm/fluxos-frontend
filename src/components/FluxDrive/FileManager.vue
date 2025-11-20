@@ -1811,15 +1811,16 @@ import { useI18n } from 'vue-i18n'
 import { useFluxDrive } from '@/composables/useFluxDrive'
 import PricingPlans from '@/components/FluxDrive/PricingPlans.vue'
 import VersionsDialog from '@/components/FluxDrive/VersionsDialog.vue'
-// Lazy-load Monaco Editor to reduce main bundle size
-const VueMonacoEditor = defineAsyncComponent(() =>
-  import('@guolao/vue-monaco-editor').then(m => m.VueMonacoEditor)
-)
-import ClipboardJS from 'clipboard'
-import LoadingSpinner from '@/components/Marketplace/LoadingSpinner.vue'
 
 // Define emit for FileManager
 const emit = defineEmits(['select-plan', 'selectPlan'])
+
+// Lazy-load Monaco Editor to reduce main bundle size
+const VueMonacoEditor = defineAsyncComponent(() =>
+  import('@guolao/vue-monaco-editor').then(m => m.VueMonacoEditor),
+)
+import ClipboardJS from 'clipboard'
+import LoadingSpinner from '@/components/Marketplace/LoadingSpinner.vue'
 
 // Initialize i18n
 const { t } = useI18n()

@@ -70,14 +70,17 @@ export function useTrustpilot() {
       // Check if cache is still valid
       if (age < CACHE_DURATION) {
         console.log('✅ TrustPilot: Loaded from cache', { age: Math.round(age / 1000 / 60) + ' minutes' })
+        
         return data
       } else {
         console.log('⏰ TrustPilot: Cache expired', { age: Math.round(age / 1000 / 60) + ' minutes' })
         localStorage.removeItem(CACHE_KEY)
+        
         return null
       }
     } catch (error) {
       console.warn('⚠️ TrustPilot: Failed to load cache', error)
+      
       return null
     }
   }
@@ -85,7 +88,7 @@ export function useTrustpilot() {
   /**
    * Save data to localStorage cache
    */
-  const saveToCache = (data) => {
+  const saveToCache = data => {
     try {
       localStorage.setItem(CACHE_KEY, JSON.stringify(data))
       console.log('💾 TrustPilot: Saved to cache')
@@ -161,6 +164,7 @@ export function useTrustpilot() {
       }
 
       console.log('✅ TrustPilot: Live data fetched successfully', liveData)
+      
       return liveData
     } catch (error) {
       console.warn('⚠️ TrustPilot: Failed to fetch live data, will use fallback', error.message)
@@ -188,6 +192,7 @@ export function useTrustpilot() {
     if (cached) {
       trustpilotData.value = cached
       isFetched.value = true
+      
       return cached
     }
 
@@ -222,6 +227,7 @@ export function useTrustpilot() {
   const refresh = async () => {
     isFetched.value = false
     localStorage.removeItem(CACHE_KEY)
+    
     return initialize()
   }
 

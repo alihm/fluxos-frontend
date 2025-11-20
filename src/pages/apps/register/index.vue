@@ -96,7 +96,7 @@
       </VCard>
 
       <!-- Trustpilot Reviews Section -->
-      <TrustpilotPanel :star-size="32" :show-rating-label="true" :use-live-data="true" />
+      <TrustpilotPanel :star-size="32" show-rating-label use-live-data />
 
       <!-- Global Server Network Section -->
       <ServerLocationsPanel
@@ -550,6 +550,7 @@ const calculateFluxCloudPrice = async () => {
     }
   } catch (error) {
     console.error('Error calculating FluxCloud price:', error)
+
     // Keep default price on error
   } finally {
     fluxCloudPriceLoading.value = false

@@ -4,7 +4,7 @@
     :color="cardColor"
     :variant="cardVariant"
   >
-    <VCardText :class="['text-center', paddingClass]">
+    <VCardText class="text-center" :class="[paddingClass]">
       <!-- Icon -->
       <div v-if="icon" :class="iconWrapperClass">
         <VIcon
@@ -29,7 +29,7 @@
         :variant="buttonVariant"
         :to="buttonTo"
         :href="buttonHref"
-        :class="['mt-4', buttonClass]"
+        class="mt-4" :class="[buttonClass]"
         @click="handleButtonClick"
       >
         <VIcon
@@ -159,6 +159,7 @@ const resolveI18nValue = value => {
 
   if (isI18nKey(value)) {
     const key = value.replace('i18n:', '')
+    
     return te(key) ? t(key) : value
   }
 

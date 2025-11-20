@@ -1,5 +1,5 @@
 <template>
-  <VCard :class="['feature-showcase', { 'has-background': backgroundColor }]" :elevation="elevation">
+  <VCard class="feature-showcase" :class="[{ 'has-background': backgroundColor }]" :elevation="elevation">
     <VCardText :style="containerStyle">
       <h2 v-if="resolvedTitle" class="showcase-title">{{ resolvedTitle }}</h2>
       <p v-if="resolvedSubtitle" class="showcase-subtitle">{{ resolvedSubtitle }}</p>
@@ -86,6 +86,7 @@ const resolveI18nValue = value => {
 
   if (isI18nKey(value)) {
     const key = value.replace('i18n:', '')
+    
     return te(key) ? t(key) : value
   }
 

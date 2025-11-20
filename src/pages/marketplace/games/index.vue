@@ -135,7 +135,7 @@
         <FAQPanel :panel="faqPanel" :app="{ name: 'gaming' }" :faqs="faqs" :title="t('pages.marketplace.games.index.faq.title')" />
 
         <!-- Trustpilot Section -->
-        <TrustpilotPanel :star-size="32" :show-rating-label="true" :use-live-data="true" />
+        <TrustpilotPanel :star-size="32" show-rating-label use-live-data />
 
         <!-- CTA Section -->
         <CtaSection
@@ -190,6 +190,7 @@ const countryCount = computed(() => {
       countries.add(flux.geolocation.country)
     }
   })
+  
   return countries.size
 })
 
@@ -219,6 +220,7 @@ const minimumGamePrice = computed(() => {
   if (prices.length === 0) return '10'
 
   const minPrice = Math.min(...prices)
+
   // Format to 2 decimal places and remove trailing zeros
   return minPrice.toFixed(2).replace(/\.00$/, '')
 })

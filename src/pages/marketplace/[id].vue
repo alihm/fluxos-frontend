@@ -305,7 +305,7 @@
 
       <!-- Trustpilot Reviews Section -->
       <div class="trustpilot-wrapper">
-        <TrustpilotPanel :use-live-data="true" :star-size="32" :show-rating-label="true" />
+        <TrustpilotPanel use-live-data :star-size="32" show-rating-label />
       </div>
 
       <!-- Global Server Network Section -->
@@ -695,16 +695,19 @@ watch(() => route.params.id, loadAppDetails, { immediate: true })
 // Dynamic SEO meta tags and structured data using computed
 const seoTitle = computed(() => {
   if (!app.value) return 'Flux Cloud Marketplace'
+  
   return `${app.value.displayName || app.value.name} - Flux Cloud Marketplace`
 })
 
 const seoDescription = computed(() => {
   if (!app.value) return 'Flux Cloud Marketplace - Decentralized cloud hosting'
+  
   return app.value.description || `Deploy ${app.value.displayName || app.value.name} on Flux Cloud. Decentralized cloud hosting with global infrastructure, 99.9% uptime, and affordable pricing.`
 })
 
 const seoImage = computed(() => {
   if (!app.value) return 'https://home.runonflux.io/flux-logo.png'
+  
   return app.value.icon || app.value.logo || 'https://home.runonflux.io/flux-logo.png'
 })
 
@@ -712,6 +715,7 @@ const seoUrl = computed(() => `https://home.runonflux.io/marketplace/${route.par
 
 const seoKeywords = computed(() => {
   if (!app.value) return 'Flux, cloud hosting, decentralized hosting, Web3, blockchain hosting'
+  
   return `${app.value.displayName || app.value.name}, Flux, cloud hosting, decentralized hosting, Web3, blockchain hosting`
 })
 
@@ -2446,7 +2450,6 @@ onMounted(() => {
 .trustpilot-wrapper :deep(.trustpilot-rating-container) {
   cursor: pointer;
 }
-
 </style>
 
 <style>

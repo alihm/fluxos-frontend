@@ -40,6 +40,7 @@ const panelTitle = computed(() => {
 
   if (isI18nKey(props.panel.title)) {
     const key = props.panel.title.replace('i18n:', '')
+    
     return te(key) ? t(key) : props.panel.title
   }
 
@@ -52,6 +53,7 @@ const panelSubtitle = computed(() => {
 
   if (isI18nKey(props.panel.subtitle)) {
     const key = props.panel.subtitle.replace('i18n:', '')
+    
     return te(key) ? t(key) : props.panel.subtitle
   }
 
@@ -68,6 +70,7 @@ const panelPadding = computed(() => {
   if (props.panel.padding) {
     return `${props.panel.padding.top}px ${props.panel.padding.right}px ${props.panel.padding.bottom}px ${props.panel.padding.left}px`
   }
+  
   return '32px'
 })
 

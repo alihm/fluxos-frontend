@@ -210,6 +210,7 @@ const itemListSchema = computed(() => {
 // Create reactive structured data that updates when itemListSchema changes
 const structuredData = computed(() => {
   const baseSchemas = [organizationSchema, breadcrumbSchema]
+  
   return itemListSchema.value ? [...baseSchemas, itemListSchema.value] : baseSchemas
 })
 

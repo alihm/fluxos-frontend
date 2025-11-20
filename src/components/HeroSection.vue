@@ -163,6 +163,7 @@ const resolveI18nValue = value => {
 
   if (isI18nKey(value)) {
     const key = value.replace('i18n:', '')
+    
     return te(key) ? t(key) : value
   }
 
@@ -197,6 +198,7 @@ const overlayStyle = computed(() => {
       background: props.overlayGradient,
     }
   }
+  
   return {
     background: props.overlayColor,
   }

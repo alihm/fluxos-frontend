@@ -84,6 +84,7 @@ export function useSEO(options) {
   // Handle both raw arrays and computed refs - wrap in computed for reactivity
   const scripts = computed(() => {
     const data = structuredData?.value !== undefined ? structuredData.value : structuredData
+    
     return data && data.length > 0
       ? [
         {

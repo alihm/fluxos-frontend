@@ -41,7 +41,7 @@
         />
 
         <!-- Trustpilot Reviews Section -->
-        <TrustpilotPanel :use-live-data="true" :star-size="32" :show-rating-label="true" />
+        <TrustpilotPanel use-live-data :star-size="32" show-rating-label />
       </div>
 
       <!-- Show actual FluxDrive interface for subscribers or users with subscription history -->

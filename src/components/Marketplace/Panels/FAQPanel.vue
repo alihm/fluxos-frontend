@@ -47,16 +47,19 @@ const props = defineProps({
     type: Object,
     default: null,
   },
+
   // Optional: Direct FAQs array (for non-panel usage)
   faqs: {
     type: Array,
     default: null,
   },
+
   // Optional: Title override
   title: {
     type: String,
     default: null,
   },
+
   // Optional: Subtitle override
   subtitle: {
     type: String,
@@ -72,6 +75,7 @@ const { getMinimumPrice } = useGameUtils()
 // Calculate minimum price from app configurations (only if app is provided)
 const minimumPrice = computed(() => {
   if (!props.app) return '0.00'
+  
   return getMinimumPrice(props.app)
 })
 
@@ -135,6 +139,7 @@ const questionsList = computed(() => {
       // Replace price placeholder with actual minimum price
       const replacePricePlaceholder = text => {
         if (!text) return ''
+
         // Check if text is an object (message function)
         if (typeof text === 'object' && text !== null) {
           // If it's a message function object, try to extract the string
@@ -142,6 +147,7 @@ const questionsList = computed(() => {
         }
         const textStr = String(text)
         const price = minimumPrice.value || '0.00'
+        
         return textStr.replace(/\[\[minPrice\]\]/g, `$${price}`)
       }
 

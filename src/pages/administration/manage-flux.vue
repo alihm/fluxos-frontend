@@ -1360,9 +1360,10 @@ import { getDetectedBackendURL } from '@/utils/backend'
 
 // Prevent indexing of manage Flux admin page (private admin data)
 useSEONoIndex()
+
 // Lazy-load Monaco Editor to reduce main bundle size
 const VueMonacoEditor = defineAsyncComponent(() =>
-  import('@guolao/vue-monaco-editor').then(m => m.VueMonacoEditor)
+  import('@guolao/vue-monaco-editor').then(m => m.VueMonacoEditor),
 )
 import { useTheme } from 'vuetify'
 

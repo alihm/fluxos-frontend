@@ -37,8 +37,7 @@
         "
         lg="4"
       >
-        <VCard
-          :title="card.title"
+        <VCard :title="card.title"
         >
           <VOverlay
             v-model="isLoading"

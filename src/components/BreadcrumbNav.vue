@@ -69,6 +69,7 @@ const resolveI18nValue = value => {
 
   if (isI18nKey(value)) {
     const key = value.replace('i18n:', '')
+    
     return te(key) ? t(key) : value
   }
 

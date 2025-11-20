@@ -85,36 +85,43 @@ const props = defineProps({
     type: Boolean,
     default: true,
   },
+
   // Show "View All Reviews" button
   showButton: {
     type: Boolean,
     default: true,
   },
+
   // Star display configuration (if null, uses live data)
   stars: {
     type: Number,
     default: null, // null = use live data, otherwise use prop value
   },
+
   // Star size
   starSize: {
     type: [String, Number],
     default: 28,
   },
+
   // Add margin around card (ma-4)
   addMargin: {
     type: Boolean,
     default: false,
   },
+
   // Show "Excellent" rating label
   showRatingLabel: {
     type: Boolean,
     default: false,
   },
+
   // Show reviews text
   showReviewsText: {
     type: Boolean,
     default: true,
   },
+
   // Use live TrustPilot data (fetched in background)
   useLiveData: {
     type: Boolean,
@@ -139,6 +146,7 @@ const displayRating = computed(() => {
   if (props.useLiveData && props.stars === null) {
     return rating.value
   }
+  
   return props.stars !== null ? props.stars : parseFloat(t('common.trustpilot.score'))
 })
 
@@ -146,6 +154,7 @@ const displayRatingText = computed(() => {
   if (props.useLiveData) {
     return ratingText.value
   }
+  
   return t('common.trustpilot.rating')
 })
 
@@ -153,6 +162,7 @@ const displayReviewsText = computed(() => {
   if (props.useLiveData) {
     return reviewsText.value
   }
+  
   return t('common.trustpilot.reviews')
 })
 
@@ -160,6 +170,7 @@ const displayReviews = computed(() => {
   if (props.useLiveData) {
     return sampleReviews.value
   }
+  
   return [
     {
       text: t('common.trustpilot.sampleReviews.review1.text'),

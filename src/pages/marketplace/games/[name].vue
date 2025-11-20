@@ -90,7 +90,7 @@
       </div>
 
       <!-- Trustpilot Reviews Section -->
-      <TrustpilotPanel v-if="game" :use-live-data="true" :star-size="32" :show-rating-label="true" />
+      <TrustpilotPanel v-if="game" use-live-data :star-size="32" show-rating-label />
     </div>
 
     <!-- Install Dialog -->
@@ -161,6 +161,7 @@ const orderedPanels = computed(() => {
 const seoTitle = computed(() => {
   if (!game.value) return 'FluxPlay - Game Server Hosting'
   const gameName = game.value.displayName || game.value.name
+  
   return `${gameName} Server Hosting - FluxPlay on Flux Network`
 })
 
@@ -173,11 +174,13 @@ const seoDescription = computed(() => {
   if (desc.length > 155) {
     desc = desc.substring(0, 152).trim() + '...'
   }
+  
   return desc
 })
 
 const seoImage = computed(() => {
   if (!game.value) return 'https://home.runonflux.io/images/games/FluxPlay_white.svg'
+  
   return gameIcon.value || 'https://home.runonflux.io/images/games/FluxPlay_white.svg'
 })
 
@@ -186,6 +189,7 @@ const seoUrl = computed(() => `https://home.runonflux.io/marketplace/games/${rou
 const seoKeywords = computed(() => {
   if (!game.value) return 'game server hosting, decentralized hosting, flux network, affordable game hosting'
   const gameName = game.value.displayName || game.value.name
+  
   return `${gameName} hosting, ${gameName} server, game server hosting, decentralized hosting, flux network, affordable game hosting`
 })
 

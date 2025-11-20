@@ -145,7 +145,7 @@ const openDB = () => {
     request.onerror = () => reject(request.error)
     request.onsuccess = () => resolve(request.result)
 
-    request.onupgradeneeded = (event) => {
+    request.onupgradeneeded = event => {
       const db = event.target.result
       if (!db.objectStoreNames.contains('locations')) {
         db.createObjectStore('locations', { keyPath: 'id' })
@@ -158,6 +158,7 @@ const openDB = () => {
 const loadFromCache = async () => {
   try {
     const db = await openDB()
+    
     return new Promise((resolve, reject) => {
       const transaction = db.transaction(['locations'], 'readonly')
       const store = transaction.objectStore('locations')
@@ -178,6 +179,7 @@ const loadFromCache = async () => {
     })
   } catch (error) {
     console.warn('IndexedDB not available, skipping cache:', error)
+    
     return null
   }
 }
@@ -193,7 +195,7 @@ const saveToCache = async (fluxData, nodeCount) => {
         fluxList: fluxData, // Full API response with all fields
         fluxNodeCount: nodeCount,
         timestamp: Date.now(),
-      }
+      },
     }
 
     const transaction = db.transaction(['locations'], 'readwrite')
@@ -209,6 +211,7 @@ const saveToCache = async (fluxData, nodeCount) => {
     })
   } catch (error) {
     console.warn('Unable to cache to IndexedDB:', error)
+
     // Cache failure is not critical, continue without it
   }
 }

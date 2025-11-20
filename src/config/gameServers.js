@@ -109,6 +109,7 @@ export const GAME_DISPLAY_NAMES = {
  */
 export function getGamePlayerMapping(gameName) {
   const normalizedName = gameName?.toLowerCase().trim()
+  
   return GAME_PLAYER_MAPPINGS[normalizedName] || null
 }
 
@@ -119,6 +120,7 @@ export function getGamePlayerMapping(gameName) {
  */
 export function getGameDisplayName(gameName) {
   const normalizedName = gameName?.toLowerCase().trim()
+  
   return GAME_DISPLAY_NAMES[normalizedName] || (gameName?.charAt(0).toUpperCase() + gameName?.slice(1))
 }
 
@@ -155,5 +157,6 @@ export function getPlayerCountForRAM(gameName, ramGB) {
   if (!mapping) return null
 
   const closestTier = getClosestRAMTier(gameName, ramGB)
+  
   return closestTier ? mapping[closestTier] : null
 }
