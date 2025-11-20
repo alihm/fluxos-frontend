@@ -1,5 +1,5 @@
 <template>
-  <div v-if="!hasError" class="server-locations-panel" :style="panelStyle">
+  <div v-if="!hasError && fluxList.length > 0" class="server-locations-panel" :style="panelStyle">
     <VCard class="locations-card" elevation="0">
       <VCardText>
         <h2 v-if="titleText" class="locations-title">{{ titleText }}</h2>
@@ -222,7 +222,9 @@ const getFluxList = async () => {
       'https://stats.runonflux.io/fluxinfo?projection=geolocation,ip,tier',
     )
 
-    const fetchedFluxList = resLoc.data.data || []
+    // Ensure we always get an array
+    const data = resLoc.data.data
+    const fetchedFluxList = Array.isArray(data) ? data : []
 
     const resList = await DashboardService.fluxnodeCount()
     const fetchedNodeCount = resList.data.data.total || 0
@@ -241,7 +243,8 @@ const getFluxList = async () => {
     // Try to load from cache (async)
     const cached = await loadFromCache()
     if (cached) {
-      fluxList.value = cached.fluxList || []
+      // Ensure cached data is also an array
+      fluxList.value = Array.isArray(cached.fluxList) ? cached.fluxList : []
       fluxNodeCount.value = cached.fluxNodeCount || 0
       hasError.value = false
     } else {

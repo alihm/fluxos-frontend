@@ -74,7 +74,7 @@ export default defineConfig(({ mode }) => {
         },
       }),
       VueI18nPlugin({
-        runtimeOnly: true,
+        runtimeOnly: false,
         compositionOnly: true,
         strictMessage: false,
         include: [
@@ -109,9 +109,13 @@ export default defineConfig(({ mode }) => {
               params: {
                 overrides: {
                   cleanupNumericValues: false,
-                  removeViewBox: false,
+                  // Removed removeViewBox from overrides - moved to separate plugin below
                 },
               },
+            },
+            {
+              name: 'removeViewBox',
+              active: false, // Disable removeViewBox to preserve viewBox attributes
             },
           ],
         },

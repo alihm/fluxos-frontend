@@ -80,14 +80,42 @@ const isI18nKey = str => {
   return str && typeof str === 'string' && str.startsWith('i18n:')
 }
 
+// Helper function to extract string from compiled i18n message objects
+const extractString = obj => {
+  // If it's already a string, check if it's JSON-encoded
+  if (typeof obj === 'string') {
+    try {
+      const parsed = JSON.parse(obj)
+      // If parsed successfully, try to extract the string from the structure
+      if (parsed && typeof parsed === 'object' && parsed.b && parsed.b.s) {
+        return parsed.b.s
+      }
+      return obj
+    } catch {
+      return obj
+    }
+  }
+
+  if (obj && typeof obj === 'object') {
+    // Try to get the actual string from compiled message object
+    // Structure: {t: 0, b: {t: 2, i: [...], s: "actual text"}}
+    if (obj.b && obj.b.s) {
+      return obj.b.s
+    }
+    return obj.body?.static || obj.loc?.source || obj.static || JSON.stringify(obj)
+  }
+
+  return String(obj)
+}
+
 // Helper function to resolve i18n keys or return raw value
 const resolveI18nValue = value => {
   if (!value) return ''
 
   if (isI18nKey(value)) {
     const key = value.replace('i18n:', '')
-    
-    return te(key) ? t(key) : value
+
+    return te(key) ? extractString(t(key)) : value
   }
 
   return value
@@ -103,7 +131,7 @@ const resolvedSubtitle = computed(() => resolveI18nValue(props.subtitle))
 
 // Resolve items
 const resolvedItems = computed(() => {
-  // If items is a string (i18n key), fetch from i18n using t() for each item
+  // If items is a string (i18n key), fetch from i18n using tm() and extract strings
   if (typeof props.items === 'string' && isI18nKey(props.items)) {
     const key = props.items.replace('i18n:', '')
 
@@ -112,24 +140,16 @@ const resolvedItems = computed(() => {
 
     const items = tm(key)
 
-    if (Array.isArray(items)) {
-      return items.map((item, index) => {
-        // Use t() to translate each field directly
-        const iconKey = `${key}.${index}.icon`
-        const titleKey = `${key}.${index}.title`
-        const descKey = `${key}.${index}.description`
-        const colorKey = `${key}.${index}.color`
+    // Deep clone to unwrap all proxies
+    let itemsArray = Array.isArray(items) ? items : Object.values(items)
+    itemsArray = JSON.parse(JSON.stringify(itemsArray))
 
-        return {
-          icon: te(iconKey) ? t(iconKey) : (typeof item.icon === 'string' ? item.icon : String(item.icon || '')),
-          title: te(titleKey) ? t(titleKey) : (typeof item.title === 'string' ? item.title : String(item.title || '')),
-          description: te(descKey) ? t(descKey) : (typeof item.description === 'string' ? item.description : String(item.description || '')),
-          color: te(colorKey) ? t(colorKey) : item.color,
-        }
-      })
-    }
-
-    return []
+    return itemsArray.map((item) => ({
+      icon: extractString(item.icon),
+      title: extractString(item.title),
+      description: extractString(item.description),
+      color: extractString(item.color),
+    }))
   }
 
   // If items is an array, resolve any i18n keys in individual items

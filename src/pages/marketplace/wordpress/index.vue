@@ -282,12 +282,29 @@ const features = computed(() => [
 
 // Helper function to extract string from compiled i18n message objects
 const extractString = obj => {
-  if (typeof obj === 'string') return obj
+  // If it's already a string, check if it's JSON-encoded
+  if (typeof obj === 'string') {
+    try {
+      const parsed = JSON.parse(obj)
+      // If parsed successfully, try to extract the string from the structure
+      if (parsed && typeof parsed === 'object' && parsed.b && parsed.b.s) {
+        return parsed.b.s
+      }
+      return obj
+    } catch {
+      return obj
+    }
+  }
+
   if (obj && typeof obj === 'object') {
     // Try to get the actual string from compiled message object
+    // Structure: {t: 0, b: {t: 2, i: [...], s: "actual text"}}
+    if (obj.b && obj.b.s) {
+      return obj.b.s
+    }
     return obj.body?.static || obj.loc?.source || obj.static || JSON.stringify(obj)
   }
-  
+
   return String(obj)
 }
 

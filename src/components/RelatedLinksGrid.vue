@@ -68,7 +68,7 @@ const props = defineProps({
   },
 })
 
-const { t, te, locale, messages } = useI18n()
+const { t, te, tm, locale, messages } = useI18n()
 
 // Helper function to check if a string is an i18n key
 const isI18nKey = str => {
@@ -119,36 +119,68 @@ const resolvedLinks = computed(() => {
   // If links is a string (i18n key), fetch from i18n
   if (typeof props.links === 'string' && isI18nKey(props.links)) {
     const key = props.links.replace('i18n:', '')
-    const links = getNestedI18nValue(key)
+    console.log('🔍 RelatedLinksGrid - i18n key:', key)
 
-    if (links && typeof links === 'object') {
-      let linksArray = Array.isArray(links) ? links : Object.values(links)
-
-      // Deep clone to unwrap proxies
-      linksArray = JSON.parse(JSON.stringify(linksArray))
-
-      // Extract actual string values from compiled i18n message objects
-      return linksArray.map(link => {
-        const extractString = obj => {
-          if (typeof obj === 'string') return obj
-          if (obj && typeof obj === 'object') {
-            return obj.body?.static || obj.loc?.source || obj.static || JSON.stringify(obj)
-          }
-          
-          return String(obj)
-        }
-
-        return {
-          to: extractString(link.to),
-          icon: extractString(link.icon),
-          title: extractString(link.title),
-          description: extractString(link.description),
-          color: link.color ? extractString(link.color) : undefined,
-        }
-      })
+    // Check if key exists
+    if (!te(key)) {
+      console.log('❌ RelatedLinksGrid - key does not exist:', key)
+      return []
     }
 
-    return []
+    const links = tm(key)
+    console.log('📦 RelatedLinksGrid - tm() result:', links)
+    console.log('📦 RelatedLinksGrid - tm() type:', typeof links)
+    console.log('📦 RelatedLinksGrid - tm() isArray:', Array.isArray(links))
+
+    // Helper function to get count of array/object items
+    const getLength = (obj) => {
+      if (Array.isArray(obj)) return obj.length
+      if (typeof obj === 'object' && obj !== null) return Object.keys(obj).length
+      return 0
+    }
+
+    const length = getLength(links)
+    console.log('📊 RelatedLinksGrid - array length:', length)
+    if (length === 0) return []
+
+    // Build array by directly translating each index
+    const result = []
+    for (let i = 0; i < length; i++) {
+      const toKey = `${key}.${i}.to`
+      const iconKey = `${key}.${i}.icon`
+      const titleKey = `${key}.${i}.title`
+      const descKey = `${key}.${i}.description`
+      const colorKey = `${key}.${i}.color`
+      console.log(`🔑 RelatedLinksGrid - checking keys for item ${i}: to=${toKey}, title=${titleKey}`)
+
+      // Use t() to get the actual translated strings
+      if (te(toKey) && te(titleKey)) {
+        const to = t(toKey)
+        const title = t(titleKey)
+        const description = te(descKey) ? t(descKey) : ''
+        console.log(`✅ RelatedLinksGrid - translated[${i}]:`, {
+          to: typeof to,
+          title: typeof title,
+          description: typeof description
+        })
+        console.log(`📝 RelatedLinksGrid - to value:`, to)
+        console.log(`📝 RelatedLinksGrid - title value:`, title)
+        console.log(`📝 RelatedLinksGrid - description value:`, description)
+
+        result.push({
+          to,
+          icon: te(iconKey) ? t(iconKey) : 'mdi-link',
+          title,
+          description,
+          color: te(colorKey) ? t(colorKey) : undefined,
+        })
+      } else {
+        console.log(`❌ RelatedLinksGrid - keys not found: toExists=${te(toKey)}, titleExists=${te(titleKey)}`)
+      }
+    }
+
+    console.log('🎯 RelatedLinksGrid - final result:', result)
+    return result
   }
 
   // If links is an array, resolve any i18n keys in individual items

@@ -85,14 +85,13 @@ const getConfigsByGroup = groupTitle => {
 }
 
 const panelStyle = computed(() => {
-  const style = {
-    padding: props.panel.padding ?
-      `${props.panel.padding.top}px ${props.panel.padding.right}px ${props.panel.padding.bottom}px ${props.panel.padding.left}px`
-      : '0',
-  }
-  console.log('🎨 GroupsPanel style:', style, 'Panel config:', props.panel)
+  // Normalize padding to ensure consistency across games
+  const defaultPadding = { top: 48, right: 0, bottom: 0, left: 0 }
+  const padding = props.panel.padding || defaultPadding
 
-  return style
+  return {
+    padding: `${padding.top || defaultPadding.top}px ${padding.right || defaultPadding.right}px ${padding.bottom || defaultPadding.bottom}px ${padding.left || defaultPadding.left}px`,
+  }
 })
 
 // 🎯 CONFIGURE "MOST POPULAR" BADGE HERE

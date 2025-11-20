@@ -125,6 +125,12 @@
       "loginRequired": "Wymagane Logowanie",
       "loggedOutSuccessfully": "Wylogowano pomyślnie"
     },
+    "selectServerConfiguration": "Wybierz Konfigurację Serwera",
+    "groups": {
+      "smallServers": "Małe Serwery",
+      "mediumServers": "Średnie Serwery",
+      "largeServers": "Duże Serwery"
+    },
     "guarantee": {
       "title": "30-Dniowa Gwarancja Zwrotu Pieniędzy",
       "description": "Wypróbuj naszą usługę bez ryzyka. Jeśli nie będziesz w pełni zadowolony w ciągu pierwszych 30 dni, zwrócimy Ci pieniądze—bez zadawania pytań.",

@@ -166,6 +166,13 @@
     const loaderColor = localStorage.getItem('vuexy-initial-loader-bg') || '#FFFFFF'
     const primaryColor = localStorage.getItem('vuexy-initial-loader-color') || '#7367F0'
 
+    // Detect theme from stored theme or background color brightness
+    const storedTheme = localStorage.getItem('vuexy-theme') || 'light'
+
+    // Determine text color based on theme
+    const isDarkTheme = storedTheme === 'dark' || (loaderColor && loaderColor.toLowerCase() !== '#ffffff' && loaderColor.toLowerCase() !== '#fff')
+    const textColor = isDarkTheme ? 'rgba(255, 255, 255, 0.87)' : 'rgba(0, 0, 0, 0.87)'
+
     // Convert hex to RGB for glow effects
     function hexToRgb(hex) {
       const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
@@ -174,13 +181,39 @@
         '115, 103, 240';
     }
 
-    // Apply background color immediately to prevent theme flash
+    // Apply background and text color immediately to prevent theme flash
     document.body.style.backgroundColor = loaderColor
+    document.body.style.color = textColor
     document.documentElement.style.backgroundColor = loaderColor
+    document.documentElement.style.color = textColor
 
     document.documentElement.style.setProperty('--initial-loader-bg', loaderColor)
     document.documentElement.style.setProperty('--initial-loader-color', primaryColor)
     document.documentElement.style.setProperty('--initial-loader-color-rgb', hexToRgb(primaryColor))
+    document.documentElement.style.setProperty('--initial-text-color', textColor)
+
+    // Set Vuetify theme colors immediately to prevent flash
+    if (isDarkTheme) {
+      document.documentElement.classList.add('v-theme--dark')
+      document.documentElement.classList.remove('v-theme--light')
+    } else {
+      document.documentElement.classList.add('v-theme--light')
+      document.documentElement.classList.remove('v-theme--dark')
+    }
+
+    // Listen for app-ready event to re-enable transitions
+    window.addEventListener('app-ready', () => {
+      // Small delay to ensure Vue has fully rendered
+      setTimeout(() => {
+        const style = document.createElement('style')
+        style.textContent = `
+          body *, html * {
+            transition: all 0.3s ease !important;
+          }
+        `
+        document.head.appendChild(style)
+      }, 100)
+    })
 
     // Check if page path should skip loader
     const skipLoaderPaths = ['/successcheckout']

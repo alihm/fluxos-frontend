@@ -37,6 +37,9 @@ export const getI18n = () => {
       pluralRules: {
         pl: polishPluralizationRule,
       },
+      globalInjection: true,
+      missingWarn: false,
+      fallbackWarn: false,
     })
   }
 

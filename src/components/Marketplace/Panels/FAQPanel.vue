@@ -72,6 +72,34 @@ const { t, te, tm } = i18n
 
 const { getMinimumPrice } = useGameUtils()
 
+// Helper function to extract string from compiled i18n message objects
+const extractString = obj => {
+  // If it's already a string, check if it's JSON-encoded
+  if (typeof obj === 'string') {
+    try {
+      const parsed = JSON.parse(obj)
+      // If parsed successfully, try to extract the string from the structure
+      if (parsed && typeof parsed === 'object' && parsed.b && parsed.b.s) {
+        return parsed.b.s
+      }
+      return obj
+    } catch {
+      return obj
+    }
+  }
+
+  if (obj && typeof obj === 'object') {
+    // Try to get the actual string from compiled message object
+    // Structure: {t: 0, b: {t: 2, i: [...], s: "actual text"}}
+    if (obj.b && obj.b.s) {
+      return obj.b.s
+    }
+    return obj.body?.static || obj.loc?.source || obj.static || JSON.stringify(obj)
+  }
+
+  return String(obj)
+}
+
 // Calculate minimum price from app configurations (only if app is provided)
 const minimumPrice = computed(() => {
   if (!props.app) return '0.00'
@@ -130,45 +158,47 @@ const questionsList = computed(() => {
   if (isI18nKey(props.panel.questions)) {
     const key = props.panel.questions.replace('i18n:', '')
 
-    // Use te() to check if key exists, then use t() for each item
-    if (!te(key)) return []
-
+    // Use tm() directly - te() returns false for array paths even when they exist
     const questions = tm(key)
 
-    if (Array.isArray(questions)) {
-      // Replace price placeholder with actual minimum price
-      const replacePricePlaceholder = text => {
-        if (!text) return ''
-
-        // Check if text is an object (message function)
-        if (typeof text === 'object' && text !== null) {
-          // If it's a message function object, try to extract the string
-          return String(text)
-        }
-        const textStr = String(text)
-        const price = minimumPrice.value || '0.00'
-        
-        return textStr.replace(/\[\[minPrice\]\]/g, `$${price}`)
-      }
-
-      return questions.map((faq, index) => {
-        // Extract values - tm() might return message functions, so we need to call them or use t()
-        const qKey = `${key}.${index}.q`
-        const aKey = `${key}.${index}.a`
-
-        const q = te(qKey) ? t(qKey) : (typeof faq.q === 'string' ? faq.q : String(faq.q || ''))
-        const a = te(aKey) ? t(aKey) : (typeof faq.a === 'string' ? faq.a : String(faq.a || ''))
-
-        return {
-          q,
-          a: replacePricePlaceholder(a),
-          question: q,
-          answer: replacePricePlaceholder(a),
-        }
-      })
+    // Check if tm() returned valid data
+    if (!questions || (typeof questions === 'object' && Object.keys(questions).length === 0)) {
+      console.log('❌ FAQPanel - tm() returned empty for key:', key)
+      return []
     }
 
-    return []
+    // Replace price placeholder with actual minimum price
+    const replacePricePlaceholder = text => {
+      if (!text) return ''
+      const textStr = String(text)
+      const price = minimumPrice.value || '0.00'
+
+      return textStr.replace(/\[\[minPrice\]\]/g, `$${price}`)
+    }
+
+    // Deep clone to unwrap all proxies and convert to array
+    let faqArray = Array.isArray(questions) ? questions : Object.values(questions)
+    faqArray = JSON.parse(JSON.stringify(faqArray))
+
+    // Build result array by extracting strings from each FAQ item
+    const result = faqArray.map((faq) => {
+      // Extract q and a, handling both property names
+      const qRaw = faq.q || faq.question || ''
+      const aRaw = faq.a || faq.answer || ''
+
+      // Use extractString to handle compiled message objects
+      const q = extractString(qRaw)
+      const a = extractString(aRaw)
+
+      return {
+        q,
+        a: replacePricePlaceholder(a),
+        question: q,
+        answer: replacePricePlaceholder(a),
+      }
+    }).filter(faq => faq.q && faq.a) // Filter out any invalid entries
+
+    return result
   }
 
   return props.panel.questions

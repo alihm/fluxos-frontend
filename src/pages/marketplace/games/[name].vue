@@ -210,11 +210,25 @@ const structuredData = computed(() => {
   if (faqPanel?.questions) {
     let questionsArray = faqPanel.questions
 
-    // If questions is an i18n key, resolve it
+    // If questions is an i18n key, resolve it using t() for each item
     if (typeof questionsArray === 'string' && questionsArray.startsWith('i18n:')) {
       const key = questionsArray.replace('i18n:', '')
       if (te(key)) {
-        questionsArray = tm(key)
+        const questions = tm(key)
+        const length = Array.isArray(questions) ? questions.length : (typeof questions === 'object' ? Object.keys(questions).length : 0)
+
+        questionsArray = []
+        for (let i = 0; i < length; i++) {
+          const qKey = `${key}.${i}.q`
+          const aKey = `${key}.${i}.a`
+
+          if (te(qKey) && te(aKey)) {
+            questionsArray.push({
+              q: t(qKey),
+              a: t(aKey),
+            })
+          }
+        }
       }
     }
 

@@ -1,10 +1,28 @@
 body {
   margin: 0;
+  /* Prevent theme color flash - use dynamic theme colors */
+  background-color: var(--initial-loader-bg, #fff) !important;
+  color: var(--initial-text-color, #000) !important;
+  transition: none !important;
 }
 
 html {
   overflow-x: hidden;
   overflow-y: scroll;
+  background-color: var(--initial-loader-bg, #fff) !important;
+}
+
+/* Force initial colors on all elements until app is ready */
+body *,
+html * {
+  transition: none !important;
+}
+
+/* Prevent flash by keeping initial styles on #app during mount */
+#app {
+  background-color: var(--initial-loader-bg, #fff) !important;
+  color: var(--initial-text-color, #000) !important;
+  min-height: 100vh;
 }
 
 #loading-bg {

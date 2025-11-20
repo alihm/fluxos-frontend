@@ -375,7 +375,9 @@ const fetchFluxLocations = async () => {
     const response = await axios.get(
       'https://stats.runonflux.io/fluxinfo?projection=geolocation,ip,tier',
     )
-    fluxList.value = response.data.data || []
+    // Ensure we always get an array
+    const data = response.data.data
+    fluxList.value = Array.isArray(data) ? data : []
     console.log(`✅ Loaded ${fluxList.value.length} flux nodes across ${countryCount.value} countries`)
   } catch (error) {
     console.error('Error fetching flux locations:', error)

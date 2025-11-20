@@ -33,14 +33,42 @@ const isI18nKey = str => {
   return str && typeof str === 'string' && str.startsWith('i18n:')
 }
 
+// Helper function to extract string from compiled i18n message objects
+const extractString = obj => {
+  // If it's already a string, check if it's JSON-encoded
+  if (typeof obj === 'string') {
+    try {
+      const parsed = JSON.parse(obj)
+      // If parsed successfully, try to extract the string from the structure
+      if (parsed && typeof parsed === 'object' && parsed.b && parsed.b.s) {
+        return parsed.b.s
+      }
+      return obj
+    } catch {
+      return obj
+    }
+  }
+
+  if (obj && typeof obj === 'object') {
+    // Try to get the actual string from compiled message object
+    // Structure: {t: 0, b: {t: 2, i: [...], s: "actual text"}}
+    if (obj.b && obj.b.s) {
+      return obj.b.s
+    }
+    return obj.body?.static || obj.loc?.source || obj.static || JSON.stringify(obj)
+  }
+
+  return String(obj)
+}
+
 // Get translated or raw title
 const titleText = computed(() => {
   if (!props.panel.title) return ''
 
   if (isI18nKey(props.panel.title)) {
     const key = props.panel.title.replace('i18n:', '')
-    
-    return te(key) ? t(key) : props.panel.title
+
+    return te(key) ? extractString(t(key)) : props.panel.title
   }
 
   return props.panel.title
@@ -52,8 +80,8 @@ const subtitleText = computed(() => {
 
   if (isI18nKey(props.panel.subtitle)) {
     const key = props.panel.subtitle.replace('i18n:', '')
-    
-    return te(key) ? t(key) : props.panel.subtitle
+
+    return te(key) ? extractString(t(key)) : props.panel.subtitle
   }
 
   return props.panel.subtitle
@@ -96,11 +124,29 @@ const featuresList = computed(() => {
       // Extract actual string values from compiled i18n message objects
       featuresArray = featuresArray.map(feature => {
         const extractString = obj => {
-          if (typeof obj === 'string') return obj
+          // If it's already a string, check if it's JSON-encoded
+          if (typeof obj === 'string') {
+            try {
+              const parsed = JSON.parse(obj)
+              // If parsed successfully, try to extract the string from the structure
+              if (parsed && typeof parsed === 'object' && parsed.b && parsed.b.s) {
+                return parsed.b.s
+              }
+              return obj
+            } catch {
+              return obj
+            }
+          }
+
           if (obj && typeof obj === 'object') {
+            // Try to get the actual string from compiled message object
+            // Structure: {t: 0, b: {t: 2, i: [...], s: "actual text"}}
+            if (obj.b && obj.b.s) {
+              return obj.b.s
+            }
             return obj.body?.static || obj.loc?.source || obj.static || JSON.stringify(obj)
           }
-          
+
           return String(obj)
         }
 

@@ -5,11 +5,16 @@
     </div>
 
     <div class="group-content">
-      <h2 v-if="group.title" class="group-title" :style="{ color: group.color }">
-        {{ group.title }}
+      <h2
+        v-if="groupTitle"
+        class="group-title"
+        :class="{ 'no-description': !groupDescription }"
+        :style="{ color: group.color }"
+      >
+        {{ groupTitle }}
       </h2>
-      <p v-if="group.description" class="group-description">
-        {{ group.description }}
+      <p v-if="groupDescription" class="group-description">
+        {{ groupDescription }}
       </p>
 
       <div class="configs-grid">
@@ -27,6 +32,7 @@
 
 <script setup>
 import { computed } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useGameUtils } from '@/composables/useGameUtils'
 import AppConfigCard from './AppConfigCard.vue'
 
@@ -47,17 +53,95 @@ const props = defineProps({
 
 const emit = defineEmits(['install'])
 
+const { t, te } = useI18n()
 const { parseLandingImage } = useGameUtils()
+
+// Helper function to check if a string is an i18n key
+const isI18nKey = str => {
+  return str && typeof str === 'string' && str.startsWith('i18n:')
+}
+
+// Helper function to extract string from compiled i18n message objects
+const extractString = obj => {
+  // If it's already a string, check if it's JSON-encoded
+  if (typeof obj === 'string') {
+    try {
+      const parsed = JSON.parse(obj)
+      // If parsed successfully, try to extract the string from the structure
+      if (parsed && typeof parsed === 'object' && parsed.b && parsed.b.s) {
+        return parsed.b.s
+      }
+      return obj
+    } catch {
+      return obj
+    }
+  }
+
+  if (obj && typeof obj === 'object') {
+    // Try to get the actual string from compiled message object
+    // Structure: {t: 0, b: {t: 2, i: [...], s: "actual text"}}
+    if (obj.b && obj.b.s) {
+      return obj.b.s
+    }
+    return obj.body?.static || obj.loc?.source || obj.static || JSON.stringify(obj)
+  }
+
+  return String(obj)
+}
+
+// Resolve group title with i18n support
+const groupTitle = computed(() => {
+  if (!props.group.title) return ''
+
+  // Handle i18n keys
+  if (isI18nKey(props.group.title)) {
+    const key = props.group.title.replace('i18n:', '')
+    return te(key) ? extractString(t(key)) : props.group.title
+  }
+
+  // Translate common API strings that are always in English
+  const apiStringMap = {
+    'Select Server Configuration': 'common.selectServerConfiguration',
+    'Small Servers': 'common.groups.smallServers',
+    'Medium Servers': 'common.groups.mediumServers',
+    'Large Servers': 'common.groups.largeServers',
+  }
+
+  const translationKey = apiStringMap[props.group.title]
+  if (translationKey && te(translationKey)) {
+    return extractString(t(translationKey))
+  }
+
+  return props.group.title
+})
+
+// Resolve group description with i18n support
+const groupDescription = computed(() => {
+  if (!props.group.description) return ''
+
+  if (isI18nKey(props.group.description)) {
+    const key = props.group.description.replace('i18n:', '')
+    return te(key) ? extractString(t(key)) : props.group.description
+  }
+
+  return props.group.description
+})
 
 const backgroundImage = computed(() => parseLandingImage(props.group.backgroundImage))
 
-const groupStyle = computed(() => ({
-  backgroundColor: props.group.backgroundColor || 'transparent',
-  borderRadius: '16px',
-  padding: '12px 32px 32px 32px',
-  position: 'relative',
-  overflow: 'hidden',
-}))
+const groupStyle = computed(() => {
+  const hasBackgroundImage = !!backgroundImage.value
+
+  return {
+    backgroundColor: props.group.backgroundColor || 'transparent',
+    borderRadius: '16px',
+    padding: '12px 32px 32px 32px',
+    position: 'relative',
+    overflow: 'hidden',
+    // Add border when there's no background image
+    border: hasBackgroundImage ? 'none' : '1px solid rgba(var(--v-theme-on-surface), 0.12)',
+  }
+})
 
 // 🎯 CONFIGURE "MOST POPULAR" BADGE HERE
 // Change this number to mark a different config as popular:
@@ -111,7 +195,11 @@ const handleInstall = data => {
   font-size: 2rem;
   font-weight: bold;
   text-align: center;
-  margin-bottom: 12px;
+  margin-bottom: 24px;
+}
+
+.group-title.no-description {
+  margin-bottom: 32px;
 }
 
 .group-description {
@@ -136,7 +224,11 @@ const handleInstall = data => {
 
   .group-title {
     font-size: 1.5rem;
-    margin-bottom: 14px;
+    margin-bottom: 20px;
+  }
+
+  .group-title.no-description {
+    margin-bottom: 28px;
   }
 
   .configs-grid {
