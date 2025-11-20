@@ -61,7 +61,9 @@
       "tier": "Tier",
       "price": "Price",
       "total": "Total",
-      "amount": "Amount"
+      "amount": "Amount",
+      "scrollLeft": "Scroll left",
+      "scrollRight": "Scroll right"
     },
     "theme": {
       "light": "Light",

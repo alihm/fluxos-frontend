@@ -155,6 +155,19 @@ import { useI18n } from 'vue-i18n'
 import AppCard from '@/components/Marketplace/AppCard.vue'
 import { useMarketplaceUtils } from '@/composables/useMarketplaceUtils'
 
+// Grid configuration constants
+const GRID_CONFIG = {
+  MIN_CARD_WIDTH: 300,      // Minimum width per app card
+  MIN_CARD_HEIGHT: 280,     // Approximate height of each card
+  GRID_GAP: 16,             // Gap between cards/rows
+  CONTAINER_PADDING: 40,    // Container padding
+  HEADER_HEIGHT: 200,       // Header with search/filters
+  PAGINATION_HEIGHT: 60,    // Pagination controls
+  RESERVED_SPACE: 150,      // Footer, statusbar, and padding
+  MAX_ROWS: 4,              // Maximum number of rows to display
+  MIN_ROWS: 1,              // Minimum number of rows to display
+}
+
 const props = defineProps({
   apps: {
     type: Array,
@@ -240,16 +253,12 @@ const categoryItems = computed(() => [
 
 // Grid configuration - responsive based on available space for cards
 const columnsCount = computed(() => {
-  const minCardWidth = 300  // Minimum width per app card
-  const gridGap = 16        // Gap between cards
-  const containerPadding = 40  // Container padding
-
-  const availableWidth = width.value - containerPadding
+  const availableWidth = width.value - GRID_CONFIG.CONTAINER_PADDING
 
   // Calculate maximum columns that fit comfortably
-  if (availableWidth >= (minCardWidth * 3) + (gridGap * 2)) {
+  if (availableWidth >= (GRID_CONFIG.MIN_CARD_WIDTH * 3) + (GRID_CONFIG.GRID_GAP * 2)) {
     return 3  // FluxCloud standard: 3 columns
-  } else if (availableWidth >= (minCardWidth * 2) + gridGap) {
+  } else if (availableWidth >= (GRID_CONFIG.MIN_CARD_WIDTH * 2) + GRID_CONFIG.GRID_GAP) {
     return 2  // 2 columns for medium screens
   } else {
     return 1  // 1 column for small screens
@@ -258,16 +267,18 @@ const columnsCount = computed(() => {
 
 const rowsCount = computed(() => {
   // Calculate rows based on window height
-  const minCardHeight = 280  // Approximate height of each card
-  const headerHeight = 200   // Header with search/filters
-  const paginationHeight = 60 // Pagination controls
-  const reservedSpace = 150  // Footer, statusbar, and padding
+  const availableHeight = window.innerHeight
+    - GRID_CONFIG.HEADER_HEIGHT
+    - GRID_CONFIG.PAGINATION_HEIGHT
+    - GRID_CONFIG.RESERVED_SPACE
 
-  const availableHeight = window.innerHeight - headerHeight - paginationHeight - reservedSpace
-  const maxRows = Math.max(1, Math.floor(availableHeight / minCardHeight))
+  const maxRows = Math.max(
+    GRID_CONFIG.MIN_ROWS,
+    Math.floor(availableHeight / GRID_CONFIG.MIN_CARD_HEIGHT)
+  )
 
   // Limit to reasonable maximum
-  return Math.min(maxRows, 4)
+  return Math.min(maxRows, GRID_CONFIG.MAX_ROWS)
 })
 
 const itemsPerPage = computed(() => {
@@ -275,11 +286,9 @@ const itemsPerPage = computed(() => {
 })
 
 const containerHeight = computed(() => {
-  const cardHeight = 280  // Height per card/row
-  const gridGap = 16      // Gap between rows
-
   // Calculate total height: (rows × cardHeight) + (gaps between rows)
-  return (rowsCount.value * cardHeight) + ((rowsCount.value - 1) * gridGap)
+  return (rowsCount.value * GRID_CONFIG.MIN_CARD_HEIGHT)
+    + ((rowsCount.value - 1) * GRID_CONFIG.GRID_GAP)
 })
 
 const gridClass = computed(() => {

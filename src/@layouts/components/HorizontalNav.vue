@@ -5,6 +5,8 @@ import {
 } from '@layouts/components'
 import { ref, onMounted, onBeforeUnmount, nextTick, watch } from 'vue'
 
+const { t } = useI18n()
+
 const props = defineProps({
   navItems: {
     type: null,
@@ -46,15 +48,17 @@ const canScrollLeft = ref(false)
 const canScrollRight = ref(false)
 let resizeObserver = null
 let mutationObserver = null
+let updateTimeout = null
 
 const updateScrollState = () => {
   if (!navContainer.value || !wrapperContainer.value) {
-    console.log('No navContainer or wrapper ref')
     return
   }
 
-  // Use setTimeout to ensure DOM is fully rendered
-  setTimeout(() => {
+  // Clear previous timeout and set new one to ensure DOM is fully rendered
+  if (updateTimeout) clearTimeout(updateTimeout)
+
+  updateTimeout = setTimeout(() => {
     if (!navContainer.value || !wrapperContainer.value) return
 
     const { scrollLeft, scrollWidth } = navContainer.value
@@ -67,18 +71,6 @@ const updateScrollState = () => {
 
     canScrollLeft.value = hasOverflow && scrollLeft > 5
     canScrollRight.value = hasOverflow && scrollLeft < scrollWidth - clientWidth - 5
-
-    // Debug logging
-    console.log('Horizontal Nav Scroll State:', {
-      scrollLeft,
-      scrollWidth,
-      clientWidth,
-      wrapperWidth,
-      canScrollLeft: canScrollLeft.value,
-      canScrollRight: canScrollRight.value,
-      hasOverflow,
-      difference: scrollWidth - wrapperWidth
-    })
   }, 100)
 }
 
@@ -128,6 +120,9 @@ onMounted(() => {
 
 onBeforeUnmount(() => {
   window.removeEventListener('resize', updateScrollState)
+  if (updateTimeout) {
+    clearTimeout(updateTimeout)
+  }
   if (resizeObserver) {
     resizeObserver.disconnect()
   }
@@ -150,6 +145,8 @@ watch(() => props.navItems, () => {
     <button
       v-show="canScrollLeft"
       class="scroll-arrow left-arrow"
+      :aria-label="t('common.labels.scrollLeft')"
+      :title="t('common.labels.scrollLeft')"
       @click="scrollLeft"
     >
       <VIcon icon="mdi-chevron-left" size="24" />
@@ -173,6 +170,8 @@ watch(() => props.navItems, () => {
     <button
       v-show="canScrollRight"
       class="scroll-arrow right-arrow"
+      :aria-label="t('common.labels.scrollRight')"
+      :title="t('common.labels.scrollRight')"
       @click="scrollRight"
     >
       <VIcon icon="mdi-chevron-right" size="24" />
@@ -220,7 +219,7 @@ watch(() => props.navItems, () => {
     min-height: 36px;
     padding: 0;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all 0.2s ease, opacity 0.3s ease;
     z-index: 10;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
     flex-shrink: 0;
