@@ -3703,7 +3703,7 @@
                 "title": "Hosting Zdecentralizowany"
               },
               "performance": {
-                "description": "Wysokowydajne dyski SSD i zoptymalizowane serwery zapewniają szybkie ładowanie strony WordPress i wydajną obsługę ruchu.",
+                "description": "Wysokowydajne dyski SSD/NVMe i zoptymalizowane serwery zapewniają szybkie ładowanie strony WordPress i wydajną obsługę ruchu.",
                 "title": "Zoptymalizowana Wydajność"
               },
               "security": {

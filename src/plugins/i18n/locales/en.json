@@ -3753,7 +3753,7 @@
               },
               {
                 "q": "How much does Enshrouded hosting cost?",
-                "a": "Starting at <strong>[[minPrice]]/month</strong> and scales based on player capacity (up to 16 players). All plans include DDoS protection, automatic backups, and high-performance SSD storage."
+                "a": "Starting at <strong>[[minPrice]]/month</strong> and scales based on player capacity (up to 16 players). All plans include DDoS protection, automatic backups, and high-performance SSD/NVMe storage."
               },
               {
                 "q": "Can I customize server settings?",
@@ -3794,7 +3794,7 @@
               },
               "performance": {
                 "title": "Optimized Performance",
-                "description": "High-performance SSD storage and optimized servers ensure your WordPress site loads quickly and handles traffic efficiently."
+                "description": "High-performance SSD/NVMe storage and optimized servers ensure your WordPress site loads quickly and handles traffic efficiently."
               },
               "updates": {
                 "title": "Automatic Updates",
