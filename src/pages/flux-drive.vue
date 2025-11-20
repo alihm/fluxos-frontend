@@ -118,7 +118,7 @@ const { t } = useI18n()
 // SEO meta tags and structured data
 const pageUrl = 'https://home.runonflux.io/flux-drive'
 const title = 'FluxDrive - Decentralized IPFS Cloud Storage | Flux Network'
-const description = 'Secure decentralized cloud storage powered by IPFS on the Flux network. Store files across distributed FluxNodes with encryption, redundancy, and censorship resistance. No centralized providers needed.'
+const description = 'Secure IPFS cloud storage on Flux network. Store files across distributed FluxNodes with encryption, redundancy & censorship resistance. Decentralized.'
 const imageUrl = 'https://home.runonflux.io/banner/FluxDriveBanner.png'
 
 // SoftwareApplication structured data

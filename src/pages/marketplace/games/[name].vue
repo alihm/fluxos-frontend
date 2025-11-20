@@ -167,7 +167,13 @@ const seoTitle = computed(() => {
 const seoDescription = computed(() => {
   if (!game.value) return 'Deploy game servers on the decentralized Flux network. Affordable, reliable game hosting with instant deployment and DDoS protection.'
   const gameName = game.value.displayName || game.value.name
-  return game.value.detailHeaderText || game.value.description || `Deploy ${gameName} servers on the decentralized Flux network. Affordable, reliable game hosting with instant deployment and DDoS protection.`
+  let desc = game.value.detailHeaderText || game.value.description || `Deploy ${gameName} servers on FluxCloud. Affordable, reliable hosting with instant deployment & DDoS protection.`
+
+  // Truncate to 155 characters for optimal SEO
+  if (desc.length > 155) {
+    desc = desc.substring(0, 152).trim() + '...'
+  }
+  return desc
 })
 
 const seoImage = computed(() => {

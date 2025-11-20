@@ -477,7 +477,7 @@ useHead({
   meta: [
     {
       name: 'description',
-      content: 'Deploy WordPress websites on the decentralized FluxCloud network. Choose from multiple performance plans with MySQL, SSL, and automatic backups. Affordable pricing starting from $25/month.',
+      content: 'Deploy WordPress on decentralized FluxCloud. Multiple performance plans with MySQL, SSL, automatic backups. Affordable pricing starting at $25/month.',
     },
 
     // Open Graph
