@@ -21,7 +21,8 @@
           </div>
         </div>
       </div>
-      <div class="slider-controls">
+      <!-- Slider controls hidden -->
+      <div class="slider-controls" style="display: none;">
         <VBtn
           icon="mdi-chevron-left"
           variant="text"
@@ -129,7 +130,7 @@ const infiniteScreenshots = computed(() => {
 const panelStyle = computed(() => ({
   padding: props.panel.padding ?
     `${props.panel.padding.top}px ${props.panel.padding.right}px ${props.panel.padding.bottom}px ${props.panel.padding.left}px`
-    : '24px',
+    : '0',
 }))
 
 const prevSlide = () => {
@@ -236,7 +237,7 @@ onUnmounted(() => {
 .screenshots-slider {
   overflow: hidden;
   border-radius: 16px;
-  margin-bottom: 16px;
+  margin-bottom: 0;
 }
 
 .screenshots-track {

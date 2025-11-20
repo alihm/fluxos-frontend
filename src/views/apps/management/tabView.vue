@@ -1,6 +1,6 @@
 <template>
   <div class="myapps-table-wrapper">
-    <VCard class="pa-4">
+    <VCard class="pa-4 myapps-table-card">
       <VRow>
         <VCol cols="4">
           <VSelect
@@ -1060,6 +1060,13 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
+/* Table card styling to match intro cards */
+.myapps-table-card {
+  border-radius: 16px !important;
+  border: 1px solid rgba(var(--v-theme-on-surface), 0.12) !important;
+  box-shadow: none !important;
+}
+
 .text-center {
   text-align: center;
 }

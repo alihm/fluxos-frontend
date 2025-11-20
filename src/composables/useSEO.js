@@ -4,6 +4,7 @@
  */
 
 import { useHead } from '@vueuse/head'
+import { computed } from 'vue'
 
 /**
  * Generate comprehensive SEO meta tags using useHead
@@ -79,21 +80,25 @@ export function useSEO(options) {
     { rel: 'canonical', href: url },
   ]
 
-  // Generate structured data scripts
-  const scripts = structuredData.length > 0
-    ? [
-      {
-        type: 'application/ld+json',
-        children: JSON.stringify(structuredData),
-      },
-    ]
-    : []
+  // Generate structured data scripts (reactive computed)
+  // Handle both raw arrays and computed refs - wrap in computed for reactivity
+  const scripts = computed(() => {
+    const data = structuredData?.value !== undefined ? structuredData.value : structuredData
+    return data && data.length > 0
+      ? [
+        {
+          type: 'application/ld+json',
+          children: JSON.stringify(data),
+        },
+      ]
+      : []
+  })
 
   useHead({
     title,
     meta: [...defaultMeta, ...meta],
     link: [...defaultLink, ...link],
-    script: scripts,
+    script: scripts, // Pass computed ref so useHead can track changes
   })
 }
 

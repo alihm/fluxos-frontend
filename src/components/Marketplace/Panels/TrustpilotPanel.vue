@@ -1,6 +1,6 @@
 <template>
   <VCard class="section-card trustpilot-section" :class="{ 'ma-4': addMargin }">
-    <VCardText class="pa-8">
+    <VCardText class="pa-6">
       <div class="trustpilot-header text-center mb-6">
         <h2 class="text-h4 mb-3 font-weight-bold">{{ t('common.trustpilot.title') }}</h2>
         <a
@@ -185,6 +185,7 @@ const hasHalfStar = computed(() => displayRating.value % 1 !== 0)
 
 <style scoped>
 .trustpilot-section {
+  border-radius: 16px !important;
   background: linear-gradient(135deg, rgba(0, 182, 122, 0.05) 0%, rgba(0, 182, 122, 0.02) 100%);
 }
 

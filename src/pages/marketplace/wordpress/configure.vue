@@ -591,6 +591,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
+import { useSEONoIndex } from '@/composables/useSEO'
 import { useFluxStore } from '@/stores/flux'
 import { storeToRefs } from 'pinia'
 import { useWordPress } from '@/composables/useWordPress'
@@ -598,6 +599,9 @@ import AppsService from '@/services/AppsService'
 import LoadingSpinner from '@/components/Marketplace/LoadingSpinner.vue'
 import MaintenanceCard from '@/components/Marketplace/MaintenanceCard.vue'
 import InstallDialog from '@/components/Marketplace/InstallDialog.vue'
+
+// Prevent indexing of WordPress configuration/payment workflow
+useSEONoIndex()
 
 const { t, locale, te } = useI18n()
 const route = useRoute()

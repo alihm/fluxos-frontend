@@ -80,7 +80,7 @@ const handleInstall = data => {
 
 <style scoped>
 .group-card {
-  margin-bottom: 24px;
+  margin-bottom: 0;
 }
 
 .group-background {

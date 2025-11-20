@@ -33,7 +33,7 @@
       <div v-if="game.panels && game.panels.length" class="panels-container">
         <PanelRenderer
           v-for="(panel, index) in orderedPanels"
-          :key="index"
+          :key="`${game.name}-${panel.type}-${index}`"
           :panel="panel"
           :app="game"
           @install="handleInstall"
@@ -90,7 +90,7 @@
       </div>
 
       <!-- Trustpilot Reviews Section -->
-      <TrustpilotPanel v-if="game" :stars="4.5" :star-size="32" :show-rating-label="true" :add-margin="true" />
+      <TrustpilotPanel v-if="game" :use-live-data="true" :star-size="32" :show-rating-label="true" />
     </div>
 
     <!-- Install Dialog -->
@@ -109,10 +109,9 @@
 import { ref, computed, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
-import { useHead } from '@vueuse/head'
+import { useSEO, generateSoftwareApplicationSchema, generateBreadcrumbSchema } from '@/composables/useSEO'
 import { useMarketplace } from '@/composables/useMarketplace'
 import { useGameUtils } from '@/composables/useGameUtils'
-import { generateSoftwareApplicationSchema } from '@/composables/useSEO'
 import LoadingSpinner from '@/components/Marketplace/LoadingSpinner.vue'
 import PanelRenderer from '@/components/Marketplace/PanelRenderer.vue'
 import AppConfigCard from '@/components/Marketplace/AppConfigCard.vue'
@@ -158,18 +157,44 @@ const orderedPanels = computed(() => {
   })
 })
 
-// Dynamic SEO meta tags and structured data
-watch(game, newGame => {
-  if (!newGame) return
+// Dynamic SEO meta tags and structured data using computed
+const seoTitle = computed(() => {
+  if (!game.value) return 'FluxPlay - Game Server Hosting'
+  const gameName = game.value.displayName || game.value.name
+  return `${gameName} Server Hosting - FluxPlay on Flux Network`
+})
 
-  const gameName = newGame.displayName || newGame.name
-  const description = newGame.detailHeaderText || newGame.description || `Deploy ${gameName} servers on the decentralized Flux network. Affordable, reliable game hosting with instant deployment and DDoS protection.`
-  const pageUrl = `https://home.runonflux.io/marketplace/games/${route.params.name}`
-  const imageUrl = gameIcon.value || 'https://home.runonflux.io/images/games/FluxPlay_white.svg'
+const seoDescription = computed(() => {
+  if (!game.value) return 'Deploy game servers on the decentralized Flux network. Affordable, reliable game hosting with instant deployment and DDoS protection.'
+  const gameName = game.value.displayName || game.value.name
+  return game.value.detailHeaderText || game.value.description || `Deploy ${gameName} servers on the decentralized Flux network. Affordable, reliable game hosting with instant deployment and DDoS protection.`
+})
+
+const seoImage = computed(() => {
+  if (!game.value) return 'https://home.runonflux.io/images/games/FluxPlay_white.svg'
+  return gameIcon.value || 'https://home.runonflux.io/images/games/FluxPlay_white.svg'
+})
+
+const seoUrl = computed(() => `https://home.runonflux.io/marketplace/games/${route.params.name}`)
+
+const seoKeywords = computed(() => {
+  if (!game.value) return 'game server hosting, decentralized hosting, flux network, affordable game hosting'
+  const gameName = game.value.displayName || game.value.name
+  return `${gameName} hosting, ${gameName} server, game server hosting, decentralized hosting, flux network, affordable game hosting`
+})
+
+// Structured data as computed refs
+const structuredData = computed(() => {
+  if (!game.value) return []
+
+  const gameName = game.value.displayName || game.value.name
+  const description = seoDescription.value
+  const pageUrl = seoUrl.value
+  const imageUrl = seoImage.value
   const price = minPrice.value
 
   // Build FAQ structured data if FAQ panel exists
-  const faqPanel = newGame.panels?.find(p => p.type === 'FAQ' && p.enabled)
+  const faqPanel = game.value.panels?.find(p => p.type === 'FAQ' && p.enabled)
   let faqStructuredData = null
 
   if (faqPanel?.questions) {
@@ -230,78 +255,30 @@ watch(game, newGame => {
   })
 
   // Breadcrumb structured data
-  const breadcrumbStructuredData = {
-    '@context': 'https://schema.org',
-    '@type': 'BreadcrumbList',
-    'itemListElement': [
-      {
-        '@type': 'ListItem',
-        'position': 1,
-        'name': 'Home',
-        'item': 'https://home.runonflux.io',
-      },
-      {
-        '@type': 'ListItem',
-        'position': 2,
-        'name': 'Games',
-        'item': 'https://home.runonflux.io/marketplace/games',
-      },
-      {
-        '@type': 'ListItem',
-        'position': 3,
-        'name': gameName,
-        'item': pageUrl,
-      },
-    ],
-  }
+  const breadcrumbStructuredData = generateBreadcrumbSchema([
+    { name: 'Home', url: 'https://home.runonflux.io' },
+    { name: 'Games', url: 'https://home.runonflux.io/marketplace/games' },
+    { name: gameName, url: pageUrl },
+  ])
 
   // Combine structured data
-  const structuredData = [productStructuredData, breadcrumbStructuredData]
+  const schemas = [productStructuredData, breadcrumbStructuredData]
   if (faqStructuredData) {
-    structuredData.push({ '@context': 'https://schema.org', ...faqStructuredData })
+    schemas.push({ '@context': 'https://schema.org', ...faqStructuredData })
   }
 
-  useHead({
-    title: `${gameName} Server Hosting - FluxPlay on Flux Network`,
-    meta: [
-      {
-        name: 'description',
-        content: description.substring(0, 160), // Limit to 160 chars for SEO
-      },
-      {
-        name: 'keywords',
-        content: `${gameName} hosting, ${gameName} server, game server hosting, decentralized hosting, flux network, affordable game hosting`,
-      },
+  return schemas
+})
 
-      // Open Graph
-      { property: 'og:title', content: `${gameName} Server Hosting - FluxPlay` },
-      { property: 'og:description', content: description.substring(0, 160) },
-      { property: 'og:image', content: imageUrl },
-      { property: 'og:url', content: pageUrl },
-      { property: 'og:type', content: 'product' },
-      { property: 'og:site_name', content: 'FluxPlay' },
-
-      // Twitter Card
-      { name: 'twitter:card', content: 'summary_large_image' },
-      { name: 'twitter:title', content: `${gameName} Server Hosting - FluxPlay` },
-      { name: 'twitter:description', content: description.substring(0, 160) },
-      { name: 'twitter:image', content: imageUrl },
-
-      // Additional SEO
-      { name: 'robots', content: 'index, follow' },
-      { name: 'author', content: 'Flux Network' },
-    ],
-    link: [
-      { rel: 'canonical', href: pageUrl },
-    ],
-    script: [
-      {
-        type: 'application/ld+json',
-        children: JSON.stringify(structuredData),
-      },
-    ],
-  })
-}, { immediate: true })
+// Apply SEO using useSEO composable (called once during setup, handles reactivity)
+useSEO({
+  title: seoTitle,
+  description: seoDescription,
+  url: seoUrl,
+  image: seoImage,
+  keywords: seoKeywords,
+  structuredData, // Computed ref - useSEO will handle reactivity
+})
 
 const loadGameDetails = async () => {
   loading.value = true
@@ -477,7 +454,7 @@ onMounted(loadGameDetails)
 
 <style scoped>
 .game-details-container {
-  padding: 0 24px 0 24px;
+  padding: 0;
   max-width: 1400px;
   margin: -16px auto 0 auto;
   min-height: calc(100vh - 100px);
@@ -517,7 +494,7 @@ onMounted(loadGameDetails)
 .panels-container {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 24px;
   padding-top: 20px;
 }
 
@@ -576,6 +553,10 @@ onMounted(loadGameDetails)
 }
 
 /* Trustpilot Section */
+.trustpilot-section {
+  margin-top: 24px;
+}
+
 .trustpilot-link {
   text-decoration: none;
   color: inherit;
@@ -605,7 +586,7 @@ onMounted(loadGameDetails)
 
 @media (max-width: 600px) {
   .game-details-container {
-    padding: 16px;
+    padding: 0;
   }
 
   .game-header {

@@ -1,9 +1,7 @@
 <template>
   <VCard :class="['benefits-grid-card', { 'has-background': backgroundColor }]" :elevation="elevation">
-    <VCardTitle v-if="resolvedTitle" class="benefits-title">
-      {{ resolvedTitle }}
-    </VCardTitle>
     <VCardText :style="containerStyle">
+      <h2 v-if="resolvedTitle" class="benefits-title">{{ resolvedTitle }}</h2>
       <p v-if="resolvedSubtitle" class="benefits-subtitle">{{ resolvedSubtitle }}</p>
 
       <div class="benefits-list" :style="gridStyle">
@@ -12,8 +10,17 @@
           :key="index"
           class="benefit-item"
         >
-          <VIcon :icon="item.icon || 'mdi-check-circle'" :size="iconSize" :color="item.color || iconColor" />
-          <span class="benefit-text">{{ item.text }}</span>
+          <div
+            class="benefit-icon"
+            :style="{
+              background: `rgba(var(--v-theme-${item.color || iconColor}), 0.1)`
+            }"
+          >
+            <VIcon :icon="item.icon || 'mdi-check-circle'" :size="iconSize" :color="item.color || iconColor" />
+          </div>
+          <div class="benefit-text-container">
+            <span class="benefit-text">{{ item.text }}</span>
+          </div>
         </div>
       </div>
     </VCardText>
@@ -48,7 +55,7 @@ const props = defineProps({
   },
   iconSize: {
     type: Number,
-    default: 24,
+    default: 22,
   },
   iconColor: {
     type: String,
@@ -174,9 +181,13 @@ const gridStyle = computed(() => ({
 <style scoped>
 .benefits-grid-card {
   border-radius: 16px;
-  background: rgba(var(--v-theme-surface), 0.6);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(var(--v-theme-primary), 0.15);
+  background: rgb(var(--v-theme-surface));
+  border: 1px solid rgba(var(--v-theme-on-surface), 0.12);
+  margin-bottom: 2rem;
+}
+
+.benefits-grid-card :deep(.v-card-text) {
+  padding: 24px !important;
 }
 
 .benefits-grid-card.has-background {
@@ -184,11 +195,13 @@ const gridStyle = computed(() => ({
 }
 
 .benefits-title {
-  font-size: 2rem;
+  font-size: 28px;
   font-weight: 700;
-  padding: 24px 24px 8px 24px;
+  margin-top: 0;
+  margin-bottom: 16px;
   text-align: center;
-  color: rgb(var(--v-theme-primary));
+  color: rgb(var(--v-theme-on-surface));
+  line-height: 1.3;
 }
 
 .benefits-subtitle {
@@ -196,7 +209,10 @@ const gridStyle = computed(() => ({
   text-align: center;
   margin-bottom: 32px;
   opacity: 0.9;
-  line-height: 1.6;
+  line-height: 1.8;
+  max-width: 900px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .benefits-list {
@@ -207,32 +223,48 @@ const gridStyle = computed(() => ({
 
 .benefit-item {
   display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 12px;
-  background: rgba(var(--v-theme-surface), 0.4);
+  gap: 16px;
+  padding: 16px;
+  background: rgba(var(--v-theme-on-surface), 0.02);
   border-radius: 12px;
+  border: 1px solid rgba(var(--v-theme-on-surface), 0.08);
   transition: all 0.3s ease;
-  border: 1px solid rgba(var(--v-theme-primary), 0.05);
 }
 
 .benefit-item:hover {
-  background: rgba(var(--v-theme-surface), 0.6);
-  border-color: rgba(var(--v-theme-primary), 0.2);
+  background: rgba(var(--v-theme-on-surface), 0.04);
+  border-color: rgba(var(--v-theme-on-surface), 0.16);
   transform: translateX(4px);
 }
 
+.benefit-icon {
+  flex-shrink: 0;
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+}
+
+.benefit-text-container {
+  flex: 1;
+  display: flex;
+  align-items: center;
+}
+
 .benefit-text {
-  font-size: 0.9375rem;
-  line-height: 1.5;
+  font-size: 0.95rem;
+  font-weight: 500;
+  line-height: 1.6;
   color: rgb(var(--v-theme-on-surface));
+  opacity: 0.85;
 }
 
 /* Responsive adjustments */
 @media (max-width: 960px) {
   .benefits-list {
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)) !important;
-    gap: 12px;
+    grid-template-columns: 1fr !important;
   }
 
   .benefits-title {
@@ -241,35 +273,53 @@ const gridStyle = computed(() => ({
 
   .benefits-subtitle {
     font-size: 1rem;
-    margin-bottom: 24px;
   }
 
-  .benefit-item {
-    padding: 10px;
+  .benefit-text {
+    font-size: 0.9375rem;
   }
 }
 
 @media (max-width: 600px) {
-  .benefits-list {
-    grid-template-columns: 1fr !important;
-  }
-
   .benefits-title {
     font-size: 1.5rem;
   }
 
   .benefits-subtitle {
     font-size: 0.9375rem;
-    margin-bottom: 20px;
   }
 
   .benefit-item {
-    padding: 8px;
-    gap: 10px;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    gap: 12px;
+    padding: 16px;
+    align-items: center;
+  }
+
+  .benefit-icon {
+    width: 40px;
+    height: 40px;
+    margin-bottom: 0;
+    flex-shrink: 0;
+  }
+
+  .benefit-icon :deep(.v-icon) {
+    font-size: 24px !important;
+  }
+
+  .benefit-text-container {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    min-width: 0;
   }
 
   .benefit-text {
     font-size: 0.875rem;
+    text-align: left;
+    line-height: 1.5;
+    width: 100%;
   }
 }
 </style>

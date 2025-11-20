@@ -203,36 +203,41 @@ const sanitizeAnswer = answer => {
 const panelStyle = computed(() => ({
   padding: props.panel.padding
     ? `${props.panel.padding.top}px ${props.panel.padding.right}px ${props.panel.padding.bottom}px ${props.panel.padding.left}px`
-    : '8px 24px',
+    : '0',
   background: props.panel.background || 'transparent',
   borderRadius: props.panel.cornerRadius ? `${props.panel.cornerRadius}px` : '0',
-  marginBottom: '15px',
 }))
 </script>
 
 <style scoped>
 .faq-panel {
-  margin-bottom: 8px;
+  margin-bottom: 0;
 }
 
 .faq-card {
   border-radius: 16px;
-  background: rgba(var(--v-theme-surface), 0.6);
-  backdrop-filter: blur(10px);
+  background: rgb(var(--v-theme-surface));
+  border: 1px solid rgba(var(--v-theme-on-surface), 0.12);
+}
+
+.faq-card :deep(.v-card-text) {
+  padding: 24px !important;
 }
 
 .faq-title {
-  font-size: 2rem;
+  font-size: 28px;
   font-weight: 700;
-  margin-bottom: 12px;
+  margin-top: 0.5rem;
+  margin-bottom: 0;
   text-align: center;
-  color: rgb(var(--v-theme-primary));
+  color: rgb(var(--v-theme-on-surface));
+  line-height: 1.3;
 }
 
 .faq-subtitle {
   font-size: 1.125rem;
   text-align: center;
-  margin-bottom: 32px;
+  margin-bottom: 16px;
   opacity: 0.9;
   line-height: 1.6;
 }
@@ -245,8 +250,8 @@ const panelStyle = computed(() => ({
   margin-bottom: 12px;
   border-radius: 12px !important;
   overflow: hidden;
-  background: rgba(var(--v-theme-surface), 0.8) !important;
-  border: 1px solid rgba(var(--v-theme-primary), 0.1);
+  background: rgba(var(--v-theme-on-surface), 0.05) !important;
+  border: 1px solid rgba(var(--v-theme-on-surface), 0.2);
   transition: all 0.3s ease;
 }
 
@@ -300,21 +305,30 @@ const panelStyle = computed(() => ({
 
 .faq-answer :deep(strong) {
   font-weight: 600;
-  color: rgb(var(--v-theme-primary));
+  color: rgb(var(--v-theme-on-surface));
 }
 
-.faq-answer :deep(ul),
+.faq-answer :deep(ul) {
+  list-style-type: disc;
+  margin-left: 0;
+  padding-left: 24px;
+  margin-bottom: 12px;
+}
+
 .faq-answer :deep(ol) {
-  margin-left: 24px;
+  list-style-type: decimal;
+  margin-left: 0;
+  padding-left: 24px;
   margin-bottom: 12px;
 }
 
 .faq-answer :deep(li) {
   margin-bottom: 8px;
+  padding-left: 4px;
 }
 
 .faq-answer :deep(a) {
-  color: rgb(var(--v-theme-primary));
+  color: rgb(var(--v-theme-on-surface));
   text-decoration: none;
 }
 
@@ -351,7 +365,7 @@ const panelStyle = computed(() => ({
 
 @media (max-width: 600px) {
   .faq-panel {
-    padding: 8px 16px !important;
+    padding: 0 !important;
   }
 
   .faq-title {

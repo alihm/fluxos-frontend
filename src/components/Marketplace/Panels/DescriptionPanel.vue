@@ -191,29 +191,34 @@ const sanitizeHtml = html => {
 const panelStyle = computed(() => ({
   padding: props.panel.padding
     ? `${props.panel.padding.top}px ${props.panel.padding.right}px ${props.panel.padding.bottom}px ${props.panel.padding.left}px`
-    : '8px 24px',
+    : '0',
   background: props.panel.background || 'transparent',
   borderRadius: props.panel.cornerRadius ? `${props.panel.cornerRadius}px` : '0',
-  marginBottom: '15px',
 }))
 </script>
 
 <style scoped>
 .description-panel {
-  margin-bottom: 8px;
+  margin-bottom: 0;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
 }
 
 .description-card {
-  border-radius: 16px;
-  background: rgba(var(--v-theme-surface), 0.6);
-  backdrop-filter: blur(10px);
+  border-radius: 16px !important;
+  border: 1px solid rgba(var(--v-theme-on-surface), 0.12) !important;
+  box-shadow: none !important;
+  background: rgb(var(--v-theme-surface)) !important;
 }
 
 .section-title {
-  font-size: 2rem;
+  font-size: 28px;
   font-weight: 700;
-  margin-bottom: 24px;
-  color: rgb(var(--v-theme-primary));
+  margin-top: 0.5rem;
+  margin-bottom: 1rem;
+  text-align: center;
+  color: rgb(var(--v-theme-on-surface));
+  line-height: 1.3;
 }
 
 .main-description {
@@ -232,11 +237,11 @@ const panelStyle = computed(() => ({
 
 .description-content :deep(strong) {
   font-weight: 600;
-  color: rgb(var(--v-theme-primary));
+  color: rgb(var(--v-theme-on-surface));
 }
 
 .description-content :deep(a) {
-  color: rgb(var(--v-theme-primary));
+  color: rgb(var(--v-theme-on-surface));
   text-decoration: none;
 }
 
@@ -258,33 +263,36 @@ const panelStyle = computed(() => ({
 
 .highlights-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 16px;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
 }
 
 .highlight-item {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 12px 16px;
-  background: rgba(var(--v-theme-primary), 0.05);
-  border-radius: 12px;
-  transition: all 0.3s ease;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  text-align: center !important;
+  padding: 1.5rem !important;
+  background: rgba(var(--v-theme-on-surface), 0.04) !important;
+  border-radius: 12px !important;
+  border: 1px solid rgba(var(--v-theme-on-surface), 0.12) !important;
+  transition: transform 0.3s, box-shadow 0.3s !important;
 }
 
 .highlight-item:hover {
-  background: rgba(var(--v-theme-primary), 0.1);
-  transform: translateX(4px);
+  transform: translateY(-4px) !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12) !important;
+  border-color: rgba(var(--v-theme-on-surface), 0.24) !important;
 }
 
 .highlight-icon {
-  flex-shrink: 0;
+  margin-bottom: 1rem !important;
 }
 
 .highlight-text {
-  font-size: 1rem;
-  line-height: 1.5;
-  font-weight: 500;
+  font-size: 0.875rem !important;
+  line-height: 1.5 !important;
+  opacity: 0.8 !important;
 }
 
 .additional-sections {
@@ -350,10 +358,6 @@ const panelStyle = computed(() => ({
 }
 
 @media (max-width: 600px) {
-  .description-panel {
-    padding: 8px 16px !important;
-  }
-
   .section-title {
     font-size: 1.5rem;
     margin-bottom: 16px;

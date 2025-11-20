@@ -50,10 +50,11 @@ window.addEventListener('load', () => {
 // Create vue app
 const app = createApp(App)
 
-// Create and install head management
+// Create and install head management (must be before registerPlugins)
 const head = createHead()
 app.use(head)
 
+// Register other plugins
 registerPlugins(app)
 app.directive('sanitize-html', sanitizeHtml)
 

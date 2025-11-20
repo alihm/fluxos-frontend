@@ -11,9 +11,62 @@ const { t } = useI18n()
 
 // SEO meta tags
 const title = 'FluxCloud - Decentralized Web3 Cloud Infrastructure'
-const description = 'Deploy applications on FluxCloud\'s decentralized Web3 infrastructure. Host games, WordPress sites, and custom apps on a network of 8,000+ FluxNodes worldwide. Starting at $0.99/month.'
+const description = 'Deploy apps on FluxCloud\'s decentralized Web3 infrastructure. Host games, WordPress, custom apps on 8,000+ FluxNodes worldwide. From $0.99/month.'
 const pageUrl = 'https://home.runonflux.io/'
-const imageUrl = 'https://home.runonflux.io/images/logo.png'
+const imageUrl = 'https://home.runonflux.io/logo.png'
+
+// Structured data schemas
+const structuredData = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'Organization',
+    name: 'Flux Network',
+    url: 'https://home.runonflux.io',
+    logo: 'https://home.runonflux.io/logo.png',
+    description: 'Decentralized Web3 cloud infrastructure powered by FluxNodes worldwide',
+    sameAs: [
+      'https://twitter.com/RunOnFlux',
+      'https://github.com/RunOnFlux',
+    ],
+  },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
+    name: 'FluxCloud',
+    url: 'https://home.runonflux.io',
+    description: description,
+    publisher: {
+      '@type': 'Organization',
+      name: 'Flux Network',
+      logo: {
+        '@type': 'ImageObject',
+        url: 'https://home.runonflux.io/logo.png',
+      },
+    },
+  },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'Service',
+    serviceType: 'Cloud Hosting',
+    provider: {
+      '@type': 'Organization',
+      name: 'Flux Network',
+    },
+    areaServed: 'Worldwide',
+    description: 'Decentralized cloud hosting for games, WordPress, and custom applications',
+    offers: {
+      '@type': 'Offer',
+      price: '0.99',
+      priceCurrency: 'USD',
+      priceSpecification: {
+        '@type': 'UnitPriceSpecification',
+        price: '0.99',
+        priceCurrency: 'USD',
+        unitText: 'monthly',
+      },
+    },
+  },
+]
 
 useHead({
   title,
@@ -40,6 +93,12 @@ useHead({
   ],
   link: [
     { rel: 'canonical', href: pageUrl },
+  ],
+  script: [
+    {
+      type: 'application/ld+json',
+      children: JSON.stringify(structuredData),
+    },
   ],
 })
 

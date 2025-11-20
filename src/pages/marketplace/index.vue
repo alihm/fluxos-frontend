@@ -184,7 +184,7 @@ const {
 const pageUrl = 'https://home.runonflux.io/marketplace'
 const title = 'Marketplace - Deploy Decentralized Apps on Flux | FluxCloud'
 const description = 'Browse and deploy decentralized applications on Flux\'s Web3 cloud infrastructure. Discover Docker containers, web apps, APIs, and services running on 8,000+ FluxNodes worldwide. One-click deployment with transparent pricing.'
-const imageUrl = 'https://home.runonflux.io/images/logo.png'
+const imageUrl = 'https://home.runonflux.io/logo.png'
 
 // Generate structured data
 const organizationSchema = generateOrganizationSchema()
@@ -207,28 +207,21 @@ const itemListSchema = computed(() => {
   return generateItemListSchema(topApps, 'FluxCloud Marketplace Applications')
 })
 
-// Watch for apps changes and update SEO
-watch(itemListSchema, newSchema => {
-  if (newSchema) {
-    useSEO({
-      title,
-      description,
-      url: pageUrl,
-      image: imageUrl,
-      keywords: 'decentralized marketplace, Web3 apps, docker hosting, decentralized cloud, blockchain apps, flux marketplace, deploy applications, container hosting, API hosting, microservices, flux apps, one-click deployment',
-      structuredData: [organizationSchema, breadcrumbSchema, newSchema],
-    })
-  }
-}, { immediate: false })
+// Create reactive structured data that updates when itemListSchema changes
+const structuredData = computed(() => {
+  const baseSchemas = [organizationSchema, breadcrumbSchema]
+  return itemListSchema.value ? [...baseSchemas, itemListSchema.value] : baseSchemas
+})
 
-// Initial SEO (before apps are loaded)
+// SEO setup with reactive structured data (called once during setup)
+// useHead accepts reactive values, so this will update automatically when structuredData changes
 useSEO({
   title,
   description,
   url: pageUrl,
   image: imageUrl,
   keywords: 'decentralized marketplace, Web3 apps, docker hosting, decentralized cloud, blockchain apps, flux marketplace, deploy applications, container hosting, API hosting, microservices, flux apps, one-click deployment',
-  structuredData: [organizationSchema, breadcrumbSchema],
+  structuredData, // This is a computed ref that updates when apps load
 })
 
 // Responsive breakpoints (matching FluxCloud)

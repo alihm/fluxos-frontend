@@ -295,57 +295,52 @@
       </div>
 
       <!-- Why Host on Flux Cloud Section -->
-      <div class="info-section why-flux-section">
-        <FeatureShowcase
-          :title="t('pages.marketplace.common.whyFlux.title')"
-          :subtitle="t('pages.marketplace.common.whyFlux.subtitle')"
-          items="i18n:pages.marketplace.common.whyFlux.benefits"
-          icon-size="24"
-        />
-      </div>
+      <FeatureShowcase
+        :title="t('pages.marketplace.common.whyFlux.title')"
+        :subtitle="t('pages.marketplace.common.whyFlux.subtitle')"
+        items="i18n:pages.marketplace.common.whyFlux.benefits"
+        :icon-size="40"
+        class="why-flux-section"
+      />
 
       <!-- Trustpilot Reviews Section -->
-      <div class="info-section">
-        <TrustpilotPanel :stars="4.5" :star-size="32" :show-rating-label="true" />
+      <div class="trustpilot-wrapper">
+        <TrustpilotPanel :use-live-data="true" :star-size="32" :show-rating-label="true" />
       </div>
 
       <!-- Global Server Network Section -->
-      <div class="info-section network-section">
-        <ServerLocationsPanel
-          :panel="serverLocationsPanel"
-          :app="app"
-        />
-      </div>
+      <ServerLocationsPanel
+        :panel="serverLocationsPanel"
+        :app="app"
+        class="network-section"
+      />
 
       <!-- Frequently Asked Questions Section -->
-      <div class="info-section faq-section">
-        <div class="section-title-modern">
-          <VAvatar size="32" class="section-title-avatar faq-avatar">
-            <VIcon icon="mdi-help-circle" size="18" color="white" />
-          </VAvatar>
-          <span class="section-title-text">{{ t('pages.marketplace.common.genericFAQ.title') }}</span>
-        </div>
-        <p class="section-subtitle">{{ t('pages.marketplace.common.genericFAQ.subtitle') }}</p>
+      <VCard class="faq-section">
+        <VCardText class="pa-6">
+          <h2 class="faq-title">{{ t('pages.marketplace.common.genericFAQ.title') }}</h2>
+          <p class="faq-subtitle">{{ t('pages.marketplace.common.genericFAQ.subtitle') }}</p>
 
-        <VExpansionPanels class="faq-expansion-panels" multiple>
-          <VExpansionPanel
-            v-for="(faq, index) in genericFAQs"
-            :key="index"
-            class="faq-expansion-panel"
-            elevation="0"
-          >
-            <VExpansionPanelTitle class="faq-question">
-              <div class="question-wrapper">
-                <VIcon icon="mdi-help-circle" size="24" color="primary" class="question-icon" />
-                <h3 class="question-text">{{ faq.q }}</h3>
-              </div>
-            </VExpansionPanelTitle>
-            <VExpansionPanelText class="faq-answer">
-              <div v-html="sanitizeAnswer(faq.a)"></div>
-            </VExpansionPanelText>
-          </VExpansionPanel>
-        </VExpansionPanels>
-      </div>
+          <VExpansionPanels class="faq-expansion-panels" multiple>
+            <VExpansionPanel
+              v-for="(faq, index) in genericFAQs"
+              :key="index"
+              class="faq-expansion-panel"
+              elevation="0"
+            >
+              <VExpansionPanelTitle class="faq-question">
+                <div class="question-wrapper">
+                  <VIcon icon="mdi-help-circle" size="24" color="primary" class="question-icon" />
+                  <h3 class="question-text">{{ faq.q }}</h3>
+                </div>
+              </VExpansionPanelTitle>
+              <VExpansionPanelText class="faq-answer">
+                <div v-html="sanitizeAnswer(faq.a)"></div>
+              </VExpansionPanelText>
+            </VExpansionPanel>
+          </VExpansionPanels>
+        </VCardText>
+      </VCard>
     </div>
 
     <!-- Image Viewer Dialog -->
@@ -391,7 +386,7 @@
 import { ref, onMounted, computed, watch, nextTick } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
-import { useHead } from '@vueuse/head'
+import { useSEO, generateBreadcrumbSchema } from '@/composables/useSEO'
 import DOMPurify from 'dompurify'
 import { useMarketplace } from '@/composables/useMarketplace'
 import LoadingSpinner from '@/components/Marketplace/LoadingSpinner.vue'
@@ -697,21 +692,41 @@ const loadAppDetails = async () => {
 // Watch for route changes (immediate: true handles initial load)
 watch(() => route.params.id, loadAppDetails, { immediate: true })
 
-// Dynamic SEO meta tags and structured data
-watch(app, newApp => {
-  if (!newApp) return
+// Dynamic SEO meta tags and structured data using computed
+const seoTitle = computed(() => {
+  if (!app.value) return 'Flux Cloud Marketplace'
+  return `${app.value.displayName || app.value.name} - Flux Cloud Marketplace`
+})
 
-  const appTitle = `${newApp.displayName || newApp.name} - Flux Cloud Marketplace`
-  const appDescription = newApp.description || `Deploy ${newApp.displayName || newApp.name} on Flux Cloud. Decentralized cloud hosting with global infrastructure, 99.9% uptime, and affordable pricing.`
-  const appImage = newApp.icon || newApp.logo || 'https://home.runonflux.io/flux-logo.png'
-  const currentUrl = `https://home.runonflux.io/marketplace/${route.params.id}`
+const seoDescription = computed(() => {
+  if (!app.value) return 'Flux Cloud Marketplace - Decentralized cloud hosting'
+  return app.value.description || `Deploy ${app.value.displayName || app.value.name} on Flux Cloud. Decentralized cloud hosting with global infrastructure, 99.9% uptime, and affordable pricing.`
+})
 
-  // Build structured data
+const seoImage = computed(() => {
+  if (!app.value) return 'https://home.runonflux.io/flux-logo.png'
+  return app.value.icon || app.value.logo || 'https://home.runonflux.io/flux-logo.png'
+})
+
+const seoUrl = computed(() => `https://home.runonflux.io/marketplace/${route.params.id}`)
+
+const seoKeywords = computed(() => {
+  if (!app.value) return 'Flux, cloud hosting, decentralized hosting, Web3, blockchain hosting'
+  return `${app.value.displayName || app.value.name}, Flux, cloud hosting, decentralized hosting, Web3, blockchain hosting`
+})
+
+// Structured data as computed refs
+const structuredData = computed(() => {
+  if (!app.value) return []
+
+  const newApp = app.value
+
+  // Build SoftwareApplication schema
   const productStructuredData = {
     '@context': 'https://schema.org',
     '@type': 'SoftwareApplication',
     'name': newApp.displayName || newApp.name,
-    'description': appDescription,
+    'description': seoDescription.value,
     'applicationCategory': 'WebApplication',
     'operatingSystem': 'Web',
     'offers': {
@@ -719,7 +734,7 @@ watch(app, newApp => {
       'price': newApp.price || 0,
       'priceCurrency': 'USD',
       'availability': 'https://schema.org/InStock',
-      'url': currentUrl,
+      'url': seoUrl.value,
     },
     'provider': {
       '@type': 'Organization',
@@ -745,86 +760,44 @@ watch(app, newApp => {
     }
   }
 
-  // BreadcrumbList structured data
-  const breadcrumbStructuredData = {
-    '@context': 'https://schema.org',
-    '@type': 'BreadcrumbList',
-    'itemListElement': [
-      {
-        '@type': 'ListItem',
-        'position': 1,
-        'name': 'Home',
-        'item': 'https://home.runonflux.io',
-      },
-      {
-        '@type': 'ListItem',
-        'position': 2,
-        'name': 'Marketplace',
-        'item': 'https://home.runonflux.io/marketplace',
-      },
-      {
-        '@type': 'ListItem',
-        'position': 3,
-        'name': newApp.displayName || newApp.name,
-        'item': currentUrl,
-      },
-    ],
-  }
+  // Breadcrumb schema
+  const breadcrumbStructuredData = generateBreadcrumbSchema([
+    { name: 'Home', url: 'https://home.runonflux.io' },
+    { name: 'Marketplace', url: 'https://home.runonflux.io/marketplace' },
+    { name: newApp.displayName || newApp.name, url: seoUrl.value },
+  ])
 
-  // FAQPage structured data (genericFAQs already includes pricing question)
-  const faqStructuredData = {
-    '@type': 'FAQPage',
-    'mainEntity': genericFAQs.value.map(faq => ({
-      '@type': 'Question',
-      'name': faq.q,
-      'acceptedAnswer': {
-        '@type': 'Answer',
-        'text': faq.a.replace(/<[^>]*>/g, ''), // Strip HTML tags for structured data
-      },
-    })),
-  }
+  // FAQ schema (if FAQs exist)
+  const schemas = [productStructuredData, breadcrumbStructuredData]
 
-  const structuredData = [productStructuredData, breadcrumbStructuredData]
   if (genericFAQs.value.length > 0) {
-    structuredData.push({ '@context': 'https://schema.org', ...faqStructuredData })
+    const faqStructuredData = {
+      '@context': 'https://schema.org',
+      '@type': 'FAQPage',
+      'mainEntity': genericFAQs.value.map(faq => ({
+        '@type': 'Question',
+        'name': faq.q,
+        'acceptedAnswer': {
+          '@type': 'Answer',
+          'text': faq.a.replace(/<[^>]*>/g, ''), // Strip HTML tags for structured data
+        },
+      })),
+    }
+    schemas.push(faqStructuredData)
   }
 
-  useHead({
-    title: appTitle,
-    meta: [
-      { name: 'description', content: appDescription },
-      { name: 'keywords', content: `${newApp.displayName || newApp.name}, Flux, cloud hosting, decentralized hosting, Web3, blockchain hosting` },
+  return schemas
+})
 
-      // Open Graph
-      { property: 'og:title', content: appTitle },
-      { property: 'og:description', content: appDescription },
-      { property: 'og:image', content: appImage },
-      { property: 'og:url', content: currentUrl },
-      { property: 'og:type', content: 'website' },
-      { property: 'og:site_name', content: 'Flux' },
-
-      // Twitter Card
-      { name: 'twitter:card', content: 'summary_large_image' },
-      { name: 'twitter:site', content: '@RunOnFlux' },
-      { name: 'twitter:title', content: appTitle },
-      { name: 'twitter:description', content: appDescription },
-      { name: 'twitter:image', content: appImage },
-
-      // Additional meta
-      { name: 'author', content: newApp.developer || newApp.company || 'Flux' },
-      { name: 'robots', content: 'index, follow' },
-    ],
-    link: [
-      { rel: 'canonical', href: currentUrl },
-    ],
-    script: [
-      {
-        type: 'application/ld+json',
-        children: JSON.stringify(structuredData),
-      },
-    ],
-  })
-}, { immediate: true })
+// Apply SEO using useSEO composable (called once during setup, handles reactivity)
+useSEO({
+  title: seoTitle,
+  description: seoDescription,
+  url: seoUrl,
+  image: seoImage,
+  keywords: seoKeywords,
+  structuredData, // Computed ref - useSEO will handle reactivity
+})
 
 onMounted(() => {
   // Check if user came here with install intent
@@ -837,7 +810,7 @@ onMounted(() => {
 
 <style scoped>
 .app-details-container {
-  padding: 0 20px 20px 20px;
+  padding: 0 0 20px 0;
   max-width: 1200px;
   margin: 0 auto !important;
   min-height: 100vh;
@@ -1819,7 +1792,7 @@ onMounted(() => {
 
 /* Modern Card Styling */
 .v-card {
-  border-radius: 24px !important;
+  border-radius: 16px !important;
   box-shadow:
     0 8px 32px rgba(0, 0, 0, 0.08),
     0 4px 16px rgba(0, 0, 0, 0.04),
@@ -1847,6 +1820,16 @@ onMounted(() => {
   pointer-events: none;
 }
 
+/* Disable transitions and ::before for Trustpilot section */
+.trustpilot-wrapper .v-card {
+  transition: none !important;
+}
+
+.trustpilot-wrapper .v-card::before {
+  content: none !important;
+  display: none !important;
+}
+
 .v-card:hover {
   box-shadow:
     0 12px 48px rgba(0, 0, 0, 0.15),
@@ -1854,6 +1837,11 @@ onMounted(() => {
     0 3px 12px rgba(0, 0, 0, 0.04),
     0 0 0 1px rgba(var(--v-theme-primary), 0.1) !important;
   transform: translateY(-4px) scale(1.01);
+}
+
+/* Disable hover transform for Trustpilot section */
+.trustpilot-wrapper .v-card:hover {
+  transform: none !important;
 }
 
 /* Avatar Styling */
@@ -1971,7 +1959,7 @@ onMounted(() => {
 /* Responsive Design */
 @media (max-width: 960px) {
   .app-details-container {
-    padding: 16px;
+    padding: 16px 0;
   }
 
   .screenshot-card:hover {
@@ -2113,6 +2101,11 @@ onMounted(() => {
   margin-top: 24px;
 }
 
+.network-section :deep(.v-card),
+.network-section :deep(.locations-card) {
+  border-radius: 16px !important;
+}
+
 .network-avatar {
   background: linear-gradient(135deg, rgb(var(--v-theme-info)) 0%, rgb(var(--v-theme-primary)) 100%) !important;
   box-shadow:
@@ -2189,7 +2182,12 @@ onMounted(() => {
 /* Why Flux Section */
 .why-flux-section {
   grid-column: 1 / -1;
-  margin-top: 32px;
+  margin-top: 24px;
+}
+
+.why-flux-section :deep(.v-card),
+.why-flux-section :deep(.feature-showcase) {
+  border-radius: 16px !important;
 }
 
 .section-subtitle {
@@ -2205,7 +2203,26 @@ onMounted(() => {
 /* FAQ Section */
 .faq-section {
   grid-column: 1 / -1;
-  margin-top: 32px;
+  margin-top: 24px;
+  border-radius: 16px !important;
+}
+
+.faq-title {
+  font-size: 28px;
+  font-weight: 700;
+  margin-top: 0.5rem;
+  margin-bottom: 0;
+  text-align: center;
+  color: rgb(var(--v-theme-on-surface));
+  line-height: 1.3;
+}
+
+.faq-subtitle {
+  font-size: 1.125rem;
+  text-align: center;
+  margin-bottom: 16px;
+  opacity: 0.9;
+  line-height: 1.6;
 }
 
 .faq-expansion-panels {
@@ -2271,21 +2288,30 @@ onMounted(() => {
 
 .faq-answer :deep(strong) {
   font-weight: 600;
-  color: rgb(var(--v-theme-primary));
+  color: rgb(var(--v-theme-on-surface));
 }
 
-.faq-answer :deep(ul),
+.faq-answer :deep(ul) {
+  list-style-type: disc;
+  margin-left: 0;
+  padding-left: 24px;
+  margin-bottom: 12px;
+}
+
 .faq-answer :deep(ol) {
-  margin-left: 24px;
+  list-style-type: decimal;
+  margin-left: 0;
+  padding-left: 24px;
   margin-bottom: 12px;
 }
 
 .faq-answer :deep(li) {
   margin-bottom: 8px;
+  padding-left: 4px;
 }
 
 .faq-answer :deep(a) {
-  color: rgb(var(--v-theme-primary));
+  color: rgb(var(--v-theme-on-surface));
   text-decoration: none;
 }
 
@@ -2394,19 +2420,45 @@ onMounted(() => {
 }
 
 /* Trustpilot Section */
-.trustpilot-link {
+.trustpilot-wrapper {
+  margin-top: 24px;
+}
+
+.trustpilot-wrapper :deep(.section-card.trustpilot-section) {
+  border-radius: 16px !important;
+}
+
+.trustpilot-wrapper :deep(.section-card.trustpilot-section)::before {
+  display: none !important;
+  content: none !important;
+}
+
+.trustpilot-wrapper :deep(.section-card.trustpilot-section):hover {
+  transform: none !important;
+}
+
+.trustpilot-wrapper :deep(.trustpilot-link) {
   text-decoration: none;
   color: inherit;
   display: inline-block;
-  transition: all 0.3s ease;
 }
 
-.trustpilot-link:hover {
-  transform: translateY(-2px);
-  opacity: 0.9;
-}
-
-.trustpilot-link .trustpilot-rating-container {
+.trustpilot-wrapper :deep(.trustpilot-rating-container) {
   cursor: pointer;
+}
+
+</style>
+
+<style>
+/* Fix Trustpilot section backdrop-filter blur effect on hover */
+.trustpilot-wrapper .v-card,
+.trustpilot-wrapper .v-card * {
+  backdrop-filter: none !important;
+}
+
+/* Fix Why Flux section border-radius */
+.why-flux-section .v-card,
+.why-flux-section .feature-showcase {
+  border-radius: 16px !important;
 }
 </style>

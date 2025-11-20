@@ -1,23 +1,5 @@
 <template>
   <div class="fluxdrive-page">
-    <!-- Breadcrumb Navigation -->
-    <BreadcrumbNav
-      :items="[
-        { text: 'Home', to: '/' },
-        { text: 'FluxDrive' }
-      ]"
-    />
-
-    <!-- Hero Section -->
-    <HeroSection
-      :title="t('pages.fluxDrive.intro.title')"
-      :subtitle="t('pages.fluxDrive.intro.subtitle')"
-      background-image="/banner/FluxDrive2.png"
-      icon="mdi-cloud-upload"
-      icon-aria-label="FluxDrive Cloud Storage"
-      min-height="300px"
-    />
-
     <!-- Loading state while checking subscription -->
     <LoadingSpinner
       v-if="!subscriptionChecked"
@@ -26,39 +8,51 @@
       :title="t('pages.fluxDrive.loading')"
     />
 
-    <!-- Show pricing plans only for users who have never had a subscription -->
-    <div v-if="!hasOrHadSubscription">
-      <PricingPlans @selectPlan="(planId, actionType) => handlePlanSelection(planId, actionType)"
+    <!-- Content - only show after subscription check is complete -->
+    <template v-else>
+      <!-- Hero Section - Only show for users without subscription history -->
+      <HeroSection
+        v-if="!hasOrHadSubscription"
+        :title="t('pages.fluxDrive.intro.title')"
+        :subtitle="t('pages.fluxDrive.intro.subtitle')"
+        background-image="/banner/FluxDrive2.png"
+        icon="mdi-cloud-upload"
+        icon-aria-label="FluxDrive Cloud Storage"
+        min-height="300px"
       />
 
-      <!-- Features Section -->
-      <FeatureShowcase
-        :title="t('pages.fluxDrive.features.title')"
-        :items="features"
-        class="ma-4"
-        grid-min-width="300px"
-      />
+      <!-- Show pricing plans only for users who have never had a subscription -->
+      <div v-if="!hasOrHadSubscription" class="plans-container">
+        <PricingPlans @selectPlan="(planId, actionType) => handlePlanSelection(planId, actionType)"
+        />
 
-      <!-- Benefits Section -->
-      <BenefitsGrid
-        :title="t('pages.fluxDrive.benefits.title')"
-        :items="benefits"
-        grid-template-columns="repeat(auto-fit, minmax(280px, 1fr))"
-        class="ma-4"
-      />
+        <!-- Features Section -->
+        <FeatureShowcase
+          :title="t('pages.fluxDrive.features.title')"
+          :items="features"
+          grid-min-width="300px"
+        />
 
-      <!-- Trustpilot Reviews Section -->
-      <TrustpilotPanel :stars="4.5" :star-size="32" :show-rating-label="true" :add-margin="true" />
-    </div>
+        <!-- Benefits Section -->
+        <BenefitsGrid
+          :title="t('pages.fluxDrive.benefits.title')"
+          :items="benefits"
+          grid-template-columns="repeat(2, 1fr)"
+        />
 
-    <!-- Show actual FluxDrive interface for subscribers or users with subscription history -->
-    <div v-else>
-      <FileManager
-        ref="fileManagerRef"
-        @selectPlan="handlePlanSelection"
-      />
-      <StorageInfo />
-    </div>
+        <!-- Trustpilot Reviews Section -->
+        <TrustpilotPanel :use-live-data="true" :star-size="32" :show-rating-label="true" />
+      </div>
+
+      <!-- Show actual FluxDrive interface for subscribers or users with subscription history -->
+      <div v-else>
+        <FileManager
+          ref="fileManagerRef"
+          @selectPlan="handlePlanSelection"
+        />
+        <StorageInfo />
+      </div>
+    </template>
 
 
     <!-- Checkout Dialog -->
@@ -376,33 +370,33 @@ const features = [
 // Benefits data for landing page
 const benefits = [
   {
-    icon: 'mdi-check-circle',
-    color: 'success',
+    icon: 'mdi-shield-check',
+    color: 'primary',
     text: t('pages.fluxDrive.benefits.noCentralized'),
   },
   {
-    icon: 'mdi-check-circle',
+    icon: 'mdi-key',
     color: 'success',
     text: t('pages.fluxDrive.benefits.fullControl'),
   },
   {
-    icon: 'mdi-check-circle',
-    color: 'success',
+    icon: 'mdi-earth',
+    color: 'info',
     text: t('pages.fluxDrive.benefits.globalRedundancy'),
   },
   {
-    icon: 'mdi-check-circle',
-    color: 'success',
+    icon: 'mdi-currency-usd',
+    color: 'warning',
     text: t('pages.fluxDrive.benefits.transparentPricing'),
   },
   {
-    icon: 'mdi-check-circle',
-    color: 'success',
+    icon: 'mdi-lock-open-variant',
+    color: 'error',
     text: t('pages.fluxDrive.benefits.noVendorLock'),
   },
   {
-    icon: 'mdi-check-circle',
-    color: 'success',
+    icon: 'mdi-code-braces',
+    color: 'secondary',
     text: t('pages.fluxDrive.benefits.openSource'),
   },
 ]
@@ -747,10 +741,14 @@ onMounted(async () => {
 @import '@styles/flux-drive.scss';
 
 .fluxdrive-page {
-  padding: 8px 24px;
+  padding: 0;
   max-width: 1400px;
   margin: 0 auto;
   min-height: calc(100vh - 100px);
+}
+
+.fluxdrive-page :deep(.hero-section) {
+  margin-bottom: 2rem !important;
 }
 
 /* Section Cards */
@@ -759,6 +757,13 @@ onMounted(async () => {
   padding: 32px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
   margin-top: 32px !important;
+}
+
+/* Trustpilot Section */
+.trustpilot-section {
+  padding: 0 !important;
+  border-radius: 16px !important;
+  box-shadow: none !important;
 }
 
 .section-title {
@@ -776,12 +781,22 @@ onMounted(async () => {
 
 /* Mobile Responsive */
 @media (max-width: 960px) {
+  .fluxdrive-page {
+    padding: 0;
+  }
+
   .section-card {
     padding: 24px 16px;
   }
 
   .section-title {
     font-size: 1.75rem;
+  }
+}
+
+@media (max-width: 600px) {
+  .fluxdrive-page {
+    padding: 0 !important;
   }
 }
 

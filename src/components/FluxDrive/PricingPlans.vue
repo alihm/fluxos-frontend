@@ -40,9 +40,6 @@
           <!-- Plan Header -->
           <div class="plan-header">
             <h3 class="plan-name">{{ plan.name }}</h3>
-            <p v-if="getPlanStatus(plan.id) === 'current'" class="plan-status-badge current">
-              {{ t('components.fluxDrive.pricingPlans.currentPlan') }}
-            </p>
           </div>
 
           <!-- Plan Resources -->
@@ -272,19 +269,21 @@ const handleSelectPlan = planId => {
 
 <style scoped>
 .pricing-plans-container {
-  padding: 24px 0;
+  padding: 0;
   margin: 0 auto;
 }
 
 /* Section Styling */
 .plans-section {
-  padding: 32px 0;
+  padding: 0;
+  padding-bottom: 32px;
 }
 
 .section-title {
   font-size: 2rem;
   font-weight: 600;
-  margin-bottom: 16px;
+  margin-top: 1rem;
+  margin-bottom: 0;
   text-align: center;
 }
 
@@ -371,10 +370,10 @@ const handleSelectPlan = planId => {
 }
 
 .price-amount {
-  font-size: 2.5rem;
+  font-size: 1.75rem;
   font-weight: 700;
   color: rgb(var(--v-theme-success));
-  line-height: 1;
+  line-height: 1.2;
 }
 
 .price-period {
@@ -462,14 +461,19 @@ const handleSelectPlan = planId => {
 .resource-value {
   font-size: 0.95rem;
   font-weight: 600;
-  color: rgb(var(--v-theme-primary));
+  color: white;
   text-align: right;
+  background: rgb(var(--v-theme-primary));
+  padding: 4px 12px;
+  border-radius: 16px;
+  display: inline-block;
 }
 
 /* Plan Button */
 .plan-btn {
   margin-top: auto;
   min-height: 48px !important;
+  max-height: 48px !important;
   font-size: 1rem !important;
   font-weight: 600 !important;
   letter-spacing: 0.5px !important;
@@ -506,17 +510,20 @@ const handleSelectPlan = planId => {
 
 @media (max-width: 600px) {
   .pricing-plans-container {
-    padding: 16px 0;
+    padding: 0 !important;
   }
 
   .plans-section {
-    padding: 24px 0;
+    padding: 0 !important;
+    padding-bottom: 24px !important;
   }
 
   .plans-grid {
     grid-template-columns: 1fr;
     gap: 24px;
     max-width: 400px;
+    padding: 0 !important;
+    margin: 0 auto !important;
   }
 
   .plan-card {

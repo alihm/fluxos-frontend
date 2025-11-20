@@ -20,15 +20,6 @@
 
     <!-- Content -->
     <div v-else class="landing-content">
-      <!-- Breadcrumb Navigation -->
-      <BreadcrumbNav
-        :items="[
-          { text: 'Home', to: '/' },
-          { text: 'Marketplace', to: '/marketplace' },
-          { text: 'WordPress Hosting' }
-        ]"
-      />
-
       <!-- Hero Section -->
       <HeroSection
         :title="t('pages.marketplace.wordpress.landing.title')"
@@ -105,23 +96,26 @@
 
       <!-- Description Section -->
       <VCard class="section-card description-section">
-        <VCardTitle class="section-title">
-          {{ t('pages.marketplace.wordpress.landing.description.title') }}
-        </VCardTitle>
-        <VCardText class="section-text">
-          <p>{{ t('pages.marketplace.wordpress.landing.description.content') }}</p>
+        <VCardText>
+          <h2 class="content-title">{{ t('pages.marketplace.wordpress.landing.description.title') }}</h2>
+          <p class="content-intro">{{ t('pages.marketplace.wordpress.landing.description.content') }}</p>
+
+          <div class="content-features">
+            <div v-for="(highlight, index) in highlights" :key="index" class="content-feature">
+              <div class="content-feature-icon">
+                <VIcon :icon="highlight.icon" size="28" :color="highlight.color" />
+              </div>
+              <div class="content-feature-text">
+                <h3 class="content-feature-title">{{ highlight.title }}</h3>
+                <p class="content-feature-desc">{{ highlight.description }}</p>
+              </div>
+            </div>
+          </div>
         </VCardText>
       </VCard>
 
-      <!-- Highlights Section -->
-      <BenefitsGrid
-        :items="highlights"
-        :elevation="0"
-        padding="24px"
-      />
-
       <!-- Trustpilot Reviews Section -->
-      <TrustpilotPanel :stars="4.5" :star-size="32" :show-rating-label="true" />
+      <TrustpilotPanel :use-live-data="true" :star-size="32" :show-rating-label="true" />
 
       <!-- Global Server Network Section -->
       <ServerLocationsPanel
@@ -141,7 +135,7 @@
 
       <!-- Related Links Section -->
       <RelatedLinksGrid
-        title="Explore More on FluxCloud"
+        :title="te('pages.marketplace.wordpress.landing.relatedLinks.sectionTitle') ? t('pages.marketplace.wordpress.landing.relatedLinks.sectionTitle') : 'Explore More on FluxCloud'"
         :links="relatedLinks"
       />
     </div>
@@ -217,22 +211,26 @@ const highlights = computed(() => [
   {
     icon: 'mdi-shield-check',
     color: 'success',
-    text: t('pages.marketplace.wordpress.landing.description.highlights.security'),
+    title: t('pages.marketplace.wordpress.landing.description.highlights.security.title'),
+    description: t('pages.marketplace.wordpress.landing.description.highlights.security.description'),
   },
   {
     icon: 'mdi-speedometer',
     color: 'info',
-    text: t('pages.marketplace.wordpress.landing.description.highlights.performance'),
+    title: t('pages.marketplace.wordpress.landing.description.highlights.performance.title'),
+    description: t('pages.marketplace.wordpress.landing.description.highlights.performance.description'),
   },
   {
     icon: 'mdi-cloud-sync',
     color: 'primary',
-    text: t('pages.marketplace.wordpress.landing.description.highlights.updates'),
+    title: t('pages.marketplace.wordpress.landing.description.highlights.updates.title'),
+    description: t('pages.marketplace.wordpress.landing.description.highlights.updates.description'),
   },
   {
     icon: 'mdi-server-network',
     color: 'warning',
-    text: t('pages.marketplace.wordpress.landing.description.highlights.decentralized'),
+    title: t('pages.marketplace.wordpress.landing.description.highlights.decentralized.title'),
+    description: t('pages.marketplace.wordpress.landing.description.highlights.decentralized.description'),
   },
 ])
 
@@ -314,36 +312,43 @@ const faqs = computed(() => {
 })
 
 // Related links
-const relatedLinks = [
-  {
-    to: '/marketplace',
-    icon: 'mdi-storefront',
-    color: 'primary',
-    title: 'Marketplace',
-    description: 'Browse all available applications',
-  },
-  {
-    to: '/marketplace/games',
-    icon: 'mdi-gamepad-variant',
-    color: 'success',
-    title: 'Game Servers',
-    description: 'Host your favorite game servers',
-  },
-  {
-    to: '/flux-drive',
-    icon: 'mdi-cloud',
-    color: 'info',
-    title: 'FluxDrive',
-    description: 'Decentralized file storage',
-  },
-  {
-    to: '/cost-calculator',
-    icon: 'mdi-calculator',
-    color: 'warning',
-    title: 'Cost Calculator',
-    description: 'Estimate your hosting costs',
-  },
-]
+const relatedLinks = computed(() => {
+  // Helper function to safely get translation with fallback
+  const safeTranslate = (key, fallback = '') => {
+    return te(key) ? t(key) : fallback
+  }
+
+  return [
+    {
+      to: '/marketplace',
+      icon: 'mdi-storefront',
+      color: 'primary',
+      title: safeTranslate('pages.marketplace.wordpress.landing.relatedLinks.marketplace.title', 'Marketplace'),
+      description: safeTranslate('pages.marketplace.wordpress.landing.relatedLinks.marketplace.description', 'Browse all available applications'),
+    },
+    {
+      to: '/marketplace/games',
+      icon: 'mdi-gamepad-variant',
+      color: 'success',
+      title: safeTranslate('pages.marketplace.wordpress.landing.relatedLinks.gameServers.title', 'Game Servers'),
+      description: safeTranslate('pages.marketplace.wordpress.landing.relatedLinks.gameServers.description', 'Host your favorite game servers'),
+    },
+    {
+      to: '/flux-drive',
+      icon: 'mdi-cloud',
+      color: 'info',
+      title: safeTranslate('pages.marketplace.wordpress.landing.relatedLinks.fluxDrive.title', 'FluxDrive'),
+      description: safeTranslate('pages.marketplace.wordpress.landing.relatedLinks.fluxDrive.description', 'Decentralized file storage'),
+    },
+    {
+      to: '/cost-calculator',
+      icon: 'mdi-calculator',
+      color: 'warning',
+      title: safeTranslate('pages.marketplace.wordpress.landing.relatedLinks.costCalculator.title', 'Cost Calculator'),
+      description: safeTranslate('pages.marketplace.wordpress.landing.relatedLinks.costCalculator.description', 'Estimate your hosting costs'),
+    },
+  ]
+})
 
 // Generate JSON-LD structured data
 const structuredData = computed(() => {
@@ -518,7 +523,7 @@ onMounted(() => {
 
 <style scoped>
 .wordpress-landing {
-  padding: 8px 24px;
+  padding: 0;
   max-width: 1400px;
   margin: 0 auto;
   min-height: calc(100vh - 100px);
@@ -527,28 +532,49 @@ onMounted(() => {
 .landing-content {
   display: flex;
   flex-direction: column;
-  gap: 32px;
+  gap: 0;
+}
+
+/* Hero section margins */
+.landing-content > :deep(.hero-section) {
+  margin: 0 !important;
+}
+
+/* Add spacing after hero section via the parent layout */
+.landing-content > :first-child {
+  margin-bottom: 2rem !important;
+}
+
+/* Consistent spacing between all sections */
+.landing-content > * {
+  margin-bottom: 2rem;
+}
+
+/* Remove bottom margin from last child */
+.landing-content > *:last-child {
+  margin-bottom: 0;
 }
 
 /* Section Cards */
 .section-card {
-  border-radius: 24px;
+  border-radius: 16px;
   padding: 32px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
 }
 
 .section-title {
-  font-size: 2rem;
-  font-weight: 600;
-  margin-bottom: 16px;
+  font-size: 28px;
+  font-weight: 700;
+  margin-bottom: 0;
   text-align: center;
+  line-height: 1.3;
 }
 
 .section-subtitle {
   font-size: 1.1rem;
   text-align: center;
   opacity: 0.7;
-  margin-bottom: 32px;
+  margin-bottom: 40px;
 }
 
 .section-text {
@@ -556,10 +582,104 @@ onMounted(() => {
   line-height: 1.8;
 }
 
+.description-section {
+  padding: 0 !important;
+  border-radius: 16px !important;
+  border: 1px solid rgba(var(--v-theme-on-surface), 0.12) !important;
+  background: rgb(var(--v-theme-surface)) !important;
+  box-shadow: none !important;
+}
+
+.description-section :deep(.v-card-text) {
+  padding: 24px !important;
+}
+
+.trustpilot-section {
+  padding: 0 !important;
+  border-radius: 16px !important;
+  border: 1px solid rgba(var(--v-theme-on-surface), 0.12) !important;
+  box-shadow: none !important;
+}
+
+.content-title {
+  font-size: 28px;
+  font-weight: 700;
+  margin-top: 0;
+  margin-bottom: 12px;
+  text-align: center;
+  color: rgb(var(--v-theme-on-surface));
+  line-height: 1.3;
+}
+
+.content-intro {
+  font-size: 1.125rem;
+  line-height: 1.8;
+  text-align: center;
+  margin-bottom: 32px;
+  opacity: 0.9;
+  max-width: 900px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.content-features {
+  display: grid;
+  gap: 24px;
+  margin-top: 32px;
+}
+
+.content-feature {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 24px;
+  background: rgba(var(--v-theme-on-surface), 0.02);
+  border-radius: 12px;
+  border: 1px solid rgba(var(--v-theme-on-surface), 0.08);
+  transition: all 0.3s ease;
+}
+
+.content-feature:hover {
+  background: rgba(var(--v-theme-on-surface), 0.04);
+  border-color: rgba(var(--v-theme-on-surface), 0.16);
+  transform: translateX(4px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.content-feature-icon {
+  flex-shrink: 0;
+  width: 56px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(var(--v-theme-primary), 0.1);
+  border-radius: 12px;
+}
+
+.content-feature-text {
+  flex: 1;
+}
+
+.content-feature-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 0 0 8px 0;
+  color: rgb(var(--v-theme-on-surface));
+}
+
+.content-feature-desc {
+  font-size: 1rem;
+  line-height: 1.7;
+  margin: 0;
+  opacity: 0.85;
+}
+
 
 /* Plans Section */
 .plans-section {
-  padding: 32px 0;
+  padding: 0;
+  margin-bottom: 2rem;
 }
 
 .plans-grid {
@@ -943,6 +1063,18 @@ onMounted(() => {
     grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   }
 
+  .content-intro {
+    font-size: 1rem;
+  }
+
+  .content-feature-title {
+    font-size: 1.125rem;
+  }
+
+  .content-feature-desc {
+    font-size: 0.9375rem;
+  }
+
   .server-locations-section .locations-title {
     font-size: 1.75rem;
   }
@@ -975,7 +1107,7 @@ onMounted(() => {
 
 @media (max-width: 600px) {
   .wordpress-landing {
-    padding: 8px 16px;
+    padding: 0;
   }
 
   .breadcrumb-nav {
@@ -993,6 +1125,8 @@ onMounted(() => {
 
   .plans-grid {
     grid-template-columns: 1fr;
+    max-width: 400px;
+    margin: 0 auto;
   }
 
   .server-locations-section .locations-title {
@@ -1043,6 +1177,55 @@ onMounted(() => {
   .faq-answer {
     padding: 0 16px 16px 16px !important;
     font-size: 0.875rem;
+  }
+
+  .content-title {
+    font-size: 1.75rem;
+  }
+
+  .content-intro {
+    font-size: 0.9375rem;
+  }
+
+  .content-feature {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 12px;
+    padding: 16px;
+    align-items: flex-start;
+  }
+
+  .content-feature-icon {
+    width: 40px;
+    height: 40px;
+    margin-bottom: 0;
+    margin-top: -8px;
+  }
+
+  .content-feature-icon :deep(.v-icon) {
+    font-size: 24px !important;
+  }
+
+  .content-feature-text {
+    flex: 1;
+    text-align: left;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-width: 0;
+  }
+
+  .content-feature-title {
+    font-size: 1.0625rem;
+    text-align: left;
+    margin: 0;
+  }
+
+  .content-feature-desc {
+    font-size: 0.875rem;
+    text-align: left;
+    width: calc(100% + 52px);
+    margin-left: -52px;
   }
 }
 </style>

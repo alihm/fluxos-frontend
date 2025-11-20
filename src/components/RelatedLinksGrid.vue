@@ -1,9 +1,7 @@
 <template>
   <VCard :class="['related-links-card', { 'has-background': backgroundColor }]" :elevation="elevation">
-    <VCardTitle v-if="resolvedTitle" class="links-title">
-      {{ resolvedTitle }}
-    </VCardTitle>
     <VCardText :style="containerStyle">
+      <h2 v-if="resolvedTitle" class="links-title">{{ resolvedTitle }}</h2>
       <p v-if="resolvedSubtitle" class="links-subtitle">{{ resolvedSubtitle }}</p>
 
       <div class="links-grid" :style="gridStyle">
@@ -180,9 +178,12 @@ const gridStyle = computed(() => ({
 <style scoped>
 .related-links-card {
   border-radius: 16px;
-  background: rgba(var(--v-theme-surface), 0.6);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(var(--v-theme-primary), 0.15);
+  background: rgb(var(--v-theme-surface));
+  border: 1px solid rgba(var(--v-theme-on-surface), 0.12);
+}
+
+.related-links-card :deep(.v-card-text) {
+  padding: 24px !important;
 }
 
 .related-links-card.has-background {
@@ -190,17 +191,19 @@ const gridStyle = computed(() => ({
 }
 
 .links-title {
-  font-size: 2rem;
+  font-size: 28px;
   font-weight: 700;
-  padding: 24px 24px 8px 24px;
+  margin-top: 0.5rem;
+  margin-bottom: 12px;
   text-align: center;
-  color: rgb(var(--v-theme-primary));
+  color: rgb(var(--v-theme-on-surface));
+  line-height: 1.3;
 }
 
 .links-subtitle {
   font-size: 1.125rem;
   text-align: center;
-  margin-bottom: 32px;
+  margin-bottom: 16px;
   opacity: 0.9;
   line-height: 1.6;
 }
@@ -208,7 +211,7 @@ const gridStyle = computed(() => ({
 .links-grid {
   display: grid;
   gap: 24px;
-  margin-top: 24px;
+  margin-top: 32px;
 }
 
 .link-card {
@@ -217,18 +220,20 @@ const gridStyle = computed(() => ({
   align-items: center;
   text-align: center;
   padding: 32px 24px;
-  background: rgb(var(--v-theme-surface));
-  border-radius: 12px;
+  background: rgba(var(--v-theme-on-surface), 0.04);
+  border-radius: 16px;
   text-decoration: none;
   color: inherit;
   transition: all 0.3s ease;
-  border: 1px solid rgba(var(--v-theme-primary), 0.1);
+  border: 1px solid rgba(var(--v-theme-on-surface), 0.12);
+  min-height: fit-content;
+  height: auto;
 }
 
 .link-card:hover {
   transform: translateY(-4px);
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
-  border-color: rgba(var(--v-theme-primary), 0.3);
+  border-color: rgba(var(--v-theme-on-surface), 0.24);
 }
 
 .link-icon {
@@ -247,6 +252,8 @@ const gridStyle = computed(() => ({
   line-height: 1.5;
   opacity: 0.7;
   margin: 0;
+  max-height: none;
+  height: auto;
 }
 
 /* Responsive adjustments */

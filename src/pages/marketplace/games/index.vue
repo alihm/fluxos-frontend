@@ -48,7 +48,39 @@
         <VCard class="section-card seo-content-section">
           <VCardText>
             <h2 class="content-title">{{ t('pages.marketplace.games.index.content.title') }}</h2>
-            <div class="content-text" v-html="t('pages.marketplace.games.index.content.body')"></div>
+            <p class="content-intro">{{ t('pages.marketplace.games.index.content.intro') }}</p>
+
+            <div class="content-features">
+              <div class="content-feature">
+                <div class="content-feature-icon">
+                  <VIcon icon="mdi-server-network" size="32" color="primary" />
+                </div>
+                <div class="content-feature-text">
+                  <h3 class="content-feature-title">{{ t('pages.marketplace.games.index.content.features.decentralized.title') }}</h3>
+                  <p class="content-feature-desc">{{ t('pages.marketplace.games.index.content.features.decentralized.description') }}</p>
+                </div>
+              </div>
+
+              <div class="content-feature">
+                <div class="content-feature-icon">
+                  <VIcon icon="mdi-shield-check" size="32" color="success" />
+                </div>
+                <div class="content-feature-text">
+                  <h3 class="content-feature-title">{{ t('pages.marketplace.games.index.content.features.security.title') }}</h3>
+                  <p class="content-feature-desc">{{ t('pages.marketplace.games.index.content.features.security.description') }}</p>
+                </div>
+              </div>
+
+              <div class="content-feature">
+                <div class="content-feature-icon">
+                  <VIcon icon="mdi-rocket-launch" size="32" color="info" />
+                </div>
+                <div class="content-feature-text">
+                  <h3 class="content-feature-title">{{ t('pages.marketplace.games.index.content.features.deployment.title') }}</h3>
+                  <p class="content-feature-desc">{{ t('pages.marketplace.games.index.content.features.deployment.description') }}</p>
+                </div>
+              </div>
+            </div>
           </VCardText>
         </VCard>
 
@@ -67,15 +99,13 @@
 
         <!-- Why FluxPlay Comparison Section -->
         <VCard class="section-card comparison-section">
-          <VCardTitle class="section-title">
-            {{ t('pages.marketplace.games.index.comparison.title') }}
-          </VCardTitle>
           <VCardText>
+            <h2 class="comparison-title">{{ t('pages.marketplace.games.index.comparison.title') }}</h2>
             <div class="comparison-table">
               <div class="comparison-header">
                 <div class="comparison-feature-header">{{ t('pages.marketplace.games.index.comparison.feature') }}</div>
                 <div class="comparison-column-header fluxplay-header">
-                  <VIcon icon="mdi-crown" size="24" color="primary" />
+                  <VIcon icon="mdi-crown" size="24" class="crown-icon" />
                   {{ t('pages.marketplace.games.index.comparison.fluxplay') }}
                 </div>
                 <div class="comparison-column-header">{{ t('pages.marketplace.games.index.comparison.traditional') }}</div>
@@ -105,7 +135,7 @@
         <FAQPanel :panel="faqPanel" :app="{ name: 'gaming' }" :faqs="faqs" :title="t('pages.marketplace.games.index.faq.title')" />
 
         <!-- Trustpilot Section -->
-        <TrustpilotPanel :show-reviews="false" :stars="5" />
+        <TrustpilotPanel :star-size="32" :show-rating-label="true" :use-live-data="true" />
 
         <!-- CTA Section -->
         <CtaSection
@@ -354,116 +384,154 @@ const fetchFluxLocations = async () => {
 }
 
 // SEO meta tags and structured data
-watch(games, loadedGames => {
-  if (!loadedGames || loadedGames.length === 0) return
+const pageUrl = 'https://home.runonflux.io/marketplace/games'
+const title = 'Game Server Hosting - FluxPlay on FluxCloud'
+const description = 'Premium game hosting with global servers, lightning-fast connections, and flexible plans. Host Minecraft, Palworld, Factorio, Satisfactory, and Enshrouded servers on FluxCloud with instant deployment and DDoS protection.'
+const imageUrl = 'https://home.runonflux.io/images/games/FluxPlay_white.svg'
 
-  const pageUrl = 'https://home.runonflux.io/marketplace/games'
-  const title = 'Game Server Hosting - FluxPlay on FluxCloud'
-  const description = 'Premium game hosting with global servers, lightning-fast connections, and flexible plans. Host Minecraft, Palworld, Factorio, Satisfactory, and Enshrouded servers on FluxCloud with instant deployment and DDoS protection.'
-  const imageUrl = 'https://home.runonflux.io/images/games/FluxPlay_white.svg'
-
-  // ItemList structured data for game listings
-  const itemListStructuredData = {
-    '@context': 'https://schema.org',
-    '@type': 'ItemList',
-    'itemListElement': loadedGames.map((game, index) => ({
-      '@type': 'ListItem',
-      'position': index + 1,
-      'item': {
-        '@type': 'Product',
-        'name': `${game.displayName || game.name} Server Hosting`,
-        'url': `https://home.runonflux.io/marketplace/games/${game.name.toLowerCase()}`,
-        'image': game.icon || game.logo || imageUrl,
-        'description': game.description || `Host your own ${game.displayName || game.name} server on FluxCloud`,
-      },
-    })),
-  }
-
-  // Organization structured data
-  const organizationStructuredData = {
-    '@context': 'https://schema.org',
-    '@type': 'Organization',
-    'name': 'FluxPlay',
-    'url': 'https://home.runonflux.io',
-    'logo': imageUrl,
-    'description': 'Decentralized game server hosting on FluxCloud',
-  }
-
-  // Breadcrumb structured data
-  const breadcrumbStructuredData = {
-    '@context': 'https://schema.org',
-    '@type': 'BreadcrumbList',
-    'itemListElement': [
+// Reactive structured data that updates when games load
+const structuredDataSchemas = computed(() => {
+  if (!games.value || games.value.length === 0) {
+    // Return only Organization, Breadcrumb, and FAQ when games haven't loaded yet
+    return [
       {
+        '@context': 'https://schema.org',
+        '@type': 'Organization',
+        'name': 'FluxPlay',
+        'url': 'https://home.runonflux.io',
+        'logo': imageUrl,
+        'description': 'Decentralized game server hosting on FluxCloud',
+      },
+      {
+        '@context': 'https://schema.org',
+        '@type': 'BreadcrumbList',
+        'itemListElement': [
+          {
+            '@type': 'ListItem',
+            'position': 1,
+            'name': 'Home',
+            'item': 'https://home.runonflux.io',
+          },
+          {
+            '@type': 'ListItem',
+            'position': 2,
+            'name': 'Games',
+            'item': pageUrl,
+          },
+        ],
+      },
+      {
+        '@context': 'https://schema.org',
+        '@type': 'FAQPage',
+        'mainEntity': faqs.value.map(faq => ({
+          '@type': 'Question',
+          'name': t(faq.question),
+          'acceptedAnswer': {
+            '@type': 'Answer',
+            'text': faq.answer.replace(/<[^>]*>/g, ''), // Strip HTML tags for schema
+          },
+        })),
+      },
+    ]
+  }
+
+  // When games are loaded, include ItemList
+  return [
+    {
+      '@context': 'https://schema.org',
+      '@type': 'ItemList',
+      'itemListElement': games.value.map((game, index) => ({
         '@type': 'ListItem',
-        'position': 1,
-        'name': 'Home',
-        'item': 'https://home.runonflux.io',
-      },
-      {
-        '@type': 'ListItem',
-        'position': 2,
-        'name': 'Games',
-        'item': pageUrl,
-      },
-    ],
-  }
+        'position': index + 1,
+        'item': {
+          '@type': 'Product',
+          'name': `${game.displayName || game.name} Server Hosting`,
+          'url': `https://home.runonflux.io/marketplace/games/${game.name.toLowerCase()}`,
+          'image': game.icon || game.logo || imageUrl,
+          'description': game.description || `Host your own ${game.displayName || game.name} server on FluxCloud`,
+        },
+      })),
+    },
+    {
+      '@context': 'https://schema.org',
+      '@type': 'Organization',
+      'name': 'FluxPlay',
+      'url': 'https://home.runonflux.io',
+      'logo': imageUrl,
+      'description': 'Decentralized game server hosting on FluxCloud',
+    },
+    {
+      '@context': 'https://schema.org',
+      '@type': 'BreadcrumbList',
+      'itemListElement': [
+        {
+          '@type': 'ListItem',
+          'position': 1,
+          'name': 'Home',
+          'item': 'https://home.runonflux.io',
+        },
+        {
+          '@type': 'ListItem',
+          'position': 2,
+          'name': 'Games',
+          'item': pageUrl,
+        },
+      ],
+    },
+    {
+      '@context': 'https://schema.org',
+      '@type': 'FAQPage',
+      'mainEntity': faqs.value.map(faq => ({
+        '@type': 'Question',
+        'name': t(faq.question),
+        'acceptedAnswer': {
+          '@type': 'Answer',
+          'text': faq.answer.replace(/<[^>]*>/g, ''), // Strip HTML tags for schema
+        },
+      })),
+    },
+  ]
+})
 
-  // FAQ structured data
-  const faqStructuredData = {
-    '@context': 'https://schema.org',
-    '@type': 'FAQPage',
-    'mainEntity': faqs.value.map(faq => ({
-      '@type': 'Question',
-      'name': t(faq.question),
-      'acceptedAnswer': {
-        '@type': 'Answer',
-        'text': faq.answer.replace(/<[^>]*>/g, ''), // Strip HTML tags for schema
-      },
-    })),
-  }
+// useHead with reactive structured data (called once during setup)
+useHead({
+  title,
+  meta: [
+    {
+      name: 'description',
+      content: description,
+    },
+    {
+      name: 'keywords',
+      content: 'game server hosting, minecraft hosting, palworld hosting, factorio hosting, satisfactory hosting, enshrouded hosting, decentralized hosting, flux network, dedicated game servers, affordable hosting, ddos protection, blockchain hosting, pay-as-you-go gaming',
+    },
 
-  useHead({
-    title,
-    meta: [
-      {
-        name: 'description',
-        content: description,
-      },
-      {
-        name: 'keywords',
-        content: 'game server hosting, minecraft hosting, palworld hosting, factorio hosting, satisfactory hosting, enshrouded hosting, decentralized hosting, flux network, dedicated game servers, affordable hosting, ddos protection, blockchain hosting, pay-as-you-go gaming',
-      },
+    // Open Graph
+    { property: 'og:title', content: title },
+    { property: 'og:description', content: description },
+    { property: 'og:image', content: imageUrl },
+    { property: 'og:url', content: pageUrl },
+    { property: 'og:type', content: 'website' },
+    { property: 'og:site_name', content: 'FluxPlay' },
 
-      // Open Graph
-      { property: 'og:title', content: title },
-      { property: 'og:description', content: description },
-      { property: 'og:image', content: imageUrl },
-      { property: 'og:url', content: pageUrl },
-      { property: 'og:type', content: 'website' },
-      { property: 'og:site_name', content: 'FluxPlay' },
+    // Twitter Card
+    { name: 'twitter:card', content: 'summary_large_image' },
+    { name: 'twitter:title', content: title },
+    { name: 'twitter:description', content: description },
+    { name: 'twitter:image', content: imageUrl },
 
-      // Twitter Card
-      { name: 'twitter:card', content: 'summary_large_image' },
-      { name: 'twitter:title', content: title },
-      { name: 'twitter:description', content: description },
-      { name: 'twitter:image', content: imageUrl },
-
-      // Additional SEO
-      { name: 'robots', content: 'index, follow' },
-      { name: 'author', content: 'Flux Network' },
-    ],
-    link: [
-      { rel: 'canonical', href: pageUrl },
-    ],
-    script: [
-      {
-        type: 'application/ld+json',
-        children: JSON.stringify([itemListStructuredData, organizationStructuredData, breadcrumbStructuredData, faqStructuredData]),
-      },
-    ],
-  })
-}, { immediate: true })
+    // Additional SEO
+    { name: 'robots', content: 'index, follow' },
+    { name: 'author', content: 'Flux Network' },
+  ],
+  link: [
+    { rel: 'canonical', href: pageUrl },
+  ],
+  script: computed(() => [{
+    type: 'application/ld+json',
+    children: JSON.stringify(structuredDataSchemas.value),
+  }]),
+})
 
 // Load games and flux locations on mount
 onMounted(async () => {
@@ -480,56 +548,141 @@ onMounted(async () => {
 
 <style scoped>
 .games-container {
-  padding: 8px 24px 32px 24px;
+  width: 100%;
+  padding: 0;
+  margin: 0;
   min-height: 100vh;
 }
 
 .games-layout {
   display: flex;
   flex-direction: column;
-  gap: 32px;
+  gap: 0;
   max-width: 1400px;
   margin: 0 auto;
+  padding: 0;
+}
+
+/* Hero section margins - must come first */
+.games-layout > :deep(.hero-section) {
+  margin: 0 !important;
+}
+
+/* Add spacing after hero section via the parent layout */
+.games-layout > :first-child {
+  margin-bottom: 0.7rem !important;
+}
+
+/* Consistent spacing between all sections */
+.games-layout > * {
+  margin-bottom: 2rem;
+}
+
+/* Remove bottom margin from last child */
+.games-layout > *:last-child {
+  margin-bottom: 0;
 }
 
 /* Section Cards */
 .section-card {
-  border-radius: 16px;
-  border: 1px solid rgba(var(--v-theme-on-surface), 0.12);
+  margin-bottom: 2rem;
+  border-radius: 16px !important;
+  border: 1px solid rgba(var(--v-theme-on-surface), 0.12) !important;
+  box-shadow: none !important;
 }
-
-.section-title {
-  font-size: 2rem;
-  font-weight: 700;
-  margin-bottom: 8px;
-  padding: 24px 24px 0 24px;
-}
-
 
 /* SEO Content Section */
 .seo-content-section {
-  background: rgba(var(--v-theme-surface), 0.4);
+  max-width: 100%;
+  background: rgb(var(--v-theme-surface)) !important;
+  border-radius: 16px !important;
+  border: 1px solid rgba(var(--v-theme-on-surface), 0.12) !important;
+  box-shadow: none !important;
+  margin-bottom: 2rem !important;
+}
+
+.seo-content-section :deep(.v-card-text) {
+  padding: 24px !important;
+}
+
+.trustpilot-section {
+  padding: 0 !important;
+  border-radius: 16px !important;
+  border: 1px solid rgba(var(--v-theme-on-surface), 0.12) !important;
+  background: rgb(var(--v-theme-surface)) !important;
+  box-shadow: none !important;
 }
 
 .content-title {
-  font-size: 1.75rem;
+  font-size: 28px;
   font-weight: 700;
+  margin-top: 0;
   margin-bottom: 16px;
+  text-align: center;
+  color: rgb(var(--v-theme-on-surface));
+  line-height: 1.3;
 }
 
-.content-text {
-  font-size: 1rem;
+.content-intro {
+  font-size: 1.125rem;
   line-height: 1.8;
+  text-align: center;
+  margin-bottom: 32px;
   opacity: 0.9;
+  max-width: 900px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
-.content-text :deep(p) {
-  margin-bottom: 16px;
+.content-features {
+  display: grid;
+  gap: 24px;
+  margin-top: 32px;
 }
 
-.content-text :deep(strong) {
+.content-feature {
+  display: flex;
+  gap: 20px;
+  padding: 24px;
+  background: rgba(var(--v-theme-on-surface), 0.02);
+  border-radius: 12px;
+  border: 1px solid rgba(var(--v-theme-on-surface), 0.08);
+  transition: all 0.3s ease;
+}
+
+.content-feature:hover {
+  background: rgba(var(--v-theme-on-surface), 0.04);
+  border-color: rgba(var(--v-theme-on-surface), 0.16);
+  transform: translateX(4px);
+}
+
+.content-feature-icon {
+  flex-shrink: 0;
+  width: 56px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(var(--v-theme-primary), 0.1);
+  border-radius: 12px;
+}
+
+.content-feature-text {
+  flex: 1;
+}
+
+.content-feature-title {
+  font-size: 1.25rem;
   font-weight: 600;
-  color: rgb(var(--v-theme-primary));
+  margin: 0 0 8px 0;
+  color: rgb(var(--v-theme-on-surface));
+}
+
+.content-feature-desc {
+  font-size: 1rem;
+  line-height: 1.7;
+  margin: 0;
+  opacity: 0.85;
 }
 
 /* Games Grid Section */
@@ -538,10 +691,11 @@ onMounted(async () => {
 }
 
 .games-section-title {
-  font-size: 2rem;
+  font-size: 28px;
   font-weight: 700;
-  margin-bottom: 8px;
+  margin-bottom: 0;
   text-align: center;
+  line-height: 1.3;
 }
 
 .games-section-subtitle {
@@ -560,58 +714,158 @@ onMounted(async () => {
 }
 
 /* Comparison Section */
+.comparison-section {
+  max-width: 100%;
+  background: rgb(var(--v-theme-surface)) !important;
+  border-radius: 16px !important;
+  border: 1px solid rgba(var(--v-theme-on-surface), 0.12) !important;
+  box-shadow: none !important;
+  margin-bottom: 2rem !important;
+}
+
+.comparison-section :deep(.v-card-text) {
+  padding: 24px !important;
+}
+
+.comparison-title {
+  font-size: 28px;
+  font-weight: 700;
+  margin-top: 0;
+  margin-bottom: 20px;
+  text-align: center;
+  line-height: 1.3;
+  color: rgb(var(--v-theme-on-surface));
+}
+
 .comparison-table {
   display: flex;
   flex-direction: column;
-  gap: 1px;
-  background: rgba(var(--v-theme-on-surface), 0.12);
+  gap: 0;
   border-radius: 12px;
   overflow: hidden;
+  border: 1px solid rgba(var(--v-theme-on-surface), 0.08);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
 }
 
 .comparison-header,
 .comparison-row {
   display: grid;
-  grid-template-columns: 2fr 1fr 1fr;
-  gap: 1px;
+  grid-template-columns: 2fr 1.2fr 1.2fr;
   background: transparent;
 }
 
+.comparison-header {
+  background: linear-gradient(135deg, rgba(var(--v-theme-primary), 0.08) 0%, rgba(var(--v-theme-primary), 0.12) 100%);
+  border-bottom: 2px solid rgba(var(--v-theme-primary), 0.2);
+}
+
 .comparison-header > div {
-  padding: 16px;
-  background: rgba(var(--v-theme-primary), 0.1);
+  padding: 20px 16px;
   font-weight: 700;
-  font-size: 1.1rem;
+  font-size: 1.0625rem;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
+  color: rgb(var(--v-theme-on-surface));
+  text-align: center;
 }
 
 .comparison-feature-header {
   justify-content: flex-start !important;
+  padding-left: 24px !important;
+  text-align: left;
 }
 
 .fluxplay-header {
-  background: rgba(var(--v-theme-primary), 0.15) !important;
+  background: linear-gradient(135deg, rgb(var(--v-theme-primary)), rgba(var(--v-theme-primary), 0.85));
+  color: white !important;
+  font-weight: 800;
+  font-size: 1.125rem !important;
+  box-shadow: 0 2px 8px rgba(var(--v-theme-primary), 0.3);
+  position: relative;
+}
+
+.fluxplay-header::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: rgb(var(--v-theme-primary));
+}
+
+.crown-icon {
+  color: #FFD700 !important;
+  filter: drop-shadow(0 2px 4px rgba(255, 215, 0, 0.4));
+}
+
+.comparison-row {
+  border-bottom: 1px solid rgba(var(--v-theme-on-surface), 0.08);
+  transition: all 0.2s ease;
+}
+
+.comparison-row:last-child {
+  border-bottom: none;
+}
+
+.comparison-row:hover {
+  background: rgba(var(--v-theme-primary), 0.02);
 }
 
 .comparison-row > div {
-  padding: 16px;
-  background: rgb(var(--v-theme-surface));
+  padding: 18px 16px;
+  background: transparent;
   display: flex;
   align-items: center;
   justify-content: center;
+  font-size: 0.9375rem;
 }
 
 .comparison-feature {
   justify-content: flex-start !important;
-  font-weight: 500;
+  font-weight: 600;
+  padding-left: 24px !important;
+  color: rgb(var(--v-theme-on-surface));
 }
 
 .fluxplay-value {
-  background: rgba(var(--v-theme-primary), 0.05) !important;
-  font-weight: 600;
+  background: linear-gradient(135deg, rgba(var(--v-theme-primary), 0.12) 0%, rgba(var(--v-theme-primary), 0.08) 100%);
+  font-weight: 800;
+  color: rgb(var(--v-theme-primary));
+  border-left: 3px solid rgb(var(--v-theme-primary));
+  border-right: 3px solid rgb(var(--v-theme-primary));
+  font-size: 1rem;
+  position: relative;
+}
+
+.fluxplay-value::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(var(--v-theme-primary), 0.3), transparent);
+}
+
+.comparison-row:last-child .fluxplay-value {
+  border-bottom: 3px solid rgb(var(--v-theme-primary));
+}
+
+.comparison-row:last-child .fluxplay-value::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(var(--v-theme-primary), 0.3), transparent);
+}
+
+.comparison-value {
+  color: rgba(var(--v-theme-on-surface), 0.85);
 }
 
 /* FAQ Section */
@@ -757,8 +1011,30 @@ onMounted(async () => {
   opacity: 0.7;
 }
 
+/* CTA Section - Force button styling */
+:deep(.cta-section .v-btn) {
+  background-color: white !important;
+  color: rgb(var(--v-theme-primary)) !important;
+}
+
+:deep(.cta-section .v-btn .v-icon) {
+  color: rgb(var(--v-theme-primary)) !important;
+}
+
 /* Responsive adjustments */
 @media (max-width: 960px) {
+  .content-intro {
+    font-size: 1rem;
+  }
+
+  .content-feature-title {
+    font-size: 1.125rem;
+  }
+
+  .content-feature-desc {
+    font-size: 0.9375rem;
+  }
+
   .features-grid {
     grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
   }
@@ -770,22 +1046,89 @@ onMounted(async () => {
 
   .comparison-header > div,
   .comparison-row > div {
-    padding: 12px;
-    font-size: 0.9rem;
+    padding: 16px 12px;
+    font-size: 0.875rem;
+  }
+
+  .comparison-feature-header,
+  .comparison-feature {
+    padding-left: 16px !important;
   }
 }
 
 @media (max-width: 600px) {
   .games-container {
-    padding: 16px;
+    padding: 0;
   }
 
   .games-layout {
-    gap: 24px;
+    gap: 0;
+  }
+
+  /* Ensure all direct children have consistent width and spacing */
+  .games-layout > * {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    margin-bottom: 2rem !important;
+  }
+
+  .games-layout > :last-child {
+    margin-bottom: 0 !important;
+  }
+
+  /* Override hero spacing */
+  .games-layout > :first-child {
+    margin-bottom: 0.7rem !important;
   }
 
   .section-title {
     font-size: 1.5rem;
+  }
+
+  .content-intro {
+    font-size: 0.9375rem;
+  }
+
+  .content-feature {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 12px;
+    padding: 16px;
+    align-items: flex-start;
+  }
+
+  .content-feature-icon {
+    width: 40px;
+    height: 40px;
+    margin-bottom: 0;
+  }
+
+  .content-feature-icon :deep(.v-icon) {
+    font-size: 24px !important;
+  }
+
+  .content-feature-text {
+    flex: 1;
+    text-align: left;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-width: 0;
+  }
+
+  .content-feature-title {
+    font-size: 1.0625rem;
+    text-align: left;
+    margin: 0;
+  }
+
+  .content-feature-desc {
+    font-size: 0.875rem;
+    text-align: left;
+    width: calc(100% + 52px);
+    margin-left: -52px;
   }
 
   .features-grid {
@@ -802,21 +1145,54 @@ onMounted(async () => {
 
   .games-grid {
     grid-template-columns: 1fr;
+    gap: 24px;
   }
 
   .comparison-header,
   .comparison-row {
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr 1fr 1fr;
   }
 
   .comparison-header > div,
   .comparison-row > div {
-    border-bottom: 1px solid rgba(var(--v-theme-on-surface), 0.06);
+    padding: 12px 8px;
+    font-size: 0.75rem;
+    justify-content: center !important;
+    text-align: center;
   }
 
-  .comparison-header > div:last-child,
-  .comparison-row > div:last-child {
-    border-bottom: none;
+  .comparison-feature-header {
+    padding-left: 12px !important;
+    justify-content: flex-start !important;
+    text-align: left;
+  }
+
+  .comparison-feature {
+    padding-left: 12px !important;
+    font-size: 0.8125rem;
+    justify-content: flex-start !important;
+    text-align: left;
+  }
+
+  .fluxplay-header {
+    font-size: 0.875rem !important;
+    padding: 12px 8px;
+  }
+
+  .fluxplay-value {
+    font-size: 0.75rem;
+    background: linear-gradient(135deg, rgba(var(--v-theme-primary), 0.12) 0%, rgba(var(--v-theme-primary), 0.08) 100%) !important;
+    font-weight: 700;
+    border-left: 2px solid rgb(var(--v-theme-primary)) !important;
+    border-right: 2px solid rgb(var(--v-theme-primary)) !important;
+  }
+
+  .comparison-row:last-child .fluxplay-value {
+    border-bottom: 2px solid rgb(var(--v-theme-primary)) !important;
+  }
+
+  .crown-icon {
+    font-size: 16px !important;
   }
 
   .question-text {

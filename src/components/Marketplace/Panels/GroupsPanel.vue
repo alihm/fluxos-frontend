@@ -88,10 +88,10 @@ const panelStyle = computed(() => {
   const style = {
     padding: props.panel.padding ?
       `${props.panel.padding.top}px ${props.panel.padding.right}px ${props.panel.padding.bottom}px ${props.panel.padding.left}px`
-      : '8px 24px',
+      : '0',
   }
   console.log('🎨 GroupsPanel style:', style, 'Panel config:', props.panel)
-  
+
   return style
 })
 
@@ -116,7 +116,7 @@ const handleInstall = data => {
 
 <style scoped>
 .groups-panel {
-  margin-bottom: 8px;
+  margin-bottom: 0;
 }
 
 .panel-title {

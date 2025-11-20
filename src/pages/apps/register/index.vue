@@ -2,15 +2,6 @@
   <div class="app-register-landing">
     <!-- Content -->
     <div class="landing-content">
-      <!-- Breadcrumb Navigation -->
-      <BreadcrumbNav
-        :items="[
-          { text: 'Home', to: '/' },
-          { text: 'Applications', to: '/apps/management' },
-          { text: 'Deploy New App' }
-        ]"
-      />
-
       <!-- Hero Section -->
       <HeroSection
         :title="t('pages.apps.register.landing.title')"
@@ -22,6 +13,7 @@
         show-cta
         :cta-text="t('pages.apps.register.landing.getStarted')"
         cta-icon="mdi-rocket-launch"
+        cta-color="primary"
         :cta-to="{ name: 'apps-register-configure' }"
       />
 
@@ -83,11 +75,11 @@
                   <VIcon v-if="provider.highlighted" icon="mdi-star" color="warning" size="20" class="mr-2" />
                   <strong>{{ provider.name }}</strong>
                 </div>
-                <div class="comparison-cell">{{ provider.instances }}</div>
-                <div class="comparison-cell">{{ provider.cpu }}</div>
-                <div class="comparison-cell">{{ provider.ram }}</div>
-                <div class="comparison-cell">{{ provider.storage }}</div>
-                <div class="comparison-cell price-cell">
+                <div class="comparison-cell" data-label="Instances">{{ provider.instances }}</div>
+                <div class="comparison-cell" :data-label="t('pages.apps.register.landing.pricing.cpu')">{{ provider.cpu }}</div>
+                <div class="comparison-cell" :data-label="t('pages.apps.register.landing.pricing.ram')">{{ provider.ram }}</div>
+                <div class="comparison-cell" :data-label="t('pages.apps.register.landing.pricing.storage')">{{ provider.storage }}</div>
+                <div class="comparison-cell price-cell" :data-label="t('pages.apps.register.landing.pricing.pricePerMonth')">
                   <span :class="{ 'best-price': provider.highlighted }">{{ provider.price }}</span>
                 </div>
               </div>
@@ -95,14 +87,16 @@
           </div>
 
           <div class="pricing-note">
-            <VIcon icon="mdi-information" color="info" size="20" />
-            <span>{{ t('pages.apps.register.landing.pricing.note') }}</span>
+            <VIcon icon="mdi-information-outline" color="info" size="24" class="pricing-note-icon" />
+            <div class="pricing-note-text">
+              <span v-html="t('pages.apps.register.landing.pricing.note').replace('. ', '.<br>')"></span>
+            </div>
           </div>
         </VCardText>
       </VCard>
 
       <!-- Trustpilot Reviews Section -->
-      <TrustpilotPanel :stars="4.5" :star-size="32" :show-rating-label="true" />
+      <TrustpilotPanel :star-size="32" :show-rating-label="true" :use-live-data="true" />
 
       <!-- Global Server Network Section -->
       <ServerLocationsPanel
@@ -126,7 +120,9 @@
         :subtitle="t('pages.apps.register.landing.cta.subtitle')"
         :button-text="t('pages.apps.register.landing.cta.button')"
         icon="mdi-rocket-launch-outline"
-        icon-color="primary"
+        icon-color="white"
+        card-color="primary"
+        card-variant="flat"
         button-icon="mdi-plus-circle"
         button-icon-position="start"
         :button-to="{ name: 'apps-register-configure' }"
@@ -146,6 +142,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useHead } from '@vueuse/head'
+import Api from '@/services/ApiClient'
 import ServerLocationsPanel from '@/components/Marketplace/Panels/ServerLocationsPanel.vue'
 import TrustpilotPanel from '@/components/Marketplace/Panels/TrustpilotPanel.vue'
 import FAQPanel from '@/components/Marketplace/Panels/FAQPanel.vue'
@@ -177,7 +174,7 @@ const fluxCloudPrice = ref('$8.99') // Default fallback price
 const fluxCloudPriceLoading = ref(true)
 
 // Hero subtitle
-const heroSubtitle = 'Experience the power of truly decentralized cloud computing. Deploy Docker containers, web apps, APIs, and microservices on our global decentralized network.'
+const heroSubtitle = computed(() => t('pages.apps.register.landing.subtitle'))
 
 // App types data
 const appTypes = computed(() => [
@@ -670,27 +667,57 @@ onMounted(async () => {
 .landing-content {
   max-width: 1400px;
   margin: 0 auto;
-  padding: 1rem;
+  padding: 0;
+}
+
+/* Hero section margins - must come first */
+.landing-content > :deep(.hero-section) {
+  margin: 0 !important;
+}
+
+/* Add spacing after hero section via the parent layout */
+.landing-content > :first-child {
+  margin-bottom: 2rem !important;
+}
+
+/* Consistent spacing between all sections */
+.landing-content > * {
+  margin-bottom: 2rem;
+}
+
+/* Remove bottom margin from last child */
+.landing-content > *:last-child {
+  margin-bottom: 0;
 }
 
 /* Section Cards */
 .section-card {
   margin-bottom: 2rem;
-  border-radius: 16px;
-  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.08);
+  border-radius: 16px !important;
+  border: 1px solid rgba(var(--v-theme-on-surface), 0.12) !important;
+  box-shadow: none !important;
+}
+
+.trustpilot-section {
+  padding: 0 !important;
+  border-radius: 16px !important;
+  border: 1px solid rgba(var(--v-theme-on-surface), 0.12) !important;
+  background: rgb(var(--v-theme-surface)) !important;
+  box-shadow: none !important;
 }
 
 /* First section card after hero needs top margin */
 .app-types-section {
-  margin-top: 2rem;
+  margin-top: 1rem;
 }
 
 .section-title {
   font-size: 2rem;
   font-weight: 700;
   text-align: center;
+  margin-top: 0.5rem;
   margin-bottom: 1rem;
-  color: rgb(var(--v-theme-primary));
+  color: rgb(var(--v-theme-on-surface));
 }
 
 .section-subtitle {
@@ -709,17 +736,18 @@ onMounted(async () => {
 }
 
 .app-type-card {
-  background: rgb(var(--v-theme-surface));
+  background: rgba(var(--v-theme-on-surface), 0.04);
   border-radius: 12px;
   padding: 1.5rem;
   text-align: center;
   transition: transform 0.3s, box-shadow 0.3s;
-  border: 1px solid rgba(var(--v-theme-primary), 0.1);
+  border: 1px solid rgba(var(--v-theme-on-surface), 0.12);
 }
 
 .app-type-card:hover {
   transform: translateY(-4px);
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  border-color: rgba(var(--v-theme-on-surface), 0.24);
 }
 
 .app-type-icon {
@@ -793,13 +821,23 @@ onMounted(async () => {
 
 .pricing-note {
   display: flex;
-  align-items: center;
-  gap: 0.5rem;
+  align-items: flex-start;
+  gap: 0.75rem;
   margin-top: 1.5rem;
   padding: 1rem;
   background: rgba(var(--v-theme-info), 0.1);
   border-radius: 8px;
   font-size: 0.875rem;
+  line-height: 1.6;
+}
+
+.pricing-note-icon {
+  flex-shrink: 0;
+  margin-top: 0.125rem;
+}
+
+.pricing-note-text {
+  flex: 1;
 }
 
 /* Server Network Section */
@@ -955,21 +993,30 @@ onMounted(async () => {
 
 .faq-answer :deep(strong) {
   font-weight: 600;
-  color: rgb(var(--v-theme-primary));
+  color: rgb(var(--v-theme-on-surface));
 }
 
-.faq-answer :deep(ul),
+.faq-answer :deep(ul) {
+  list-style-type: disc;
+  margin-left: 0;
+  padding-left: 24px;
+  margin-bottom: 12px;
+}
+
 .faq-answer :deep(ol) {
-  margin-left: 24px;
+  list-style-type: decimal;
+  margin-left: 0;
+  padding-left: 24px;
   margin-bottom: 12px;
 }
 
 .faq-answer :deep(li) {
   margin-bottom: 8px;
+  padding-left: 4px;
 }
 
 .faq-answer :deep(a) {
-  color: rgb(var(--v-theme-primary));
+  color: rgb(var(--v-theme-on-surface));
   text-decoration: none;
 }
 
@@ -990,17 +1037,20 @@ onMounted(async () => {
   .comparison-row {
     grid-template-columns: 1fr;
     gap: 0.5rem;
+    padding: 1.5rem 1rem;
   }
 
   .comparison-cell {
     text-align: left;
     display: flex;
     justify-content: space-between;
+    padding: 0.25rem 0;
   }
 
   .comparison-cell::before {
     content: attr(data-label);
     font-weight: 600;
+    color: rgba(var(--v-theme-on-surface), 0.7);
   }
 
   .comparison-header {
@@ -1009,7 +1059,18 @@ onMounted(async () => {
 
   .provider-cell {
     font-size: 1.125rem;
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.75rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid rgba(var(--v-theme-on-surface), 0.12);
+    justify-content: flex-start;
+  }
+
+  .provider-cell::before {
+    content: none;
+  }
+
+  .section-title {
+    font-size: 1.75rem;
   }
 }
 
@@ -1028,6 +1089,41 @@ onMounted(async () => {
 
 .trustpilot-link .trustpilot-rating-container {
   cursor: pointer;
+}
+
+/* Ensure all section components have consistent styling */
+:deep(.server-locations-panel),
+:deep(.faq-panel) {
+  padding: 0 !important;
+}
+
+:deep(.server-locations-panel .v-card),
+:deep(.faq-panel .v-card),
+:deep(.feature-showcase),
+:deep(.related-links-card),
+:deep(.trustpilot-panel) {
+  width: 100%;
+  max-width: 100%;
+  background: rgb(var(--v-theme-surface)) !important;
+  border-radius: 16px !important;
+  border: 1px solid rgba(var(--v-theme-on-surface), 0.12) !important;
+  box-shadow: none !important;
+  margin-bottom: 2rem !important;
+}
+
+/* Remove bottom margin from last section (Explore More) */
+:deep(.related-links-card:last-child) {
+  margin-bottom: 0 !important;
+}
+
+/* CTA Section - Force button styling */
+:deep(.cta-section .v-btn) {
+  background-color: white !important;
+  color: rgb(var(--v-theme-primary)) !important;
+}
+
+:deep(.cta-section .v-btn .v-icon) {
+  color: rgb(var(--v-theme-primary)) !important;
 }
 
 @media (max-width: 600px) {

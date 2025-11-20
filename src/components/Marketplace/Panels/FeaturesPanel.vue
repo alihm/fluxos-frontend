@@ -1,31 +1,18 @@
 <template>
   <div class="features-panel" :style="panelStyle">
-    <VCard class="features-card" elevation="0">
-      <VCardText>
-        <h2 v-if="titleText" class="features-title">{{ titleText }}</h2>
-        <p v-if="subtitleText" class="features-subtitle">{{ subtitleText }}</p>
-
-        <div class="features-grid">
-          <div
-            v-for="(feature, index) in featuresList"
-            :key="index"
-            class="feature-item"
-          >
-            <div class="feature-icon-wrapper">
-              <VIcon :icon="feature.icon || 'mdi-star'" size="40" :color="feature.color || 'primary'" />
-            </div>
-            <h3 class="feature-title">{{ feature.title }}</h3>
-            <p class="feature-description">{{ feature.description }}</p>
-          </div>
-        </div>
-      </VCardText>
-    </VCard>
+    <FeatureShowcase
+      :title="titleText"
+      :subtitle="subtitleText"
+      :items="featuresList"
+      grid-min-width="280px"
+    />
   </div>
 </template>
 
 <script setup>
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
+import FeatureShowcase from '@/components/FeatureShowcase.vue'
 
 const props = defineProps({
   panel: {
@@ -137,22 +124,24 @@ const featuresList = computed(() => {
 const panelStyle = computed(() => ({
   padding: props.panel.padding
     ? `${props.panel.padding.top}px ${props.panel.padding.right}px ${props.panel.padding.bottom}px ${props.panel.padding.left}px`
-    : '8px 24px',
+    : '0',
   background: props.panel.background || 'transparent',
   borderRadius: props.panel.cornerRadius ? `${props.panel.cornerRadius}px` : '0',
-  marginBottom: '15px',
 }))
 </script>
 
 <style scoped>
 .features-panel {
-  margin-bottom: 8px;
+  margin-bottom: 0;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
 }
 
 .features-card {
-  border-radius: 16px;
-  background: rgba(var(--v-theme-surface), 0.6);
-  backdrop-filter: blur(10px);
+  border-radius: 16px !important;
+  border: 1px solid rgba(var(--v-theme-on-surface), 0.12) !important;
+  box-shadow: none !important;
+  background: rgb(var(--v-theme-surface)) !important;
 }
 
 .features-title {
@@ -249,7 +238,7 @@ const panelStyle = computed(() => ({
 
 @media (max-width: 600px) {
   .features-panel {
-    padding: 8px 16px !important;
+    padding: 8px 0 !important;
   }
 
   .features-grid {

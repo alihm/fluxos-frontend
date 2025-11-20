@@ -1,52 +1,48 @@
 <template>
   <div class="cost-calculator-page">
     <!-- Page Header -->
-    <VCard
-      flat
-      class="mb-6 cost-calculator-intro-card"
+    <a
+      href="https://runonflux.com"
+      target="_blank"
+      rel="noopener noreferrer"
+      class="info-link"
     >
-      <VCardText class="pa-6 pa-sm-8">
-        <div class="d-flex align-center flex-column flex-sm-row text-center text-sm-start mb-3">
-          <VAvatar
-            size="72"
-            color="primary"
-            variant="tonal"
-            class="mb-4 mb-sm-0 me-sm-4"
-          >
-            <VIcon
-              icon="tabler-calculator"
-              size="40"
-            />
-          </VAvatar>
-          <div>
-            <h1 class="text-h4 text-sm-h3 font-weight-bold mb-2">
-              {{ t('pages.costCalculator.title') }}
-            </h1>
-            <p class="text-body-1 text-medium-emphasis mb-0">
-              {{ t('pages.costCalculator.subtitle') }}
-            </p>
+      <VCard
+        flat
+        class="mb-6 cost-calculator-intro-card"
+      >
+        <VCardText class="pa-6 pa-sm-8">
+          <div class="d-flex align-center flex-column flex-sm-row text-center text-sm-start mb-3">
+            <VAvatar
+              size="72"
+              color="primary"
+              variant="tonal"
+              class="mb-4 mb-sm-0 me-sm-4"
+            >
+              <VIcon
+                icon="tabler-calculator"
+                size="40"
+              />
+            </VAvatar>
+            <div>
+              <h1 class="text-h4 text-sm-h3 font-weight-bold mb-2">
+                {{ t('pages.costCalculator.title') }}
+              </h1>
+              <p class="text-body-1 text-medium-emphasis mb-0">
+                {{ t('pages.costCalculator.subtitle') }}
+              </p>
+            </div>
           </div>
-        </div>
-        <p class="text-body-1 mb-3" style="max-width: 900px;">
-          {{ t('pages.costCalculator.description') }}
-        </p>
-        <a
-          href="https://runonflux.com"
-          target="_blank"
-          rel="noopener noreferrer"
-          class="learn-more-link"
-        >
-          <VBtn
-            color="primary"
-            variant="tonal"
-            prepend-icon="mdi-open-in-new"
-            size="small"
-          >
+          <p class="text-body-1 mb-3" style="max-width: 900px;">
+            {{ t('pages.costCalculator.description') }}
+          </p>
+          <div class="learn-more">
+            <VIcon size="18" class="mr-1">mdi-open-in-new</VIcon>
             {{ t('pages.costCalculator.learnMore') }}
-          </VBtn>
-        </a>
-      </VCardText>
-    </VCard>
+          </div>
+        </VCardText>
+      </VCard>
+    </a>
 
     <VRow>
       <!-- Calculator Form -->
@@ -54,7 +50,7 @@
         cols="12" 
         md="6"
       >
-        <VCard>
+        <VCard class="calculator-card">
           <VCardTitle class="bg-primary text-white">{{ t('pages.costCalculator.configuration') }}</VCardTitle>
           <VCardText class="pt-6">
             <!-- Instances -->
@@ -450,7 +446,7 @@
         cols="12" 
         md="6"
       >
-        <VCard>
+        <VCard class="calculator-card">
           <VCardTitle class="bg-primary text-white">{{ t('pages.costCalculator.presetConfigurations') }}</VCardTitle>
           <VCardText class="pt-6">
             <VTable 
@@ -623,7 +619,7 @@ const { t } = useI18n()
 // SEO meta tags and structured data
 const pageUrl = 'https://home.runonflux.io/cost-calculator'
 const title = 'App Hosting Cost Calculator - Starting at $0.99/month | Flux Network'
-const description = 'Calculate exact costs for hosting your applications on Flux decentralized cloud. Transparent pricing starting at $0.99/month. Deploy Docker containers, web apps, APIs, databases, and microservices with pay-as-you-go pricing. No hidden fees, no vendor lock-in.'
+const description = 'Calculate app hosting costs on Flux decentralized cloud. Transparent pricing from $0.99/month for Docker, web apps, APIs, databases. Pay-as-you-go, no hidden fees.'
 const imageUrl = 'https://home.runonflux.io/banner/FluxHostingBanner.png'
 
 // WebApplication structured data
@@ -1375,18 +1371,44 @@ definePage({
 <style scoped>
 .cost-calculator-intro-card {
   border-radius: 16px;
-  background: linear-gradient(135deg, rgba(var(--v-theme-primary), 0.05) 0%, rgba(var(--v-theme-success), 0.05) 100%);
-  border: 1px solid rgba(var(--v-theme-primary), 0.1);
+  border: 2px solid rgba(var(--v-theme-on-surface), 0.12) !important;
+  box-shadow: none !important;
   transition: all 0.3s ease;
+  cursor: pointer;
 }
 
-.cost-calculator-intro-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 16px rgba(var(--v-theme-primary), 0.1);
-}
-
-.learn-more-link {
+.info-link {
   text-decoration: none;
+  color: inherit;
+}
+
+.info-link:hover .cost-calculator-intro-card {
+  transform: translateY(-4px);
+  border-color: rgba(var(--v-theme-primary), 0.3) !important;
+  box-shadow: 0 4px 12px rgba(var(--v-theme-primary), 0.1) !important;
+}
+
+.learn-more {
+  display: flex;
+  align-items: center;
+  margin-top: 12px;
+  color: rgba(var(--v-theme-on-surface), 0.6);
+  font-size: 0.875rem;
+  font-weight: 600;
+  transition: color 0.2s ease;
+}
+
+.info-link:hover .learn-more {
+  color: rgba(var(--v-theme-on-surface), 0.8);
+}
+
+.calculator-card {
+  border-radius: 16px !important;
+}
+
+.calculator-card :deep(.v-card-title.bg-primary) {
+  border-top-left-radius: 14px !important;
+  border-top-right-radius: 14px !important;
 }
 
 /* Hide number input spinners */
@@ -1437,7 +1459,7 @@ definePage({
 }
 
 .cost-calculator-page {
-  padding: 5px 24px 24px 24px;
+  padding: 0;
 }
 
 .cursor-pointer {

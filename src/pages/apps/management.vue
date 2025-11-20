@@ -1,28 +1,25 @@
 <template>
   <div>
     <!-- Flux Cloud Info Card -->
-    <VCard
-      class="mb-6"
-      variant="tonal"
-      color="primary"
-    >
+    <VCard class="mb-4 management-intro-card">
       <VCardText>
-        <div class="d-flex align-start gap-4">
-          <VIcon
-            icon="mdi-cloud-check-outline"
+        <div class="d-flex align-center mb-3">
+          <VAvatar
             size="48"
             color="primary"
-            class="mt-1"
-          />
-          <div class="flex-grow-1">
-            <h2 class="text-h5 mb-2">
-              {{ t('myApps.fluxCloudTitle') }}
-            </h2>
-            <p class="text-body-1 mb-0">
-              {{ t('myApps.fluxCloudDescription') }}
-            </p>
+            variant="tonal"
+            class="mr-3"
+          >
+            <VIcon size="28">mdi-cloud-check-outline</VIcon>
+          </VAvatar>
+          <div>
+            <h2 class="text-h4 mb-1">{{ t('myApps.fluxCloudTitle') }}</h2>
+            <p class="text-body-2 mb-0 text-medium-emphasis">{{ t('myApps.fluxCloudSubtitle') }}</p>
           </div>
         </div>
+        <p class="text-body-1 mb-0">
+          {{ t('myApps.fluxCloudDescription') }}
+        </p>
       </VCardText>
     </VCard>
 
@@ -490,6 +487,38 @@ onMounted(async () => {
   /* Optional: reduce tab content padding */
   .v-tab {
     padding: 0 6px !important;
+  }
+}
+
+/* Management intro card styling */
+.management-intro-card {
+  border-radius: 16px !important;
+  border: 1px solid rgba(var(--v-theme-on-surface), 0.12) !important;
+  box-shadow: none !important;
+}
+
+.management-intro-card h2 {
+  line-height: 1.2;
+  word-break: keep-all;
+}
+
+/* Mobile responsive adjustments */
+@media (max-width: 599px) {
+  .management-intro-card h2 {
+    font-size: 1.5rem !important;
+  }
+
+  .management-intro-card .v-avatar {
+    width: 48px !important;
+    height: 48px !important;
+  }
+
+  .management-intro-card .v-icon {
+    font-size: 24px !important;
+  }
+
+  .management-intro-card .v-card-text {
+    padding: 16px !important;
   }
 }
 </style>

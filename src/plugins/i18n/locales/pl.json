@@ -61,7 +61,22 @@
       "tier": "Poziom",
       "price": "Cena",
       "total": "Suma",
-      "amount": "Kwota"
+      "amount": "Kwota",
+      "free": "Darmowy",
+      "memory": "Pamięć",
+      "storage": "Pamięć masowa",
+      "screenshots": "Zrzuty ekranu",
+      "about": "O aplikacji",
+      "developer": "Deweloper",
+      "lastUpdate": "Ostatnia aktualizacja",
+      "downloads": "Pobrania",
+      "links": "Linki",
+      "website": "Strona internetowa",
+      "sourceCode": "Kod źródłowy",
+      "support": "Wsparcie",
+      "plan": "Plan",
+      "billing": "Rozliczenia",
+      "monthly": "Miesięcznie"
     },
     "theme": {
       "light": "Jasny",
@@ -176,6 +191,11 @@
       "years": "lata | lat",
       "ago": "temu",
       "now": "teraz"
+    },
+    "units": {
+      "vCores": "vCores",
+      "mb": "MB",
+      "gb": "GB"
     }
   },
   "menu": {
@@ -274,7 +294,8 @@
   },
   "myApps": {
     "fluxCloudTitle": "Flux Cloud - Zdecentralizowane Zarządzanie Aplikacjami",
-    "fluxCloudDescription": "Monitoruj i zarządzaj wszystkimi swoimi aplikacjami w kontenerach Docker działającymi w zdecentralizowanej sieci chmurowej Flux. Przeglądaj status w czasie rzeczywistym, zużycie zasobów i metryki wydajności swoich rozproszonych aplikacji wdrożonych w naszej globalnej infrastrukturze opartej na blockchain. Kliknij dowolną aplikację, aby uzyskać dostęp do szczegółowych kontroli zarządzania i analiz."
+    "fluxCloudDescription": "Monitoruj i zarządzaj wszystkimi swoimi aplikacjami w kontenerach Docker działającymi w zdecentralizowanej sieci chmurowej Flux. Przeglądaj status w czasie rzeczywistym, zużycie zasobów i metryki wydajności swoich rozproszonych aplikacji wdrożonych w naszej globalnej infrastrukturze opartej na blockchain. Kliknij dowolną aplikację, aby uzyskać dostęp do szczegółowych kontroli zarządzania i analiz.",
+    "fluxCloudSubtitle": "Zdecentralizowane Zarządzanie Aplikacjami"
   },
   "sections": {
     "dashboard": {
@@ -369,7 +390,7 @@
     "fileUpload": {
       "dropFilesHere": "Upuść pliki tutaj lub",
       "clickToUpload": "kliknij, aby przesłać",
-      "fileSizeLimit": "(Maksymalny rozmiar pliku to 5GB)",
+      "fileSizeLimit": "(Maksymalny rozmiar pliku to 5 GB)",
       "uploadFiles": "Prześlij Pliki",
       "alreadyInQueue": "'{fileName}' jest już w kolejce przesyłania",
       "uploadSuccess": "'{fileName}' został przesłany",
@@ -531,7 +552,7 @@
       "removeBackupFile": "Usuń plik kopii zapasowej",
       "selectComponentsToUpload": "Wybierz komponenty aplikacji, które chcesz przesłać",
       "chooseStorageMethod": "Wybierz metodę przechowywania",
-      "freeFluxDriveInfo": "Darmowe kopie zapasowe FluxDrive! Do 10GB na użytkownika",
+      "freeFluxDriveInfo": "Darmowe kopie zapasowe FluxDrive! Do 10 GB łącznie na użytkownika",
       "fluxDriveDownloadInfo": "Kopie zapasowe FluxDrive można pobrać na stronie Przywracania",
       "uploadSelectedComponents": "Prześlij wybrane komponenty",
       "selectRestoreMethod": "Wybierz metodę przywracania",
@@ -1178,7 +1199,9 @@
       "updateDeployedSuccessfully": "Aktualizacja wdrożona pomyślnie!",
       "paymentConfirmedSpecUpdated": "Płatność potwierdzona! Specyfikacja Twojej aplikacji została zaktualizowana.",
       "testPaymentConfirmed": "TEST: Płatność potwierdzona! Twoja aplikacja jest teraz aktywna i działa.",
-      "sspPaymentInitiated": "Płatność SSP zainicjowana: {txid}"
+      "sspPaymentInitiated": "Płatność SSP zainicjowana: {txid}",
+      "payment": "Płatność",
+      "testAndPay": "Testuj i Płać"
     },
     "statusBar": {
       "backend": "Serwer",
@@ -1317,6 +1340,14 @@
           "title": "Więcej Gier do Hostowania",
           "subtitle": "Odkryj inne popularne serwery gier, które możesz wdrożyć na FluxCloud",
           "startingAt": "Począwszy od"
+        },
+        "genericFAQPanel": {
+          "subtitle": "Najczęściej zadawane pytania dotyczące hostingu w Flux Cloud",
+          "title": "Najczęściej Zadawane Pytania"
+        },
+        "whyFluxPanel": {
+          "subtitle": "Odkryj zalety zdecentralizowanej infrastruktury chmurowej opartej na technologii Web3",
+          "title": "Dlaczego Hostować w Flux Cloud"
         }
       },
       "installDialog": {
@@ -1331,6 +1362,11 @@
         "instances": "{count} Instancja | {count} Instancje",
         "estimatedPricing": "Szacowany koszt",
         "loading": "Ładowanie...",
+        "wordPressPlanTitle": "WordPress {planName}",
+        "walletAltZelcore": "Flux ID (ZelCore)",
+        "walletAltSSP": "SSP",
+        "walletAltMetaMask": "MetaMask",
+        "walletAltWalletConnect": "WalletConnect",
         "agreeToTerms": "Zgadzam się z <a href=\"https://runonflux.io/terms\" target=\"_blank\" rel=\"noopener noreferrer\" style=\"color: inherit; text-decoration: none; font-weight: bold;\">Warunkami korzystania</a> i <a href=\"https://runonflux.io/privacy\" target=\"_blank\" rel=\"noopener noreferrer\" style=\"color: inherit; text-decoration: none; font-weight: bold;\">Polityką prywatności</a>",
         "oneMonth": "1 Miesiąc",
         "threeMonths": "3 Miesiące",
@@ -1692,7 +1728,7 @@
           "features": {
             "0": "Płatności PayPal",
             "1": "Logiczne przeskoki",
-            "2": "Przesyłanie plików z 5GB pamięci",
+            "2": "Przesyłanie plików z pamięcią 5 GB",
             "3": "Wsparcie dla niestandardowej domeny",
             "4": "Integracja ze Stripe"
           }
@@ -1846,6 +1882,10 @@
         "uploadWait": "Proszę czekać...",
         "uploadProgress": "Postęp: {progress}%",
         "fileOfTotal": "Plik {current} z {total}",
+        "debugInfo": "Info Debugowania:",
+        "displayLogicDebug": "Debug Logiki Wyświetlania:",
+        "versionCommentPlaceholder": "np. Poprawki błędów, nowe funkcje...",
+        "commentValidation": "Komentarz musi mieć mniej niż 100 znaków",
         "downloading": "Pobieranie",
         "downloadProgress": "Postęp: {progress}%",
         "confirmDelete": "Potwierdź Usunięcie",
@@ -2126,7 +2166,15 @@
             "walletInfo": "Informacje o portfelu",
             "errorStatus": "Status błędów",
             "noErrors": "Nie wykryto błędów",
-            "noInfoLoaded": "Brak załadowanych informacji o daemonie. Kliknij \"Odśwież\" aby pobrać."
+            "noInfoLoaded": "Brak załadowanych informacji o daemonie. Kliknij \"Odśwież\" aby pobrać.",
+            "difficulty": "Trudność",
+            "timeOffset": "Przesunięcie czasu",
+            "testnet": "Testnet",
+            "balance": "Saldo",
+            "keyPoolSize": "Rozmiar puli kluczy",
+            "keyPoolOldest": "Najstarsza pula kluczy",
+            "payTxFee": "Opłata transakcyjna",
+            "relayFee": "Opłata przekazywania"
           }
         },
         "benchmark": {
@@ -2284,6 +2332,11 @@
           "remove": "Usuń",
           "visit": "Odwiedź"
         },
+        "searchIpPlaceholder": "Szukaj IP...",
+        "persistentStorage": "Pamięć Trwała",
+        "persistentStorageTooltip": "Śledzi pamięć, która utrzymuje się po ponownym uruchomieniu kontenera. Zapobiega nadmiernemu użyciu dysku.",
+        "rootFilesystem": "System Plików Root (rootfs)",
+        "rootFilesystemTooltip": "Tymczasowa pamięć kontenera. Monitorowanie rootfs pomaga uniknąć problemów z przestrzenią.",
         "confirmButton": "Zarządzaj",
         "dialog": {
           "installingTitle": "Instalowanie aplikacji...",
@@ -2420,6 +2473,172 @@
           "name": "Nazwa",
           "status": "Status",
           "description": "Opis"
+        }
+      },
+      "register": {
+        "landing": {
+          "appTypes": {
+            "api": {
+              "description": "Twórz i wdrażaj interfejsy API RESTful, punkty końcowe GraphQL i architektury mikrousług z łatwością.",
+              "title": "API i Mikrousługi"
+            },
+            "blockchain": {
+              "description": "Uruchamiaj węzły blockchain, walidatory i aplikacje DeFi w naszej zdecentralizowanej infrastrukturze.",
+              "title": "Węzły Blockchain"
+            },
+            "custom": {
+              "description": "Wdrażaj dowolny kontener Docker. Modele uczenia maszynowego, potoki przetwarzania danych lub niestandardowe aplikacje biznesowe.",
+              "title": "Aplikacje Niestandardowe"
+            },
+            "database": {
+              "description": "Hostuj PostgreSQL, MongoDB, MySQL i inne usługi baz danych z trwałym przechowywaniem.",
+              "title": "Bazy Danych"
+            },
+            "docker": {
+              "description": "Aplikacje wielokontenerowe z obsługą Docker Compose. Złożone stosy stały się proste.",
+              "title": "Docker Compose"
+            },
+            "subtitle": "FluxCloud obsługuje każdą aplikację Dockera. Od prostych aplikacji internetowych po złożone wdrożenia wielokontenerowe.",
+            "title": "Co Możesz Wdrożyć?",
+            "web": {
+              "description": "Wdrażaj aplikacje internetowe full-stack z usługami frontend i backend. Idealne dla React, Vue, Angular, Next.js i innych.",
+              "title": "Aplikacje Internetowe"
+            }
+          },
+          "benefits": {
+            "affordable": {
+              "description": "Zaoszczędź znacznie w porównaniu do AWS, Google Cloud lub Azure. Brak ukrytych opłat, przejrzyste ceny.",
+              "title": "70% Bardziej Przystępny"
+            },
+            "censorship": {
+              "description": "Zbudowany na zasadach Web3. Twoje aplikacje pozostają dostępne i nie mogą być usunięte przez żaden pojedynczy podmiot.",
+              "title": "Odporny na Censurę"
+            },
+            "decentralized": {
+              "description": "Brak pojedynczego punktu awarii. Twoje aplikacje działają na tysiącach niezależnie zarządzanych węzłów na całym świecie.",
+              "title": "Prawdziwie Zdecentralizowany"
+            },
+            "freeDomain": {
+              "description": "Automatyczne zarządzanie domenami i certyfikaty SSL w cenie. Wskaż swoją domenę, a my zajmiemy się resztą bez konfiguracji.",
+              "title": "Bezpłatna Usługa Zarządzania Domeną"
+            },
+            "global": {
+              "description": "Wdrażaj w ponad 62 krajach z automatycznym routingiem geograficznym dla optymalnej wydajności wszędzie.",
+              "title": "Globalna Dystrybucja"
+            },
+            "guarantee": {
+              "description": "Niezadowolony? Otrzymasz pełny zwrot pieniędzy w ciągu 30 dni, bez zadawania pytań. Jesteśmy pewni, że pokochasz naszą usługę.",
+              "title": "30-Dniowa Gwarancja Zwrotu Pieniędzy"
+            },
+            "loadBalancer": {
+              "description": "Wbudowany load balancer dla wszystkich instancji. Automatyczna dystrybucja ruchu zapewnia optymalną wydajność i niezawodność.",
+              "title": "Zintegrowany Load Balancer"
+            },
+            "noVendor": {
+              "description": "Standardowe kontenery Docker oznaczają, że możesz migrować w dowolnym momencie. Pełna kontrola nad aplikacjami i danymi.",
+              "title": "Bez Uzależnienia od Dostawcy"
+            },
+            "scalable": {
+              "description": "Skaluj od 3 do ponad 100 instancji natychmiast. Płać tylko za to, czego używasz, z elastyczną alokacją zasobów.",
+              "title": "Natychmiast Skalowalny"
+            },
+            "title": "Dlaczego Wybrać FluxCloud?"
+          },
+          "cta": {
+            "button": "Skonfiguruj Swoje Wdrożenie",
+            "subtitle": "Dołącz do tysięcy programistów już budujących na FluxCloud. Zacznij wdrażać swoje aplikacje już dziś.",
+            "title": "Gotowy do Wdrożenia?"
+          },
+          "documentation": "Zobacz Dokumentację",
+          "faq": {
+            "questions": {
+              "howToDeploy": {
+                "answer": "Wdrażanie w FluxCloud jest proste:<ol><li>Kliknij \"Rozpocznij Wdrażanie\", aby uzyskać dostęp do strony konfiguracji</li><li>Określ swój obraz Docker i konfigurację</li><li>Wybierz swoje zasoby (CPU, RAM, pamięć masowa)</li><li>Wybierz liczbę instancji i lokalizacje wdrożenia</li><li>Wdróż, a Twoja aplikacja będzie dostępna w ciągu kilku minut</li></ol><p>Obsługujemy obrazy Docker z dowolnego rejestru, w tym Docker Hub, GitHub Container Registry i rejestrów prywatnych.</p>",
+                "question": "Jak wdrożyć aplikację?"
+              },
+              "pricing": {
+                "answer": "FluxCloud oferuje przejrzyste ceny typu pay-as-you-go od zaledwie $0.99/miesiąc dla podstawowych konfiguracji. Cena zależy od:<ul><li>Przydzielonych rdzeni CPU</li><li>Ilości RAM</li><li>Rozmiaru pamięci masowej</li><li>Liczby instancji</li><li>Wymagań dotyczących portów</li></ul><p>Użyj naszego <a href=\"/cost-calculator\" target=\"_blank\">Kalkulatora Kosztów</a>, aby oszacować dokładne ceny dla swoich potrzeb. Brak ukrytych opłat, brak niespodzianek.</p>",
+                "question": "Ile to kosztuje?"
+              },
+              "requirements": {
+                "answer": "Aby wdrażać aplikacje w FluxCloud potrzebujesz:<ul><li><strong>Flux ID:</strong> Utwórz je za darmo używając dowolnego portfela kompatybilnego z Flux</li><li><strong>Obraz Docker:</strong> Twoja aplikacja spakowana jako kontener Docker</li><li><strong>Tokeny FLUX lub USD:</strong> Do płacenia za hosting (akceptujemy karty kredytowe przez Stripe i PayPal)</li><li><strong>Minimum 3 instancje:</strong> Dla decentralizacji i redundancji</li></ul><p>Minimalne zasoby na instancję: 0.1 rdzeni CPU, 100 MB RAM, 1 GB pamięci masowej</p>",
+                "question": "Jakie są wymagania do wdrożenia?"
+              },
+              "security": {
+                "answer": "FluxCloud implementuje wiele warstw bezpieczeństwa:<ul><li><strong>Izolacja Kontenerów:</strong> Każda aplikacja działa we własnym izolowanym kontenerze Docker</li><li><strong>Szyfrowany Transfer:</strong> Wszystkie dane w tranzycie są szyfrowane</li><li><strong>Ochrona DDoS:</strong> Wbudowana ochrona przed atakami</li><li><strong>Regularne Audyty:</strong> Kod i infrastruktura są regularnie audytowane</li><li><strong>Zdecentralizowany:</strong> Brak pojedynczego punktu awarii</li><li><strong>Opcje Prywatne:</strong> Tryb korporacyjny dla zwiększonej prywatności</li></ul><p>Zachowujesz pełną kontrolę nad kodem aplikacji i danymi.</p>",
+                "question": "Jak bezpieczny jest FluxCloud?"
+              },
+              "support": {
+                "answer": "Oferujemy wiele kanałów wsparcia:<ul><li><strong>Dokumentacja:</strong> Kompleksowe przewodniki na <a href=\"https://docs.runonflux.io\" target=\"_blank\">docs.runonflux.io</a></li><li><strong>Społeczność Discord:</strong> Aktywne wsparcie społeczności 24/7</li><li><strong>Wsparcie E-mail:</strong> Bezpośrednia pomoc od naszego zespołu</li><li><strong>System Zgłoszeń:</strong> Śledź problemy na <a href=\"https://support.runonflux.io\" target=\"_blank\">support.runonflux.io</a></li><li><strong>Asystent AI:</strong> Wbudowany pomocnik AI dla szybkich pytań</li></ul>",
+                "question": "Jaki rodzaj wsparcia jest dostępny?"
+              },
+              "whatIsFlux": {
+                "answer": "FluxCloud to zdecentralizowana platforma cloud computing zasilana technologią Web3. W przeciwieństwie do tradycyjnych dostawców chmury, którzy polegają na scentralizowanych centrach danych, FluxCloud rozprowadza Twoje aplikacje na ponad 13 000 niezależnie zarządzanych węzłach w ponad 62 krajach. Zapewnia to lepszą redundancję, odporność na censurę i znacznie niższe koszty.",
+                "question": "Czym jest FluxCloud?"
+              }
+            },
+            "title": "Najczęściej Zadawane Pytania"
+          },
+          "features": {
+            "monitoring": {
+              "description": "Śledź CPU, RAM, pamięć masową i użycie sieci w czasie rzeczywistym. Szczegółowe logi i metryki w cenie.",
+              "title": "Monitorowanie w Czasie Rzeczywistym"
+            },
+            "performance": {
+              "description": "Pamięć SSD/NVMe, sieci o dużej przepustowości i zoptymalizowany routing zapewniają szybkie działanie aplikacji wszędzie.",
+              "title": "Wysoka Wydajność"
+            },
+            "redundancy": {
+              "description": "Wiele instancji na różnych węzłach zapewnia 99.9% dostępności z automatycznym przełączaniem awaryjnym.",
+              "title": "Automatyczna Redundancja"
+            },
+            "security": {
+              "description": "Wbudowana ochrona DDoS, szyfrowany transfer danych i izolowane środowiska kontenerów.",
+              "title": "Bezpieczny z Założenia"
+            },
+            "support": {
+              "description": "Społeczność Discord, dokumentacja i system zgłoszeń dostępny całą dobę.",
+              "title": "Wsparcie 24/7"
+            },
+            "title": "Funkcje Klasy Korporacyjnej",
+            "updates": {
+              "description": "Aktualizuj swoje aplikacje bez przerw, korzystając z naszej strategii wdrażania stopniowego.",
+              "title": "Aktualizacje Bez Przestojów"
+            }
+          },
+          "getStarted": "Rozpocznij Wdrażanie",
+          "pricing": {
+            "cpu": "CPU",
+            "note": "Ceny są przybliżone i oparte na publicznie dostępnych cenach dla podobnych konfiguracji. FluxCloud oferuje do 70% oszczędności w porównaniu do tradycyjnych dostawców chmury.",
+            "pricePerMonth": "Cena/Miesiąc",
+            "provider": "Dostawca",
+            "ram": "RAM",
+            "storage": "Pamięć Masowa",
+            "subtitle": "Zobacz, jak FluxCloud wypada w porównaniu z tradycyjnymi dostawcami chmury. Te same zasoby, ułamek kosztów.",
+            "title": "Przejrzyste i Przystępne Ceny"
+          },
+          "relatedLinks": {
+            "calculator": "Kalkulator Kosztów",
+            "calculatorDesc": "Oszacuj koszty hostingu",
+            "gaming": "Serwery Gier",
+            "gamingDesc": "Hostuj swoje ulubione serwery gier",
+            "marketplace": "Marketplace",
+            "marketplaceDesc": "Przeglądaj prekonfigurowane aplikacje",
+            "title": "Odkryj Więcej w FluxCloud",
+            "wordpress": "Hosting WordPress",
+            "wordpressDesc": "Wdrażaj strony WordPress w FluxCloud"
+          },
+          "serverNetwork": {
+            "activeServers": "Aktywne Serwery",
+            "countries": "Kraje",
+            "coverage": "Zasięg",
+            "global": "Globalny",
+            "noData": "Dane mapy serwerów są obecnie niedostępne",
+            "subtitle": "Twoje aplikacje wdrożone w globalnej zdecentralizowanej infrastrukturze z węzłami na każdym kontynencie.",
+            "title": "Globalna Sieć Serwerów"
+          },
+          "subtitle": "Doświadcz mocy prawdziwie zdecentralizowanego cloud computing. Wdrażaj kontenery Docker, aplikacje internetowe, API i mikrousługi w naszej globalnej sieci ponad 13 000 węzłów w ponad 62 krajach.",
+          "title": "Wdróż Swoją Aplikację w FluxCloud"
         }
       }
     },
@@ -2602,8 +2821,8 @@
           "subtitle": "Prawdziwie zdecentralizowana infrastruktura",
           "description": "FluxCloud obsługuje największą na świecie zdecentralizowaną sieć infrastruktury chmurowej, z węzłami FluxNodes rozproszonymi na wszystkich kontynentach i setkami dostawców hostingu. Ta różnorodność geograficzna zapewnia właścicielom aplikacji niezrównane korzyści: niskie opóźnienia dzięki przetwarzaniu brzegowemu, wysoką redundancję i tolerancję błędów, odporność na censurę oraz prawdziwą decentralizację. Twoje aplikacje działają na prawdziwym, niezależnie obsługiwanym sprzęcie—nie w scentralizowanych centrach danych."
         },
-        "geographicTitle": "Lokalizacje geograficzne ({count})",
-        "providersTitle": "Dostawcy ({count})",
+        "geographicTitle": "Lokalizacje geograficzne",
+        "providersTitle": "Dostawcy",
         "noGeographicData": "Brak dostępnych danych geograficznych.",
         "noProviderData": "Brak dostępnych danych o dostawcach.",
         "unknown": "Nieznany"
@@ -2838,7 +3057,21 @@
           },
           "content": {
             "title": "Profesjonalny Hosting Serwerów Gier Made Simple",
-            "body": "<p><strong>FluxPlay</strong> rewolucjonizuje hosting serwerów gier, łącząc moc zdecentralizowanej infrastruktury z prostotą tradycyjnego hostingu. Niezależnie od tego, czy hostujesz serwery <strong>Minecraft</strong>, <strong>Palworld</strong>, <strong>Factorio</strong>, <strong>Satisfactory</strong>, czy <strong>Enshrouded</strong>, nasza platforma zapewnia niezrównaną wydajność i niezawodność.</p><p>Zbudowany na <strong>FluxCloud</strong>, FluxPlay zapewnia hosting gier klasy korporacyjnej z automatycznym skalowaniem, dystrybucją geograficzną i bezpieczeństwem klasy wojskowej. Nasza zdecentralizowana architektura gwarantuje, że serwer gry pozostanie online, nawet jeśli pojedyncze węzły zawiodą, zapewniając lepszy uptime niż tradycyjni dostawcy scentralizowanego hostingu.</p><p>Dzięki natychmiastowemu wdrożeniu, przejrzystym cenom i wbudowanej ochronie DDoS, FluxPlay to nowoczesne rozwiązanie dla graczy, społeczności i administratorów serwerów, którzy wymagają najlepszego.</p>"
+            "features": {
+              "decentralized": {
+                "description": "Zbudowany na FluxCloud, nasza platforma zapewnia hosting gier klasy korporacyjnej z automatycznym skalowaniem i dystrybucją geograficzną. Nasza zdecentralizowana architektura zapewnia, że serwer gry pozostanie online nawet w przypadku awarii poszczególnych węzłów, zapewniając lepszy uptime niż tradycyjni dostawcy scentralizowanego hostingu.",
+                "title": "Zdecentralizowana Infrastruktura Klasy Korporacyjnej"
+              },
+              "deployment": {
+                "description": "Wdróż swój serwer gier w mniej niż 30 sekund dzięki naszemu zautomatyzowanemu systemowi. Ciesz się przejrzystymi cenami typu pay-as-you-go bez ukrytych opłat ani długoterminowych umów - nowoczesne rozwiązanie dla graczy, społeczności i administratorów serwerów, którzy wymagają najlepszego.",
+                "title": "Natychmiastowe Wdrożenie i Przejrzyste Ceny"
+              },
+              "security": {
+                "description": "Każdy serwer gier zawiera kompleksową ochronę DDoS i środki bezpieczeństwa klasy wojskowej. Nasza rozproszona architektura sieci zapewnia naturalną obronę przed atakami, zachowując jednocześnie optymalną wydajność i łączność graczy przez cały czas.",
+                "title": "Bezpieczeństwo Klasy Wojskowej i Ochrona DDoS"
+              }
+            },
+            "intro": "FluxPlay rewolucjonizuje hosting serwerów gier, łącząc moc zdecentralizowanej infrastruktury z prostotą tradycyjnego hostingu. Niezależnie od tego, czy hostujesz serwery Minecraft, Palworld, Factorio, Satisfactory czy Enshrouded, nasza platforma zapewnia niezrównaną wydajność i niezawodność."
           },
           "serverLocations": {
             "title": "Globalna Sieć Serwerów",
@@ -3465,10 +3698,22 @@
             "title": "Dlaczego warto wybrać WordPress na FluxCloud?",
             "content": "Hostuj swoją stronę WordPress na zdecentralizowanej infrastrukturze, która łączy wydajność, bezpieczeństwo i niezawodność. Nasz zarządzany hosting WordPress obejmuje automatyczne aktualizacje, cotygodniowe kopie zapasowe i bezpieczeństwo na poziomie korporacyjnym - wszystko zasilane przez sieć FluxCloud.",
             "highlights": {
-              "security": "Bezpieczeństwo na poziomie korporacyjnym z automatycznymi aktualizacjami",
-              "performance": "Wysokowydajne dyski SSD/NVMe i zoptymalizowane serwery",
-              "updates": "Automatyczne aktualizacje rdzenia WordPress i wtyczek",
-              "decentralized": "Zdecentralizowany hosting na wielu węzłach globalnych"
+              "decentralized": {
+                "description": "Zdecentralizowany hosting na wielu węzłach globalnych zapewnia lepszy uptime, redundancję i odporność na pojedyncze punkty awarii.",
+                "title": "Hosting Zdecentralizowany"
+              },
+              "performance": {
+                "description": "Wysokowydajne dyski SSD i zoptymalizowane serwery zapewniają szybkie ładowanie strony WordPress i wydajną obsługę ruchu.",
+                "title": "Zoptymalizowana Wydajność"
+              },
+              "security": {
+                "description": "Bezpieczeństwo na poziomie korporacyjnym z automatycznymi aktualizacjami, ochroną DDoS i regularnymi poprawkami zabezpieczeń, aby Twoja strona WordPress była bezpieczna przed zagrożeniami.",
+                "title": "Bezpieczeństwo Korporacyjne"
+              },
+              "updates": {
+                "description": "Automatyczne aktualizacje rdzenia WordPress i wtyczek utrzymują Twoją stronę bezpieczną i działającą z najnowszymi funkcjami bez ręcznej interwencji.",
+                "title": "Automatyczne Aktualizacje"
+              }
             }
           },
           "plans": {
@@ -3830,6 +4075,25 @@
             "description": {
               "title": "Profesjonalny Hosting WordPress Made Simple",
               "content": "Doświadcz przyszłości hostingu WordPress z FluxPlay. Nasza zdecentralizowana infrastruktura zapewnia wydajność, bezpieczeństwo i niezawodność klasy korporacyjnej dla Twoich stron WordPress. Zbudowany na sieci blockchain Flux, Twoja strona korzysta z globalnej dystrybucji, automatycznego skalowania i lepszego uptime w porównaniu z tradycyjnymi dostawcami hostingu."
+            },
+            "relatedLinks": {
+              "sectionTitle": "Odkryj Więcej na FluxCloud",
+              "marketplace": {
+                "title": "Marketplace",
+                "description": "Przeglądaj wszystkie dostępne aplikacje"
+              },
+              "gameServers": {
+                "title": "Serwery Gier",
+                "description": "Hostuj swoje ulubione serwery gier"
+              },
+              "fluxDrive": {
+                "title": "FluxDrive",
+                "description": "Zdecentralizowane przechowywanie plików"
+              },
+              "costCalculator": {
+                "title": "Kalkulator Kosztów",
+                "description": "Oszacuj koszty hostingu"
+              }
             }
           }
         }
@@ -3956,7 +4220,16 @@
       "yes": "Tak",
       "no": "Nie",
       "loginRequiredForVoting": "Wymagane Logowanie do Głosowania",
-      "loginRequiredMessage": "Musisz być zalogowany, aby uczestniczyć w głosowaniu xDAO. Wybierz preferowaną metodę logowania poniżej."
+      "loginRequiredMessage": "Musisz być zalogowany, aby uczestniczyć w głosowaniu xDAO. Wybierz preferowaną metodę logowania poniżej.",
+      "debugInfo": "Info Debugowania:",
+      "errors": {
+        "loadProposalsServer": "Nie udało się załadować propozycji z serwera",
+        "networkFailed": "Połączenie sieciowe nie powiodło się. Sprawdź swoje połączenie internetowe.",
+        "timeout": "Upłynął limit czasu żądania. Serwer może być tymczasowo niedostępny.",
+        "serverError": "Błąd serwera. Spróbuj ponownie później.",
+        "serviceNotFound": "Nie znaleziono usługi propozycji.",
+        "loadProposalsGeneric": "Nie udało się załadować propozycji. Spróbuj ponownie."
+      }
     },
     "error": {
       "pageNotFoundTitle": "Strona nie znaleziona ⚠️",
@@ -3979,6 +4252,78 @@
       "description": "Nie masz uprawnień do dostępu do tej strony.",
       "backToHome": "Powrót do strony głównej",
       "footerImageAlt": "Dekoracyjny obraz stopki strony braku autoryzacji"
+    },
+    "checkout": {
+      "title": "Zamówienie",
+      "selectPlan": "Wybierz plan",
+      "paymentMethod": {
+        "title": "Metoda płatności",
+        "fluxPay": "Flux Pay",
+        "cryptoCom": "Crypto.com"
+      },
+      "orderSummary": {
+        "title": "Podsumowanie zamówienia",
+        "plan": "Plan",
+        "storage": "Pamięć masowa",
+        "billing": "Rozliczenia",
+        "monthly": "Miesięcznie",
+        "total": "Suma",
+        "currentPlan": "Obecny plan",
+        "status": "Status"
+      },
+      "subscriptionDetails": "Szczegóły subskrypcji",
+      "billingCycle": "Cykl rozliczeniowy",
+      "monthly": "Miesięcznie",
+      "total": "Suma",
+      "proceedToPayment": "Przejdź do płatności",
+      "paymentProcessing": "Przetwarzanie płatności",
+      "secureCheckout": "Bezpieczne zamówienie",
+      "plan": "Plan",
+      "price": "Cena",
+      "perMonth": "miesięcznie",
+      "header": {
+        "title": "Flux Drive",
+        "subtitle": "Dokończ subskrypcję, aby odblokować zdecentralizowaną pamięć masową"
+      },
+      "fluxPay": {
+        "title": "Zapłać za pomocą Flux",
+        "subtitle": "Bezpieczna płatność za pomocą portfela Zelcore",
+        "amount": "Kwota:",
+        "usdValue": "Wartość w USD:",
+        "openWallet": "Otwórz portfel Zelcore",
+        "waitingForPayment": "Oczekiwanie na płatność...",
+        "cancelPayment": "Anuluj płatność"
+      },
+      "cryptoCom": {
+        "title": "Zapłać za pomocą Crypto.com",
+        "subtitle": "Subskrypcja cykliczna przez Crypto.com Pay",
+        "continue": "Kontynuuj z Crypto.com"
+      },
+      "security": {
+        "title": "Bezpieczna płatność",
+        "message": "Twoje dane płatności są zaszyfrowane i bezpieczne. Nigdy nie przechowujemy szczegółów płatności."
+      },
+      "loading": {
+        "planDetails": "Ładowanie szczegółów planu...",
+        "unableToLoad": "Nie można załadować szczegółów planu"
+      },
+      "messages": {
+        "authenticationRequired": "Wymagana autentykacja",
+        "invalidAuthData": "Nieprawidłowy format danych autentykacji",
+        "missingAuthFields": "Brakujące pola autentykacji",
+        "planDetailsNotAvailable": "Szczegóły planu niedostępne",
+        "subscriptionLoadFailed": "Nie udało się załadować danych subskrypcji",
+        "pleaseLoginFirst": "Najpierw zaloguj się",
+        "invalidAuth": "Nieprawidłowe dane autentykacji",
+        "paymentInitFailed": "Inicjalizacja płatności nie powiodła się. Spróbuj ponownie.",
+        "paymentFailed": "Nie udało się zainicjować płatności",
+        "cryptoComInitFailed": "Inicjalizacja płatności Crypto.com nie powiodła się. Spróbuj ponownie.",
+        "cryptoComPaymentFailed": "Nie udało się zainicjować płatności Crypto.com",
+        "paymentFailedRetry": "Płatność nie powiodła się. Spróbuj ponownie.",
+        "paymentSuccessfulRedirecting": "Płatność zakończona pomyślnie! Przekierowywanie do Flux Drive...",
+        "pleaseLoginToContinue": "Zaloguj się, aby kontynuować zakup",
+        "sessionExpired": "Sesja wygasła. Zaloguj się ponownie."
+      }
     }
   },
   "$vuetify": {

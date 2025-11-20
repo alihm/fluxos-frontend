@@ -1,9 +1,9 @@
 <template>
   <div>
     <!-- Introduction Section -->
-    <VRow class="mb-6">
+    <VRow>
       <VCol cols="12">
-        <VCard flat class="resources-intro-card">
+        <VCard class="resources-intro-card">
           <VCardText>
             <div class="d-flex align-center mb-3">
               <VAvatar
@@ -35,41 +35,44 @@
         lg="4"
         style="overflow: visible !important;"
       >
-        <VCard style="overflow: visible !important; clip-path: none !important; height: 300px; position: relative;">
-          <VOverlay
-            v-model="fluxListLoading"
-            contained
-            persistent
-            scroll-strategy="none"
-            class="align-center justify-center overlay"
-          >
-            <VProgressCircular indeterminate />
-          </VOverlay>
-          <div class="d-flex align-center pa-4" style="position: absolute; top: 0; left: 0; z-index: 1;">
+        <div class="resource-card-wrapper">
+          <div class="resource-card-header">
             <VAvatar
               size="48"
-              color="success lighten-4"
+              color="success"
               variant="tonal"
+              class="mr-3"
             >
               <VIcon size="24">
                 mdi-memory
               </VIcon>
             </VAvatar>
-            <h2 class="text-h5 ml-2">
+            <h3 class="text-h5 mb-0">
               {{ t('pages.dashboard.resources.vCores') }}
-            </h2>
+            </h3>
           </div>
-          <VCardText class="pa-4" style="overflow: visible !important; height: 100%;">
-            <div class="chart-container">
-              <Doughnut
-                :key="`cpu-${theme}`"
-                :data="cpuChartData"
-                :options="cpuChartOptions"
-                :plugins="[centerTextPlugin]"
-              />
-            </div>
-          </VCardText>
-        </VCard>
+          <VCard style="overflow: visible !important; clip-path: none !important; height: 300px;" class="resource-card-content">
+            <VOverlay
+              v-model="fluxListLoading"
+              contained
+              persistent
+              scroll-strategy="none"
+              class="align-center justify-center overlay"
+            >
+              <VProgressCircular indeterminate />
+            </VOverlay>
+            <VCardText class="pa-2" style="overflow: visible !important; height: 100%;">
+              <div class="chart-container">
+                <Doughnut
+                  :key="`cpu-${theme}`"
+                  :data="cpuChartData"
+                  :options="cpuChartOptions"
+                  :plugins="[centerTextPlugin]"
+                />
+              </div>
+            </VCardText>
+          </VCard>
+        </div>
       </VCol>
       <VCol
         cols="12"
@@ -78,41 +81,44 @@
         lg="4"
         style="overflow: visible !important;"
       >
-        <VCard style="overflow: visible !important; clip-path: none !important; height: 300px; position: relative;">
-          <VOverlay
-            v-model="fluxListLoading"
-            contained
-            persistent
-            scroll-strategy="none"
-            class="align-center justify-center overlay"
-          >
-            <VProgressCircular indeterminate />
-          </VOverlay>
-          <div class="d-flex align-center pa-4" style="position: absolute; top: 0; left: 0; z-index: 1;">
+        <div class="resource-card-wrapper">
+          <div class="resource-card-header">
             <VAvatar
               size="48"
-              color="success lighten-4"
+              color="success"
               variant="tonal"
+              class="mr-3"
             >
               <VIcon size="24">
                 mdi-database-outline
               </VIcon>
             </VAvatar>
-            <h2 class="text-h5 ml-2">
+            <h3 class="text-h5 mb-0">
               {{ t('pages.dashboard.resources.ram') }}
-            </h2>
+            </h3>
           </div>
-          <VCardText class="pa-4" style="overflow: visible !important; height: 100%;">
-            <div class="chart-container">
-              <Doughnut
-                :key="`ram-${theme}`"
-                :data="ramChartData"
-                :options="ramChartOptions"
-                :plugins="[centerTextPlugin]"
-              />
-            </div>
-          </VCardText>
-        </VCard>
+          <VCard style="overflow: visible !important; clip-path: none !important; height: 300px;" class="resource-card-content">
+            <VOverlay
+              v-model="fluxListLoading"
+              contained
+              persistent
+              scroll-strategy="none"
+              class="align-center justify-center overlay"
+            >
+              <VProgressCircular indeterminate />
+            </VOverlay>
+            <VCardText class="pa-2" style="overflow: visible !important; height: 100%;">
+              <div class="chart-container">
+                <Doughnut
+                  :key="`ram-${theme}`"
+                  :data="ramChartData"
+                  :options="ramChartOptions"
+                  :plugins="[centerTextPlugin]"
+                />
+              </div>
+            </VCardText>
+          </VCard>
+        </div>
       </VCol>
       <VCol
         cols="12"
@@ -121,164 +127,167 @@
         lg="4"
         style="overflow: visible !important;"
       >
-        <VCard style="overflow: visible !important; clip-path: none !important; height: 300px; position: relative;">
-          <VOverlay
-            v-model="fluxListLoading"
-            contained
-            persistent
-            scroll-strategy="none"
-            class="align-center justify-center overlay"
-          >
-            <VProgressCircular indeterminate />
-          </VOverlay>
-          <div class="d-flex align-center pa-4" style="position: absolute; top: 0; left: 0; z-index: 1;">
+        <div class="resource-card-wrapper">
+          <div class="resource-card-header">
             <VAvatar
               size="48"
-              color="success lighten-4"
+              color="success"
               variant="tonal"
+              class="mr-3"
             >
               <VIcon size="24">
                 tabler-server
               </VIcon>
             </VAvatar>
-            <h2 class="text-h5 ml-2">
+            <h3 class="text-h5 mb-0">
               {{ t('pages.dashboard.resources.ssd') }}
-            </h2>
+            </h3>
           </div>
-          <VCardText class="pa-4" style="overflow: visible !important; height: 100%;">
-            <div class="chart-container">
-              <Doughnut
-                :key="`ssd-${theme}`"
-                :data="ssdChartData"
-                :options="ssdChartOptions"
-                :plugins="[centerTextPlugin]"
-              />
-            </div>
-          </VCardText>
-        </VCard>
+          <VCard style="overflow: visible !important; clip-path: none !important; height: 300px;" class="resource-card-content">
+            <VOverlay
+              v-model="fluxListLoading"
+              contained
+              persistent
+              scroll-strategy="none"
+              class="align-center justify-center overlay"
+            >
+              <VProgressCircular indeterminate />
+            </VOverlay>
+            <VCardText class="pa-2" style="overflow: visible !important; height: 100%;">
+              <div class="chart-container">
+                <Doughnut
+                  :key="`ssd-${theme}`"
+                  :data="ssdChartData"
+                  :options="ssdChartOptions"
+                  :plugins="[centerTextPlugin]"
+                />
+              </div>
+            </VCardText>
+          </VCard>
+        </div>
       </VCol>
     </VRow>
 
     <VRow>
-      <VCol
-        cols="12"
-        sm="12"
-        md="12"
-        lg="4"
-      >
-        <VCard>
-          <VOverlay
-            v-model="historyStatsLoading"
-            contained
-            persistent
-            scroll-strategy="none"
-            class="align-center justify-center overlay"
-          >
-            <VProgressCircular indeterminate />
-          </VOverlay>
-          <VCardText class="mr-2">
+      <VCol cols="12">
+        <div class="resource-card-wrapper">
+          <div class="resource-card-header">
             <VAvatar
               size="48"
-              color="success lighten-4"
+              color="success"
               variant="tonal"
+              class="mr-3"
             >
               <VIcon size="24">
                 mdi-memory
               </VIcon>
             </VAvatar>
-            <h2 class="mt-2 text-h5 d-inline-block ml-2">
+            <h3 class="text-h5 mb-0">
               {{ t('pages.dashboard.resources.cpuHistory') }}
-            </h2>
-          </VCardText>
-          <VueApexCharts
-            ref="chart5"
-            type="area"
-            height="200"
-            width="100%"
-            :options="cpuHistoryData.chartOptions"
-            :series="cpuHistoryData.series"
-          />
-        </VCard>
+            </h3>
+          </div>
+          <VCard class="resource-card-content">
+            <VOverlay
+              v-model="historyStatsLoading"
+              contained
+              persistent
+              scroll-strategy="none"
+              class="align-center justify-center overlay"
+            >
+              <VProgressCircular indeterminate />
+            </VOverlay>
+            <VueApexCharts
+              ref="chart5"
+              type="area"
+              height="300"
+              width="100%"
+              :options="cpuHistoryData.chartOptions"
+              :series="cpuHistoryData.series"
+            />
+          </VCard>
+        </div>
       </VCol>
-      <VCol
-        cols="12"
-        sm="12"
-        md="6"
-        lg="4"
-      >
-        <VCard>
-          <VOverlay
-            v-model="historyStatsLoading"
-            contained
-            persistent
-            scroll-strategy="none"
-            class="align-center justify-center overlay"
-          >
-            <VProgressCircular indeterminate />
-          </VOverlay>
-          <VCardText class="mr-2">
+    </VRow>
+
+    <VRow>
+      <VCol cols="12">
+        <div class="resource-card-wrapper">
+          <div class="resource-card-header">
             <VAvatar
               size="48"
-              color="success lighten-4"
+              color="success"
               variant="tonal"
+              class="mr-3"
             >
               <VIcon size="24">
                 mdi-database-outline
               </VIcon>
             </VAvatar>
-            <h2 class="mt-2 text-h5 d-inline-block ml-2">
+            <h3 class="text-h5 mb-0">
               {{ t('pages.dashboard.resources.ramHistory') }}
-            </h2>
-          </VCardText>
-          <VueApexCharts
-            ref="chart6"
-            type="area"
-            height="200"
-            width="100%"
-            :options="ramHistoryData.chartOptions"
-            :series="ramHistoryData.series"
-          />
-        </VCard>
+            </h3>
+          </div>
+          <VCard class="resource-card-content">
+            <VOverlay
+              v-model="historyStatsLoading"
+              contained
+              persistent
+              scroll-strategy="none"
+              class="align-center justify-center overlay"
+            >
+              <VProgressCircular indeterminate />
+            </VOverlay>
+            <VueApexCharts
+              ref="chart6"
+              type="area"
+              height="300"
+              width="100%"
+              :options="ramHistoryData.chartOptions"
+              :series="ramHistoryData.series"
+            />
+          </VCard>
+        </div>
       </VCol>
-      <VCol
-        cols="12"
-        sm="12"
-        md="6"
-        lg="4"
-      >
-        <VCard>
-          <VOverlay
-            v-model="historyStatsLoading"
-            contained
-            persistent
-            scroll-strategy="none"
-            class="align-center justify-center overlay"
-          >
-            <VProgressCircular indeterminate />
-          </VOverlay>
-          <VCardText class="mr-2">
+    </VRow>
+
+    <VRow>
+      <VCol cols="12">
+        <div class="resource-card-wrapper">
+          <div class="resource-card-header">
             <VAvatar
               size="48"
-              color="success lighten-4"
+              color="success"
               variant="tonal"
+              class="mr-3"
             >
               <VIcon size="24">
                 mdi-harddisk
               </VIcon>
             </VAvatar>
-            <h2 class="mt-2 text-h5 d-inline-block ml-2">
+            <h3 class="text-h5 mb-0">
               {{ t('pages.dashboard.resources.storageHistory') }}
-            </h2>
-          </VCardText>
-          <VueApexCharts
-            ref="chart7"
-            type="area"
-            height="200"
-            width="100%"
-            :options="ssdHistoryData.chartOptions"
-            :series="ssdHistoryData.series"
-          />
-        </VCard>
+            </h3>
+          </div>
+          <VCard class="resource-card-content">
+            <VOverlay
+              v-model="historyStatsLoading"
+              contained
+              persistent
+              scroll-strategy="none"
+              class="align-center justify-center overlay"
+            >
+              <VProgressCircular indeterminate />
+            </VOverlay>
+            <VueApexCharts
+              ref="chart7"
+              type="area"
+              height="300"
+              width="100%"
+              :options="ssdHistoryData.chartOptions"
+              :series="ssdHistoryData.series"
+            />
+          </VCard>
+        </div>
       </VCol>
     </VRow>
 
@@ -995,6 +1004,86 @@ const generateSSDHistory = async () => {
   ssdHistoryData.value.series = await generateHistory(40, 220, 150, 440, 600, 880)
 }
 
+const CACHE_KEY_RESOURCES = 'fluxResourcesCache'
+const CACHE_KEY_HISTORY = 'fluxHistoryStatsCache'
+
+const loadCachedData = (key) => {
+  try {
+    const cached = localStorage.getItem(key)
+    if (!cached) return null
+
+    const { data, timestamp } = JSON.parse(cached)
+
+    return data
+  } catch (error) {
+    console.error('Error loading cached data:', error)
+
+    return null
+  }
+}
+
+const saveCachedData = (key, data) => {
+  try {
+    // Check if data is different from cached data
+    const existing = localStorage.getItem(key)
+    if (existing) {
+      const { data: existingData } = JSON.parse(existing)
+      if (JSON.stringify(existingData) === JSON.stringify(data)) {
+        // Data is the same, no need to save
+        return
+      }
+    }
+
+    // Data is different or doesn't exist, save it
+    localStorage.setItem(key, JSON.stringify({
+      data,
+      timestamp: Date.now(),
+    }))
+    console.log(`Cached data updated for ${key}`)
+  } catch (error) {
+    console.error('Error saving cached data:', error)
+  }
+}
+
+const processResourceData = (fluxTierBenchList) => {
+  fluxTierBenchList.forEach(node => {
+    if (node.tier === "CUMULUS" && node.benchmark && node.benchmark.bench) {
+      cumulusCpuValue.value +=
+        node.benchmark.bench.cores === 0 ? 4 : node.benchmark.bench.cores
+      cumulusRamValue.value +=
+        node.benchmark.bench.ram < 8 ? 8 : Math.round(node.benchmark.bench.ram)
+      cumulusSSDStorageValue.value += node.benchmark.bench.ssd
+      cumulusHDDStorageValue.value += node.benchmark.bench.hdd
+    } else if (node.tier === "CUMULUS") {
+      cumulusCpuValue.value += 4
+      cumulusRamValue.value += 8
+      cumulusHDDStorageValue.value += 220
+    } else if (node.tier === "NIMBUS" && node.benchmark && node.benchmark.bench) {
+      nimbusCpuValue.value +=
+        node.benchmark.bench.cores === 0 ? 8 : node.benchmark.bench.cores
+      nimbusRamValue.value +=
+        node.benchmark.bench.ram < 32 ? 32 : Math.round(node.benchmark.bench.ram)
+      nimbusSSDStorageValue.value += node.benchmark.bench.ssd
+      nimbusHDDStorageValue.value += node.benchmark.bench.hdd
+    } else if (node.tier === "NIMBUS") {
+      nimbusCpuValue.value += 8
+      nimbusRamValue.value += 32
+      nimbusSSDStorageValue.value += 440
+    } else if (node.tier === "STRATUS" && node.benchmark && node.benchmark.bench) {
+      stratusCpuValue.value +=
+        node.benchmark.bench.cores === 0 ? 16 : node.benchmark.bench.cores
+      stratusRamValue.value +=
+        node.benchmark.bench.ram < 64 ? 64 : Math.round(node.benchmark.bench.ram)
+      stratusSSDStorageValue.value += node.benchmark.bench.ssd
+      stratusHDDStorageValue.value += node.benchmark.bench.hdd
+    } else if (node.tier === "STRATUS") {
+      stratusCpuValue.value += 16
+      stratusRamValue.value += 64
+      stratusSSDStorageValue.value += 880
+    }
+  })
+}
+
 const generateResources = async () => {
   try {
     fluxListLoading.value = true
@@ -1020,9 +1109,21 @@ const generateResources = async () => {
     // Check if API returned an error response
     if (fluxTierBench.data.status === 'error') {
       console.error('API returned error:', fluxTierBench.data.data)
+
+      // Try to load cached data
+      const cached = loadCachedData(CACHE_KEY_RESOURCES)
+      if (cached && Array.isArray(cached)) {
+        console.log('Using cached resources data')
+        hasValidData.value = true
+        processResourceData(cached)
+        fluxListLoading.value = false
+
+        return
+      }
+
       hasValidData.value = false
       fluxListLoading.value = false
-      
+
       return
     }
 
@@ -1032,58 +1133,45 @@ const generateResources = async () => {
     if (!Array.isArray(fluxTierBenchList)) {
       console.error('fluxTierBenchList is not an array:', fluxTierBenchList)
       console.log('Full API response:', fluxTierBench.data)
+
+      // Try to load cached data
+      const cached = loadCachedData(CACHE_KEY_RESOURCES)
+      if (cached && Array.isArray(cached)) {
+        console.log('Using cached resources data')
+        hasValidData.value = true
+        processResourceData(cached)
+        fluxListLoading.value = false
+
+        return
+      }
+
       hasValidData.value = false
       fluxListLoading.value = false
-      
+
       return
     }
 
-    // If we got here, data is valid
+    // If we got here, data is valid - save to cache
     hasValidData.value = true
+    saveCachedData(CACHE_KEY_RESOURCES, fluxTierBenchList)
 
     console.log('Number of nodes in fluxTierBenchList:', fluxTierBenchList.length)
 
-    fluxTierBenchList.forEach(node => {
-      if (node.tier === "CUMULUS" && node.benchmark && node.benchmark.bench) {
-        cumulusCpuValue.value +=
-          node.benchmark.bench.cores === 0 ? 4 : node.benchmark.bench.cores
-        cumulusRamValue.value +=
-          node.benchmark.bench.ram < 8 ? 8 : Math.round(node.benchmark.bench.ram)
-        cumulusSSDStorageValue.value += node.benchmark.bench.ssd
-        cumulusHDDStorageValue.value += node.benchmark.bench.hdd
-      } else if (node.tier === "CUMULUS") {
-        cumulusCpuValue.value += 4
-        cumulusRamValue.value += 8
-        cumulusHDDStorageValue.value += 220
-      } else if (node.tier === "NIMBUS" && node.benchmark && node.benchmark.bench) {
-        nimbusCpuValue.value +=
-          node.benchmark.bench.cores === 0 ? 8 : node.benchmark.bench.cores
-        nimbusRamValue.value +=
-          node.benchmark.bench.ram < 32 ? 32 : Math.round(node.benchmark.bench.ram)
-        nimbusSSDStorageValue.value += node.benchmark.bench.ssd
-        nimbusHDDStorageValue.value += node.benchmark.bench.hdd
-      } else if (node.tier === "NIMBUS") {
-        nimbusCpuValue.value += 8
-        nimbusRamValue.value += 32
-        nimbusSSDStorageValue.value += 440
-      } else if (node.tier === "STRATUS" && node.benchmark && node.benchmark.bench) {
-        stratusCpuValue.value +=
-          node.benchmark.bench.cores === 0 ? 16 : node.benchmark.bench.cores
-        stratusRamValue.value +=
-          node.benchmark.bench.ram < 64 ? 64 : Math.round(node.benchmark.bench.ram)
-        stratusSSDStorageValue.value += node.benchmark.bench.ssd
-        stratusHDDStorageValue.value += node.benchmark.bench.hdd
-      } else if (node.tier === "STRATUS") {
-        stratusCpuValue.value += 16
-        stratusRamValue.value += 64
-        stratusSSDStorageValue.value += 880
-      }
-    })
-
+    processResourceData(fluxTierBenchList)
     fluxListLoading.value = false
   } catch (error) {
     console.error(error)
-    hasValidData.value = false
+
+    // Try to load cached data on error
+    const cached = loadCachedData(CACHE_KEY_RESOURCES)
+    if (cached && Array.isArray(cached)) {
+      console.log('API failed, using cached resources data')
+      hasValidData.value = true
+      processResourceData(cached)
+    } else {
+      hasValidData.value = false
+    }
+
     fluxListLoading.value = false
   }
 }
@@ -1097,6 +1185,39 @@ const getHistoryStats = async () => {
     const result = await axios.get("https://stats.runonflux.io/fluxhistorystats")
     if (result.data.data) {
       fluxHistoryStats.value = result.data.data
+
+      // Save to cache (only if different)
+      saveCachedData(CACHE_KEY_HISTORY, result.data.data)
+
+      await generateCPUHistory()
+      await generateRAMHistory()
+      await generateSSDHistory()
+      await nextTick()
+      historyStatsLoading.value = false
+    } else {
+      // Try to load cached data
+      const cached = loadCachedData(CACHE_KEY_HISTORY)
+      if (cached) {
+        console.log('Using cached history stats data')
+        fluxHistoryStats.value = cached
+        await generateCPUHistory()
+        await generateRAMHistory()
+        await generateSSDHistory()
+        await nextTick()
+        historyStatsLoading.value = false
+      } else {
+        showError.value = true
+        historyStatsLoading.value = false
+      }
+    }
+  } catch (error) {
+    console.error(error)
+
+    // Try to load cached data on error
+    const cached = loadCachedData(CACHE_KEY_HISTORY)
+    if (cached) {
+      console.log('API failed, using cached history stats data')
+      fluxHistoryStats.value = cached
       await generateCPUHistory()
       await generateRAMHistory()
       await generateSSDHistory()
@@ -1104,10 +1225,8 @@ const getHistoryStats = async () => {
       historyStatsLoading.value = false
     } else {
       showError.value = true
+      historyStatsLoading.value = false
     }
-  } catch (error) {
-    console.error(error)
-    showError.value = true
   }
 }
 
@@ -1115,15 +1234,42 @@ const getHistoryStats = async () => {
 watch(theme, newTheme => {
   console.log('Theme watcher triggered, new theme:', newTheme)
 
-  // Update history charts tooltips
-  if (cpuHistoryData.value.chartOptions) {
-    cpuHistoryData.value.chartOptions = { ...cpuHistoryData.value.chartOptions, tooltip: { ...cpuHistoryData.value.chartOptions.tooltip, theme: newTheme } }
+  // Update history charts using updateOptions like in overview.vue
+  if (chart5.value) {
+    chart5.value.updateOptions(
+      {
+        tooltip: {
+          followCursor: true,
+          theme: newTheme,
+        },
+      },
+      false,
+      false,
+    )
   }
-  if (ramHistoryData.value.chartOptions) {
-    ramHistoryData.value.chartOptions = { ...ramHistoryData.value.chartOptions, tooltip: { ...ramHistoryData.value.chartOptions.tooltip, theme: newTheme } }
+  if (chart6.value) {
+    chart6.value.updateOptions(
+      {
+        tooltip: {
+          followCursor: true,
+          theme: newTheme,
+        },
+      },
+      false,
+      false,
+    )
   }
-  if (ssdHistoryData.value.chartOptions) {
-    ssdHistoryData.value.chartOptions = { ...ssdHistoryData.value.chartOptions, tooltip: { ...ssdHistoryData.value.chartOptions.tooltip, theme: newTheme } }
+  if (chart7.value) {
+    chart7.value.updateOptions(
+      {
+        tooltip: {
+          followCursor: true,
+          theme: newTheme,
+        },
+      },
+      false,
+      false,
+    )
   }
 
   console.log('History charts updated')
@@ -1180,16 +1326,62 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
-.resources-intro-card {
-  border-radius: 16px;
-  background: linear-gradient(135deg, rgba(var(--v-theme-primary), 0.05) 0%, rgba(var(--v-theme-success), 0.05) 100%);
-  border: 1px solid rgba(var(--v-theme-primary), 0.1);
-  transition: all 0.3s ease;
+/* Apply 16px border-radius to all cards */
+:deep(.v-card) {
+  border-radius: 16px !important;
 }
 
-.resources-intro-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 16px rgba(var(--v-theme-primary), 0.1);
+.resources-intro-card {
+  border-radius: 16px;
+  border: 1px solid rgba(var(--v-theme-on-surface), 0.12) !important;
+  box-shadow: none !important;
+}
+
+/* Resource card with external header */
+.resource-card-wrapper {
+  display: flex;
+  flex-direction: column;
+  background: rgb(var(--v-theme-surface));
+  border-radius: 16px;
+  border: 1px solid rgba(var(--v-theme-on-surface), 0.12);
+}
+
+.resource-card-header {
+  display: flex;
+  align-items: center;
+  padding: 8px 16px;
+  border-bottom: 1px solid rgba(var(--v-theme-on-surface), 0.12);
+}
+
+.resource-card-content {
+  border-radius: 0 0 16px 16px !important;
+  border: none !important;
+  overflow: hidden !important;
+}
+
+.resources-intro-card h2 {
+  line-height: 1.2;
+  word-break: keep-all;
+}
+
+/* Mobile responsive adjustments */
+@media (max-width: 599px) {
+  .resources-intro-card h2 {
+    font-size: 1.5rem !important;
+  }
+
+  .resources-intro-card .v-avatar {
+    width: 48px !important;
+    height: 48px !important;
+  }
+
+  .resources-intro-card .v-icon {
+    font-size: 24px !important;
+  }
+
+  .resources-intro-card .v-card-text {
+    padding: 16px !important;
+  }
 }
 
 .summary-card {

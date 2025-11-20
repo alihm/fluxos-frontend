@@ -10,9 +10,13 @@
           :key="index"
           class="feature-item"
         >
-          <div class="feature-icon-wrapper" :style="getIconWrapperStyle(item)">
-            <VIcon :icon="item.icon || 'mdi-check-circle'" :size="iconSize" :color="item.color || iconColor" />
-          </div>
+          <VAvatar
+            :color="item.color || iconColor"
+            size="80"
+            class="feature-avatar"
+          >
+            <VIcon :icon="item.icon || 'mdi-check-circle'" :size="iconSize" />
+          </VAvatar>
           <h3 class="feature-title">{{ item.title }}</h3>
           <p class="feature-description">{{ item.description }}</p>
         </div>
@@ -66,15 +70,6 @@ const props = defineProps({
   elevation: {
     type: Number,
     default: 0,
-  },
-  // Gradient options for icon wrapper
-  gradientStart: {
-    type: String,
-    default: 'rgba(var(--v-theme-primary), 0.15)',
-  },
-  gradientEnd: {
-    type: String,
-    default: 'rgba(var(--v-theme-success), 0.1)',
   },
 })
 
@@ -181,29 +176,18 @@ const containerStyle = computed(() => ({
 const gridStyle = computed(() => ({
   gridTemplateColumns: `repeat(auto-fit, minmax(${props.gridMinWidth}, 1fr))`,
 }))
-
-// Icon wrapper style
-const getIconWrapperStyle = item => {
-  // If item has custom color, use it for gradient
-  if (item.color) {
-    return {
-      background: `linear-gradient(135deg, rgba(var(--v-theme-${item.color}), 0.15) 0%, rgba(var(--v-theme-${item.color}), 0.1) 100%)`,
-    }
-  }
-
-  // Use default gradient from props
-  return {
-    background: `linear-gradient(135deg, ${props.gradientStart} 0%, ${props.gradientEnd} 100%)`,
-  }
-}
 </script>
 
 <style scoped>
 .feature-showcase {
   border-radius: 16px;
-  background: rgba(var(--v-theme-surface), 0.6);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(var(--v-theme-primary), 0.15);
+  background: rgb(var(--v-theme-surface));
+  border: 1px solid rgba(var(--v-theme-on-surface), 0.12);
+  margin-bottom: 0;
+}
+
+.feature-showcase :deep(.v-card-text) {
+  padding: 24px !important;
 }
 
 .feature-showcase.has-background {
@@ -211,17 +195,19 @@ const getIconWrapperStyle = item => {
 }
 
 .showcase-title {
-  font-size: 2rem;
+  font-size: 28px;
   font-weight: 700;
-  margin-bottom: 12px;
+  margin-top: 0.5rem;
+  margin-bottom: 0;
   text-align: center;
-  color: rgb(var(--v-theme-primary));
+  color: rgb(var(--v-theme-on-surface));
+  line-height: 1.3;
 }
 
 .showcase-subtitle {
   font-size: 1.125rem;
   text-align: center;
-  margin-bottom: 40px;
+  margin-bottom: 16px;
   opacity: 0.9;
   line-height: 1.6;
 }
@@ -238,30 +224,24 @@ const getIconWrapperStyle = item => {
   align-items: center;
   text-align: center;
   padding: 32px 24px;
-  background: rgba(var(--v-theme-surface), 0.8);
+  background: rgba(var(--v-theme-on-surface), 0.04);
   border-radius: 16px;
-  border: 1px solid rgba(var(--v-theme-primary), 0.1);
+  border: 1px solid rgba(var(--v-theme-on-surface), 0.12);
   transition: all 0.3s ease;
 }
 
 .feature-item:hover {
   transform: translateY(-4px);
-  box-shadow: 0 8px 24px rgba(var(--v-theme-primary), 0.15);
-  border-color: rgba(var(--v-theme-primary), 0.3);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  border-color: rgba(var(--v-theme-on-surface), 0.24);
 }
 
-.feature-icon-wrapper {
-  width: 80px;
-  height: 80px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 50%;
+.feature-avatar {
   margin-bottom: 20px;
   transition: all 0.3s ease;
 }
 
-.feature-item:hover .feature-icon-wrapper {
+.feature-item:hover .feature-avatar {
   transform: scale(1.1);
 }
 
@@ -292,7 +272,7 @@ const getIconWrapperStyle = item => {
 
   .showcase-subtitle {
     font-size: 1rem;
-    margin-bottom: 32px;
+    margin-bottom: 16px;
   }
 
   .feature-item {
@@ -319,13 +299,13 @@ const getIconWrapperStyle = item => {
     padding: 20px 16px;
   }
 
-  .feature-icon-wrapper {
-    width: 64px;
-    height: 64px;
+  .feature-avatar {
+    width: 64px !important;
+    height: 64px !important;
     margin-bottom: 16px;
   }
 
-  .feature-icon-wrapper :deep(.v-icon) {
+  .feature-avatar :deep(.v-icon) {
     font-size: 32px !important;
   }
 

@@ -214,6 +214,10 @@ const handleCtaClick = event => {
   padding: 80px 32px;
   overflow: hidden;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 !important;
 }
 
 .hero-overlay {
@@ -240,7 +244,7 @@ const handleCtaClick = event => {
   position: relative;
   z-index: 1;
   max-width: 800px;
-  margin: 0 auto;
+  width: 100%;
   text-align: center;
 }
 
@@ -256,7 +260,7 @@ const handleCtaClick = event => {
 .hero-subtitle {
   font-size: clamp(1rem, 2.5vw, 1.5rem);
   color: rgba(255, 255, 255, 0.95);
-  margin-bottom: 2rem;
+  margin-bottom: 2.5rem;
   line-height: 1.6;
   text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.4);
 }
@@ -273,6 +277,12 @@ const handleCtaClick = event => {
   letter-spacing: 0.5px;
   text-transform: none;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+  transition: all 0.3s ease;
+}
+
+.hero-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.25);
 }
 
 /* Responsive adjustments */
@@ -295,6 +305,7 @@ const handleCtaClick = event => {
   .hero-section {
     padding: 48px 16px;
     border-radius: 16px;
+    margin-bottom: 2rem !important;
   }
 
   .hero-title {
@@ -303,7 +314,7 @@ const handleCtaClick = event => {
 
   .hero-subtitle {
     font-size: 1rem;
-    margin-bottom: 1.5rem;
+    margin-bottom: 3rem;
   }
 
   .hero-icon-top-right {
@@ -315,10 +326,20 @@ const handleCtaClick = event => {
   .hero-actions {
     flex-direction: column;
     width: 100%;
+    align-items: center;
   }
 
   .hero-btn {
-    width: 100%;
+    width: auto;
+    max-width: 280px;
+    font-size: 0.9375rem !important;
+    height: 48px !important;
+    padding: 0 32px !important;
+  }
+
+  .hero-btn:active {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
   }
 }
 </style>

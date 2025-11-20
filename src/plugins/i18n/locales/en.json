@@ -61,7 +61,22 @@
       "tier": "Tier",
       "price": "Price",
       "total": "Total",
-      "amount": "Amount"
+      "amount": "Amount",
+      "free": "Free",
+      "memory": "Memory",
+      "storage": "Storage",
+      "screenshots": "Screenshots",
+      "about": "About",
+      "developer": "Developer",
+      "lastUpdate": "Last Update",
+      "downloads": "Downloads",
+      "links": "Links",
+      "website": "Website",
+      "sourceCode": "Source Code",
+      "support": "Support",
+      "plan": "Plan",
+      "billing": "Billing",
+      "monthly": "Monthly"
     },
     "theme": {
       "light": "Light",
@@ -176,6 +191,11 @@
       "years": "years",
       "ago": "ago",
       "now": "now"
+    },
+    "units": {
+      "vCores": "vCores",
+      "mb": "MB",
+      "gb": "GB"
     }
   },
   "menu": {
@@ -273,7 +293,8 @@
     }
   },
   "myApps": {
-    "fluxCloudTitle": "Flux Cloud - Decentralized Application Management",
+    "fluxCloudTitle": "Flux Cloud",
+    "fluxCloudSubtitle": "Decentralized Application Management",
     "fluxCloudDescription": "Monitor and manage all your Docker containerized applications running on the Flux decentralized cloud network. View real-time status, resource usage, and performance metrics of your distributed apps deployed across our global blockchain-powered infrastructure. Click on any application to access detailed management controls and analytics."
   },
   "sections": {
@@ -369,7 +390,7 @@
     "fileUpload": {
       "dropFilesHere": "Drop files here or",
       "clickToUpload": "click to upload",
-      "fileSizeLimit": "(File size is limited to 5GB)",
+      "fileSizeLimit": "(File size is limited to 5 GB)",
       "uploadFiles": "Upload Files",
       "alreadyInQueue": "'{fileName}' is already in the upload queue",
       "uploadSuccess": "'{fileName}' has been uploaded",
@@ -531,7 +552,7 @@
       "removeBackupFile": "Remove backup file",
       "selectComponentsToUpload": "Select application component(s) you would like to upload",
       "chooseStorageMethod": "Choose your storage method",
-      "freeFluxDriveInfo": "Free FluxDrive backups! Up to 10GB total to use per user",
+      "freeFluxDriveInfo": "Free FluxDrive backups! Up to 10 GB total to use per user",
       "fluxDriveDownloadInfo": "FluxDrive backups can be downloaded on Restore page",
       "uploadSelectedComponents": "Upload Selected Components",
       "selectRestoreMethod": "Select Restore Method",
@@ -897,7 +918,7 @@
       "cancelAction": "Cancel",
       "cancelSubscription": "Cancel Subscription",
       "cancelWarning": "This will expire your application.",
-      "currentlySubscribedUntil": "Your application is currently subscribed until:",
+      "currentlySubscribedUntil": "Currently your application is subscribed until",
       "afterCancellationExpire": "After cancellation, your app will expire on approximately",
       "blocksFromNow": "blocks from now",
       "afterExpirationNotAccessible": "After expiration, your application will no longer be accessible unless you redeploy it.",
@@ -1005,7 +1026,7 @@
       "subscriptionPeriodDecreaseWarning": "Your selected subscription period will decrease the current subscription time!",
       "currentSubscriptionUntil": "Current subscription until:",
       "timeLeft": "Time left:",
-      "renewalPeriod": "Renewal period:",
+      "renewalPeriod": "Renewal period",
       "afterRenewalSubscriptionUntil": "After renewal subscription until:",
       "cancel": "Cancel",
       "save": "Save",
@@ -1047,10 +1068,7 @@
       "changingNodesWarning": "Changing nodes after encryption will require re-setting secrets and repository authentication.",
       "priorityNodesAlertV8": "Your app will preferentially deploy on selected nodes but can still run on other network nodes.",
       "applicationSubscribedUntil": "Your application will be subscribed until",
-      "currentlySubscribedUntil": "Currently your application is subscribed until",
       "newSubscriptionEndsOn": "Your new adjusted subscription ends on",
-      "subscriptionPeriodDecreaseWarning": "Your selected subscription period will decrease the current subscription time!",
-      "priorityNodesVersionWarning": "Priority nodes are only available for applications with version 7 or higher.",
       "noNodesSelected": "No nodes selected",
       "page": "Page",
       "of": "of",
@@ -1133,7 +1151,6 @@
       "renewal1Month": "1 month",
       "fixedRenewalPeriod": "Fixed renewal period for older app versions",
       "timeRemaining": "Time remaining",
-      "renewalPeriod": "Renewal period",
       "afterRenewalSubscriptionEndsOn": "After renewal, subscription ends on",
       "expired": "Expired",
       "renewal3Months": "3 months",
@@ -1345,6 +1362,11 @@
         "instances": "{count} Instance | {count} Instances",
         "estimatedPricing": "Estimated Pricing",
         "loading": "Loading...",
+        "wordPressPlanTitle": "WordPress {planName}",
+        "walletAltZelcore": "Flux ID (ZelCore)",
+        "walletAltSSP": "SSP",
+        "walletAltMetaMask": "MetaMask",
+        "walletAltWalletConnect": "WalletConnect",
         "agreeToTerms": "I agree to the <a href=\"https://runonflux.io/terms\" target=\"_blank\" rel=\"noopener noreferrer\" style=\"color: inherit; text-decoration: none; font-weight: bold;\">Terms of Use</a> and <a href=\"https://runonflux.io/privacy\" target=\"_blank\" rel=\"noopener noreferrer\" style=\"color: inherit; text-decoration: none; font-weight: bold;\">Privacy Policy</a>",
         "oneMonth": "1 Month",
         "threeMonths": "3 Months",
@@ -1706,7 +1728,7 @@
           "features": {
             "0": "PayPal payments",
             "1": "Logic Jumps",
-            "2": "File upload with 5GB storage",
+            "2": "File upload with 5 GB storage",
             "3": "Custom domain support",
             "4": "Stripe integration"
           }
@@ -1860,6 +1882,10 @@
         "uploadWait": "Please wait...",
         "uploadProgress": "Upload progress: {progress}%",
         "fileOfTotal": "File {current} of {total}",
+        "debugInfo": "Debug Info:",
+        "displayLogicDebug": "Display Logic Debug:",
+        "versionCommentPlaceholder": "e.g., Bug fixes, new features...",
+        "commentValidation": "Comment must be less than 100 characters",
         "downloading": "Downloading",
         "downloadProgress": "Download progress: {progress}%",
         "confirmDelete": "Confirm Delete",
@@ -1942,7 +1968,7 @@
       },
       "pricingPlans": {
         "title": "FluxDrive Storage Plans",
-        "subtitle": "Choose the perfect plan for your decentralized storage needs.",
+        "subtitle": "Choose your perfect storage plan.",
         "storage": "Storage",
         "contactUs": "Contact Us",
         "signIn": "Login",
@@ -2140,7 +2166,15 @@
             "walletInfo": "Wallet Information",
             "errorStatus": "Error Status",
             "noErrors": "No errors detected",
-            "noInfoLoaded": "No daemon info loaded. Click \"Refresh\" to fetch."
+            "noInfoLoaded": "No daemon info loaded. Click \"Refresh\" to fetch.",
+            "difficulty": "Difficulty",
+            "timeOffset": "Time Offset",
+            "testnet": "Testnet",
+            "balance": "Balance",
+            "keyPoolSize": "Key Pool Size",
+            "keyPoolOldest": "Key Pool Oldest",
+            "payTxFee": "Pay TX Fee",
+            "relayFee": "Relay Fee"
           }
         },
         "benchmark": {
@@ -2298,6 +2332,11 @@
           "remove": "Remove",
           "visit": "Visit"
         },
+        "searchIpPlaceholder": "Search IP...",
+        "persistentStorage": "Persistent Storage",
+        "persistentStorageTooltip": "Tracks storage that persists across container restarts. Prevents disk overuse.",
+        "rootFilesystem": "Root Filesystem (rootfs)",
+        "rootFilesystemTooltip": "Temporary container storage. Monitoring rootfs helps avoid space issues.",
         "confirmButton": "Manage",
         "dialog": {
           "installingTitle": "Installing App...",
@@ -2564,23 +2603,23 @@
               },
               "howToDeploy": {
                 "question": "How do I deploy an application?",
-                "answer": "Deploying on FluxCloud is simple:<br>1. Click \"Start Deploying\" to access the configuration page<br>2. Specify your Docker image and configuration<br>3. Choose your resources (CPU, RAM, storage)<br>4. Select number of instances and deployment locations<br>5. Deploy and your app will be live in minutes<br><br>We support Docker images from any registry including Docker Hub, GitHub Container Registry, and private registries."
+                "answer": "Deploying on FluxCloud is simple:<ol><li>Click \"Start Deploying\" to access the configuration page</li><li>Specify your Docker image and configuration</li><li>Choose your resources (CPU, RAM, storage)</li><li>Select number of instances and deployment locations</li><li>Deploy and your app will be live in minutes</li></ol><p>We support Docker images from any registry including Docker Hub, GitHub Container Registry, and private registries.</p>"
               },
               "pricing": {
                 "question": "How much does it cost?",
-                "answer": "FluxCloud offers transparent, pay-as-you-go pricing starting at just $0.99/month for basic configurations. Pricing depends on:<br>- CPU cores allocated<br>- RAM amount<br>- Storage size<br>- Number of instances<br>- Port requirements<br><br>Use our <a href=\"/cost-calculator\" target=\"_blank\">Cost Calculator</a> to estimate exact pricing for your needs. No hidden fees, no surprise charges."
+                "answer": "FluxCloud offers transparent, pay-as-you-go pricing starting at just $0.99/month for basic configurations. Pricing depends on:<ul><li>CPU cores allocated</li><li>RAM amount</li><li>Storage size</li><li>Number of instances</li><li>Port requirements</li></ul><p>Use our <a href=\"/cost-calculator\" target=\"_blank\">Cost Calculator</a> to estimate exact pricing for your needs. No hidden fees, no surprise charges.</p>"
               },
               "support": {
                 "question": "What kind of support is available?",
-                "answer": "We offer multiple support channels:<br>- <strong>Documentation</strong>: Comprehensive guides at <a href=\"https://docs.runonflux.io\" target=\"_blank\">docs.runonflux.io</a><br>- <strong>Discord Community</strong>: Active 24/7 community support<br>- <strong>Email Support</strong>: Direct assistance from our team<br>- <strong>Ticketing System</strong>: Track issues at <a href=\"https://support.runonflux.io\" target=\"_blank\">support.runonflux.io</a><br>- <strong>AI Assistant</strong>: Built-in AI helper for quick questions"
+                "answer": "We offer multiple support channels:<ul><li><strong>Documentation:</strong> Comprehensive guides at <a href=\"https://docs.runonflux.io\" target=\"_blank\">docs.runonflux.io</a></li><li><strong>Discord Community:</strong> Active 24/7 community support</li><li><strong>Email Support:</strong> Direct assistance from our team</li><li><strong>Ticketing System:</strong> Track issues at <a href=\"https://support.runonflux.io\" target=\"_blank\">support.runonflux.io</a></li><li><strong>AI Assistant:</strong> Built-in AI helper for quick questions</li></ul>"
               },
               "requirements": {
                 "question": "What are the requirements to deploy?",
-                "answer": "To deploy applications on FluxCloud you need:<br>- <strong>A Flux ID</strong>: Create one for free using any Flux-compatible wallet<br>- <strong>Docker Image</strong>: Your application packaged as a Docker container<br>- <strong>FLUX tokens or USD</strong>: To pay for hosting (we accept credit cards via Stripe and PayPal)<br>- <strong>Minimum 3 instances</strong>: For decentralization and redundancy<br><br>Minimum resources per instance: 0.1 CPU cores, 100MB RAM, 1GB storage"
+                "answer": "To deploy applications on FluxCloud you need:<ul><li><strong>A Flux ID:</strong> Create one for free using any Flux-compatible wallet</li><li><strong>Docker Image:</strong> Your application packaged as a Docker container</li><li><strong>FLUX tokens or USD:</strong> To pay for hosting (we accept credit cards via Stripe and PayPal)</li><li><strong>Minimum 3 instances:</strong> For decentralization and redundancy</li></ul><p>Minimum resources per instance: 0.1 CPU cores, 100 MB RAM, 1 GB storage</p>"
               },
               "security": {
                 "question": "How secure is FluxCloud?",
-                "answer": "FluxCloud implements multiple security layers:<br>- <strong>Container Isolation</strong>: Each app runs in its own isolated Docker container<br>- <strong>Encrypted Transfer</strong>: All data in transit is encrypted<br>- <strong>DDoS Protection</strong>: Built-in protection against attacks<br>- <strong>Regular Audits</strong>: Code and infrastructure regularly audited<br>- <strong>Decentralized</strong>: No single point of failure<br>- <strong>Private Options</strong>: Enterprise mode for enhanced privacy<br><br>You maintain full control over your application code and data."
+                "answer": "FluxCloud implements multiple security layers:<ul><li><strong>Container Isolation:</strong> Each app runs in its own isolated Docker container</li><li><strong>Encrypted Transfer:</strong> All data in transit is encrypted</li><li><strong>DDoS Protection:</strong> Built-in protection against attacks</li><li><strong>Regular Audits:</strong> Code and infrastructure regularly audited</li><li><strong>Decentralized:</strong> No single point of failure</li><li><strong>Private Options:</strong> Enterprise mode for enhanced privacy</li></ul><p>You maintain full control over your application code and data.</p>"
               }
             }
           },
@@ -2590,7 +2629,7 @@
             "button": "Configure Your Deployment"
           },
           "relatedLinks": {
-            "title": "Explore More",
+            "title": "Explore More on FluxCloud",
             "marketplace": "Marketplace",
             "marketplaceDesc": "Browse pre-configured applications",
             "wordpress": "WordPress Hosting",
@@ -2607,7 +2646,7 @@
       "title": "App Hosting Cost Calculator",
       "subtitle": "Affordable decentralized hosting starting at $0.99/month - Calculate your exact costs",
       "description": "Deploy your applications on the Flux decentralized cloud network with transparent, pay-as-you-go pricing. Choose your compute resources (CPU, RAM, storage), select the number of instances, and get instant pricing. No hidden fees, no vendor lock-in. Perfect for Docker containers, web apps, APIs, databases, and microservices. Starting at just $0.99/month for basic configurations.",
-      "learnMore": "Learn More About Flux Hosting",
+      "learnMore": "Learn More",
       "configuration": "Configuration",
       "instancesQuestion": "How many instances will you be running?",
       "instancesHint": "(min 3 / max 100) 1 Instance = 1 Node",
@@ -2782,8 +2821,8 @@
           "subtitle": "Truly decentralized infrastructure",
           "description": "FluxCloud operates the world's largest decentralized cloud infrastructure network, with FluxNodes distributed across all continents and hundreds of hosting providers. This geographic diversity provides app owners with unparalleled benefits: low latency from edge computing, high redundancy and fault tolerance, censorship resistance, and true decentralization. Your applications run on real, independently operated hardware—not centralized data centers."
         },
-        "geographicTitle": "Geographic Locations ({count})",
-        "providersTitle": "Providers ({count})",
+        "geographicTitle": "Geographic Locations",
+        "providersTitle": "Providers",
         "noGeographicData": "No geographic data available.",
         "noProviderData": "No provider data available.",
         "unknown": "Unknown"
@@ -2822,7 +2861,7 @@
         "storageHistory": "Storage History",
         "totalVCores": "Total vCores",
         "totalRam": "Total RAM",
-        "totalSsd": "Total SSD",
+        "totalSsd": "Total SSD/NVMe",
         "totalHdd": "Total HDD",
         "tierCumulus": "Cumulus",
         "tierNimbus": "Nimbus",
@@ -3108,7 +3147,21 @@
           },
           "content": {
             "title": "Professional Game Server Hosting Made Simple",
-            "body": "<p><strong>FluxPlay</strong> revolutionizes game server hosting by combining the power of decentralized infrastructure with the simplicity of traditional hosting. Whether you're hosting <strong>Minecraft</strong>, <strong>Palworld</strong>, <strong>Factorio</strong>, <strong>Satisfactory</strong>, or <strong>Enshrouded</strong> servers, our platform delivers unmatched performance and reliability.</p><p>Built on <strong>FluxCloud</strong>, FluxPlay provides enterprise-grade game hosting with automatic scaling, geographic distribution, and military-grade security. Our decentralized architecture ensures your game server remains online even if individual nodes fail, providing superior uptime compared to traditional centralized hosting providers.</p><p>With instant deployment, transparent pricing, and included DDoS protection, FluxPlay is the modern solution for gamers, communities, and server administrators who demand the best.</p>"
+            "intro": "FluxPlay revolutionizes game server hosting by combining the power of decentralized infrastructure with the simplicity of traditional hosting. Whether you're hosting Minecraft, Palworld, Factorio, Satisfactory, or Enshrouded servers, our platform delivers unmatched performance and reliability.",
+            "features": {
+              "decentralized": {
+                "title": "Enterprise-Grade Decentralized Infrastructure",
+                "description": "Built on FluxCloud, our platform provides enterprise-grade game hosting with automatic scaling and geographic distribution. Our decentralized architecture ensures your game server remains online even if individual nodes fail, delivering superior uptime compared to traditional centralized hosting providers."
+              },
+              "security": {
+                "title": "Military-Grade Security & DDoS Protection",
+                "description": "Every game server includes comprehensive DDoS protection and military-grade security measures. Our distributed network architecture provides natural defense against attacks while maintaining optimal performance and player connectivity at all times."
+              },
+              "deployment": {
+                "title": "Instant Deployment & Transparent Pricing",
+                "description": "Deploy your game server in under 30 seconds with our automated system. Enjoy transparent pay-as-you-go pricing with no hidden fees or long-term contracts - the modern solution for gamers, communities, and server administrators who demand the best."
+              }
+            }
           },
           "serverLocations": {
             "title": "Global Server Network",
@@ -3735,10 +3788,22 @@
             "title": "Why Choose WordPress on FluxCloud?",
             "content": "Host your WordPress website on a decentralized infrastructure that combines performance, security, and reliability. Our managed WordPress hosting includes automatic updates, weekly backups, and enterprise-grade security - all powered by the FluxCloud network.",
             "highlights": {
-              "security": "Enterprise-grade security with automatic updates",
-              "performance": "High-performance SSD storage and optimized servers",
-              "updates": "Automatic WordPress core and plugin updates",
-              "decentralized": "Decentralized hosting across multiple global nodes"
+              "security": {
+                "title": "Enterprise Security",
+                "description": "Enterprise-grade security with automatic updates, DDoS protection, and regular security patches to keep your WordPress site safe from threats."
+              },
+              "performance": {
+                "title": "Optimized Performance",
+                "description": "High-performance SSD storage and optimized servers ensure your WordPress site loads quickly and handles traffic efficiently."
+              },
+              "updates": {
+                "title": "Automatic Updates",
+                "description": "Automatic WordPress core and plugin updates keep your site secure and running the latest features without manual intervention."
+              },
+              "decentralized": {
+                "title": "Decentralized Hosting",
+                "description": "Decentralized hosting across multiple global nodes provides better uptime, redundancy, and resistance to single points of failure."
+              }
             }
           },
           "plans": {
@@ -4100,6 +4165,25 @@
             "description": {
               "title": "Professional WordPress Hosting Made Simple",
               "content": "Experience the future of WordPress hosting with FluxPlay. Our decentralized infrastructure provides enterprise-grade performance, security, and reliability for your WordPress sites. Built on the Flux blockchain network, your site benefits from global distribution, automatic scaling, and superior uptime compared to traditional hosting providers."
+            },
+            "relatedLinks": {
+              "sectionTitle": "Explore More on FluxCloud",
+              "marketplace": {
+                "title": "Marketplace",
+                "description": "Browse all available applications"
+              },
+              "gameServers": {
+                "title": "Game Servers",
+                "description": "Host your favorite game servers"
+              },
+              "fluxDrive": {
+                "title": "FluxDrive",
+                "description": "Decentralized file storage"
+              },
+              "costCalculator": {
+                "title": "Cost Calculator",
+                "description": "Estimate your hosting costs"
+              }
             }
           }
         }
@@ -4107,7 +4191,7 @@
     },
     "xdao": {
       "title": "Flux XDAO",
-      "subtitle": "Community-driven decentralized governance platform where FluxNode operators vote on network improvements, protocol changes, and treasury allocations",
+      "subtitle": "Decentralized Governance Platform",
       "description": "Flux XDAO (Extended Decentralized Autonomous Organization) empowers the community to shape the future of the Flux ecosystem through on-chain governance. FluxNode operators can submit proposals, discuss initiatives, and vote on critical decisions affecting network development, funding allocations, and protocol upgrades. Every vote is recorded on the blockchain, ensuring transparency and immutability.",
       "learnMore": "Learn More About XDAO",
       "loggedIn": "Logged in",
@@ -4148,7 +4232,16 @@
       "yes": "Yes",
       "no": "No",
       "loginRequiredForVoting": "Login Required for Voting",
-      "loginRequiredMessage": "You need to be logged in to participate in xDAO voting. Please choose your preferred login method below."
+      "loginRequiredMessage": "You need to be logged in to participate in xDAO voting. Please choose your preferred login method below.",
+      "debugInfo": "Debug Info:",
+      "errors": {
+        "loadProposalsServer": "Failed to load proposals from server",
+        "networkFailed": "Network connection failed. Please check your internet connection.",
+        "timeout": "Request timed out. The server may be temporarily unavailable.",
+        "serverError": "Server error. Please try again later.",
+        "serviceNotFound": "Proposals service not found.",
+        "loadProposalsGeneric": "Failed to load proposals. Please try again."
+      }
     },
     "error": {
       "pageNotFoundTitle": "Page Not Found ⚠️",
@@ -4171,6 +4264,78 @@
       "description": "You don't have permission to access this page.",
       "backToHome": "Back To Home",
       "footerImageAlt": "Unauthorized access decorative footer image"
+    },
+    "checkout": {
+      "title": "Checkout",
+      "selectPlan": "Select Plan",
+      "paymentMethod": {
+        "title": "Payment Method",
+        "fluxPay": "Flux Pay",
+        "cryptoCom": "Crypto.com"
+      },
+      "orderSummary": {
+        "title": "Order Summary",
+        "plan": "Plan",
+        "storage": "Storage",
+        "billing": "Billing",
+        "monthly": "Monthly",
+        "total": "Total",
+        "currentPlan": "Current Plan",
+        "status": "Status"
+      },
+      "subscriptionDetails": "Subscription Details",
+      "billingCycle": "Billing Cycle",
+      "monthly": "Monthly",
+      "total": "Total",
+      "proceedToPayment": "Proceed to Payment",
+      "paymentProcessing": "Processing Payment",
+      "secureCheckout": "Secure Checkout",
+      "plan": "Plan",
+      "price": "Price",
+      "perMonth": "per month",
+      "header": {
+        "title": "Flux Drive",
+        "subtitle": "Complete your subscription to unlock decentralized storage"
+      },
+      "fluxPay": {
+        "title": "Pay with Flux",
+        "subtitle": "Secure payment using your Zelcore wallet",
+        "amount": "Amount:",
+        "usdValue": "USD Value:",
+        "openWallet": "Open Zelcore Wallet",
+        "waitingForPayment": "Waiting for Payment...",
+        "cancelPayment": "Cancel Payment"
+      },
+      "cryptoCom": {
+        "title": "Pay with Crypto.com",
+        "subtitle": "Recurring subscription via Crypto.com Pay",
+        "continue": "Continue with Crypto.com"
+      },
+      "security": {
+        "title": "Secure Payment",
+        "message": "Your payment information is encrypted and secure. We never store your payment details."
+      },
+      "loading": {
+        "planDetails": "Loading plan details...",
+        "unableToLoad": "Unable to load plan details"
+      },
+      "messages": {
+        "authenticationRequired": "Authentication required",
+        "invalidAuthData": "Invalid authentication data format",
+        "missingAuthFields": "Missing auth fields",
+        "planDetailsNotAvailable": "Plan details not available",
+        "subscriptionLoadFailed": "Failed to load subscription data",
+        "pleaseLoginFirst": "Please login first",
+        "invalidAuth": "Invalid authentication data",
+        "paymentInitFailed": "Payment initialization failed. Please try again.",
+        "paymentFailed": "Failed to initialize payment",
+        "cryptoComInitFailed": "Crypto.com payment initialization failed. Please try again.",
+        "cryptoComPaymentFailed": "Failed to initialize Crypto.com payment",
+        "paymentFailedRetry": "Payment failed. Please try again.",
+        "paymentSuccessfulRedirecting": "Payment successful! Redirecting to Flux Drive...",
+        "pleaseLoginToContinue": "Please login to continue with your purchase",
+        "sessionExpired": "Session expired. Please login again."
+      }
     }
   },
   "$vuetify": {

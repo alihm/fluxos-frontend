@@ -116,9 +116,13 @@ import { ref, onMounted, computed, watch, nextTick } from 'vue'
 import { useFluxStore } from '@/stores/flux'
 import { storeToRefs } from 'pinia'
 import { useI18n } from 'vue-i18n'
+import { useSEONoIndex } from '@/composables/useSEO'
 import { useLoginSheet } from '@/composables/useLoginSheet'
 import axios from 'axios'
 import { getDetectedBackendURL } from '@/utils/backend'
+
+// Prevent indexing of app registration workflow (authenticated workflow)
+useSEONoIndex()
 
 const { t } = useI18n()
 const { openLoginBottomSheet, closeLoginBottomSheet } = useLoginSheet()

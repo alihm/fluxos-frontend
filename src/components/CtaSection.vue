@@ -11,7 +11,7 @@
           :icon="icon"
           :size="iconSize"
           :color="iconColor"
-          class="mb-4"
+          class="mb-4 cta-icon-animated"
         />
       </div>
 
@@ -181,6 +181,10 @@ const handleButtonClick = event => {
   box-shadow: 0 2px 16px rgba(0, 0, 0, 0.08);
 }
 
+.cta-section :deep(.v-card-text) {
+  padding: 24px !important;
+}
+
 .cta-icon {
   display: flex;
   justify-content: center;
@@ -188,32 +192,90 @@ const handleButtonClick = event => {
   margin-bottom: 1rem;
 }
 
+.cta-icon-animated {
+  animation: float 3s ease-in-out infinite, glow 2s ease-in-out infinite;
+  filter: drop-shadow(0 0 6px rgba(var(--v-theme-primary), 0.3));
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes glow {
+  0%, 100% {
+    filter: drop-shadow(0 0 6px rgba(var(--v-theme-primary), 0.3));
+  }
+  50% {
+    filter: drop-shadow(0 0 12px rgba(var(--v-theme-primary), 0.5));
+  }
+}
+
 .cta-title {
-  font-size: 2.5rem;
+  font-size: 28px;
   font-weight: 800;
-  margin-bottom: 16px;
+  margin-bottom: 12px;
+  line-height: 1.3;
 }
 
 .cta-subtitle {
   font-size: 1.25rem;
   margin-bottom: 0;
   opacity: 0.9;
+  line-height: 1.6;
 }
 
 .cta-btn {
   font-weight: 600;
   letter-spacing: 0.5px;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.cta-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(var(--v-theme-primary), 0.4);
+}
+
+/* Ensure VBtn inside cta-section maintains hover animation without color change */
+.cta-section .v-btn {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.cta-section .v-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
 }
 
 /* Styling for primary background CTA (like games page) */
-.cta-section[data-v-theme="primary"] .cta-title,
-.cta-section.bg-primary .cta-title {
+.cta-section.bg-primary .cta-title,
+.cta-section.v-card--variant-flat .cta-title {
   color: white;
 }
 
-.cta-section[data-v-theme="primary"] .cta-subtitle,
-.cta-section.bg-primary .cta-subtitle {
+.cta-section.bg-primary .cta-subtitle,
+.cta-section.v-card--variant-flat .cta-subtitle {
   color: rgba(255, 255, 255, 0.9);
+}
+
+/* Button on primary background - white button with primary text */
+.cta-section.v-card--variant-flat .v-btn {
+  background-color: white !important;
+  color: rgb(var(--v-theme-primary)) !important;
+}
+
+.cta-section.v-card--variant-flat .v-btn:hover {
+  background-color: white !important;
+  color: rgb(var(--v-theme-primary)) !important;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+}
+
+.cta-section.v-card--variant-flat .v-btn .v-icon {
+  color: rgb(var(--v-theme-primary)) !important;
 }
 
 /* Responsive adjustments */

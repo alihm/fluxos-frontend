@@ -10,19 +10,28 @@
     >
       <VCarouselItem
         v-for="(image, index) in carouselImages"
-        :key="index"
-        :src="image"
-        :alt="`${app.displayName || app.name} server gameplay screenshot ${index + 1}`"
-        cover
+        :key="`carousel-${app.name}-${index}-${image}`"
       >
+        <VImg
+          :key="`img-${app.name}-${index}-${image}`"
+          :src="image"
+          :alt="`${app.displayName || app.name} server gameplay screenshot ${index + 1}`"
+          height="400"
+          cover
+          eager
+          :transition="false"
+        />
         <!-- Game Icon Overlay -->
         <div v-if="gameIcon" class="game-icon-overlay">
           <VImg
+            :key="`icon-${app.name}`"
             :src="gameIcon"
             :alt="`${app.displayName || app.name} game icon`"
             width="120"
             height="120"
+            eager
             contain
+            :transition="false"
             class="icon-image"
           />
         </div>
@@ -42,7 +51,7 @@
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { computed, shallowRef, watchEffect } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useGameUtils } from '@/composables/useGameUtils'
 
@@ -65,8 +74,11 @@ const gameIcon = computed(() => {
   return parseLandingImage(props.app.icon || props.app.logo)
 })
 
-// Get carousel images from screenshots (same source as ScreenshotsPanel)
-const carouselImages = computed(() => {
+// Use shallowRef for stable image array to prevent unnecessary re-renders
+const carouselImages = shallowRef([])
+
+// Update carousel images only when app actually changes
+watchEffect(() => {
   const images = []
 
   // Get screenshots directly from app.screenshots (same as ScreenshotsPanel)
@@ -89,7 +101,13 @@ const carouselImages = computed(() => {
     if (img) images.push(img)
   }
 
-  return images
+  // Only update if images actually changed
+  const newImagesString = images.join(',')
+  const currentImagesString = carouselImages.value.join(',')
+
+  if (newImagesString !== currentImagesString) {
+    carouselImages.value = images
+  }
 })
 
 const panelStyle = computed(() => ({
@@ -98,19 +116,56 @@ const panelStyle = computed(() => ({
     : '0',
   background: props.panel.background || 'transparent',
   borderRadius: props.panel.cornerRadius ? `${props.panel.cornerRadius}px` : '0',
-  marginBottom: '15px',
 }))
 </script>
 
 <style scoped>
 .header-panel {
-  margin-bottom: 8px;
+  margin-bottom: 0;
   margin-top: 48px;
 }
 
 .game-carousel {
   border-radius: 16px;
   overflow: hidden;
+}
+
+/* Hide carousel arrows by default, show on hover */
+.game-carousel :deep(.v-window__controls) {
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.game-carousel:hover :deep(.v-window__controls) {
+  opacity: 1;
+}
+
+/* Make carousel arrows more transparent and move down */
+.game-carousel :deep(.v-btn--icon) {
+  background-color: rgba(0, 0, 0, 0.3) !important;
+  backdrop-filter: blur(4px);
+  transform: translateY(15px) !important;
+}
+
+.game-carousel :deep(.v-btn--icon:hover) {
+  background-color: rgba(0, 0, 0, 0.5) !important;
+  transform: translateY(15px) !important;
+}
+
+.game-carousel :deep(.v-btn--icon:active),
+.game-carousel :deep(.v-btn--icon:focus) {
+  background-color: rgba(0, 0, 0, 0.5) !important;
+  transform: translateY(15px) !important;
+}
+
+.game-carousel :deep(.v-btn--icon .v-icon) {
+  color: white !important;
+}
+
+.game-carousel :deep(.v-btn--icon:hover .v-icon),
+.game-carousel :deep(.v-btn--icon:active .v-icon),
+.game-carousel :deep(.v-btn--icon:focus .v-icon) {
+  color: white !important;
 }
 
 .game-icon-overlay {

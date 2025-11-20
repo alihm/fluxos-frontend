@@ -218,10 +218,14 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
+import { useSEONoIndex } from '@/composables/useSEO'
 import { useSnackbar } from '@/composables/useSnackbar'
 import { useFluxStore } from '@/stores/flux'
 import IDService from '@/services/IDService'
 import qs from 'qs'
+
+// Prevent indexing of manage users admin page (private admin data)
+useSEONoIndex()
 
 const router = useRouter()
 const { t } = useI18n()

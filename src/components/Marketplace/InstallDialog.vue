@@ -815,25 +815,25 @@
                         <img
                           v-else-if="detectedSigningMethod.includes('ZelCore')"
                           :src="fluxIDLogo"
-                          alt="Flux ID (ZelCore)"
+                          :alt="t('components.marketplace.installDialog.walletAltZelcore')"
                           class="walletIcon"
                         />
                         <img
                           v-else-if="detectedSigningMethod === 'SSP'"
                           :src="theme.global.name.value === 'dark' ? sspLogoWhite : sspLogoBlack"
-                          alt="SSP"
+                          :alt="t('components.marketplace.installDialog.walletAltSSP')"
                           class="walletIcon"
                         />
                         <img
                           v-else-if="detectedSigningMethod === 'MetaMask'"
                           :src="metamaskLogo"
-                          alt="MetaMask"
+                          :alt="t('components.marketplace.installDialog.walletAltMetaMask')"
                           class="walletIcon"
                         />
                         <img
                           v-else-if="detectedSigningMethod === 'WalletConnect'"
                           :src="walletConnectLogo"
-                          alt="WalletConnect"
+                          :alt="t('components.marketplace.installDialog.walletAltWalletConnect')"
                           class="walletIcon"
                         />
                         <!-- Manual - Use pen/signature icon -->

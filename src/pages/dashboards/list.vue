@@ -94,8 +94,88 @@
 <script setup>
 import { ref, computed, onMounted, watch } from "vue"
 import { useI18n } from "vue-i18n"
+import { useHead } from "@vueuse/head"
 import axios from "axios"
 import DashboardService from "@/services/DashboardService"
+
+// SEO for Flux node list page
+const title = 'Flux Network Node List - Live Node Directory'
+const description = 'Browse the complete list of Flux network nodes. View node details, locations, and performance metrics across the decentralized infrastructure.'
+const pageUrl = 'https://home.runonflux.io/dashboards/list'
+const imageUrl = 'https://home.runonflux.io/logo.png'
+
+// Structured data schemas
+const structuredData = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'Organization',
+    name: 'Flux Network',
+    url: 'https://home.runonflux.io',
+    logo: 'https://home.runonflux.io/logo.png',
+    description: 'Decentralized Web3 cloud infrastructure powered by FluxNodes worldwide',
+    sameAs: [
+      'https://twitter.com/RunOnFlux',
+      'https://github.com/RunOnFlux',
+    ],
+  },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      {
+        '@type': 'ListItem',
+        position: 1,
+        name: 'Home',
+        item: 'https://home.runonflux.io',
+      },
+      {
+        '@type': 'ListItem',
+        position: 2,
+        name: 'Dashboards',
+        item: 'https://home.runonflux.io/dashboards/overview',
+      },
+      {
+        '@type': 'ListItem',
+        position: 3,
+        name: 'Node List',
+        item: 'https://home.runonflux.io/dashboards/list',
+      },
+    ],
+  },
+]
+
+useHead({
+  title,
+  meta: [
+    { name: 'description', content: description },
+    { name: 'keywords', content: 'flux nodes, node list, flux network, node directory, decentralized nodes, flux node status' },
+    { name: 'robots', content: 'index, follow' },
+
+    // Open Graph
+    { property: 'og:title', content: title },
+    { property: 'og:description', content: description },
+    { property: 'og:image', content: imageUrl },
+    { property: 'og:url', content: pageUrl },
+    { property: 'og:type', content: 'website' },
+    { property: 'og:site_name', content: 'FluxCloud' },
+
+    // Twitter
+    { name: 'twitter:card', content: 'summary_large_image' },
+    { name: 'twitter:title', content: title },
+    { name: 'twitter:description', content: description },
+    { name: 'twitter:image', content: imageUrl },
+    { name: 'twitter:site', content: '@RunOnFlux' },
+  ],
+  link: [
+    { rel: 'canonical', href: pageUrl },
+  ],
+  script: [
+    {
+      type: 'application/ld+json',
+      children: JSON.stringify(structuredData),
+    },
+  ],
+})
 
 const { t } = useI18n()
 

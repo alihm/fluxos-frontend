@@ -648,13 +648,13 @@
                       <span class="font-weight-medium">Blocks: {{ formatValue(daemonInfoParsed.blocks) }}</span>
                     </VChip>
                     <VChip v-if="daemonInfoParsed.difficulty" prepend-icon="mdi-chart-line" size="small" color="cyan" variant="tonal">
-                      <span class="font-weight-medium">Difficulty: {{ formatValue(daemonInfoParsed.difficulty) }}</span>
+                      <span class="font-weight-medium">{{ t('pages.administration.manageFlux.daemon.info.difficulty') }}: {{ formatValue(daemonInfoParsed.difficulty) }}</span>
                     </VChip>
                     <VChip v-if="daemonInfoParsed.timeoffset !== undefined" prepend-icon="mdi-clock-outline" size="small" color="secondary" variant="tonal">
-                      <span class="font-weight-medium">Time Offset: {{ formatValue(daemonInfoParsed.timeoffset) }}</span>
+                      <span class="font-weight-medium">{{ t('pages.administration.manageFlux.daemon.info.timeOffset') }}: {{ formatValue(daemonInfoParsed.timeoffset) }}</span>
                     </VChip>
                     <VChip v-if="daemonInfoParsed.testnet !== undefined" prepend-icon="mdi-test-tube" size="small" color="teal" variant="tonal">
-                      <span class="font-weight-medium">Testnet: {{ formatValue(daemonInfoParsed.testnet) }}</span>
+                      <span class="font-weight-medium">{{ t('pages.administration.manageFlux.daemon.info.testnet') }}: {{ formatValue(daemonInfoParsed.testnet) }}</span>
                     </VChip>
                   </div>
                 </VCardText>
@@ -672,19 +672,19 @@
                 <VCardText class="pa-2">
                   <div class="d-flex flex-wrap ga-2">
                     <VChip v-if="daemonInfoParsed.balance !== undefined" prepend-icon="mdi-cash" size="small" color="success" variant="tonal">
-                      <span class="font-weight-medium">Balance: {{ formatValue(daemonInfoParsed.balance) }}</span>
+                      <span class="font-weight-medium">{{ t('pages.administration.manageFlux.daemon.info.balance') }}: {{ formatValue(daemonInfoParsed.balance) }}</span>
                     </VChip>
                     <VChip v-if="daemonInfoParsed.keypoolsize" prepend-icon="mdi-key-chain" size="small" color="info" variant="tonal">
-                      <span class="font-weight-medium">Key Pool Size: {{ formatValue(daemonInfoParsed.keypoolsize) }}</span>
+                      <span class="font-weight-medium">{{ t('pages.administration.manageFlux.daemon.info.keyPoolSize') }}: {{ formatValue(daemonInfoParsed.keypoolsize) }}</span>
                     </VChip>
                     <VChip v-if="daemonInfoParsed.keypoololdest" prepend-icon="mdi-key" size="small" color="cyan" variant="tonal">
-                      <span class="font-weight-medium">Key Pool Oldest: {{ formatValue(daemonInfoParsed.keypoololdest) }}</span>
+                      <span class="font-weight-medium">{{ t('pages.administration.manageFlux.daemon.info.keyPoolOldest') }}: {{ formatValue(daemonInfoParsed.keypoololdest) }}</span>
                     </VChip>
                     <VChip v-if="daemonInfoParsed.paytxfee !== undefined" prepend-icon="mdi-currency-usd" size="small" color="teal" variant="tonal">
-                      <span class="font-weight-medium">Pay TX Fee: {{ formatValue(daemonInfoParsed.paytxfee) }}</span>
+                      <span class="font-weight-medium">{{ t('pages.administration.manageFlux.daemon.info.payTxFee') }}: {{ formatValue(daemonInfoParsed.paytxfee) }}</span>
                     </VChip>
                     <VChip v-if="daemonInfoParsed.relayfee !== undefined" prepend-icon="mdi-swap-horizontal" size="small" color="secondary" variant="tonal">
-                      <span class="font-weight-medium">Relay Fee: {{ formatValue(daemonInfoParsed.relayfee) }}</span>
+                      <span class="font-weight-medium">{{ t('pages.administration.manageFlux.daemon.info.relayFee') }}: {{ formatValue(daemonInfoParsed.relayfee) }}</span>
                     </VChip>
                   </div>
                 </VCardText>
@@ -1352,10 +1352,14 @@
 <script setup>
 import { ref, onMounted, computed, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { useSEONoIndex } from '@/composables/useSEO'
 import { useSnackbar } from '@/composables/useSnackbar'
 import axios from 'axios'
 import { useFluxStore } from '@/stores/flux'
 import { getDetectedBackendURL } from '@/utils/backend'
+
+// Prevent indexing of manage Flux admin page (private admin data)
+useSEONoIndex()
 // Lazy-load Monaco Editor to reduce main bundle size
 const VueMonacoEditor = defineAsyncComponent(() =>
   import('@guolao/vue-monaco-editor').then(m => m.VueMonacoEditor)

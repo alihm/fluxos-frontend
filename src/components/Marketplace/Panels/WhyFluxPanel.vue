@@ -74,12 +74,11 @@ const panelPadding = computed(() => {
 // Panel wrapper style
 const panelStyle = computed(() => ({
   borderRadius: props.panel.cornerRadius ? `${props.panel.cornerRadius}px` : '0',
-  marginBottom: '15px',
 }))
 </script>
 
 <style scoped>
 .why-flux-panel {
-  margin-bottom: 8px;
+  margin-bottom: 0;
 }
 </style>

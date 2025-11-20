@@ -1,14 +1,14 @@
 <template>
   <div>
     <!-- Introduction Section -->
-    <VRow class="mb-6">
+    <VRow>
       <VCol cols="12">
-        <VCard flat class="rewards-intro-card">
+        <VCard class="rewards-intro-card">
           <VCardText>
             <div class="d-flex align-center mb-3">
               <VAvatar
                 size="48"
-                color="primary"
+                color="success"
                 variant="tonal"
                 class="mr-3"
               >
@@ -19,24 +19,9 @@
                 <p class="text-body-2 mb-0 text-medium-emphasis">{{ t('pages.dashboard.rewards.intro.subtitle') }}</p>
               </div>
             </div>
-            <p class="text-body-1 mb-3">
+            <p class="text-body-1 mb-0">
               {{ t('pages.dashboard.rewards.intro.description') }}
             </p>
-            <a
-              href="https://runonflux.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              class="learn-more-link"
-            >
-              <VBtn
-                color="primary"
-                variant="tonal"
-                prepend-icon="mdi-open-in-new"
-                size="small"
-              >
-                {{ t('pages.dashboard.rewards.intro.learnMore') }}
-              </VBtn>
-            </a>
           </VCardText>
         </VCard>
       </VCol>
@@ -51,11 +36,9 @@
           rewardCards.length % 2 === 1 && index === rewardCards.length - 1 ? '12' : '6'
         "
         lg="4"
-        class="py-0 mt-2"
       >
         <VCard
           :title="card.title"
-          elevation="2"
         >
           <VOverlay
             v-model="isLoading"
@@ -109,16 +92,13 @@
       </VCol>
 
       <VCol
-        class="py-0 mt-2"
         cols="12"
         md="12"
         lg="12"
       >
         <VCard
           :title="t('pages.dashboard.rewards.historicalPriceChart')"
-          elevation="2"
           height="350"
-          class="py-0"
         >
           <VueApexCharts
             ref="historyPrice"
@@ -486,25 +466,48 @@ const generateEconomics = async fluxnodecounts => {
 </script>
 
 <style scoped>
-.rewards-intro-card {
-  border-radius: 16px;
-  background: linear-gradient(135deg, rgba(var(--v-theme-primary), 0.05) 0%, rgba(var(--v-theme-success), 0.05) 100%);
-  border: 1px solid rgba(var(--v-theme-primary), 0.1);
-  transition: all 0.3s ease;
+/* Apply border and border-radius to all cards */
+:deep(.v-card) {
+  border-radius: 16px !important;
+  border: 1px solid rgba(var(--v-theme-on-surface), 0.12) !important;
+  box-shadow: none !important;
 }
 
-.rewards-intro-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 16px rgba(var(--v-theme-primary), 0.1);
+.rewards-intro-card {
+  border-radius: 16px !important;
+  border: 1px solid rgba(var(--v-theme-on-surface), 0.12) !important;
+  box-shadow: none !important;
+}
+
+.rewards-intro-card h2 {
+  line-height: 1.2;
+  word-break: keep-all;
+}
+
+/* Mobile responsive adjustments */
+@media (max-width: 599px) {
+  .rewards-intro-card h2 {
+    font-size: 1.5rem !important;
+  }
+
+  .rewards-intro-card .v-avatar {
+    width: 48px !important;
+    height: 48px !important;
+  }
+
+  .rewards-intro-card .v-icon {
+    font-size: 24px !important;
+  }
+
+  .rewards-intro-card .v-card-text {
+    padding: 16px !important;
+  }
 }
 
 .learn-more-link {
   text-decoration: none;
 }
 
-.v-card {
-  margin-bottom: 1rem;
-}
 .v-timeline {
   padding-left: 0;
 }
