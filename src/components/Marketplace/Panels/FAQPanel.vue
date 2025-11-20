@@ -65,7 +65,7 @@ const props = defineProps({
 })
 
 const i18n = useI18n()
-const { t, te, tm, messages } = i18n
+const { t, te, tm } = i18n
 
 const { getMinimumPrice } = useGameUtils()
 
@@ -126,65 +126,40 @@ const questionsList = computed(() => {
   if (isI18nKey(props.panel.questions)) {
     const key = props.panel.questions.replace('i18n:', '')
 
-    // Try to access the value directly without te() check
-    let questions = null
+    // Use te() to check if key exists, then use t() for each item
+    if (!te(key)) return []
 
-    // Try direct access via locale messages
-    try {
-      const locale = i18n.locale.value
-      const parts = key.split('.')
-      let value = i18n.messages.value[locale]
+    const questions = tm(key)
 
-      for (const part of parts) {
-        if (value && typeof value === 'object') {
-          value = value[part]
-        } else {
-          break
+    if (Array.isArray(questions)) {
+      // Replace price placeholder with actual minimum price
+      const replacePricePlaceholder = text => {
+        if (!text) return ''
+        // Check if text is an object (message function)
+        if (typeof text === 'object' && text !== null) {
+          // If it's a message function object, try to extract the string
+          return String(text)
         }
+        const textStr = String(text)
+        const price = minimumPrice.value || '0.00'
+        return textStr.replace(/\[\[minPrice\]\]/g, `$${price}`)
       }
 
-      questions = value
-    } catch (e) {
-      // Silently handle error
-    }
+      return questions.map((faq, index) => {
+        // Extract values - tm() might return message functions, so we need to call them or use t()
+        const qKey = `${key}.${index}.q`
+        const aKey = `${key}.${index}.a`
 
-    // Convert to array and unwrap proxy objects
-    if (questions && typeof questions === 'object') {
-      let questionsArray = Array.isArray(questions) ? questions : Object.values(questions)
-
-      // Deep clone to unwrap all proxies
-      questionsArray = JSON.parse(JSON.stringify(questionsArray))
-
-      // Extract actual string values from compiled i18n message objects
-      questionsArray = questionsArray.map(faq => {
-        const extractString = obj => {
-          if (typeof obj === 'string') return obj
-          if (obj && typeof obj === 'object') {
-            // Try to get the actual string from compiled message object
-            return obj.body?.static || obj.loc?.source || obj.static || JSON.stringify(obj)
-          }
-          
-          return String(obj)
-        }
-
-        // Replace price placeholder with actual minimum price
-        // Use $$ to escape the dollar sign in the replacement string
-        const replacePricePlaceholder = text => {
-          if (!text) return text
-          const price = minimumPrice.value || '0.00'
-          
-          return text.replace(/\[\[minPrice\]\]/g, `$$${price}`)
-        }
+        const q = te(qKey) ? t(qKey) : (typeof faq.q === 'string' ? faq.q : String(faq.q || ''))
+        const a = te(aKey) ? t(aKey) : (typeof faq.a === 'string' ? faq.a : String(faq.a || ''))
 
         return {
-          q: extractString(faq.q),
-          a: replacePricePlaceholder(extractString(faq.a)),
-          question: extractString(faq.q),
-          answer: replacePricePlaceholder(extractString(faq.a)),
+          q,
+          a: replacePricePlaceholder(a),
+          question: q,
+          answer: replacePricePlaceholder(a),
         }
       })
-
-      return questionsArray
     }
 
     return []

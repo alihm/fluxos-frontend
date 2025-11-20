@@ -73,7 +73,7 @@ const props = defineProps({
   },
 })
 
-const { t, te, locale, messages } = useI18n()
+const { t, te, tm } = useI18n()
 
 // Helper function to check if a string is an i18n key
 const isI18nKey = str => {
@@ -92,25 +92,7 @@ const resolveI18nValue = value => {
   return value
 }
 
-// Helper to get deeply nested i18n value
-const getNestedI18nValue = key => {
-  try {
-    const parts = key.split('.')
-    let value = messages.value[locale.value]
-
-    for (const part of parts) {
-      if (value && typeof value === 'object') {
-        value = value[part]
-      } else {
-        break
-      }
-    }
-
-    return value
-  } catch (e) {
-    return null
-  }
-}
+// Removed getNestedI18nValue - use tm() instead
 
 // Resolve title
 const resolvedTitle = computed(() => resolveI18nValue(props.title))
@@ -120,32 +102,28 @@ const resolvedSubtitle = computed(() => resolveI18nValue(props.subtitle))
 
 // Resolve items
 const resolvedItems = computed(() => {
-  // If items is a string (i18n key), fetch from i18n
+  // If items is a string (i18n key), fetch from i18n using t() for each item
   if (typeof props.items === 'string' && isI18nKey(props.items)) {
     const key = props.items.replace('i18n:', '')
-    const items = getNestedI18nValue(key)
 
-    if (items && typeof items === 'object') {
-      let itemsArray = Array.isArray(items) ? items : Object.values(items)
+    // Use te() to check if key exists
+    if (!te(key)) return []
 
-      // Deep clone to unwrap proxies
-      itemsArray = JSON.parse(JSON.stringify(itemsArray))
+    const items = tm(key)
 
-      // Extract actual string values from compiled i18n message objects
-      return itemsArray.map(item => {
-        const extractString = obj => {
-          if (typeof obj === 'string') return obj
-          if (obj && typeof obj === 'object') {
-            return obj.body?.static || obj.loc?.source || obj.static || JSON.stringify(obj)
-          }
-          return String(obj)
-        }
+    if (Array.isArray(items)) {
+      return items.map((item, index) => {
+        // Use t() to translate each field directly
+        const iconKey = `${key}.${index}.icon`
+        const titleKey = `${key}.${index}.title`
+        const descKey = `${key}.${index}.description`
+        const colorKey = `${key}.${index}.color`
 
         return {
-          icon: extractString(item.icon),
-          title: extractString(item.title),
-          description: extractString(item.description),
-          color: item.color ? extractString(item.color) : undefined,
+          icon: te(iconKey) ? t(iconKey) : (typeof item.icon === 'string' ? item.icon : String(item.icon || '')),
+          title: te(titleKey) ? t(titleKey) : (typeof item.title === 'string' ? item.title : String(item.title || '')),
+          description: te(descKey) ? t(descKey) : (typeof item.description === 'string' ? item.description : String(item.description || '')),
+          color: te(colorKey) ? t(colorKey) : item.color,
         }
       })
     }
