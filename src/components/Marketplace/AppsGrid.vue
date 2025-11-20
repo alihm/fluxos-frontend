@@ -92,7 +92,7 @@
       </div>
 
       <div v-else class="apps-container">
-        <div class="apps-content">
+        <div class="apps-content" :style="{ height: containerHeight + 'px' }">
           <Transition :name="slideDirection === 'next' ? 'slide-next' : 'slide-prev'">
             <div :key="currentPage" class="apps-grid" :class="gridClass">
               <AppCard
@@ -154,6 +154,19 @@ import { useDisplay } from 'vuetify'
 import { useI18n } from 'vue-i18n'
 import AppCard from '@/components/Marketplace/AppCard.vue'
 import { useMarketplaceUtils } from '@/composables/useMarketplaceUtils'
+
+// Grid configuration constants
+const GRID_CONFIG = {
+  MIN_CARD_WIDTH: 300,      // Minimum width per app card
+  MIN_CARD_HEIGHT: 280,     // Approximate height of each card
+  GRID_GAP: 16,             // Gap between cards/rows
+  CONTAINER_PADDING: 40,    // Container padding
+  HEADER_HEIGHT: 200,       // Header with search/filters
+  PAGINATION_HEIGHT: 60,    // Pagination controls
+  RESERVED_SPACE: 150,      // Footer, statusbar, and padding
+  MAX_ROWS: 4,              // Maximum number of rows to display
+  MIN_ROWS: 1,              // Minimum number of rows to display
+}
 
 const props = defineProps({
   apps: {
@@ -240,26 +253,42 @@ const categoryItems = computed(() => [
 
 // Grid configuration - responsive based on available space for cards
 const columnsCount = computed(() => {
-  const minCardWidth = 300  // Minimum width per app card
-  const gridGap = 16        // Gap between cards
-  const containerPadding = 40  // Container padding
-
-  const availableWidth = width.value - containerPadding
+  const availableWidth = width.value - GRID_CONFIG.CONTAINER_PADDING
 
   // Calculate maximum columns that fit comfortably
-  if (availableWidth >= (minCardWidth * 3) + (gridGap * 2)) {
+  if (availableWidth >= (GRID_CONFIG.MIN_CARD_WIDTH * 3) + (GRID_CONFIG.GRID_GAP * 2)) {
     return 3  // FluxCloud standard: 3 columns
-  } else if (availableWidth >= (minCardWidth * 2) + gridGap) {
+  } else if (availableWidth >= (GRID_CONFIG.MIN_CARD_WIDTH * 2) + GRID_CONFIG.GRID_GAP) {
     return 2  // 2 columns for medium screens
   } else {
     return 1  // 1 column for small screens
   }
 })
 
+const rowsCount = computed(() => {
+  // Calculate rows based on window height
+  const availableHeight = window.innerHeight
+    - GRID_CONFIG.HEADER_HEIGHT
+    - GRID_CONFIG.PAGINATION_HEIGHT
+    - GRID_CONFIG.RESERVED_SPACE
+
+  const maxRows = Math.max(
+    GRID_CONFIG.MIN_ROWS,
+    Math.floor(availableHeight / GRID_CONFIG.MIN_CARD_HEIGHT)
+  )
+
+  // Limit to reasonable maximum
+  return Math.min(maxRows, GRID_CONFIG.MAX_ROWS)
+})
+
 const itemsPerPage = computed(() => {
-  const rows = 1  // Only 1 row per page
-  
-  return columnsCount.value * rows
+  return columnsCount.value * rowsCount.value
+})
+
+const containerHeight = computed(() => {
+  // Calculate total height: (rows × cardHeight) + (gaps between rows)
+  return (rowsCount.value * GRID_CONFIG.MIN_CARD_HEIGHT)
+    + ((rowsCount.value - 1) * GRID_CONFIG.GRID_GAP)
 })
 
 const gridClass = computed(() => {
@@ -496,7 +525,8 @@ watch(() => props.sortBy, val => { sort.value = val })
 .apps-content {
   position: relative;
   overflow: hidden;
-  height: 250px;
+  /* height is now set dynamically via inline style based on rowsCount */
+  transition: height 0.3s ease;
 }
 
 
@@ -594,7 +624,7 @@ watch(() => props.sortBy, val => { sort.value = val })
   justify-content: center;
   align-items: center;
   gap: 20px;
-  padding: 16px 0;
+  padding: 8px 0 0 0;
 }
 
 
