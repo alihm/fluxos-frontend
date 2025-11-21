@@ -6,13 +6,14 @@
     :style="{ '--animation-order': animationOrder }"
     @mouseenter="hovered = true"
     @mouseleave="hovered = false"
+    @click="viewDetails"
   >
     <VCard
       class="app-card"
       elevation="0"
     >
       <div class="card-content">
-        <!-- Top section: Icon + Name + Buttons (87px height) -->
+        <!-- Top section: Icon + Name (87px height) -->
         <div class="app-top-section">
           <div class="app-icon-container">
             <AppIcon :app="app" :size="60" />
@@ -30,27 +31,6 @@
                 {{ categoryName }}
               </VChip>
             </div>
-          </div>
-
-          <div class="app-buttons">
-            <VBtn
-              color="primary"
-              variant="flat"
-              size="x-small"
-              class="install-btn"
-              @click.stop="deploy"
-            >
-              {{ t('components.marketplace.appCard.install') }}
-            </VBtn>
-            <VBtn
-              color="primary"
-              variant="flat"
-              size="x-small"
-              class="view-btn"
-              @click.stop="viewDetails"
-            >
-              {{ t('components.marketplace.appCard.view') }}
-            </VBtn>
           </div>
         </div>
 
@@ -89,13 +69,6 @@
         </div>
       </div>
     </VCard>
-
-    <!-- Install Dialog -->
-    <InstallDialog
-      v-model="showInstallDialog"
-      :app="app"
-      @deployed="handleDeploySuccess"
-    />
   </div>
 </template>
 
@@ -104,7 +77,6 @@ import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import AppIcon from '@/components/Marketplace/AppIcon.vue'
-import InstallDialog from '@/components/Marketplace/InstallDialog.vue'
 import { useMarketplaceUtils } from '@/composables/useMarketplaceUtils'
 
 const props = defineProps({
@@ -122,15 +94,12 @@ const props = defineProps({
   },
 })
 
-const emit = defineEmits(['deploy'])
-
 const { t } = useI18n()
 
 const router = useRouter()
 const { formatNumber, formatPrice } = useMarketplaceUtils()
 
 const hovered = ref(false)
-const showInstallDialog = ref(false)
 const cardRef = ref(null)
 const isVisible = ref(false)
 
@@ -151,17 +120,6 @@ const navigateToApp = () => {
 
 const viewDetails = () => {
   navigateToApp()
-}
-
-const deploy = () => {
-  // FluxCloud opens InstallDialog as modal
-  showInstallDialog.value = true
-}
-
-const handleDeploySuccess = deployedApp => {
-  // Emit deploy event for parent components to handle
-  emit('deploy', deployedApp)
-  console.log('🚀 App deployed successfully:', deployedApp.displayName || deployedApp.name)
 }
 
 // Intersection Observer for scroll-based animation
@@ -202,6 +160,7 @@ onUnmounted(() => {
   border-radius: 12px;
   position: relative;
   overflow: hidden;
+  cursor: pointer;
   /* Initial state - hidden */
   opacity: 0;
   transform: translateY(30px);
@@ -306,13 +265,14 @@ onUnmounted(() => {
   height: 100%;
 }
 
-/* Top section - FluxCloud style (87px height) */
+/* Top section - Centered layout (87px height) */
 .app-top-section {
   height: 87px;
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 0 8px;
+  justify-content: center;
+  gap: 12px;
+  padding: 0 16px;
 }
 
 .app-icon-container {
@@ -321,59 +281,35 @@ onUnmounted(() => {
 }
 
 .app-name-section {
-  flex: 1;
-  min-width: 0;
-  padding: 0 4px;
   display: flex;
   flex-direction: column;
   justify-content: center;
-  gap: 4px;
+  align-items: center;
+  gap: 6px;
+  text-align: center;
 }
 
 .app-name {
-  font-size: 0.85rem;
+  font-size: 0.95rem;
   font-weight: 600;
   margin: 0;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   line-height: 1.2;
+  max-width: 100%;
 }
 
 .app-category {
   display: flex;
   align-items: center;
+  justify-content: center;
 }
 
 .category-chip {
   font-size: 0.7rem !important;
   height: 18px !important;
   padding: 0 6px !important;
-}
-
-.spacer {
-  width: 20px;
-  flex-shrink: 0;
-}
-
-.app-buttons {
-  width: 80px;
-  flex-shrink: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  padding: 8px 0 0 0;
-  margin-right: 3px;
-}
-
-.install-btn,
-.view-btn {
-  height: 25px !important;
-  font-size: 0.75rem !important;
-  font-weight: 600 !important;
-  color: white !important;
-  width: 100% !important;
-  border-radius: 12px !important;
 }
 
 .card-divider {

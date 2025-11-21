@@ -2965,6 +2965,10 @@
       "loading": "Ładowanie sklepu...",
       "maintenanceTitle": "Sklep Aplikacji\nW Trakcie Konserwacji",
       "maintenanceSubtitle": "Obecnie występują problemy techniczne ze sklepem. Nasz zespół pracuje nad jak najszybszym rozwiązaniem tego problemu.",
+      "hero": {
+        "title": "Marketplace Aplikacji Flux",
+        "subtitle": "Wdrażaj zdecentralizowane wstępnie skonfigurowane aplikacje w chmurze Web3 Flux. Kontenery Docker, aplikacje webowe i API na ponad {nodeCount} węzłach FluxNodes na całym świecie."
+      },
       "detail": {
         "loadingTitle": "Ładowanie aplikacji...",
         "errorMessage": "Nie udało się załadować szczegółów aplikacji: {error}",

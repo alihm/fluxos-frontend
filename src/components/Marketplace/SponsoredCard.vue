@@ -47,26 +47,6 @@
                     </div>
                     <div class="app-info">
                       <h3 class="app-name">{{ app.displayName || app.name }}</h3>
-                      <div class="app-actions">
-                        <VBtn
-                          color="primary"
-                          variant="flat"
-                          size="x-small"
-                          class="action-btn"
-                          @click.stop="deployApp(app)"
-                        >
-                          {{ labels.install }}
-                        </VBtn>
-                        <VBtn
-                          color="primary"
-                          variant="outlined"
-                          size="x-small"
-                          class="action-btn"
-                          @click.stop="navigateToApp(app)"
-                        >
-                          {{ labels.view }}
-                        </VBtn>
-                      </div>
                     </div>
                   </div>
                 </div>
@@ -114,8 +94,6 @@ const { formatNumber } = useMarketplaceUtils()
 
 const labels = computed(() => ({
   sponsored: t('components.marketplace.sponsoredCard.sponsored'),
-  install: t('components.marketplace.sponsoredCard.install'),
-  view: t('components.marketplace.sponsoredCard.view'),
   noSponsoredApps: t('components.marketplace.sponsoredCard.noSponsoredApps'),
 }))
 
@@ -218,10 +196,6 @@ const formatCount = count => {
 }
 
 const navigateToApp = app => {
-  router.push(`/marketplace/${app.uuid || app.name}`)
-}
-
-const deployApp = app => {
   router.push(`/marketplace/${app.uuid || app.name}`)
 }
 
@@ -462,61 +436,39 @@ onUnmounted(() => {
 .app-content {
   display: flex;
   align-items: center;
-  height: 65px; /* Adjusted internal row height */
-  padding: 0 8px; /* FluxCloud left/right content padding */
-  gap: 12px; /* Space between icon and text */
+  justify-content: center;
+  height: 65px;
+  padding: 0 12px;
+  gap: 16px;
 }
 
 .icon-section {
-  width: 48px; /* Adjusted for smaller icon */
+  width: 48px;
   flex-shrink: 0;
 }
 
 .app-info {
-  flex: 1;
-  padding: 2px;
   display: flex;
   flex-direction: column;
   justify-content: center;
-  min-width: 0;
-  gap: 6px;
+  align-items: center;
+  text-align: center;
 }
 
 .app-name {
-  font-size: 0.9rem;
-  font-weight: 600;
+  font-size: 1.1rem;
+  font-weight: 700;
   margin: 0;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  line-height: 1.2;
+  line-height: 1.3;
+  max-width: 100%;
 }
 
 .spacer {
-  width: 16px; /* Reduced spacer width */
+  width: 16px;
   flex-shrink: 0;
-}
-
-.app-actions {
-  display: flex;
-  flex-direction: row;
-  gap: 6px;
-  align-items: center;
-  flex-wrap: nowrap;
-}
-
-.action-btn {
-  height: 24px !important;
-  font-size: 0.6rem !important;
-  font-weight: 600 !important;
-  color: white !important;
-  min-width: 50px !important;
-  padding: 0 6px !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  line-height: 1 !important;
-  border-radius: 12px !important;
 }
 
 
@@ -537,6 +489,10 @@ onUnmounted(() => {
 
   .app-body {
     padding: 10px;
+  }
+
+  .app-name {
+    font-size: 1rem;
   }
 
   .app-desc {

@@ -2963,6 +2963,10 @@
       "loading": "Loading Marketplace...",
       "maintenanceTitle": "Applications Marketplace\nUnder Maintenance",
       "maintenanceSubtitle": "We're currently experiencing technical difficulties with the marketplace. Our team is working to resolve this issue as quickly as possible.",
+      "hero": {
+        "title": "Flux Application Marketplace",
+        "subtitle": "Deploy decentralized pre-configured applications on Flux's Web3 cloud. Docker containers, web apps, and APIs on {nodeCount}+ FluxNodes worldwide."
+      },
       "detail": {
         "loadingTitle": "Loading Application...",
         "errorMessage": "Failed to load application details: {error}",
