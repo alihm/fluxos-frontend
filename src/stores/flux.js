@@ -181,17 +181,16 @@ export const useFluxStore = defineStore("flux", {
         return
       }
 
-      // Try to load from cache first
+      // Try to load from cache first for instant display
       const cached = await this.loadServerLocationsFromCache()
       if (cached) {
         this.serverLocations.fluxList = Array.isArray(cached.fluxList) ? cached.fluxList : []
         this.serverLocations.fluxNodeCount = cached.fluxNodeCount || 0
         this.serverLocations.hasError = false
-        this.serverLocations.lastFetched = cached.timestamp
-        return
+        // Don't set lastFetched yet - we'll fetch fresh data below
       }
 
-      // No cache available, fetch fresh data
+      // Always fetch fresh data on page load
       this.serverLocations.isLoading = true
 
       try {
@@ -374,18 +373,17 @@ export const useFluxStore = defineStore("flux", {
         return
       }
 
-      // Try to load from cache first
+      // Try to load from cache first for instant display
       const cached = await this.loadTrustpilotFromCache()
       if (cached) {
         this.trustpilot.data = cached
-        this.trustpilot.isFetched = true
-        return
+        // Don't set isFetched yet - we'll fetch fresh data below
+      } else {
+        // Start with fallback data immediately (for instant display)
+        this.trustpilot.data = this.getTrustpilotFallbackData()
       }
 
-      // Start with fallback data immediately (for instant display)
-      this.trustpilot.data = this.getTrustpilotFallbackData()
-
-      // Fetch live data in background
+      // Always fetch fresh data in background
       this.trustpilot.isLoading = true
 
       try {
