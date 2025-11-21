@@ -12,7 +12,6 @@ export default [
   {
     title: 'menu.application.marketplace',  // Direct link to marketplace
     icon: { icon: 'mdi-shopping-search', size: 20 },
-    iconClass: 'nav-icon-bounce',
     itemClass: 'nav-marketplace-promoted',
     to: 'marketplace',
   },
