@@ -2974,7 +2974,7 @@
         "errorMessage": "Nie udało się załadować szczegółów aplikacji: {error}",
         "priceLabel": "Cena",
         "priceFree": "Darmowe",
-        "install": "Instaluj",
+        "install": "Kup Teraz",
         "minimumRequirements": "Minimalne Wymagania",
         "unitCores": "vCores",
         "unitMB": "MB",
@@ -4186,6 +4186,11 @@
               "a": "Tak! Nasz zespół wsparcia jest dostępny <strong>24/7</strong> za pomocą czatu na żywo, e-maila i Discord. Niezależnie od tego, czy masz pytania dotyczące wdrażania, rozwiązywania problemów czy optymalizacji wydajności, jesteśmy tutaj, aby pomóc. Oferujemy również <strong>szczegółową dokumentację, poradniki oraz społeczność deweloperów</strong> do samoobsługi."
             }
           ]
+        },
+        "appSpecificFAQ": {
+          "pricingQuestion": "Ile kosztuje hosting {appName} na Flux Cloud?",
+          "pricingAnswerPaid": "Hosting <strong>{appName}</strong> na Flux Cloud zaczyna się od <strong>{priceText}/miesiąc</strong>. Obejmuje to zdecentralizowaną infrastrukturę w globalnej sieci węzłów, automatyczne kopie zapasowe, wbudowaną ochronę DDoS, gwarancję uptime 99,9% i wsparcie 24/7. Możesz w dowolnym momencie skalować zasoby w górę lub w dół dzięki naszym elastycznym opcjom cenowym. Brak ukrytych opłat ani umów długoterminowych.",
+          "pricingAnswerFree": "Hosting <strong>{appName}</strong> na Flux Cloud jest <strong>bezpłatny</strong>. Obejmuje to zdecentralizowaną infrastrukturę w globalnej sieci węzłów, automatyczne kopie zapasowe, wbudowaną ochronę DDoS, gwarancję uptime 99,9% i wsparcie 24/7. Możesz w dowolnym momencie skalować zasoby w górę lub w dół dzięki naszym elastycznym opcjom cenowym. Brak ukrytych opłat ani umów długoterminowych."
         }
       }
     },

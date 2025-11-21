@@ -2972,7 +2972,7 @@
         "errorMessage": "Failed to load application details: {error}",
         "priceLabel": "Price",
         "priceFree": "Free",
-        "install": "Install",
+        "install": "Buy Now",
         "minimumRequirements": "Minimum Requirements",
         "unitCores": "vCores",
         "unitMB": "MB",
@@ -3080,6 +3080,11 @@
               "a": "We offer 24/7 support through our Discord community, email support, our AI built-in tool, and our support ticket system at <a href=\"https://support.runonflux.io/\" target=\"_blank\" rel=\"noopener noreferrer\">support.runonflux.io</a>."
             }
           ]
+        },
+        "appSpecificFAQ": {
+          "pricingQuestion": "How much does it cost to host {appName} on Flux Cloud?",
+          "pricingAnswerPaid": "Hosting <strong>{appName}</strong> on Flux Cloud starts at <strong>{priceText}/month</strong>. This includes decentralized infrastructure across a global network of nodes, automatic backups, built-in DDoS protection, 99.9% uptime guarantee, and 24/7 support. You can scale resources up or down anytime with our flexible pricing options. No hidden fees or long-term contracts required.",
+          "pricingAnswerFree": "Hosting <strong>{appName}</strong> on Flux Cloud is <strong>free</strong>. This includes decentralized infrastructure across a global network of nodes, automatic backups, built-in DDoS protection, 99.9% uptime guarantee, and 24/7 support. You can scale resources up or down anytime with our flexible pricing options. No hidden fees or long-term contracts required."
         }
       },
       "games": {

@@ -112,6 +112,7 @@ import { useI18n } from 'vue-i18n'
 import { useSEO, generateSoftwareApplicationSchema, generateBreadcrumbSchema } from '@/composables/useSEO'
 import { useMarketplace } from '@/composables/useMarketplace'
 import { useGameUtils } from '@/composables/useGameUtils'
+import { useFluxStore } from '@/stores/flux'
 import LoadingSpinner from '@/components/Marketplace/LoadingSpinner.vue'
 import PanelRenderer from '@/components/Marketplace/PanelRenderer.vue'
 import AppConfigCard from '@/components/Marketplace/AppConfigCard.vue'
@@ -131,6 +132,9 @@ const error = ref(null)
 const showInstallDialog = ref(false)
 const selectedApp = ref(null)
 const selectedConfig = ref(null)
+
+// Network data
+const nodeCount = ref(8000) // Default fallback
 
 // Parse game icon to handle asset:// protocol
 const gameIcon = computed(() => parseLandingImage(game.value?.icon))
@@ -264,7 +268,7 @@ const structuredData = computed(() => {
     features: [
       'One-click deployment',
       'Auto-scaling',
-      'Global distribution across 8,000+ nodes',
+      `Global distribution across ${nodeCount.value.toLocaleString()}+ nodes`,
       'Built-in DDoS protection',
       '24/7 automated monitoring',
       'Automatic backups',
@@ -466,6 +470,48 @@ const getConfigWithPopular = (config, index, totalConfigs) => {
   }
 }
 
+// Fetch network data from Pinia store (no API call needed)
+const fetchNetworkData = async () => {
+  try {
+    // Get data from Pinia store (already fetched in App.vue)
+    const fluxStore = useFluxStore()
+    const { serverLocations } = fluxStore
+
+    // Wait a bit for store to populate if needed
+    if (serverLocations.fluxList.length === 0 && !serverLocations.lastFetched) {
+      // Store hasn't loaded yet, wait for it
+      await new Promise(resolve => {
+        const unwatch = watch(
+          () => serverLocations.fluxList.length,
+          (length) => {
+            if (length > 0) {
+              unwatch()
+              resolve()
+            }
+          },
+          { immediate: true }
+        )
+        // Timeout after 5 seconds
+        setTimeout(() => {
+          unwatch()
+          resolve()
+        }, 5000)
+      })
+    }
+
+    // Update node count from store
+    if (serverLocations.fluxNodeCount > 0) {
+      nodeCount.value = serverLocations.fluxNodeCount
+      console.log('✅ Network data loaded from store:', {
+        nodeCount: nodeCount.value,
+      })
+    }
+  } catch (error) {
+    console.error('Error loading network data from store:', error)
+    // Keep default fallback values on error
+  }
+}
+
 // Watch for route changes to reload game details
 watch(() => route.params.name, () => {
   // Scroll to top when navigating to a different game
@@ -473,7 +519,12 @@ watch(() => route.params.name, () => {
   loadGameDetails()
 }, { immediate: false })
 
-onMounted(loadGameDetails)
+onMounted(async () => {
+  await Promise.all([
+    loadGameDetails(),
+    fetchNetworkData()
+  ])
+})
 </script>
 
 <style scoped>

@@ -296,10 +296,10 @@
 
       <!-- Why Host on Flux Cloud Section -->
       <FeatureShowcase
-        :title="t('pages.marketplace.common.whyFlux.title')"
-        :subtitle="t('pages.marketplace.common.whyFlux.subtitle')"
-        items="i18n:pages.marketplace.common.whyFlux.benefits"
+        :title="t('pages.apps.register.landing.benefits.title')"
+        :items="whyFluxBenefits"
         :icon-size="40"
+        grid-min-width="300px"
         class="why-flux-section"
       />
 
@@ -389,6 +389,7 @@ import { useI18n } from 'vue-i18n'
 import { useSEO, generateBreadcrumbSchema } from '@/composables/useSEO'
 import DOMPurify from 'dompurify'
 import { useMarketplace } from '@/composables/useMarketplace'
+import { useFluxStore } from '@/stores/flux'
 import LoadingSpinner from '@/components/Marketplace/LoadingSpinner.vue'
 import AppIcon from '@/components/Marketplace/AppIcon.vue'
 import InstallDialog from '@/components/Marketplace/InstallDialog.vue'
@@ -418,12 +419,76 @@ const showImageViewer = computed({
   },
 })
 
+// Network data
+const nodeCount = ref(8000) // Default fallback
+const countryCount = ref(63) // Default fallback
+
 // Server Locations Panel Configuration
 const serverLocationsPanel = {
   enabled: true,
-  title: 'Global Server Network',
-  subtitle: 'Deploy your applications across our worldwide decentralized infrastructure',
+  title: 'i18n:pages.apps.register.landing.serverNetwork.title',
+  subtitle: 'i18n:pages.apps.register.landing.serverNetwork.subtitle',
 }
+
+// Why Flux Benefits data (using i18n translations like register page)
+const whyFluxBenefits = computed(() => [
+  {
+    icon: 'mdi-shield-check',
+    color: 'success',
+    title: t('pages.apps.register.landing.benefits.decentralized.title'),
+    description: t('pages.apps.register.landing.benefits.decentralized.description'),
+  },
+  {
+    icon: 'mdi-currency-usd-off',
+    color: 'warning',
+    title: t('pages.apps.register.landing.benefits.affordable.title'),
+    description: t('pages.apps.register.landing.benefits.affordable.description'),
+  },
+  {
+    icon: 'mdi-web',
+    color: 'info',
+    title: t('pages.apps.register.landing.benefits.global.title'),
+    description: t('pages.apps.register.landing.benefits.global.description', {
+      countryCount: countryCount.value
+    }),
+  },
+  {
+    icon: 'mdi-scale-balance',
+    color: 'primary',
+    title: t('pages.apps.register.landing.benefits.censorship.title'),
+    description: t('pages.apps.register.landing.benefits.censorship.description'),
+  },
+  {
+    icon: 'mdi-chart-line',
+    color: 'success',
+    title: t('pages.apps.register.landing.benefits.scalable.title'),
+    description: t('pages.apps.register.landing.benefits.scalable.description'),
+  },
+  {
+    icon: 'mdi-lock-open',
+    color: 'error',
+    title: t('pages.apps.register.landing.benefits.noVendor.title'),
+    description: t('pages.apps.register.landing.benefits.noVendor.description'),
+  },
+  {
+    icon: 'mdi-cash-refund',
+    color: 'success',
+    title: t('pages.apps.register.landing.benefits.guarantee.title'),
+    description: t('pages.apps.register.landing.benefits.guarantee.description'),
+  },
+  {
+    icon: 'mdi-domain',
+    color: 'info',
+    title: t('pages.apps.register.landing.benefits.freeDomain.title'),
+    description: t('pages.apps.register.landing.benefits.freeDomain.description'),
+  },
+  {
+    icon: 'mdi-swap-horizontal',
+    color: 'primary',
+    title: t('pages.apps.register.landing.benefits.loadBalancer.title'),
+    description: t('pages.apps.register.landing.benefits.loadBalancer.description'),
+  },
+])
 
 const validScreenshots = computed(() => {
   if (!app.value?.screenshots) return []
@@ -431,7 +496,7 @@ const validScreenshots = computed(() => {
   return app.value.screenshots.filter(image => !failedImages.value.has(image))
 })
 
-// Get app-specific pricing FAQ
+// Get app-specific pricing FAQ (using i18n translations)
 const appSpecificFAQs = computed(() => {
   if (!app.value) return []
 
@@ -441,8 +506,10 @@ const appSpecificFAQs = computed(() => {
 
   return [
     {
-      q: `How much does it cost to host ${appName} on Flux Cloud?`,
-      a: `Hosting <strong>${appName}</strong> on Flux Cloud ${appPrice > 0 ? `starts at <strong>${priceText}/month</strong>` : 'is <strong>free</strong>'}. This includes decentralized infrastructure across a global network of nodes, automatic backups, built-in DDoS protection, 99.9% uptime guarantee, and 24/7 support. You can scale resources up or down anytime with our flexible pricing options. No hidden fees or long-term contracts required.`,
+      q: t('pages.marketplace.common.appSpecificFAQ.pricingQuestion', { appName }),
+      a: appPrice > 0
+        ? t('pages.marketplace.common.appSpecificFAQ.pricingAnswerPaid', { appName, priceText })
+        : t('pages.marketplace.common.appSpecificFAQ.pricingAnswerFree', { appName }),
     },
   ]
 })
@@ -669,7 +736,7 @@ const loadAppDetails = async () => {
   if (!appId) {
     localLoading.value = false
     router.push('/marketplace')
-    
+
     return
   }
 
@@ -688,6 +755,59 @@ const loadAppDetails = async () => {
   }
 }
 
+// Fetch network data from Pinia store (no API call needed)
+const fetchNetworkData = async () => {
+  try {
+    // Get data from Pinia store (already fetched in App.vue)
+    const fluxStore = useFluxStore()
+    const { serverLocations } = fluxStore
+
+    // Wait a bit for store to populate if needed
+    if (serverLocations.fluxList.length === 0 && !serverLocations.lastFetched) {
+      // Store hasn't loaded yet, wait for it
+      await new Promise(resolve => {
+        const unwatch = watch(
+          () => serverLocations.fluxList.length,
+          (length) => {
+            if (length > 0) {
+              unwatch()
+              resolve()
+            }
+          },
+          { immediate: true }
+        )
+        // Timeout after 5 seconds
+        setTimeout(() => {
+          unwatch()
+          resolve()
+        }, 5000)
+      })
+    }
+
+    // Update node count from store
+    if (serverLocations.fluxNodeCount > 0) {
+      nodeCount.value = serverLocations.fluxNodeCount
+    }
+
+    // Calculate country count from store data
+    if (serverLocations.fluxList.length > 0) {
+      const countries = new Set()
+      serverLocations.fluxList.forEach(flux => {
+        if (flux.geolocation?.country) {
+          countries.add(flux.geolocation.country)
+        }
+      })
+      countryCount.value = countries.size
+      console.log('✅ Network data loaded from store:', {
+        nodeCount: nodeCount.value,
+        countryCount: countryCount.value,
+      })
+    }
+  } catch (error) {
+    console.error('Error loading network data from store:', error)
+    // Keep default fallback values on error
+  }
+}
 
 // Watch for route changes (immediate: true handles initial load)
 watch(() => route.params.id, loadAppDetails, { immediate: true })
@@ -803,7 +923,10 @@ useSEO({
   structuredData, // Computed ref - useSEO will handle reactivity
 })
 
-onMounted(() => {
+onMounted(async () => {
+  // Load network data for dynamic node/country counts
+  await fetchNetworkData()
+
   // Check if user came here with install intent
   if (route.query.action === 'install') {
     // Could show install dialog or scroll to install button
