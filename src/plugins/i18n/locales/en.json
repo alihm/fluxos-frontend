@@ -2484,7 +2484,7 @@
       "register": {
         "landing": {
           "title": "Deploy Your App on FluxCloud",
-          "subtitle": "Experience the power of truly decentralized cloud computing. Deploy Docker containers, web apps, APIs, and microservices on our global network of 13,000+ nodes across 62+ countries.",
+          "subtitle": "Experience the power of truly decentralized cloud computing. Deploy Docker containers, web apps, databases, APIs, and microservices on our global network of 13,000+ nodes across 62+ countries.",
           "getStarted": "Start Deploying",
           "documentation": "View Documentation",
           "appTypes": {
@@ -2853,7 +2853,7 @@
         "intro": {
           "title": "FluxCloud Network Resources",
           "subtitle": "Real-time infrastructure capacity",
-          "description": "These are the total computing resources currently available across the entire FluxCloud Network. Our decentralized infrastructure is powered by thousands of FluxNodes worldwide, providing scalable CPU, RAM, and storage capacity for hosting applications, running blockchain nodes, and executing workloads without relying on traditional cloud providers."
+          "description": "Explore the total computing resources currently available across the entire FluxCloud Network. Our decentralized infrastructure is powered by thousands of FluxNodes worldwide, providing scalable CPU, RAM, and storage capacity for hosting applications, running blockchain nodes, and executing workloads without relying on traditional cloud providers."
         },
         "summary": {
           "title": "Total Network Capacity"

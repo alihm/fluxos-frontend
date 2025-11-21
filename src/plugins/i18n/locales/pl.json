@@ -2643,7 +2643,7 @@
             "subtitle": "Twoje aplikacje wdrożone w globalnej zdecentralizowanej infrastrukturze z węzłami na każdym kontynencie.",
             "title": "Globalna Sieć Serwerów"
           },
-          "subtitle": "Doświadcz mocy prawdziwie zdecentralizowanego cloud computing. Wdrażaj kontenery Docker, aplikacje internetowe, API i mikrousługi w naszej globalnej sieci ponad 13 000 węzłów w ponad 62 krajach.",
+          "subtitle": "Doświadcz mocy prawdziwie zdecentralizowanego cloud computing. Wdrażaj kontenery Docker, aplikacje internetowe, bazy danych, API i mikrousługi w naszej globalnej sieci ponad 13 000 węzłów w ponad 62 krajach.",
           "title": "Wdróż Swoją Aplikację w FluxCloud"
         }
       }
@@ -2853,7 +2853,7 @@
         "intro": {
           "title": "Zasoby sieci FluxCloud",
           "subtitle": "Pojemność infrastruktury w czasie rzeczywistym",
-          "description": "To są całkowite zasoby obliczeniowe dostępne obecnie w całej sieci FluxCloud. Nasza zdecentralizowana infrastruktura jest zasilana przez tysiące węzłów FluxNodes na całym świecie, zapewniając skalowalną pojemność CPU, RAM i pamięci masowej do hostowania aplikacji, uruchamiania węzłów blockchain i wykonywania obciążeń bez polegania na tradycyjnych dostawcach chmury."
+          "description": "Odkryj całkowite zasoby obliczeniowe dostępne obecnie w całej sieci FluxCloud. Nasza zdecentralizowana infrastruktura jest zasilana przez tysiące węzłów FluxNodes na całym świecie, zapewniając skalowalną pojemność CPU, RAM i pamięci masowej do hostowania aplikacji, uruchamiania węzłów blockchain i wykonywania obciążeń bez polegania na tradycyjnych dostawcach chmury."
         },
         "summary": {
           "title": "Całkowita pojemność sieci"
