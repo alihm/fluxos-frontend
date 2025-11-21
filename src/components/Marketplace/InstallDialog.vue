@@ -396,8 +396,12 @@
                     hide-details
                     class="modern-input"
                     color="primary"
-                    attach
-                    :menu-props="{ contentClass: 'install-dialog-select-menu' }"
+                    :menu-props="{
+                      contentClass: 'install-dialog-select-menu',
+                      maxHeight: 300,
+                      eager: true,
+                      closeOnContentClick: true
+                    }"
                   >
                     <template #append-inner>
                       <VTooltip location="top">
@@ -5069,6 +5073,11 @@ watch(isLoggedIn, (newValue, oldValue) => {
     0 2px 6px rgba(0, 0, 0, 0.08);
   position: relative;
   overflow: hidden;
+}
+
+/* Allow dropdowns to overflow in parameter items */
+.param-item.modern-section {
+  overflow: visible;
 }
 
 .modern-section::after {
