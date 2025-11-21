@@ -8,7 +8,7 @@
         <!-- Map Component -->
         <div class="map-container">
           <VOverlay
-            v-model="isLoading"
+            v-model="isLoadingLocal"
             contained
             scroll-strategy="none"
             class="align-center justify-center"
@@ -23,7 +23,7 @@
             class="server-map"
           />
 
-          <div v-if="!isLoading && fluxList.length === 0" class="no-data">
+          <div v-if="!isLoadingLocal && fluxList.length === 0" class="no-data">
             {{ t('components.marketplace.panels.serverLocationsPanel.noData') }}
           </div>
         </div>
@@ -58,12 +58,11 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
-import axios from 'axios'
-import LZString from 'lz-string'
 import MapComponent from '@core/components/MapComponent.vue'
-import DashboardService from '@/services/DashboardService'
+import { useFluxStore } from '@/stores/flux'
+import { storeToRefs } from 'pinia'
 
 const props = defineProps({
   panel: {
@@ -78,13 +77,15 @@ const props = defineProps({
 
 const { t, te } = useI18n()
 
-const fluxList = ref([])
-const fluxNodeCount = ref(0)
-const isLoading = ref(true)
-const hasError = ref(false)
+// Use server locations data from Pinia store
+const fluxStore = useFluxStore()
+const { serverLocations } = storeToRefs(fluxStore)
 
-// Cache configuration
-const CACHE_KEY = 'flux_server_locations'
+// Extract data from store
+const fluxList = computed(() => serverLocations.value.fluxList)
+const fluxNodeCount = computed(() => serverLocations.value.fluxNodeCount)
+const isLoadingLocal = computed(() => serverLocations.value.isLoading)
+const hasError = computed(() => serverLocations.value.hasError)
 
 // Helper function to check if a string is an i18n key
 const isI18nKey = str => {
@@ -125,7 +126,7 @@ const countryCount = computed(() => {
       countries.add(flux.geolocation.country)
     }
   })
-  
+
   return countries.size
 })
 
@@ -136,136 +137,6 @@ const panelStyle = computed(() => ({
   background: props.panel.background || 'transparent',
   borderRadius: props.panel.cornerRadius ? `${props.panel.cornerRadius}px` : '0',
 }))
-
-// IndexedDB helper functions for large data storage
-const openDB = () => {
-  return new Promise((resolve, reject) => {
-    const request = indexedDB.open('FluxServerLocationsDB', 1)
-
-    request.onerror = () => reject(request.error)
-    request.onsuccess = () => resolve(request.result)
-
-    request.onupgradeneeded = event => {
-      const db = event.target.result
-      if (!db.objectStoreNames.contains('locations')) {
-        db.createObjectStore('locations', { keyPath: 'id' })
-      }
-    }
-  })
-}
-
-// Load data from IndexedDB cache
-const loadFromCache = async () => {
-  try {
-    const db = await openDB()
-    
-    return new Promise((resolve, reject) => {
-      const transaction = db.transaction(['locations'], 'readonly')
-      const store = transaction.objectStore('locations')
-      const request = store.get(CACHE_KEY)
-
-      request.onsuccess = () => {
-        if (request.result) {
-          console.log('✅ Loaded server locations from IndexedDB cache')
-          resolve(request.result.data)
-        } else {
-          resolve(null)
-        }
-      }
-      request.onerror = () => {
-        console.warn('Error reading from IndexedDB:', request.error)
-        resolve(null)
-      }
-    })
-  } catch (error) {
-    console.warn('IndexedDB not available, skipping cache:', error)
-    
-    return null
-  }
-}
-
-// Save data to IndexedDB cache (stores full API response)
-const saveToCache = async (fluxData, nodeCount) => {
-  try {
-    const db = await openDB()
-
-    const dataToCache = {
-      id: CACHE_KEY,
-      data: {
-        fluxList: fluxData, // Full API response with all fields
-        fluxNodeCount: nodeCount,
-        timestamp: Date.now(),
-      },
-    }
-
-    const transaction = db.transaction(['locations'], 'readwrite')
-    const store = transaction.objectStore('locations')
-    store.put(dataToCache)
-
-    await new Promise((resolve, reject) => {
-      transaction.oncomplete = () => {
-        console.log(`✅ Cached ${fluxData.length} nodes in IndexedDB`)
-        resolve()
-      }
-      transaction.onerror = () => reject(transaction.error)
-    })
-  } catch (error) {
-    console.warn('Unable to cache to IndexedDB:', error)
-
-    // Cache failure is not critical, continue without it
-  }
-}
-
-const getFluxList = async () => {
-  try {
-    const resLoc = await axios.get(
-      'https://stats.runonflux.io/fluxinfo?projection=geolocation,ip,tier',
-    )
-
-    // Ensure we always get an array
-    const data = resLoc.data.data
-    const fetchedFluxList = Array.isArray(data) ? data : []
-
-    const resList = await DashboardService.fluxnodeCount()
-    const fetchedNodeCount = resList.data.data.total || 0
-
-    // Update reactive values
-    fluxList.value = fetchedFluxList
-    fluxNodeCount.value = fetchedNodeCount
-
-    // Save to cache (only if data changed)
-    saveToCache(fetchedFluxList, fetchedNodeCount)
-
-    hasError.value = false
-  } catch (error) {
-    console.error('Error fetching flux list:', error)
-
-    // Try to load from cache (async)
-    const cached = await loadFromCache()
-    if (cached) {
-      // Ensure cached data is also an array
-      fluxList.value = Array.isArray(cached.fluxList) ? cached.fluxList : []
-      fluxNodeCount.value = cached.fluxNodeCount || 0
-      hasError.value = false
-    } else {
-      // No cache available, hide section
-      fluxList.value = []
-      fluxNodeCount.value = 0
-      hasError.value = true
-    }
-  }
-}
-
-onMounted(async () => {
-  isLoading.value = true
-  try {
-    await getFluxList()
-  } catch (error) {
-    console.error('Error loading server locations:', error)
-  } finally {
-    isLoading.value = false
-  }
-})
 </script>
 
 <style scoped>

@@ -44,6 +44,10 @@ onMounted(() => {
   const fluxStore = useFluxStore()
 
   fluxStore.fetchFluxIDs()
+
+  // Fetch server locations in background on app load
+  // This will populate the data once for all pages that use ServerLocationsPanel
+  fluxStore.fetchServerLocations()
 })
 
 watch(
