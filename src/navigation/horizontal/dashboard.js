@@ -1,11 +1,6 @@
 
 export default [
   {
-    title: 'menu.home.title',  // Pass the key for the translation
-    icon: { icon: 'tabler-home' },
-    to: '/',
-  },
-  {
     title: 'menu.dashboard.title',  // Pass the key for the translation
     icon: { icon: 'tabler-device-desktop' },
     children: [
