@@ -1,6 +1,6 @@
 <template>
   <div class="config-card-wrapper">
-    <div class="config-card" :style="cardStyle">
+    <div class="config-card" :class="{ 'popular': config.isPopular }" :style="cardStyle">
       <!-- Most Popular Badge -->
       <div v-if="config.isPopular" class="most-popular-badge">
         {{ labels.mostPopular }}
@@ -138,12 +138,21 @@ const labels = computed(() => ({
   overflow: visible;
 }
 
+.config-card.popular {
+  border-color: rgb(var(--v-theme-primary)) !important;
+  box-shadow: 0 8px 32px rgba(var(--v-theme-primary), 0.3);
+}
+
 .config-card:hover {
   transform: translateY(-6px);
   box-shadow: 0 12px 40px rgba(33, 150, 243, 0.4), 0 0 60px rgba(33, 150, 243, 0.2);
   border-color: rgba(33, 150, 243, 0.5) !important;
   border-top: 3px solid #2196F3 !important;
   filter: drop-shadow(0 -4px 12px rgba(33, 150, 243, 0.6));
+}
+
+.config-card.popular:hover {
+  box-shadow: 0 12px 40px rgba(var(--v-theme-primary), 0.5), 0 0 60px rgba(var(--v-theme-primary), 0.3);
 }
 
 .config-card:hover .config-price-badge {

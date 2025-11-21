@@ -329,6 +329,10 @@ const handleSelectPlan = planId => {
   border-color: rgba(33, 150, 243, 0.5);
 }
 
+.plan-card.recommended:hover {
+  box-shadow: 0 12px 40px rgba(var(--v-theme-primary), 0.5);
+}
+
 .plan-card.current-plan {
   border-color: rgb(var(--v-theme-success));
   box-shadow: 0 8px 32px rgba(var(--v-theme-success), 0.2);

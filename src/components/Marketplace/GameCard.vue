@@ -64,7 +64,7 @@ const backgroundImageUrl = computed(() => {
   if (!props.game.landingImage) return ''
   const parsed = parseLandingImage(props.game.landingImage)
   console.log('🎨 Game:', props.game.name, 'Landing image:', props.game.landingImage, '→', parsed)
-  
+
   return parsed
 })
 
