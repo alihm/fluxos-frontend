@@ -176,7 +176,7 @@ const exploreBanner = banner => {
   font-size: clamp(1.8rem, 4vw, 2.5rem);
   font-weight: 800;
   text-align: center;
-  margin-bottom: 0;
+  margin-bottom: 0.5rem;
   line-height: 1.3;
   color: rgb(var(--v-theme-on-background));
   position: relative;
@@ -185,9 +185,9 @@ const exploreBanner = banner => {
 .section-title::after {
   content: '';
   display: block;
-  width: 100px;
+  width: 150px;
   height: 4px;
-  background: rgb(var(--v-theme-primary));
+  background: rgb(var(--v-theme-on-background));
   margin: 0.5rem auto 0;
   border-radius: 10px;
 }

@@ -286,10 +286,12 @@ const extractString = obj => {
   if (typeof obj === 'string') {
     try {
       const parsed = JSON.parse(obj)
+
       // If parsed successfully, try to extract the string from the structure
       if (parsed && typeof parsed === 'object' && parsed.b && parsed.b.s) {
         return parsed.b.s
       }
+      
       return obj
     } catch {
       return obj
@@ -302,6 +304,7 @@ const extractString = obj => {
     if (obj.b && obj.b.s) {
       return obj.b.s
     }
+    
     return obj.body?.static || obj.loc?.source || obj.static || JSON.stringify(obj)
   }
 

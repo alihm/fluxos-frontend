@@ -78,10 +78,12 @@ const extractString = obj => {
   if (typeof obj === 'string') {
     try {
       const parsed = JSON.parse(obj)
+
       // If parsed successfully, try to extract the string from the structure
       if (parsed && typeof parsed === 'object' && parsed.b && parsed.b.s) {
         return parsed.b.s
       }
+      
       return obj
     } catch {
       return obj
@@ -94,6 +96,7 @@ const extractString = obj => {
     if (obj.b && obj.b.s) {
       return obj.b.s
     }
+    
     return obj.body?.static || obj.loc?.source || obj.static || JSON.stringify(obj)
   }
 
@@ -164,6 +167,7 @@ const questionsList = computed(() => {
     // Check if tm() returned valid data
     if (!questions || (typeof questions === 'object' && Object.keys(questions).length === 0)) {
       console.log('❌ FAQPanel - tm() returned empty for key:', key)
+      
       return []
     }
 
@@ -181,7 +185,7 @@ const questionsList = computed(() => {
     faqArray = JSON.parse(JSON.stringify(faqArray))
 
     // Build result array by extracting strings from each FAQ item
-    const result = faqArray.map((faq) => {
+    const result = faqArray.map(faq => {
       // Extract q and a, handling both property names
       const qRaw = faq.q || faq.question || ''
       const aRaw = faq.a || faq.answer || ''

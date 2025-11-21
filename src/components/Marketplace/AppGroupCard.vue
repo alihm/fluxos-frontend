@@ -67,10 +67,12 @@ const extractString = obj => {
   if (typeof obj === 'string') {
     try {
       const parsed = JSON.parse(obj)
+
       // If parsed successfully, try to extract the string from the structure
       if (parsed && typeof parsed === 'object' && parsed.b && parsed.b.s) {
         return parsed.b.s
       }
+      
       return obj
     } catch {
       return obj
@@ -83,6 +85,7 @@ const extractString = obj => {
     if (obj.b && obj.b.s) {
       return obj.b.s
     }
+    
     return obj.body?.static || obj.loc?.source || obj.static || JSON.stringify(obj)
   }
 
@@ -96,6 +99,7 @@ const groupTitle = computed(() => {
   // Handle i18n keys
   if (isI18nKey(props.group.title)) {
     const key = props.group.title.replace('i18n:', '')
+    
     return te(key) ? extractString(t(key)) : props.group.title
   }
 
@@ -121,6 +125,7 @@ const groupDescription = computed(() => {
 
   if (isI18nKey(props.group.description)) {
     const key = props.group.description.replace('i18n:', '')
+    
     return te(key) ? extractString(t(key)) : props.group.description
   }
 
@@ -138,6 +143,7 @@ const groupStyle = computed(() => {
     padding: '12px 32px 32px 32px',
     position: 'relative',
     overflow: 'hidden',
+
     // Add border when there's no background image
     border: hasBackgroundImage ? 'none' : '1px solid rgba(var(--v-theme-on-surface), 0.12)',
   }

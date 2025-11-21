@@ -17,6 +17,7 @@
               height="200"
               cover
               class="screenshot-image"
+              eager
             />
           </div>
         </div>
@@ -63,6 +64,7 @@
           :alt="`${app.displayName || app.name} server screenshot fullscreen`"
           contain
           max-height="90vh"
+          eager
         />
         <VBtn
           icon="mdi-close"

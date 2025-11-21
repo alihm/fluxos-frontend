@@ -20,6 +20,7 @@
                   height="100"
                   width="100"
                   contain
+                  eager
                 />
               </div>
               <h3 class="game-name">{{ game.displayName || game.name }}</h3>

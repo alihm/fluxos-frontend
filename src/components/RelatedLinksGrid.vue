@@ -124,6 +124,7 @@ const resolvedLinks = computed(() => {
     // Check if key exists
     if (!te(key)) {
       console.log('❌ RelatedLinksGrid - key does not exist:', key)
+      
       return []
     }
 
@@ -133,9 +134,10 @@ const resolvedLinks = computed(() => {
     console.log('📦 RelatedLinksGrid - tm() isArray:', Array.isArray(links))
 
     // Helper function to get count of array/object items
-    const getLength = (obj) => {
+    const getLength = obj => {
       if (Array.isArray(obj)) return obj.length
       if (typeof obj === 'object' && obj !== null) return Object.keys(obj).length
+      
       return 0
     }
 
@@ -161,7 +163,7 @@ const resolvedLinks = computed(() => {
         console.log(`✅ RelatedLinksGrid - translated[${i}]:`, {
           to: typeof to,
           title: typeof title,
-          description: typeof description
+          description: typeof description,
         })
         console.log(`📝 RelatedLinksGrid - to value:`, to)
         console.log(`📝 RelatedLinksGrid - title value:`, title)
@@ -180,6 +182,7 @@ const resolvedLinks = computed(() => {
     }
 
     console.log('🎯 RelatedLinksGrid - final result:', result)
+    
     return result
   }
 

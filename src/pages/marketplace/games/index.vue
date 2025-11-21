@@ -375,6 +375,7 @@ const fetchFluxLocations = async () => {
     const response = await axios.get(
       'https://stats.runonflux.io/fluxinfo?projection=geolocation,ip,tier',
     )
+
     // Ensure we always get an array
     const data = response.data.data
     fluxList.value = Array.isArray(data) ? data : []
