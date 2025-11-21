@@ -1105,7 +1105,7 @@ const loadTOS = async () => {
     tosHtmlContent.value = html
   } catch (error) {
     console.error('Failed to load TOS:', error)
-    tosHtmlContent.value = `<p>${t('pages.marketplace.wordpress.errors.tosLoadFailed')} <a href="https://runonflux.io/terms" target="_blank">https://runonflux.io/terms</a></p>`
+    tosHtmlContent.value = `<p>${t('pages.marketplace.wordpress.errors.tosLoadFailed')} <a href="https://cdn.runonflux.io/Flux_Terms_of_Service.pdf" target="_blank">https://cdn.runonflux.io/Flux_Terms_of_Service.pdf</a></p>`
   }
 }
 

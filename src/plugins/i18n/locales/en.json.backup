@@ -1212,7 +1212,7 @@
         "instances": "{count} Instance | {count} Instances",
         "estimatedPricing": "Estimated Pricing",
         "loading": "Loading...",
-        "agreeToTerms": "I agree to the <a href=\"https://runonflux.io/terms\" target=\"_blank\" rel=\"noopener noreferrer\" style=\"color: inherit; text-decoration: none; font-weight: bold;\">Terms of Use</a> and <a href=\"https://runonflux.io/privacy\" target=\"_blank\" rel=\"noopener noreferrer\" style=\"color: inherit; text-decoration: none; font-weight: bold;\">Privacy Policy</a>",
+        "agreeToTerms": "I agree to the <a href=\"https://cdn.runonflux.io/Flux_Terms_of_Service.pdf\" target=\"_blank\" rel=\"noopener noreferrer\" style=\"color: inherit; text-decoration: none; font-weight: bold;\">Terms of Use</a> and <a href=\"https://runonflux.io/privacy\" target=\"_blank\" rel=\"noopener noreferrer\" style=\"color: inherit; text-decoration: none; font-weight: bold;\">Privacy Policy</a>",
         "oneMonth": "1 Month",
         "threeMonths": "3 Months",
         "sixMonths": "6 Months",
@@ -2629,7 +2629,7 @@
           "title": "Terms of Service",
           "agreement": "I have read and agree to the",
           "link": "Terms of Service",
-          "loadError": "Failed to load Terms of Service. Please visit <a href=\"https://runonflux.io/terms\" target=\"_blank\">https://runonflux.io/terms</a>"
+          "loadError": "Failed to load Terms of Service. Please visit <a href=\"https://cdn.runonflux.io/Flux_Terms_of_Service.pdf\" target=\"_blank\">https://cdn.runonflux.io/Flux_Terms_of_Service.pdf</a>"
         }
       }
     },
