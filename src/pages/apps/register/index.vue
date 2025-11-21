@@ -142,7 +142,9 @@
 import { ref, computed, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useHead } from '@vueuse/head'
+import axios from 'axios'
 import Api from '@/services/ApiClient'
+import DashboardService from '@/services/DashboardService'
 import ServerLocationsPanel from '@/components/Marketplace/Panels/ServerLocationsPanel.vue'
 import TrustpilotPanel from '@/components/Marketplace/Panels/TrustpilotPanel.vue'
 import FAQPanel from '@/components/Marketplace/Panels/FAQPanel.vue'
@@ -173,8 +175,18 @@ const faqPanel = {
 const fluxCloudPrice = ref('$8.99') // Default fallback price
 const fluxCloudPriceLoading = ref(true)
 
-// Hero subtitle
-const heroSubtitle = computed(() => t('pages.apps.register.landing.subtitle'))
+// Network data
+const nodeCount = ref(8000) // Default fallback
+const countryCount = ref(63) // Default fallback
+const networkDataLoading = ref(true)
+
+// Hero subtitle with dynamic network data
+const heroSubtitle = computed(() =>
+  t('pages.apps.register.landing.subtitle', {
+    nodeCount: nodeCount.value.toLocaleString(),
+    countryCount: countryCount.value
+  })
+)
 
 // App types data
 const appTypes = computed(() => [
@@ -234,7 +246,9 @@ const benefits = computed(() => [
     icon: 'mdi-web',
     color: 'info',
     title: t('pages.apps.register.landing.benefits.global.title'),
-    description: t('pages.apps.register.landing.benefits.global.description'),
+    description: t('pages.apps.register.landing.benefits.global.description', {
+      countryCount: countryCount.value
+    }),
   },
   {
     icon: 'mdi-scale-balance',
@@ -367,7 +381,10 @@ const features = computed(() => [
 const faqs = computed(() => [
   {
     question: t('pages.apps.register.landing.faq.questions.whatIsFlux.question'),
-    answer: t('pages.apps.register.landing.faq.questions.whatIsFlux.answer'),
+    answer: t('pages.apps.register.landing.faq.questions.whatIsFlux.answer', {
+      nodeCount: nodeCount.value.toLocaleString(),
+      countryCount: countryCount.value
+    }),
   },
   {
     question: t('pages.apps.register.landing.faq.questions.howToDeploy.question'),
@@ -557,6 +574,48 @@ const calculateFluxCloudPrice = async () => {
   }
 }
 
+// Fetch network data (node count and country count)
+const fetchNetworkData = async () => {
+  try {
+    networkDataLoading.value = true
+
+    // Fetch node count and flux list in parallel
+    const [nodeCountResponse, fluxListResponse] = await Promise.all([
+      DashboardService.fluxnodeCount(),
+      axios.get('https://stats.runonflux.io/fluxinfo?projection=geolocation,ip,tier')
+    ])
+
+    // Update node count
+    if (nodeCountResponse.data?.data?.total) {
+      nodeCount.value = nodeCountResponse.data.data.total
+    }
+
+    // Calculate country count from flux list
+    if (fluxListResponse.data?.data && Array.isArray(fluxListResponse.data.data)) {
+      const countries = new Set()
+      fluxListResponse.data.data.forEach(flux => {
+        if (flux.geolocation?.country) {
+          countries.add(flux.geolocation.country)
+        }
+      })
+      countryCount.value = countries.size
+      console.log('✅ Network data loaded:', {
+        nodeCount: nodeCount.value,
+        countryCount: countryCount.value,
+        totalFluxNodes: fluxListResponse.data.data.length,
+        uniqueCountries: Array.from(countries).sort()
+      })
+    } else {
+      console.warn('⚠️ Unexpected flux list response structure:', fluxListResponse.data)
+    }
+  } catch (error) {
+    console.error('Error fetching network data:', error)
+    // Keep default fallback values on error
+  } finally {
+    networkDataLoading.value = false
+  }
+}
+
 // SEO meta tags
 useHead({
   title: 'Deploy Your App on FluxCloud - Decentralized Cloud Computing',
@@ -649,9 +708,12 @@ useHead({
 })
 
 onMounted(async () => {
-  // Load pricing data
+  // Load pricing and network data in parallel
   try {
-    await calculateFluxCloudPrice()
+    await Promise.all([
+      calculateFluxCloudPrice(),
+      fetchNetworkData()
+    ])
   } catch (error) {
     console.error('Error loading data:', error)
   }

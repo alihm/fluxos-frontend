@@ -2484,7 +2484,7 @@
       "register": {
         "landing": {
           "title": "Deploy Your App on FluxCloud",
-          "subtitle": "Experience the power of truly decentralized cloud computing. Deploy Docker containers, web apps, databases, APIs, and microservices on our global network of 13,000+ nodes across 62+ countries.",
+          "subtitle": "Experience the power of truly decentralized cloud computing. Deploy Docker containers, web apps, databases, APIs, and microservices on our global network of {nodeCount}+ nodes across {countryCount}+ countries.",
           "getStarted": "Start Deploying",
           "documentation": "View Documentation",
           "appTypes": {
@@ -2527,7 +2527,7 @@
             },
             "global": {
               "title": "Global Distribution",
-              "description": "Deploy across 62+ countries with automatic geo-routing for optimal performance everywhere."
+              "description": "Deploy across {countryCount}+ countries with automatic geo-routing for optimal performance everywhere."
             },
             "censorship": {
               "title": "Censorship Resistant",
@@ -2605,7 +2605,7 @@
             "questions": {
               "whatIsFlux": {
                 "question": "What is FluxCloud?",
-                "answer": "FluxCloud is a decentralized cloud computing platform powered by Web3 technology. Unlike traditional cloud providers that rely on centralized data centers, FluxCloud distributes your applications across 13,000+ independently operated nodes in 62+ countries. This provides better redundancy, censorship resistance, and significantly lower costs."
+                "answer": "FluxCloud is a decentralized cloud computing platform powered by Web3 technology. Unlike traditional cloud providers that rely on centralized data centers, FluxCloud distributes your applications across {nodeCount}+ independently operated nodes in {countryCount}+ countries. This provides better redundancy, censorship resistance, and significantly lower costs."
               },
               "howToDeploy": {
                 "question": "How do I deploy an application?",

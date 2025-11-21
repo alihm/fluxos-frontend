@@ -2483,6 +2483,8 @@
       },
       "register": {
         "landing": {
+          "title": "Wdróż Swoją Aplikację w FluxCloud",
+          "subtitle": "Doświadcz mocy prawdziwie zdecentralizowanego cloud computingu. Wdrażaj kontenery Docker, aplikacje internetowe, bazy danych, API i mikrousługi w naszej globalnej sieci {nodeCount}+ węzłów w {countryCount}+ krajach.",
           "appTypes": {
             "api": {
               "description": "Twórz i wdrażaj interfejsy API RESTful, punkty końcowe GraphQL i architektury mikrousług z łatwością.",
@@ -2529,7 +2531,7 @@
               "title": "Bezpłatna Usługa Zarządzania Domeną"
             },
             "global": {
-              "description": "Wdrażaj w ponad 62 krajach z automatycznym routingiem geograficznym dla optymalnej wydajności wszędzie.",
+              "description": "Wdrażaj w ponad {countryCount} krajach z automatycznym routingiem geograficznym dla optymalnej wydajności wszędzie.",
               "title": "Globalna Dystrybucja"
             },
             "guarantee": {
@@ -2579,7 +2581,7 @@
                 "question": "Jaki rodzaj wsparcia jest dostępny?"
               },
               "whatIsFlux": {
-                "answer": "FluxCloud to zdecentralizowana platforma cloud computing zasilana technologią Web3. W przeciwieństwie do tradycyjnych dostawców chmury, którzy polegają na scentralizowanych centrach danych, FluxCloud rozprowadza Twoje aplikacje na ponad 13 000 niezależnie zarządzanych węzłach w ponad 62 krajach. Zapewnia to lepszą redundancję, odporność na censurę i znacznie niższe koszty.",
+                "answer": "FluxCloud to zdecentralizowana platforma cloud computing zasilana technologią Web3. W przeciwieństwie do tradycyjnych dostawców chmury, którzy polegają na scentralizowanych centrach danych, FluxCloud rozprowadza Twoje aplikacje na {nodeCount}+ niezależnie zarządzanych węzłach w {countryCount}+ krajach. Zapewnia to lepszą redundancję, odporność na censurę i znacznie niższe koszty.",
                 "question": "Czym jest FluxCloud?"
               }
             },
