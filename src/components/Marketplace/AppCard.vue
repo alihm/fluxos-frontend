@@ -1,7 +1,9 @@
 <template>
   <div
+    ref="cardRef"
     class="app-card-wrapper"
-    :class="{ 'hovered': hovered }"
+    :class="{ 'hovered': hovered, 'is-visible': isVisible }"
+    :style="{ '--animation-order': animationOrder }"
     @mouseenter="hovered = true"
     @mouseleave="hovered = false"
   >
@@ -98,7 +100,7 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import AppIcon from '@/components/Marketplace/AppIcon.vue'
@@ -114,6 +116,10 @@ const props = defineProps({
     type: Array,
     default: () => [],
   },
+  animationOrder: {
+    type: Number,
+    default: 0,
+  },
 })
 
 const emit = defineEmits(['deploy'])
@@ -125,6 +131,8 @@ const { formatNumber, formatPrice } = useMarketplaceUtils()
 
 const hovered = ref(false)
 const showInstallDialog = ref(false)
+const cardRef = ref(null)
+const isVisible = ref(false)
 
 const categoryName = computed(() => {
   if (!props.app.category) return t('components.marketplace.appCard.defaultCategory')
@@ -155,15 +163,65 @@ const handleDeploySuccess = deployedApp => {
   emit('deploy', deployedApp)
   console.log('🚀 App deployed successfully:', deployedApp.displayName || deployedApp.name)
 }
+
+// Intersection Observer for scroll-based animation
+let observer = null
+
+onMounted(() => {
+  if (!cardRef.value) return
+
+  observer = new IntersectionObserver(
+    entries => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting && !isVisible.value) {
+          isVisible.value = true
+        }
+      })
+    },
+    {
+      threshold: 0.1,
+      rootMargin: '50px',
+    },
+  )
+
+  observer.observe(cardRef.value)
+})
+
+onUnmounted(() => {
+  if (observer && cardRef.value) {
+    observer.unobserve(cardRef.value)
+  }
+})
 </script>
 
 <style scoped>
 .app-card-wrapper {
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   height: 250px;
+  width: 100%;
   border-radius: 12px;
   position: relative;
   overflow: hidden;
+  /* Initial state - hidden */
+  opacity: 0;
+  transform: translateY(30px);
+}
+
+/* Scroll reveal animation - triggers when card becomes visible */
+.app-card-wrapper.is-visible {
+  animation: fadeInUp 0.6s ease-out forwards;
+  animation-delay: calc(var(--animation-order) * 0.05s);
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
 
 .app-card-wrapper::before {
