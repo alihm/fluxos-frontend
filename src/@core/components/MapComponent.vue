@@ -115,12 +115,10 @@ async function getNodesViaApi() {
   try {
     const res = await axios.get(url)
     if (res.status === 200 && res.data.status === "success") {
-      console.log("🟢 Nodes fetched via API:", res.data.data.length)
-
       return res.data.data
     }
   } catch (error) {
-    console.error("🔴 Error fetching nodes:", error)
+    console.error("Error fetching nodes:", error)
   }
 
   return []
@@ -153,11 +151,6 @@ async function getFilteredWithFallback() {
 
   if (!props.showAll && missingIps.length === 0 && filtered.length === 0) {
     missingIps = props.filterNodes
-  }
-
-  console.log("🟡 Filtered nodes:", filtered.length)
-  if (missingIps.length) {
-    console.log("🟠 Missing IPs needing fallback:", missingIps)
   }
 
   if (missingIps.length > 0) {
@@ -291,7 +284,6 @@ async function renderMarkers() {
 function applyTheme() {
   if (leafletMap) {
     const isDark = theme.value === "dark"
-    console.log('Applying theme, isDark:', isDark, 'theme.value:', theme.value)
     leafletMap.getContainer().classList.toggle("leaflet-dark", isDark)
   }
 }
@@ -299,17 +291,13 @@ function applyTheme() {
 function initMap() {
   if (!mapContainer.value) return
 
-  console.log('Map container rect:', mapContainer.value.getBoundingClientRect())
-
   leafletMap = L.map(mapContainer.value, {
     center: [20, 0],
     zoom: 2,
     minZoom: 2,
     maxZoom: 18,
-    attributionControl: false, // Hide attribution control (removes Ukraine flag)
+    attributionControl: false,
   })
-
-  console.log('Leaflet map created')
 
   const tileLayer = L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
     attribution: "© OpenStreetMap contributors",
@@ -317,20 +305,7 @@ function initMap() {
     detectRetina: true,
   })
 
-  // tileLayer.on('tileloadstart', e => {
-  //   console.log('Tile load start:', e.coords)
-  // })
-
-  // tileLayer.on('tileload', e => {
-  //   console.log('Tile loaded:', e.coords)
-  // })
-
-  // tileLayer.on('tileerror', e => {
-  //   console.error('Tile error:', e)
-  // })
-
   tileLayer.addTo(leafletMap)
-  console.log('Tile layer added')
 
   markerClusterGroup = new MarkerClusterGroup({
     chunkedLoading: true,
@@ -343,21 +318,47 @@ function initMap() {
   applyTheme()
 
   leafletMap.invalidateSize()
-  console.log('Map invalidated, map size:', leafletMap.getSize())
 }
 
-onMounted(async () => {
-  console.log("🟢 Map initialization...")
+// Track if we're using nodes from props (vs API fetch)
+const usingPropsNodes = ref(props.nodes !== undefined)
 
+// Watch for nodes prop changes - this handles async data from store
+watch(() => props.nodes, (newNodes) => {
+  // Only update if we're explicitly using props.nodes (not in filter/showAll mode)
+  if (usingPropsNodes.value && newNodes && newNodes.length > 0) {
+    fluxList.value = newNodes
+    if (leafletMap && markerClusterGroup) {
+      renderMarkers()
+    }
+  }
+}, { immediate: true })
+
+onMounted(async () => {
   if (!fluxList.value.length) {
-    if (props.nodes.length > 0) {
+    // Case 1: Nodes provided via props and already has data
+    if (props.nodes && props.nodes.length > 0) {
       fluxList.value = props.nodes
-      console.log("🟢 Using passed nodes:", fluxList.value.length)
-    } else {
+    }
+    // Case 2: Filter mode (needs all nodes to filter)
+    else if (props.filterNodes && props.filterNodes.length > 0) {
+      usingPropsNodes.value = false
       fluxList.value = await getNodesViaApi()
     }
-  } else {
-    console.log("🟡 FluxList already filled, skipping load.")
+    // Case 3: ShowAll mode without nodes prop
+    else if (props.showAll && props.nodes === undefined) {
+      usingPropsNodes.value = false
+      fluxList.value = await getNodesViaApi()
+    }
+    // Case 4: Nodes prop exists but empty - wait for watch to populate
+    else if (props.nodes !== undefined) {
+      // usingPropsNodes is already true, watch will handle the update
+    }
+    // Case 5: No clear usage pattern
+    else {
+      usingPropsNodes.value = false
+      fluxList.value = await getNodesViaApi()
+    }
   }
 
   await nextTick()

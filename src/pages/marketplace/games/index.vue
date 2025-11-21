@@ -160,7 +160,7 @@
 import { ref, computed, onMounted, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useHead } from '@vueuse/head'
-import axios from 'axios'
+import { useFluxStore } from '@/stores/flux'
 import { useMarketplace } from '@/composables/useMarketplace'
 import { useGameUtils } from '@/composables/useGameUtils'
 import LoadingSpinner from '@/components/Marketplace/LoadingSpinner.vue'
@@ -368,20 +368,40 @@ function scrollToGames() {
   }
 }
 
-// Fetch server location data
+// Fetch server location data from Pinia store (no API call needed)
 const fetchFluxLocations = async () => {
   try {
     isLoadingLocations.value = true
-    const response = await axios.get(
-      'https://stats.runonflux.io/fluxinfo?projection=geolocation,ip,tier',
-    )
 
-    // Ensure we always get an array
-    const data = response.data.data
-    fluxList.value = Array.isArray(data) ? data : []
-    console.log(`✅ Loaded ${fluxList.value.length} flux nodes across ${countryCount.value} countries`)
+    // Get data from Pinia store (already fetched in App.vue)
+    const fluxStore = useFluxStore()
+    const { serverLocations } = fluxStore
+
+    // Wait for store to populate if needed
+    if (serverLocations.fluxList.length === 0 && !serverLocations.lastFetched) {
+      await new Promise(resolve => {
+        const unwatch = watch(
+          () => serverLocations.fluxList.length,
+          (length) => {
+            if (length > 0) {
+              unwatch()
+              resolve()
+            }
+          },
+          { immediate: true }
+        )
+        setTimeout(() => {
+          unwatch()
+          resolve()
+        }, 5000)
+      })
+    }
+
+    // Use data from store
+    fluxList.value = serverLocations.fluxList
+    console.log(`✅ Loaded ${fluxList.value.length} flux nodes from store across ${countryCount.value} countries`)
   } catch (error) {
-    console.error('Error fetching flux locations:', error)
+    console.error('Error loading flux locations from store:', error)
     fluxList.value = []
   } finally {
     isLoadingLocations.value = false

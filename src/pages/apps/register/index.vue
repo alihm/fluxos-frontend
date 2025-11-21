@@ -139,12 +139,11 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useHead } from '@vueuse/head'
-import axios from 'axios'
 import Api from '@/services/ApiClient'
-import DashboardService from '@/services/DashboardService'
+import { useFluxStore } from '@/stores/flux'
 import ServerLocationsPanel from '@/components/Marketplace/Panels/ServerLocationsPanel.vue'
 import TrustpilotPanel from '@/components/Marketplace/Panels/TrustpilotPanel.vue'
 import FAQPanel from '@/components/Marketplace/Panels/FAQPanel.vue'
@@ -574,42 +573,60 @@ const calculateFluxCloudPrice = async () => {
   }
 }
 
-// Fetch network data (node count and country count)
+// Fetch network data from Pinia store (no API call needed)
 const fetchNetworkData = async () => {
   try {
     networkDataLoading.value = true
 
-    // Fetch node count and flux list in parallel
-    const [nodeCountResponse, fluxListResponse] = await Promise.all([
-      DashboardService.fluxnodeCount(),
-      axios.get('https://stats.runonflux.io/fluxinfo?projection=geolocation,ip,tier')
-    ])
+    // Get data from Pinia store (already fetched in App.vue)
+    const fluxStore = useFluxStore()
+    const { serverLocations } = fluxStore
 
-    // Update node count
-    if (nodeCountResponse.data?.data?.total) {
-      nodeCount.value = nodeCountResponse.data.data.total
+    // Wait a bit for store to populate if needed
+    if (serverLocations.fluxList.length === 0 && !serverLocations.lastFetched) {
+      // Store hasn't loaded yet, wait for it
+      await new Promise(resolve => {
+        const unwatch = watch(
+          () => serverLocations.fluxList.length,
+          (length) => {
+            if (length > 0) {
+              unwatch()
+              resolve()
+            }
+          },
+          { immediate: true }
+        )
+        // Timeout after 5 seconds
+        setTimeout(() => {
+          unwatch()
+          resolve()
+        }, 5000)
+      })
     }
 
-    // Calculate country count from flux list
-    if (fluxListResponse.data?.data && Array.isArray(fluxListResponse.data.data)) {
+    // Update node count from store
+    if (serverLocations.fluxNodeCount > 0) {
+      nodeCount.value = serverLocations.fluxNodeCount
+    }
+
+    // Calculate country count from store data
+    if (serverLocations.fluxList.length > 0) {
       const countries = new Set()
-      fluxListResponse.data.data.forEach(flux => {
+      serverLocations.fluxList.forEach(flux => {
         if (flux.geolocation?.country) {
           countries.add(flux.geolocation.country)
         }
       })
       countryCount.value = countries.size
-      console.log('✅ Network data loaded:', {
+      console.log('✅ Network data loaded from store:', {
         nodeCount: nodeCount.value,
         countryCount: countryCount.value,
-        totalFluxNodes: fluxListResponse.data.data.length,
+        totalFluxNodes: serverLocations.fluxList.length,
         uniqueCountries: Array.from(countries).sort()
       })
-    } else {
-      console.warn('⚠️ Unexpected flux list response structure:', fluxListResponse.data)
     }
   } catch (error) {
-    console.error('Error fetching network data:', error)
+    console.error('Error loading network data from store:', error)
     // Keep default fallback values on error
   } finally {
     networkDataLoading.value = false

@@ -176,21 +176,22 @@ export const useFluxStore = defineStore("flux", {
     },
 
     async fetchServerLocations() {
-      // Don't fetch if already loading
-      if (this.serverLocations.isLoading) {
+      // Don't fetch if already loading or already fetched this session
+      if (this.serverLocations.isLoading || this.serverLocations.lastFetched) {
         return
       }
 
-      // Try to load from cache first to populate immediately
+      // Try to load from cache first
       const cached = await this.loadServerLocationsFromCache()
       if (cached) {
         this.serverLocations.fluxList = Array.isArray(cached.fluxList) ? cached.fluxList : []
         this.serverLocations.fluxNodeCount = cached.fluxNodeCount || 0
         this.serverLocations.hasError = false
         this.serverLocations.lastFetched = cached.timestamp
+        return
       }
 
-      // Then fetch fresh data in background
+      // No cache available, fetch fresh data
       this.serverLocations.isLoading = true
 
       try {
@@ -215,22 +216,19 @@ export const useFluxStore = defineStore("flux", {
       } catch (error) {
         console.error('Error fetching server locations:', error)
 
-        // If we don't have cached data, try to load it
-        if (!cached) {
-          const fallbackCache = await this.loadServerLocationsFromCache()
-          if (fallbackCache) {
-            this.serverLocations.fluxList = Array.isArray(fallbackCache.fluxList) ? fallbackCache.fluxList : []
-            this.serverLocations.fluxNodeCount = fallbackCache.fluxNodeCount || 0
-            this.serverLocations.hasError = false
-            this.serverLocations.lastFetched = fallbackCache.timestamp
-          } else {
-            // No cache available
-            this.serverLocations.fluxList = []
-            this.serverLocations.fluxNodeCount = 0
-            this.serverLocations.hasError = true
-          }
+        // Try to load from cache as fallback
+        const fallbackCache = await this.loadServerLocationsFromCache()
+        if (fallbackCache) {
+          this.serverLocations.fluxList = Array.isArray(fallbackCache.fluxList) ? fallbackCache.fluxList : []
+          this.serverLocations.fluxNodeCount = fallbackCache.fluxNodeCount || 0
+          this.serverLocations.hasError = false
+          this.serverLocations.lastFetched = fallbackCache.timestamp
+        } else {
+          // No cache available
+          this.serverLocations.fluxList = []
+          this.serverLocations.fluxNodeCount = 0
+          this.serverLocations.hasError = true
         }
-        // If we already have cached data, keep it and just log the error
       } finally {
         this.serverLocations.isLoading = false
       }
@@ -377,11 +375,10 @@ export const useFluxStore = defineStore("flux", {
       }
 
       // Try to load from cache first
-      const cached = this.loadTrustpilotFromCache()
+      const cached = await this.loadTrustpilotFromCache()
       if (cached) {
         this.trustpilot.data = cached
         this.trustpilot.isFetched = true
-
         return
       }
 
