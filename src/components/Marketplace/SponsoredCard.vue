@@ -31,11 +31,10 @@
                 :key="app.uuid || app.name"
                 class="sponsored-app"
                 variant="outlined"
-                @click="navigateToApp(app)"
               >
                 <div class="sponsored-badge">
-                  <div>
-                    <VIcon size="12" color="#FFD700">mdi-star</VIcon>
+                  <div :style="badgeStyle">
+                    <VIcon size="12" class="star-icon" :style="starStyle">mdi-star</VIcon>
                     {{ labels.sponsored }}
                   </div>
                 </div>
@@ -48,6 +47,19 @@
                     <div class="app-info">
                       <h3 class="app-name">{{ app.displayName || app.name }}</h3>
                     </div>
+                  </div>
+                  <div class="sponsored-action">
+                    <VBtn
+                      color="primary"
+                      variant="flat"
+                      size="x-small"
+                      rounded="pill"
+                      class="sponsored-view-btn"
+                      @click.stop="navigateToApp(app)"
+                    >
+                      <VIcon start size="13">mdi-eye</VIcon>
+                      {{ labels.viewDetails }}
+                    </VBtn>
                   </div>
                 </div>
               </VCard>
@@ -95,6 +107,18 @@ const { formatNumber } = useMarketplaceUtils()
 const labels = computed(() => ({
   sponsored: t('components.marketplace.sponsoredCard.sponsored'),
   noSponsoredApps: t('components.marketplace.sponsoredCard.noSponsoredApps'),
+  viewDetails: t('components.marketplace.sponsoredCard.viewDetails'),
+}))
+
+// Badge styling - inline to ensure it overrides everything
+const badgeStyle = computed(() => ({
+  background: 'rgb(var(--v-theme-primary))',
+  color: '#ffffff',
+  fontWeight: '600',
+}))
+
+const starStyle = computed(() => ({
+  color: '#FFD700 !important',
 }))
 
 // Auto-sliding carousel state
@@ -390,11 +414,8 @@ onUnmounted(() => {
 }
 
 .sponsored-app:hover .sponsored-badge > div {
-  border-color: #bdbdbd !important;
-  box-shadow: 0 4px 12px rgba(255, 255, 255, 0.6) !important,
-              inset 0 1px 0 rgba(255, 255, 255, 0.7) !important;
-  text-shadow: 0 0 8px rgba(255, 255, 255, 0.9) !important;
-  background: linear-gradient(145deg, rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0.2)) !important;
+  transform: scale(1.02);
+  box-shadow: 0 3px 10px rgba(var(--v-theme-primary), 0.4);
 }
 
 .sponsored-badge {
@@ -406,10 +427,11 @@ onUnmounted(() => {
   z-index: 1;
 }
 
+/* Light theme - Blue background with white text */
 .sponsored-badge > div {
-  background: linear-gradient(145deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.1));
-  color: #e0e0e0;
-  border: 1px solid #e0e0e0;
+  background: rgb(var(--v-theme-primary));
+  color: #ffffff;
+  border: 1px solid rgba(var(--v-theme-primary), 0.8);
   border-top: none;
   border-right: none;
   padding: 2px 8px;
@@ -419,10 +441,34 @@ onUnmounted(() => {
   display: flex;
   align-items: center;
   gap: 2px;
+  box-shadow: 0 2px 8px rgba(var(--v-theme-primary), 0.3);
+}
+
+/* Star icon styling - Light theme */
+.sponsored-badge .star-icon {
+  color: #FFD700;
+}
+
+/* Dark theme adjustments */
+.v-theme--dark .sponsored-badge > div {
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.1));
+  color: #e0e0e0;
+  border-color: #e0e0e0;
   box-shadow: 0 2px 8px rgba(255, 255, 255, 0.3),
               inset 0 1px 0 rgba(255, 255, 255, 0.4);
-  backdrop-filter: blur(5px);
   text-shadow: 0 0 4px rgba(255, 255, 255, 0.5);
+}
+
+.v-theme--dark .sponsored-badge .star-icon {
+  color: #FFD700;
+}
+
+.v-theme--dark .sponsored-app:hover .sponsored-badge > div {
+  border-color: #bdbdbd;
+  box-shadow: 0 4px 12px rgba(255, 255, 255, 0.6),
+              inset 0 1px 0 rgba(255, 255, 255, 0.7);
+  text-shadow: 0 0 8px rgba(255, 255, 255, 0.9);
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0.2));
 }
 
 .app-body {
@@ -430,16 +476,37 @@ onUnmounted(() => {
   flex: 1;
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  justify-content: space-between;
 }
 
 .app-content {
   display: flex;
   align-items: center;
   justify-content: center;
-  height: 65px;
   padding: 0 12px;
   gap: 16px;
+  flex: 1;
+}
+
+.sponsored-action {
+  padding: 2px 8px 0 8px;
+  display: flex;
+  justify-content: center;
+}
+
+.sponsored-view-btn {
+  height: 22px !important;
+  min-width: 100px !important;
+  font-size: 0.65rem !important;
+  font-weight: 600 !important;
+  text-transform: none !important;
+  transition: all 0.3s ease !important;
+  padding: 0 12px !important;
+}
+
+.sponsored-view-btn:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 8px rgba(var(--v-theme-primary), 0.3);
 }
 
 .icon-section {

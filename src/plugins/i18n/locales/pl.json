@@ -1244,6 +1244,7 @@
       "appCard": {
         "install": "Instaluj",
         "view": "Zobacz",
+        "viewDetails": "Zobacz Szczegóły",
         "defaultCategory": "Aplikacje",
         "noDescription": "Brak dostępnego opisu"
       },
@@ -1261,6 +1262,7 @@
         "unknown": "Nieznany",
         "free": "Darmowe",
         "install": "Instaluj",
+        "viewDetails": "Zobacz Szczegóły",
         "noDescription": "Brak dostępnego opisu",
         "other": "Inne"
       },
@@ -1281,6 +1283,7 @@
         "sponsored": "Sponsorowane",
         "install": "Instaluj",
         "view": "Zobacz",
+        "viewDetails": "Zobacz Szczegóły",
         "noSponsoredApps": "Brak sponsorowanych aplikacji"
       },
       "newListedCard": {

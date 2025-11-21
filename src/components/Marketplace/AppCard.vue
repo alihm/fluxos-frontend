@@ -67,6 +67,21 @@
             {{ app.description || t('components.marketplace.appCard.noDescription') }}
           </p>
         </div>
+
+        <!-- Action button -->
+        <div class="app-action-section">
+          <VBtn
+            color="primary"
+            variant="flat"
+            size="x-small"
+            rounded="pill"
+            class="view-details-btn"
+            @click.stop="viewDetails"
+          >
+            <VIcon start size="14">mdi-eye</VIcon>
+            {{ t('components.marketplace.appCard.viewDetails') }}
+          </VBtn>
+        </div>
       </div>
     </VCard>
   </div>
@@ -343,7 +358,7 @@ onUnmounted(() => {
 /* Description section - FluxCloud style (flexible height) */
 .app-description-section {
   flex: 1;
-  padding: 8px 16px 16px 16px;
+  padding: 8px 16px 4px 16px;
   display: flex;
   align-items: flex-start;
 }
@@ -359,6 +374,28 @@ onUnmounted(() => {
   overflow: hidden;
   text-overflow: ellipsis;
   word-break: break-word;
+}
+
+/* Action section */
+.app-action-section {
+  padding: 4px 16px 8px 16px;
+  display: flex;
+  justify-content: center;
+}
+
+.view-details-btn {
+  height: 28px !important;
+  min-width: 120px !important;
+  font-size: 0.75rem !important;
+  font-weight: 600 !important;
+  text-transform: none !important;
+  transition: all 0.3s ease !important;
+  padding: 0 16px !important;
+}
+
+.view-details-btn:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 8px rgba(var(--v-theme-primary), 0.3);
 }
 
 /* Mobile adjustments */
