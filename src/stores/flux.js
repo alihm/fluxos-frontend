@@ -3,6 +3,8 @@ import { defineStore } from "pinia"
 import Api from "@/services/ApiClient"
 import axios from "axios"
 import DashboardService from "@/services/DashboardService"
+import AppsService from "@/services/AppsService"
+import qs from "qs"
 
 export const useFluxStore = defineStore("flux", {
   state: () => ({
@@ -33,10 +35,16 @@ export const useFluxStore = defineStore("flux", {
       isFetched: false,
       fetchError: null,
     },
+    userApps: {
+      hasApps: false,
+      isChecked: false,
+    },
   }),
 
   getters: {
     isXdaoOpen: state => state.xdaoOpen,
+    hasUserApps: state => state.userApps.hasApps,
+    isUserAppsChecked: state => state.userApps.isChecked,
   },
 
   actions: {
@@ -407,6 +415,51 @@ export const useFluxStore = defineStore("flux", {
       this.trustpilot.isFetched = false
       this.trustpilot.fetchError = null
       console.log('🗑️ TrustPilot: Cache cleared')
+    },
+
+    async checkUserApps() {
+      const zelidauth = localStorage.getItem('zelidauth')
+      const auth = qs.parse(zelidauth || '')
+
+      // If not logged in, user has no apps
+      if (!auth?.zelid) {
+        this.userApps.hasApps = false
+        this.userApps.isChecked = true
+
+        return
+      }
+
+      try {
+        // Check for active apps
+        const activeResponse = await AppsService.myGlobalAppSpecifications(auth.zelid)
+        const activeApps = Array.isArray(activeResponse.data.data) ? activeResponse.data.data : []
+
+        if (activeApps.length > 0) {
+          this.userApps.hasApps = true
+          this.userApps.isChecked = true
+
+          return
+        }
+
+        // Check for expired apps
+        const expiredResponse = await AppsService.permanentMessagesOwner(auth.zelid).catch(() => ({
+          data: { data: [] },
+        }))
+        const expiredApps = expiredResponse.data.data || []
+
+        this.userApps.hasApps = expiredApps.length > 0
+        this.userApps.isChecked = true
+      } catch (error) {
+        console.error('Error checking user apps:', error)
+        // On error, assume user might have apps to avoid hiding the menu unnecessarily
+        this.userApps.hasApps = true
+        this.userApps.isChecked = true
+      }
+    },
+
+    resetUserApps() {
+      this.userApps.hasApps = false
+      this.userApps.isChecked = false
     },
   },
 })
