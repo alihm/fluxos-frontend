@@ -77,6 +77,8 @@
       "plan": "Plan",
       "billing": "Rozliczenia",
       "monthly": "Miesięcznie"
+      "scrollLeft": "Przewiń w lewo",
+      "scrollRight": "Przewiń w prawo"
     },
     "theme": {
       "light": "Jasny",

@@ -77,6 +77,8 @@
       "plan": "Plan",
       "billing": "Billing",
       "monthly": "Monthly"
+      "scrollLeft": "Scroll left",
+      "scrollRight": "Scroll right"
     },
     "theme": {
       "light": "Light",
