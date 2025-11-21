@@ -1,5 +1,32 @@
 <template>
   <div>
+    <!-- Introduction Section -->
+    <VRow>
+      <VCol cols="12">
+        <VCard class="rewards-intro-card">
+          <VCardText>
+            <div class="d-flex align-center mb-3">
+              <VAvatar
+                size="48"
+                color="success"
+                variant="tonal"
+                class="mr-3"
+              >
+                <VIcon size="28">mdi-cash-multiple</VIcon>
+              </VAvatar>
+              <div>
+                <h2 class="text-h4 mb-1">{{ t('pages.dashboard.rewards.intro.title') }}</h2>
+                <p class="text-body-2 mb-0 text-medium-emphasis">{{ t('pages.dashboard.rewards.intro.subtitle') }}</p>
+              </div>
+            </div>
+            <p class="text-body-1 mb-0">
+              {{ t('pages.dashboard.rewards.intro.description') }}
+            </p>
+          </VCardText>
+        </VCard>
+      </VCol>
+    </VRow>
+
     <VRow>
       <VCol
         v-for="(card, index) in rewardCards"
@@ -9,11 +36,8 @@
           rewardCards.length % 2 === 1 && index === rewardCards.length - 1 ? '12' : '6'
         "
         lg="4"
-        class="py-0 mt-2"
       >
-        <VCard
-          :title="card.title"
-          elevation="2"
+        <VCard :title="card.title"
         >
           <VOverlay
             v-model="isLoading"
@@ -67,16 +91,13 @@
       </VCol>
 
       <VCol
-        class="py-0 mt-2"
         cols="12"
         md="12"
         lg="12"
       >
         <VCard
           :title="t('pages.dashboard.rewards.historicalPriceChart')"
-          elevation="2"
           height="350"
-          class="py-0"
         >
           <VueApexCharts
             ref="historyPrice"
@@ -125,8 +146,25 @@ import axiosRetry from "axios-retry"
 import { useConfigStore } from "@core/stores/config"
 import { storeToRefs } from "pinia"
 import { useI18n } from "vue-i18n"
+import { useSEO, generateOrganizationSchema, generateBreadcrumbSchema } from '@/composables/useSEO'
 
 const { t } = useI18n()
+
+// SEO configuration
+useSEO({
+  title: 'Flux Node Rewards - FLUX Token Mining & Staking | FluxCloud',
+  description: 'Track Flux node rewards and FLUX token distribution. View real-time rewards for Cumulus, Nimbus, and Stratus nodes. Monitor block rewards, node earnings, and staking returns on the Flux network.',
+  url: 'https://home.runonflux.io/dashboards/rewards',
+  keywords: 'flux rewards, flux token, node rewards, FLUX mining, flux staking, node earnings, flux income, blockchain rewards, passive income, flux node profit',
+  structuredData: [
+    generateOrganizationSchema(),
+    generateBreadcrumbSchema([
+      { name: 'Home', url: 'https://home.runonflux.io' },
+      { name: 'Flux Network', url: 'https://home.runonflux.io/dashboards/overview' },
+      { name: 'Rewards', url: 'https://home.runonflux.io/dashboards/rewards' },
+    ]),
+  ],
+})
 
 const configStore = useConfigStore()
 const { theme } = storeToRefs(configStore)
@@ -427,9 +465,48 @@ const generateEconomics = async fluxnodecounts => {
 </script>
 
 <style scoped>
-.v-card {
-  margin-bottom: 1rem;
+/* Apply border and border-radius to all cards */
+:deep(.v-card) {
+  border-radius: 16px !important;
+  border: 1px solid rgba(var(--v-theme-on-surface), 0.12) !important;
+  box-shadow: none !important;
 }
+
+.rewards-intro-card {
+  border-radius: 16px !important;
+  border: 1px solid rgba(var(--v-theme-on-surface), 0.12) !important;
+  box-shadow: none !important;
+}
+
+.rewards-intro-card h2 {
+  line-height: 1.2;
+  word-break: keep-all;
+}
+
+/* Mobile responsive adjustments */
+@media (max-width: 599px) {
+  .rewards-intro-card h2 {
+    font-size: 1.5rem !important;
+  }
+
+  .rewards-intro-card .v-avatar {
+    width: 48px !important;
+    height: 48px !important;
+  }
+
+  .rewards-intro-card .v-icon {
+    font-size: 24px !important;
+  }
+
+  .rewards-intro-card .v-card-text {
+    padding: 16px !important;
+  }
+}
+
+.learn-more-link {
+  text-decoration: none;
+}
+
 .v-timeline {
   padding-left: 0;
 }

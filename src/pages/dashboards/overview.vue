@@ -1,4 +1,77 @@
 <template>
+  <!-- Introduction Section -->
+  <VRow>
+    <VCol cols="12">
+      <VCard flat class="intro-card">
+        <VCardTitle class="text-h4 mb-4">
+          {{ t('pages.dashboard.overview.intro.title') }}
+        </VCardTitle>
+        <VCardText>
+          <VRow>
+            <VCol cols="12" md="6">
+              <a
+                href="https://runonflux.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="info-link"
+              >
+                <div class="info-section">
+                  <div class="d-flex align-center mb-3">
+                    <VAvatar
+                      size="40"
+                      color="primary"
+                      variant="tonal"
+                      class="mr-3"
+                    >
+                      <VIcon size="24">mdi-cube-outline</VIcon>
+                    </VAvatar>
+                    <h3 class="text-h5">{{ t('pages.dashboard.overview.intro.blockchain.title') }}</h3>
+                  </div>
+                  <p class="text-body-1">
+                    {{ t('pages.dashboard.overview.intro.blockchain.description') }}
+                  </p>
+                  <div class="learn-more">
+                    <VIcon size="18" class="mr-1">mdi-open-in-new</VIcon>
+                    {{ t('pages.dashboard.overview.intro.learnMore') }}
+                  </div>
+                </div>
+              </a>
+            </VCol>
+            <VCol cols="12" md="6">
+              <a
+                href="https://runonflux.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="info-link"
+              >
+                <div class="info-section">
+                  <div class="d-flex align-center mb-3">
+                    <VAvatar
+                      size="40"
+                      color="success"
+                      variant="tonal"
+                      class="mr-3"
+                    >
+                      <VIcon size="24">mdi-cloud-outline</VIcon>
+                    </VAvatar>
+                    <h3 class="text-h5">{{ t('pages.dashboard.overview.intro.cloud.title') }}</h3>
+                  </div>
+                  <p class="text-body-1">
+                    {{ t('pages.dashboard.overview.intro.cloud.description', { nodes: beautifyValue(totalNodes, 0) }) }}
+                  </p>
+                  <div class="learn-more">
+                    <VIcon size="18" class="mr-1">mdi-open-in-new</VIcon>
+                    {{ t('pages.dashboard.overview.intro.learnMore') }}
+                  </div>
+                </div>
+              </a>
+            </VCol>
+          </VRow>
+        </VCardText>
+      </VCard>
+    </VCol>
+  </VRow>
+
   <VRow class="match-height">
     <!-- Card 1: Total Nodes -->
     <VCol
@@ -6,9 +79,7 @@
       lg="6"
       xxl="4"
     >
-      <VCard
-        flat
-        style="position: relative; min-height: 320px"
+      <VCard style="position: relative; min-height: 320px"
       >
         <VCardTitle class="d-flex justify-space-between align-center">
           <div>
@@ -28,10 +99,10 @@
         </VCardTitle>
         <VCardText>
           <VRow>
-            <!-- Chart on the left, taking 2/3 width -->
+            <!-- Chart on the left, taking slightly less than 2/3 width -->
             <VCol
               cols="12"
-              sm="8"
+              sm="7"
             >
               <VueApexCharts
                 type="donut"
@@ -40,12 +111,49 @@
                 :options="nodeData.chartOptions"
                 :series="nodeData.series"
               />
+
+              <!-- Legacy vs ArcaneOS Progress Chart -->
+              <div class="px-4 mt-2">
+                <div class="d-flex justify-space-between align-center mb-2">
+                  <VChip
+                    size="x-small"
+                    color="grey"
+                    variant="flat"
+                    class="legacy-chip"
+                    style="background-color: #6c757d; color: white;"
+                  >
+                    Legacy
+                  </VChip>
+                  <VChip
+                    size="x-small"
+                    color="primary"
+                    variant="flat"
+                    class="arcane-chip"
+                  >
+                    ArcaneOS
+                  </VChip>
+                </div>
+                <div class="legacy-arcane-bar">
+                  <div
+                    class="legacy-segment"
+                    :style="{ width: legacyPercentage + '%' }"
+                  >
+                    <span class="segment-label">{{ legacyPercentage.toFixed(1) }}%</span>
+                  </div>
+                  <div
+                    class="arcane-segment"
+                    :style="{ width: arcanePercentage + '%' }"
+                  >
+                    <span class="segment-label">{{ arcanePercentage.toFixed(1) }}%</span>
+                  </div>
+                </div>
+              </div>
             </VCol>
 
-            <!-- Version list on the right, taking 1/3 width -->
+            <!-- Version list on the right, taking slightly more than 1/3 width -->
             <VCol
               cols="12"
-              sm="4"
+              sm="5"
             >
               <div class="px-2 pt-2">
                 <h4 class="mb-2">
@@ -82,7 +190,7 @@
                       size="x-small"
                       :color="theme === 'dark' ? 'white' : 'primary'"
                     >
-                      Arcane OS
+                      ArcaneOS
                     </VChip>
                   </VCard>
                 </div>
@@ -108,24 +216,23 @@
       lg="6"
       xxl="8"
     >
-      <VCard
-        flat
-        class="d-flex flex-column justify-space-between"
-        style="position: relative; min-height: 320px; height: 100%"
+      <VCard style="position: relative; min-height: 320px; height: 100%; overflow: hidden;"
       >
         <VCardTitle class="d-flex justify-space-between align-center">
           <h2 class="mt-2 truncate text-h4">
             {{ t('pages.dashboard.overview.nodeHistory') }}
           </h2>
         </VCardTitle>
-        <VueApexCharts
-          ref="history"
-          type="area"
-          height="280"
-          width="100%"
-          :options="nodeHistoryData.chartOptions"
-          :series="nodeHistoryData.series"
-        />
+        <div style="position: absolute; bottom: -1px; left: 0; right: 0; top: 72px;">
+          <VueApexCharts
+            ref="history"
+            type="area"
+            height="100%"
+            width="100%"
+            :options="nodeHistoryData.chartOptions"
+            :series="nodeHistoryData.series"
+          />
+        </div>
         <VOverlay
           v-model="isLoading"
           contained
@@ -146,9 +253,7 @@
       lg="6"
       xxl="4"
     >
-      <VCard
-        flat
-        style="position: relative; min-height: 320px"
+      <VCard style="position: relative; min-height: 320px"
       >
         <VOverlay
           v-model="isLoading"
@@ -177,10 +282,10 @@
         </VCardTitle>
         <VCardText>
           <VRow>
-            <!-- Chart on the left, taking 2/3 width -->
+            <!-- Chart on the left, taking slightly less than 2/3 width -->
             <VCol
               cols="12"
-              sm="8"
+              sm="7"
             >
               <VueApexCharts
                 type="donut"
@@ -191,10 +296,10 @@
               />
             </VCol>
 
-            <!-- Legend on the right, taking 1/3 width -->
+            <!-- Legend on the right, taking slightly more than 1/3 width -->
             <VCol
               cols="12"
-              sm="4"
+              sm="5"
             >
               <div class="px-2 pt-2">
                 <h4 class="mb-2">
@@ -212,7 +317,7 @@
                 >
                   <VCard
                     variant="outlined"
-                    class="pa-2"
+                    class="pa-2 tier-card"
                     style="border-left: 3px solid"
                     :style="{ borderLeftColor: lockedSupplyData.chartOptions.colors[0] }"
                   >
@@ -226,7 +331,7 @@
 
                   <VCard
                     variant="outlined"
-                    class="pa-2"
+                    class="pa-2 tier-card"
                     style="border-left: 3px solid"
                     :style="{ borderLeftColor: lockedSupplyData.chartOptions.colors[1] }"
                   >
@@ -240,7 +345,7 @@
 
                   <VCard
                     variant="outlined"
-                    class="pa-2"
+                    class="pa-2 tier-card"
                     style="border-left: 3px solid"
                     :style="{ borderLeftColor: lockedSupplyData.chartOptions.colors[2] }"
                   >
@@ -265,9 +370,7 @@
       lg="6"
       xxl="8"
     >
-      <VCard
-        flat
-        style="position: relative; min-height: 320px"
+      <VCard style="position: relative; min-height: 320px"
       >
         <VOverlay
           v-model="isLoading"
@@ -365,6 +468,7 @@
 <script setup>
 import { ref, computed, onMounted, watch, nextTick } from "vue"
 import { useI18n } from "vue-i18n"
+import { useHead } from '@vueuse/head'
 import axios from "axios"
 import tierColors from "@/utils/colors"
 import DashboardService from "@/services/DashboardService"
@@ -372,6 +476,84 @@ import { useConfigStore } from "@core/stores/config"
 import { storeToRefs } from "pinia"
 
 const { t } = useI18n()
+
+// SEO meta tags
+const title = 'Flux Network Overview - Real-Time Node Statistics | FluxCloud'
+const description = 'View real-time statistics of the Flux decentralized network. Track 8,000+ active FluxNodes across Cumulus, Nimbus, and Stratus tiers. Monitor network health, supply, and node distribution worldwide.'
+const pageUrl = 'https://home.runonflux.io/dashboards/overview'
+const imageUrl = 'https://home.runonflux.io/logo.png'
+
+// Structured data schemas
+const structuredData = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'Organization',
+    name: 'Flux Network',
+    url: 'https://home.runonflux.io',
+    logo: 'https://home.runonflux.io/logo.png',
+    description: 'Decentralized Web3 cloud infrastructure powered by FluxNodes worldwide',
+    sameAs: [
+      'https://twitter.com/RunOnFlux',
+      'https://github.com/RunOnFlux',
+    ],
+  },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      {
+        '@type': 'ListItem',
+        position: 1,
+        name: 'Home',
+        item: 'https://home.runonflux.io',
+      },
+      {
+        '@type': 'ListItem',
+        position: 2,
+        name: 'Dashboards',
+        item: 'https://home.runonflux.io/dashboards/overview',
+      },
+      {
+        '@type': 'ListItem',
+        position: 3,
+        name: 'Network Overview',
+        item: 'https://home.runonflux.io/dashboards/overview',
+      },
+    ],
+  },
+]
+
+useHead({
+  title,
+  meta: [
+    { name: 'description', content: description },
+    { name: 'keywords', content: 'Flux network, FluxNodes, node statistics, blockchain network, decentralized infrastructure, Cumulus, Nimbus, Stratus, network monitoring, node tiers' },
+
+    // Open Graph
+    { property: 'og:title', content: title },
+    { property: 'og:description', content: description },
+    { property: 'og:image', content: imageUrl },
+    { property: 'og:url', content: pageUrl },
+    { property: 'og:type', content: 'website' },
+    { property: 'og:site_name', content: 'FluxCloud' },
+
+    // Twitter
+    { name: 'twitter:card', content: 'summary_large_image' },
+    { name: 'twitter:title', content: title },
+    { name: 'twitter:description', content: description },
+    { name: 'twitter:image', content: imageUrl },
+    { name: 'twitter:site', content: '@RunOnFlux' },
+  ],
+  link: [
+    { rel: 'canonical', href: pageUrl },
+  ],
+  script: [
+    {
+      type: 'application/ld+json',
+      children: JSON.stringify(structuredData),
+    },
+  ],
+})
 
 // Data properties
 const isLoading = ref(true) // Unified loading state
@@ -578,6 +760,22 @@ const getFluxNodeCount = async () => {
 
 const versionLog = ref({})
 
+// Computed properties for Legacy vs Arcane OS percentages
+const legacyPercentage = computed(() => {
+  const legacyCount = versionLog.value['legacy'] || 0
+  const total = Object.values(versionLog.value).reduce((sum, count) => sum + count, 0)
+  
+  return total > 0 ? (legacyCount / total) * 100 : 0
+})
+
+const arcanePercentage = computed(() => {
+  const legacyCount = versionLog.value['legacy'] || 0
+  const total = Object.values(versionLog.value).reduce((sum, count) => sum + count, 0)
+  const arcaneCount = total - legacyCount
+  
+  return total > 0 ? (arcaneCount / total) * 100 : 0
+})
+
 const getFluxVersionData = async () => {
   try {
     const res = await axios.get("https://stats.runonflux.io/fluxinfo")
@@ -588,7 +786,14 @@ const getFluxVersionData = async () => {
 
       versionMap.set(version, (versionMap.get(version) || 0) + 1)
     }
-    const sorted = [...versionMap.entries()].sort((a, b) => b[1] - a[1])
+    const sorted = [...versionMap.entries()].sort((a, b) => {
+      // Put legacy first
+      if (a[0] === 'legacy') return -1
+      if (b[0] === 'legacy') return 1
+
+      // Then sort by count descending
+      return b[1] - a[1]
+    })
 
     versionChart.value.chartOptions.labels = sorted.map(([version]) => version)
     console.log(versionChart.value.chartOptions.labels)
@@ -603,13 +808,13 @@ const getFluxVersionData = async () => {
 }
 
 const getVersionColor = (version, index) => {
-  const colors = ['#6c757d', '#7c3aed', '#ec4899', '#f59e0b']
   if (version === 'legacy') {
-    return colors[0] // Gray for legacy
+    return '#6c757d' // Gray for legacy (same as legacy segment)
   }
 
-  // Assign purple, pink, or amber for ArcaneOS versions
-  return colors[(index % 3) + 1]
+  // Use primary color for all ArcaneOS versions (same as arcane segment)
+  // Using rgb(var(--v-theme-primary)) to match the theme
+  return 'rgb(var(--v-theme-primary))'
 }
 
 const fetchAllData = async () => {
@@ -635,6 +840,73 @@ onMounted(async () => {
 </script>
 
 <style scoped>
+/* Apply border and border-radius to all cards except version-card and tier-card */
+:deep(.v-card:not(.version-card):not(.tier-card)) {
+  border-radius: 16px !important;
+  border: 1px solid rgba(var(--v-theme-on-surface), 0.12) !important;
+  box-shadow: none !important;
+}
+
+/* Exception for version and tier cards - keep their colored left borders */
+:deep(.version-card),
+:deep(.tier-card) {
+  border-radius: 16px !important;
+  border-top: 1px solid rgba(var(--v-theme-on-surface), 0.12) !important;
+  border-right: 1px solid rgba(var(--v-theme-on-surface), 0.12) !important;
+  border-bottom: 1px solid rgba(var(--v-theme-on-surface), 0.12) !important;
+  box-shadow: none !important;
+  /* border-left is set via inline styles to preserve the colored borders */
+}
+
+.intro-card {
+  border-radius: 16px;
+  border: 1px solid rgba(var(--v-theme-on-surface), 0.12) !important;
+  box-shadow: none !important;
+}
+
+.intro-card :deep(.v-card-title) {
+  padding-top: 20px;
+  text-align: center;
+}
+
+.info-link {
+  text-decoration: none;
+  color: inherit;
+  display: block;
+  height: 100%;
+}
+
+.info-section {
+  height: 100%;
+  padding: 16px;
+  border-radius: 12px;
+  background: rgb(var(--v-theme-surface));
+  border: 2px solid rgba(var(--v-theme-on-surface), 0.12);
+  transition: all 0.3s ease;
+  cursor: pointer;
+  position: relative;
+}
+
+.info-section:hover {
+  transform: translateY(-4px);
+  border-color: rgba(var(--v-theme-primary), 0.3);
+  box-shadow: 0 4px 12px rgba(var(--v-theme-primary), 0.1);
+}
+
+.learn-more {
+  display: flex;
+  align-items: center;
+  margin-top: 12px;
+  color: rgba(var(--v-theme-on-surface), 0.6);
+  font-size: 0.875rem;
+  font-weight: 600;
+  transition: color 0.2s ease;
+}
+
+.info-section:hover .learn-more {
+  color: rgba(var(--v-theme-on-surface), 0.8);
+}
+
 .overlay {
   backdrop-filter: blur(5px);
   -webkit-backdrop-filter: blur(5px);
@@ -642,6 +914,11 @@ onMounted(async () => {
 
 .version-card {
   overflow: visible;
+  width: 100%;
+}
+
+.tier-card {
+  width: 100%;
 }
 
 .arcane-label {
@@ -657,7 +934,7 @@ onMounted(async () => {
   letter-spacing: 0.5px;
   padding: 4px 2px !important;
   height: auto !important;
-  border-radius: 0 4px 4px 0 !important;
+  border-radius: 0 16px 16px 0 !important;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -671,5 +948,44 @@ onMounted(async () => {
 .arcane-glow-light {
   box-shadow: 0 0 4px rgba(0, 0, 0, 0.3),
               0 0 8px rgba(0, 0, 0, 0.15) !important;
+}
+
+.legacy-chip,
+.arcane-chip {
+  border-radius: 12px !important;
+}
+
+.legacy-arcane-bar {
+  display: flex;
+  height: 20px;
+  width: 100%;
+  border-radius: 12px;
+  overflow: hidden;
+  background: rgba(var(--v-theme-on-surface), 0.08);
+}
+
+.legacy-segment {
+  background: #6c757d;
+  transition: width 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.arcane-segment {
+  background: rgb(var(--v-theme-primary));
+  transition: width 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.segment-label {
+  color: white;
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
 }
 </style>

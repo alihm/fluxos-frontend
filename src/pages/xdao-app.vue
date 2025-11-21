@@ -1,78 +1,31 @@
 <template>
-  <div class="xdao-app">
-    <!-- Page Header -->
-    <VCard 
-      class="mb-6"
-      variant="tonal"
-      color="primary"
-      elevation="2"
-    >
-      <VCardText class="pa-6 pa-sm-8 position-relative">
-        <div class="d-flex flex-column flex-sm-row align-center justify-space-between">
-          <div class="d-flex align-center flex-column flex-sm-row text-center text-sm-start">
-            <VAvatar
-              size="72"
-              color="primary"
-              variant="tonal"
-              class="mb-4 mb-sm-0 me-sm-4"
-            >
-              <VIcon
-                icon="mdi-account-group"
-                size="40"
-              />
-            </VAvatar>
-            <div>
-              <h1 class="text-h4 text-sm-h3 font-weight-bold mb-2">
-                {{ t('pages.xdao.title') }}
-              </h1>
-              <p class="text-body-1 text-sm-h6 text-medium-emphasis mb-0">
-                {{ t('pages.xdao.subtitle') }}
-              </p>
-            </div>
-          </div>
-
-          <!-- Login/Status Button -->
-          <div
-            :class="$vuetify.display.xs ? 'position-absolute' : 'mt-4 mt-sm-0'"
-            :style="$vuetify.display.xs ? 'top: 12px; right: 12px;' : ''"
-          >
-            <VChip
-              v-if="isLoggedIn"
-              color="success"
-              variant="elevated"
-              :size="$vuetify.display.xs ? 'small' : 'default'"
-              class="px-3"
-            >
+  <div>
+    <!-- Introduction Section -->
+    <VRow>
+      <VCol cols="12">
+        <VCard class="xdao-intro-card">
+          <VCardText>
+            <div class="d-flex align-center mb-3">
               <VAvatar
-                :size="$vuetify.display.xs ? '18' : '24'"
-                color="success"
-                :class="$vuetify.display.xs ? 'me-1' : 'me-2'"
+                size="48"
+                color="primary"
+                variant="tonal"
+                class="mr-3"
               >
-                <VIcon icon="mdi-account-check" :size="$vuetify.display.xs ? '12' : '16'" />
+                <VIcon size="28">mdi-account-group</VIcon>
               </VAvatar>
-              <span :class="$vuetify.display.xs ? 'text-caption' : ''">
-                {{ $vuetify.display.xs ? userZelid?.substring(0, 6) + '..' : userZelid?.substring(0, 8) + '...' || t('pages.xdao.loggedIn') }}
-              </span>
-            </VChip>
-            <VBtn
-              v-else
-              color="primary"
-              variant="flat"
-              :size="$vuetify.display.xs ? 'small' : 'default'"
-              @click="openLoginBottomSheet"
-              class="text-none"
-            >
-              <VIcon
-                icon="mdi-login"
-                :size="$vuetify.display.xs ? '18' : '24'"
-                class="me-1 me-sm-2"
-              />
-              {{ $vuetify.display.xs ? t('pages.xdao.login') : t('pages.xdao.loginToVote') }}
-            </VBtn>
-          </div>
-        </div>
-      </VCardText>
-    </VCard>
+              <div>
+                <h2 class="text-h4 mb-1">{{ t('pages.xdao.title') }}</h2>
+                <p class="text-body-2 mb-0 text-medium-emphasis">{{ t('pages.xdao.subtitle') }}</p>
+              </div>
+            </div>
+            <p class="text-body-1 mb-0">
+              {{ t('pages.xdao.description') }}
+            </p>
+          </VCardText>
+        </VCard>
+      </VCol>
+    </VRow>
 
     <VRow>
       <!-- Mobile Sidebar Toggle -->
@@ -81,6 +34,7 @@
           <VCardText class="pa-4">
             <VBtn
               variant="outlined"
+              color="secondary"
               @click="showMobileFilters = !showMobileFilters"
             >
               <VIcon icon="mdi-filter-variant" class="me-2" />
@@ -163,7 +117,7 @@
                   {{ filter.title }}
                   <VChip
                     v-if="filter.count > 0"
-                    :color="activeFilter === filter.value && activeTab === 0 ? 'primary' : 'default'"
+                    :color="activeFilter === filter.value && activeTab === 0 ? 'success' : 'default'"
                     variant="tonal"
                     size="x-small"
                     class="ml-2"
@@ -419,7 +373,7 @@
 
     <!-- Debug Info -->
     <div v-if="$route.query.debug" class="debug-info pa-4 ma-4 bg-surface rounded">
-      <h4>Debug Info:</h4>
+      <h4>{{ t('pages.xdao.debugInfo') }}</h4>
       <p>showAddProposal: {{ showAddProposal }}</p>
       <p>showProposalDetail: {{ showProposalDetail }}</p>
       <p>proposals.length: {{ proposals.length }}</p>
@@ -431,6 +385,7 @@
 <script setup>
 import { ref, computed, onMounted, watch, nextTick } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { useSEO, generateOrganizationSchema, generateBreadcrumbSchema } from '@/composables/useSEO'
 import axios from 'axios'
 import { useFluxStore } from '@/stores/flux'
 import { storeToRefs } from 'pinia'
@@ -439,6 +394,21 @@ import { useLoginSheet } from '@/composables/useLoginSheet'
 // Import components
 import ProposalDetailDialog from '@/components/xdao/ProposalDetailDialog.vue'
 import AddProposalTab from '@/components/xdao/AddProposalTab.vue'
+
+// SEO for FluxDAO governance page
+useSEO({
+  title: 'FluxDAO - Decentralized Governance | Flux Network',
+  description: 'Participate in FluxDAO governance. Vote on proposals, submit ideas, and shape the future of Flux decentralized cloud. Community-driven decisions.',
+  url: 'https://home.runonflux.io/xdao-app',
+  keywords: 'FluxDAO, DAO, decentralized governance, voting, proposals, blockchain governance, community governance, flux governance, DAO voting',
+  structuredData: [
+    generateOrganizationSchema(),
+    generateBreadcrumbSchema([
+      { name: 'Home', url: 'https://home.runonflux.io' },
+      { name: 'FluxDAO', url: 'https://home.runonflux.io/xdao-app' },
+    ]),
+  ],
+})
 
 const { t } = useI18n()
 const { openLoginBottomSheet, closeLoginBottomSheet } = useLoginSheet()
@@ -452,7 +422,7 @@ const proposals = ref([])
 const loading = ref(true)
 const error = ref(null)
 const searchQuery = ref('')
-const activeFilter = ref('all')
+const activeFilter = ref('open')
 const sortBy = ref('latest')
 const showAddProposal = ref(false)
 const showProposalDetail = ref(false)
@@ -468,8 +438,6 @@ const userZelid = computed(() => zelid.value)
 // Proposal filters with counts
 const proposalFilters = computed(() => {
   const getCount = filterValue => {
-    if (filterValue === 'all') return proposals.value.length
-
     return proposals.value.filter(proposal => {
       if (filterValue === 'open') return proposal.status === 'Open'
       if (filterValue === 'passed') return proposal.status === 'Passed'
@@ -486,11 +454,10 @@ const proposalFilters = computed(() => {
   }
 
   return [
-    { title: t('pages.xdao.allProposals'), icon: 'mdi-clipboard-outline', value: 'all', count: getCount('all') },
     { title: t('pages.xdao.open'), icon: 'mdi-clock-outline', value: 'open', count: getCount('open') },
     { title: t('pages.xdao.passed'), icon: 'mdi-check-circle-outline', value: 'passed', count: getCount('passed') },
-    { title: t('pages.xdao.unpaid'), icon: 'mdi-currency-usd-off', value: 'unpaid', count: getCount('unpaid') },
     { title: t('pages.xdao.rejected'), icon: 'mdi-close-circle-outline', value: 'rejected', count: getCount('rejected') },
+    { title: t('pages.xdao.unpaid'), icon: 'mdi-currency-usd-off', value: 'unpaid', count: getCount('unpaid') },
   ]
 })
 
@@ -507,31 +474,29 @@ const filteredProposals = computed(() => {
   let filtered = proposals.value
 
   // Apply filter
-  if (activeFilter.value !== 'all') {
-    filtered = filtered.filter(proposal => {
-      console.log('Filtering proposal:', proposal.topic, 'Status:', proposal.status, 'Filter:', activeFilter.value)
-      
-      if (activeFilter.value === 'open') {
-        return proposal.status === 'Open'
-      }
-      if (activeFilter.value === 'passed') {
-        return proposal.status === 'Passed'
-      }
-      if (activeFilter.value === 'unpaid') {
-        // Check for unpaid variations (excluding rejected ones)
-        return proposal.status === 'Unpaid' || 
-               (proposal.status.includes('Unpaid') && !proposal.status.includes('Rejected') && !proposal.status.includes('Not Enough Votes'))
-      }
-      if (activeFilter.value === 'rejected') {
-        // Check for all rejected variations (including "Rejected Unpaid")
-        return (proposal.status.includes('Rejected') || proposal.status === 'Rejected')
-      }
-      
-      return false
-    })
-    
-    console.log('Filtered results for', activeFilter.value, ':', filtered.length, 'proposals')
-  }
+  filtered = filtered.filter(proposal => {
+    console.log('Filtering proposal:', proposal.topic, 'Status:', proposal.status, 'Filter:', activeFilter.value)
+
+    if (activeFilter.value === 'open') {
+      return proposal.status === 'Open'
+    }
+    if (activeFilter.value === 'passed') {
+      return proposal.status === 'Passed'
+    }
+    if (activeFilter.value === 'unpaid') {
+      // Check for unpaid variations (excluding rejected ones)
+      return proposal.status === 'Unpaid' ||
+             (proposal.status.includes('Unpaid') && !proposal.status.includes('Rejected') && !proposal.status.includes('Not Enough Votes'))
+    }
+    if (activeFilter.value === 'rejected') {
+      // Check for all rejected variations (including "Rejected Unpaid")
+      return (proposal.status.includes('Rejected') || proposal.status === 'Rejected')
+    }
+
+    return false
+  })
+
+  console.log('Filtered results for', activeFilter.value, ':', filtered.length, 'proposals')
 
   // Apply search
   if (searchQuery.value) {
@@ -588,7 +553,7 @@ const fetchProposals = async () => {
     } else {
       console.error('API returned error:', response.data)
       proposals.value = []
-      error.value = 'Failed to load proposals from server'
+      error.value = t('pages.xdao.errors.loadProposalsServer')
     }
   } catch (err) {
     console.error('Error fetching proposals:', err)
@@ -599,18 +564,18 @@ const fetchProposals = async () => {
       status: err.response?.status,
     })
     proposals.value = []
-    
+
     // Set user-friendly error message
     if (err.code === 'NETWORK_ERROR' || err.message.includes('Network Error')) {
-      error.value = 'Network connection failed. Please check your internet connection.'
+      error.value = t('pages.xdao.errors.networkFailed')
     } else if (err.code === 'ECONNABORTED' || err.message.includes('timeout')) {
-      error.value = 'Request timed out. The server may be temporarily unavailable.'
+      error.value = t('pages.xdao.errors.timeout')
     } else if (err.response?.status >= 500) {
-      error.value = 'Server error. Please try again later.'
+      error.value = t('pages.xdao.errors.serverError')
     } else if (err.response?.status === 404) {
-      error.value = 'Proposals service not found.'
+      error.value = t('pages.xdao.errors.serviceNotFound')
     } else {
-      error.value = 'Failed to load proposals. Please try again.'
+      error.value = t('pages.xdao.errors.loadProposalsGeneric')
     }
   } finally {
     loading.value = false
@@ -716,10 +681,6 @@ const formatDate = timestamp => {
 }
 
 const getEmptyStateTitle = () => {
-  if (activeFilter.value === 'all') {
-    return t('pages.xdao.noProposalsFound')
-  }
-
   const filterLabels = {
     'open': t('pages.xdao.noOpenProposals'),
     'passed': t('pages.xdao.noPassedProposals'),
@@ -731,10 +692,6 @@ const getEmptyStateTitle = () => {
 }
 
 const getEmptyStateMessage = () => {
-  if (activeFilter.value === 'all') {
-    return t('pages.xdao.noProposalsSubmitted')
-  }
-
   const messages = {
     'open': t('pages.xdao.noOpenProposalsMessage'),
     'passed': t('pages.xdao.noPassedProposalsMessage'),
@@ -828,16 +785,41 @@ definePage({
 </script>
 
 <style scoped>
-.xdao-app {
-  padding: 16px;
-  overflow-x: hidden;
-  max-width: 100%;
+/* Apply border and border-radius to all cards */
+:deep(.v-card) {
+  border-radius: 16px !important;
+  border: 1px solid rgba(var(--v-theme-on-surface), 0.12) !important;
+  box-shadow: none !important;
 }
 
-@media (min-width: 768px) {
-  .xdao-app {
-    padding: 24px;
-    overflow-x: hidden;
+.xdao-intro-card {
+  border-radius: 16px !important;
+  border: 1px solid rgba(var(--v-theme-on-surface), 0.12) !important;
+  box-shadow: none !important;
+}
+
+.xdao-intro-card h2 {
+  line-height: 1.2;
+  word-break: keep-all;
+}
+
+/* Mobile responsive adjustments */
+@media (max-width: 599px) {
+  .xdao-intro-card h2 {
+    font-size: 1.5rem !important;
+  }
+
+  .xdao-intro-card .v-avatar {
+    width: 48px !important;
+    height: 48px !important;
+  }
+
+  .xdao-intro-card .v-icon {
+    font-size: 24px !important;
+  }
+
+  .xdao-intro-card .v-card-text {
+    padding: 16px !important;
   }
 }
 
@@ -1009,7 +991,8 @@ definePage({
 }
 
 .v-list-item--active {
-  box-shadow: 0 2px 8px rgba(var(--v-theme-primary), 0.2);
+  background-color: rgba(var(--v-theme-secondary), 0.12) !important;
+  color: rgb(var(--v-theme-secondary)) !important;
 }
 
 /* Compact sidebar styling */
@@ -1065,17 +1048,6 @@ definePage({
 
 .sidebar-list::-webkit-scrollbar-thumb:hover {
   background-color: rgba(var(--v-theme-primary), 0.5);
-}
-
-/* Prevent horizontal overflow */
-.v-row {
-  margin: 0 !important;
-  max-width: 100%;
-}
-
-.v-col {
-  padding-left: 12px;
-  padding-right: 12px;
 }
 
 /* Ensure cards don't overflow */

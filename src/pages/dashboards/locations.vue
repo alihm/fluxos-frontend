@@ -3,6 +3,33 @@
     class="map"
     :class="{ 'dark-theme': theme.value === 'dark' }"
   >
+    <!-- Introduction Section -->
+    <VRow class="mb-3">
+      <VCol cols="12">
+        <VCard class="locations-intro-card">
+          <VCardText>
+            <div class="d-flex align-center mb-3">
+              <VAvatar
+                size="48"
+                color="primary"
+                variant="tonal"
+                class="mr-3"
+              >
+                <VIcon size="28">mdi-earth</VIcon>
+              </VAvatar>
+              <div>
+                <h2 class="text-h4 mb-1">{{ t('pages.dashboard.locations.intro.title') }}</h2>
+                <p class="text-body-2 mb-0 text-medium-emphasis">{{ t('pages.dashboard.locations.intro.subtitle') }}</p>
+              </div>
+            </div>
+            <p class="text-body-1 mb-0">
+              {{ t('pages.dashboard.locations.intro.description') }}
+            </p>
+          </VCardText>
+        </VCard>
+      </VCol>
+    </VRow>
+
     <MapComponent
       v-if="fluxList.length > 0"
       :nodes="fluxList"
@@ -14,37 +41,57 @@
         sm="12"
         cols="12"
       >
-        <VCard
-          elevation="2"
-          class="pa-4"
-        >
-          <VOverlay
-            v-model="isLoading"
-            contained
-            scroll-strategy="none"
-            class="align-center justify-center overlay"
-          >
-            <VProgressCircular indeterminate />
-          </VOverlay>
+        <div class="location-card-wrapper">
+          <div class="location-card-header">
+            <VAvatar
+              size="48"
+              color="secondary"
+              variant="tonal"
+              class="mr-3"
+            >
+              <VIcon size="24">
+                mdi-map-marker
+              </VIcon>
+            </VAvatar>
+            <h3 class="text-h5 mb-0">
+              {{ t('pages.dashboard.locations.geographicTitle') }}
+            </h3>
+            <VSpacer />
+            <VChip
+              color="success"
+              size="small"
+            >
+              {{ getLocationCount() }}
+            </VChip>
+          </div>
+          <VCard style="overflow: visible !important; clip-path: none !important; min-height: 400px; padding-top: 30px !important;" class="location-card-content">
+            <VOverlay
+              v-model="isLoading"
+              contained
+              persistent
+              scroll-strategy="none"
+              class="align-center justify-center overlay"
+            >
+              <VProgressCircular indeterminate />
+            </VOverlay>
 
-          <h3>{{ t('pages.dashboard.locations.geographicTitle', { count: getLocationCount() }) }}</h3>
-
-          <template v-if="geographicData.series.length > 0">
-            <VueApexCharts
-              ref="geoChart"
-              type="donut"
-              height="600"
-              width="100%"
-              :options="geographicData.chartOptions"
-              :series="geographicData.series"
-            />
-          </template>
-          <template v-else>
-            <div class="no-data">
-              {{ t('pages.dashboard.locations.noGeographicData') }}
-            </div>
-          </template>
-        </VCard>
+            <template v-if="geographicData.series.length > 0">
+              <VueApexCharts
+                ref="geoChart"
+                type="donut"
+                height="400"
+                width="100%"
+                :options="geographicData.chartOptions"
+                :series="geographicData.series"
+              />
+            </template>
+            <template v-else>
+              <div class="no-data">
+                {{ t('pages.dashboard.locations.noGeographicData') }}
+              </div>
+            </template>
+          </VCard>
+        </div>
       </VCol>
 
       <VCol
@@ -52,37 +99,57 @@
         sm="12"
         cols="12"
       >
-        <VCard
-          elevation="2"
-          class="pa-4"
-        >
-          <VOverlay
-            v-model="isLoading"
-            contained
-            scroll-strategy="none"
-            class="align-center justify-center overlay"
-          >
-            <VProgressCircular indeterminate />
-          </VOverlay>
+        <div class="location-card-wrapper">
+          <div class="location-card-header">
+            <VAvatar
+              size="48"
+              color="secondary"
+              variant="tonal"
+              class="mr-3"
+            >
+              <VIcon size="24">
+                mdi-server-network
+              </VIcon>
+            </VAvatar>
+            <h3 class="text-h5 mb-0">
+              {{ t('pages.dashboard.locations.providersTitle') }}
+            </h3>
+            <VSpacer />
+            <VChip
+              color="success"
+              size="small"
+            >
+              {{ getProviderCount() }}
+            </VChip>
+          </div>
+          <VCard style="overflow: visible !important; clip-path: none !important; min-height: 400px; padding-top: 30px !important;" class="location-card-content">
+            <VOverlay
+              v-model="isLoading"
+              contained
+              persistent
+              scroll-strategy="none"
+              class="align-center justify-center overlay"
+            >
+              <VProgressCircular indeterminate />
+            </VOverlay>
 
-          <h3>{{ t('pages.dashboard.locations.providersTitle', { count: getProviderCount() }) }}</h3>
-
-          <template v-if="providerData.series.length > 0">
-            <VueApexCharts
-              ref="providerChart"
-              type="donut"
-              height="600"
-              width="100%"
-              :options="providerData.chartOptions"
-              :series="providerData.series"
-            />
-          </template>
-          <template v-else>
-            <div class="no-data">
-              {{ t('pages.dashboard.locations.noProviderData') }}
-            </div>
-          </template>
-        </VCard>
+            <template v-if="providerData.series.length > 0">
+              <VueApexCharts
+                ref="providerChart"
+                type="donut"
+                height="400"
+                width="100%"
+                :options="providerData.chartOptions"
+                :series="providerData.series"
+              />
+            </template>
+            <template v-else>
+              <div class="no-data">
+                {{ t('pages.dashboard.locations.noProviderData') }}
+              </div>
+            </template>
+          </VCard>
+        </div>
       </VCol>
     </VRow>
   </div>
@@ -95,9 +162,26 @@ import axios from "axios"
 import DashboardService from "@/services/DashboardService"
 import { useConfigStore } from "@core/stores/config"
 import { storeToRefs } from "pinia"
+import { useSEO, generateOrganizationSchema, generateBreadcrumbSchema } from '@/composables/useSEO'
 
 // Initialize i18n
 const { t } = useI18n()
+
+// SEO configuration
+useSEO({
+  title: 'Flux Node Locations - Global Network Map | FluxCloud',
+  description: 'Explore the global distribution of 8,000+ FluxNodes. Interactive map showing node locations across 70+ countries. View network decentralization and geographic spread of Flux infrastructure worldwide.',
+  url: 'https://home.runonflux.io/dashboards/locations',
+  keywords: 'flux node map, node locations, global network, geographic distribution, flux nodes worldwide, decentralized network map, node distribution, blockchain network map',
+  structuredData: [
+    generateOrganizationSchema(),
+    generateBreadcrumbSchema([
+      { name: 'Home', url: 'https://home.runonflux.io' },
+      { name: 'Flux Network', url: 'https://home.runonflux.io/dashboards/overview' },
+      { name: 'Locations', url: 'https://home.runonflux.io/dashboards/locations' },
+    ]),
+  ],
+})
 
 // Reactive state
 const fluxList = ref([])
@@ -122,7 +206,7 @@ const providerData = reactive({
       {
         breakpoint: 600,
         options: {
-          chart: { height: 350 },
+          chart: { height: 400 },
           legend: {
             show: true,
             position: "bottom",
@@ -152,7 +236,7 @@ const geographicData = reactive({
       {
         breakpoint: 600,
         options: {
-          chart: { height: 350 },
+          chart: { height: 400 },
           legend: {
             show: true,
             position: "bottom",
@@ -333,29 +417,117 @@ watch(
 )
 </script>
 
+<style lang="scss" scoped>
+/* Apply border and border-radius to all cards */
+:deep(.v-card) {
+  border-radius: 16px !important;
+  border: 1px solid rgba(var(--v-theme-on-surface), 0.12) !important;
+  box-shadow: none !important;
+}
+
+.locations-intro-card {
+  border-radius: 16px !important;
+  border: 1px solid rgba(var(--v-theme-on-surface), 0.12) !important;
+  box-shadow: none !important;
+}
+
+.locations-intro-card h2 {
+  line-height: 1.2;
+  word-break: keep-all;
+}
+
+/* Mobile responsive adjustments */
+@media (max-width: 599px) {
+  .locations-intro-card h2 {
+    font-size: 1.5rem !important;
+  }
+
+  .locations-intro-card .v-avatar {
+    width: 48px !important;
+    height: 48px !important;
+  }
+
+  .locations-intro-card .v-icon {
+    font-size: 24px !important;
+  }
+
+  .locations-intro-card .v-card-text {
+    padding: 16px !important;
+  }
+}
+
+.overlay {
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.no-data {
+  text-align: center;
+  font-size: 18px;
+  color: #999;
+  margin-top: 30px;
+}
+
+/* Location card with external header */
+.location-card-wrapper {
+  display: flex;
+  flex-direction: column;
+  background: rgb(var(--v-theme-surface));
+  border-radius: 16px;
+  border: 1px solid rgba(var(--v-theme-on-surface), 0.12);
+}
+
+.location-card-header {
+  display: flex;
+  align-items: center;
+  padding: 8px 16px;
+  border-bottom: 1px solid rgba(var(--v-theme-on-surface), 0.12);
+}
+
+.location-card-content {
+  border-radius: 0 0 16px 16px !important;
+  border: none !important;
+  overflow: hidden !important;
+  padding-top: 30px !important;
+}
+
+/* Scale chart to compensate for padding on all resolutions except mobile */
+@media (min-width: 601px) {
+  /* Make chart slightly larger to compensate for padding */
+  .location-card-content .apexcharts-canvas {
+    transform: scale(1.15);
+    transform-origin: center center;
+  }
+}
+</style>
+
 <style lang="scss">
+/* Non-scoped styles for ApexCharts */
 .map {
   .apexcharts-legend {
     display: block !important;
     overflow-y: auto;
     max-height: 100px;
-    padding: 5px 0;
+    padding: 16px;
+    direction: ltr;
     -webkit-overflow-scrolling: touch;
     scrollbar-width: thin;
     &::-webkit-scrollbar {
       width: 8px;
     }
     &::-webkit-scrollbar-track {
-      background: #2a2a2a;
-      border-radius: 10px;
+      background: transparent;
     }
     &::-webkit-scrollbar-thumb {
-      background: #888888;
-      border-radius: 10px;
+      background: rgba(var(--v-theme-on-surface), 0.3);
+      border-radius: 4px;
     }
     .apexcharts-legend-series {
       display: inline-block;
-      margin: 2px 4px !important;
+      margin: 4px !important;
       align-items: center;
     }
     .apexcharts-legend-marker {
@@ -372,13 +544,31 @@ watch(
   @media (max-width: 600px) {
     .apexcharts-legend {
       max-height: 80px;
-      font-size: 10px !important;
+      padding: 8px 8px 0 16px !important;
+      margin-bottom: -16px !important;
+      font-size: 11px !important;
+      text-align: left;
+      width: calc(100% + 32px) !important;
+      margin-left: -16px !important;
+      margin-right: -16px !important;
+      left: 0 !important;
+      right: 0 !important;
+      bottom: 0 !important;
+    }
+    .apexcharts-legend-series {
+      margin: 3px !important;
+      white-space: nowrap;
+    }
+    .apexcharts-legend-text {
+      font-size: 11px !important;
     }
     .apexcharts-canvas {
-      height: 350px !important;
+      height: 400px !important;
     }
-    .v-card {
-      padding: 16px !important;
+    .location-card-content {
+      padding-left: 16px !important;
+      padding-right: 16px !important;
+      /* Keep padding-top: 30px from parent rule */
     }
   }
 
@@ -428,17 +618,5 @@ watch(
     color: #333333 !important;
     fill: #333333 !important;
   }
-}
-
-.overlay {
-  backdrop-filter: blur(5px);
-  -webkit-backdrop-filter: blur(5px);
-}
-
-.no-data {
-  text-align: center;
-  font-size: 18px;
-  color: #999;
-  margin-top: 30px;
 }
 </style>

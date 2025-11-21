@@ -49,8 +49,12 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { useSEONoIndex } from '@/composables/useSEO'
 import { useSnackbar } from '@/composables/useSnackbar'
 import LoadingSpinner from '@/components/Marketplace/LoadingSpinner.vue'
+
+// Prevent indexing of Docker events admin page (private admin data)
+useSEONoIndex()
 
 const { t } = useI18n()
 const { showSnackbar } = useSnackbar()

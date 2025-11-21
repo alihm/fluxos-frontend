@@ -92,59 +92,21 @@
       </div>
 
       <div v-else class="apps-container">
-        <div class="apps-content" :style="{ height: containerHeight + 'px' }">
-          <Transition :name="slideDirection === 'next' ? 'slide-next' : 'slide-prev'">
-            <div :key="currentPage" class="apps-grid" :class="gridClass">
-              <AppCard
-                v-for="app in paginatedApps"
-                :key="app.uuid || app.name"
-                :app="app"
-                :marketplace-categories="marketplaceCategories"
-                @deploy="$emit('deploy', app)"
-              />
-            </div>
-          </Transition>
+        <div class="apps-content">
+          <div class="apps-grid" :class="gridClass">
+            <AppCard
+              v-for="(app, index) in props.apps"
+              :key="app.uuid || app.name"
+              :app="app"
+              :marketplace-categories="marketplaceCategories"
+              :animation-order="index"
+              @deploy="$emit('deploy', app)"
+            />
+          </div>
         </div>
 
       </div>
     </VCard>
-
-    <!-- Pagination outside VCard -->
-    <div v-if="totalPages > 1" class="pagination">
-      <VBtn
-        variant="tonal"
-        color="primary"
-        :disabled="currentPage <= 1"
-        @click="changePage(currentPage - 1)"
-      >
-        <VIcon start>mdi-arrow-left</VIcon>
-        {{ labels.previous }}
-      </VBtn>
-
-      <div class="page-numbers">
-        <VBtn
-          v-for="page in displayPages"
-          :key="page"
-          size="small"
-          :variant="page === currentPage ? 'flat' : 'text'"
-          :color="page === currentPage ? 'primary' : undefined"
-          :disabled="page === '...'"
-          @click="page !== '...' && changePage(page)"
-        >
-          {{ page }}
-        </VBtn>
-      </div>
-
-      <VBtn
-        variant="tonal"
-        color="primary"
-        :disabled="currentPage >= totalPages"
-        @click="changePage(currentPage + 1)"
-      >
-        {{ labels.next }}
-        <VIcon end>mdi-arrow-right</VIcon>
-      </VBtn>
-    </div>
   </div>
 </template>
 
@@ -282,13 +244,9 @@ const rowsCount = computed(() => {
 })
 
 const itemsPerPage = computed(() => {
-  return columnsCount.value * rowsCount.value
-})
+  const rows = 20  // Show 20 rows per page for better browsing
 
-const containerHeight = computed(() => {
-  // Calculate total height: (rows × cardHeight) + (gaps between rows)
-  return (rowsCount.value * GRID_CONFIG.MIN_CARD_HEIGHT)
-    + ((rowsCount.value - 1) * GRID_CONFIG.GRID_GAP)
+  return columnsCount.value * rows
 })
 
 const gridClass = computed(() => {
@@ -520,13 +478,13 @@ watch(() => props.sortBy, val => { sort.value = val })
   flex: 1;
   display: flex;
   flex-direction: column;
+  overflow: visible;
 }
 
 .apps-content {
   position: relative;
-  overflow: hidden;
-  /* height is now set dynamically via inline style based on rowsCount */
-  transition: height 0.3s ease;
+  min-height: 250px;
+  height: auto;
 }
 
 

@@ -1,16 +1,19 @@
 <template>
   <div
+    ref="cardRef"
     class="app-card-wrapper"
-    :class="{ 'hovered': hovered }"
+    :class="{ 'hovered': hovered, 'is-visible': isVisible }"
+    :style="{ '--animation-order': animationOrder }"
     @mouseenter="hovered = true"
     @mouseleave="hovered = false"
+    @click="viewDetails"
   >
     <VCard
       class="app-card"
       elevation="0"
     >
       <div class="card-content">
-        <!-- Top section: Icon + Name + Buttons (87px height) -->
+        <!-- Top section: Icon + Name (87px height) -->
         <div class="app-top-section">
           <div class="app-icon-container">
             <AppIcon :app="app" :size="60" />
@@ -28,27 +31,6 @@
                 {{ categoryName }}
               </VChip>
             </div>
-          </div>
-
-          <div class="app-buttons">
-            <VBtn
-              color="primary"
-              variant="flat"
-              size="x-small"
-              class="install-btn"
-              @click.stop="deploy"
-            >
-              {{ t('components.marketplace.appCard.install') }}
-            </VBtn>
-            <VBtn
-              color="primary"
-              variant="flat"
-              size="x-small"
-              class="view-btn"
-              @click.stop="viewDetails"
-            >
-              {{ t('components.marketplace.appCard.view') }}
-            </VBtn>
           </div>
         </div>
 
@@ -85,24 +67,31 @@
             {{ app.description || t('components.marketplace.appCard.noDescription') }}
           </p>
         </div>
+
+        <!-- Action button -->
+        <div class="app-action-section">
+          <VBtn
+            color="primary"
+            variant="flat"
+            size="x-small"
+            rounded="pill"
+            class="view-details-btn"
+            @click.stop="viewDetails"
+          >
+            <VIcon start size="14">mdi-eye</VIcon>
+            {{ t('components.marketplace.appCard.viewDetails') }}
+          </VBtn>
+        </div>
       </div>
     </VCard>
-
-    <!-- Install Dialog -->
-    <InstallDialog
-      v-model="showInstallDialog"
-      :app="app"
-      @deployed="handleDeploySuccess"
-    />
   </div>
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import AppIcon from '@/components/Marketplace/AppIcon.vue'
-import InstallDialog from '@/components/Marketplace/InstallDialog.vue'
 import { useMarketplaceUtils } from '@/composables/useMarketplaceUtils'
 
 const props = defineProps({
@@ -114,9 +103,11 @@ const props = defineProps({
     type: Array,
     default: () => [],
   },
+  animationOrder: {
+    type: Number,
+    default: 0,
+  },
 })
-
-const emit = defineEmits(['deploy'])
 
 const { t } = useI18n()
 
@@ -124,7 +115,8 @@ const router = useRouter()
 const { formatNumber, formatPrice } = useMarketplaceUtils()
 
 const hovered = ref(false)
-const showInstallDialog = ref(false)
+const cardRef = ref(null)
+const isVisible = ref(false)
 
 const categoryName = computed(() => {
   if (!props.app.category) return t('components.marketplace.appCard.defaultCategory')
@@ -145,25 +137,65 @@ const viewDetails = () => {
   navigateToApp()
 }
 
-const deploy = () => {
-  // FluxCloud opens InstallDialog as modal
-  showInstallDialog.value = true
-}
+// Intersection Observer for scroll-based animation
+let observer = null
 
-const handleDeploySuccess = deployedApp => {
-  // Emit deploy event for parent components to handle
-  emit('deploy', deployedApp)
-  console.log('🚀 App deployed successfully:', deployedApp.displayName || deployedApp.name)
-}
+onMounted(() => {
+  if (!cardRef.value) return
+
+  observer = new IntersectionObserver(
+    entries => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting && !isVisible.value) {
+          isVisible.value = true
+        }
+      })
+    },
+    {
+      threshold: 0.1,
+      rootMargin: '50px',
+    },
+  )
+
+  observer.observe(cardRef.value)
+})
+
+onUnmounted(() => {
+  if (observer && cardRef.value) {
+    observer.unobserve(cardRef.value)
+  }
+})
 </script>
 
 <style scoped>
 .app-card-wrapper {
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   height: 250px;
+  width: 100%;
   border-radius: 12px;
   position: relative;
   overflow: hidden;
+  cursor: pointer;
+  /* Initial state - hidden */
+  opacity: 0;
+  transform: translateY(30px);
+}
+
+/* Scroll reveal animation - triggers when card becomes visible */
+.app-card-wrapper.is-visible {
+  animation: fadeInUp 0.6s ease-out forwards;
+  animation-delay: calc(var(--animation-order) * 0.05s);
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
 
 .app-card-wrapper::before {
@@ -248,13 +280,14 @@ const handleDeploySuccess = deployedApp => {
   height: 100%;
 }
 
-/* Top section - FluxCloud style (87px height) */
+/* Top section - Centered layout (87px height) */
 .app-top-section {
   height: 87px;
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 0 8px;
+  justify-content: center;
+  gap: 12px;
+  padding: 0 16px;
 }
 
 .app-icon-container {
@@ -263,59 +296,35 @@ const handleDeploySuccess = deployedApp => {
 }
 
 .app-name-section {
-  flex: 1;
-  min-width: 0;
-  padding: 0 4px;
   display: flex;
   flex-direction: column;
   justify-content: center;
-  gap: 4px;
+  align-items: center;
+  gap: 6px;
+  text-align: center;
 }
 
 .app-name {
-  font-size: 0.85rem;
+  font-size: 0.95rem;
   font-weight: 600;
   margin: 0;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   line-height: 1.2;
+  max-width: 100%;
 }
 
 .app-category {
   display: flex;
   align-items: center;
+  justify-content: center;
 }
 
 .category-chip {
   font-size: 0.7rem !important;
   height: 18px !important;
   padding: 0 6px !important;
-}
-
-.spacer {
-  width: 20px;
-  flex-shrink: 0;
-}
-
-.app-buttons {
-  width: 80px;
-  flex-shrink: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  padding: 8px 0 0 0;
-  margin-right: 3px;
-}
-
-.install-btn,
-.view-btn {
-  height: 25px !important;
-  font-size: 0.75rem !important;
-  font-weight: 600 !important;
-  color: white !important;
-  width: 100% !important;
-  border-radius: 12px !important;
 }
 
 .card-divider {
@@ -349,7 +358,7 @@ const handleDeploySuccess = deployedApp => {
 /* Description section - FluxCloud style (flexible height) */
 .app-description-section {
   flex: 1;
-  padding: 8px 16px 16px 16px;
+  padding: 8px 16px 4px 16px;
   display: flex;
   align-items: flex-start;
 }
@@ -365,6 +374,28 @@ const handleDeploySuccess = deployedApp => {
   overflow: hidden;
   text-overflow: ellipsis;
   word-break: break-word;
+}
+
+/* Action section */
+.app-action-section {
+  padding: 4px 16px 8px 16px;
+  display: flex;
+  justify-content: center;
+}
+
+.view-details-btn {
+  height: 28px !important;
+  min-width: 120px !important;
+  font-size: 0.75rem !important;
+  font-weight: 600 !important;
+  text-transform: none !important;
+  transition: all 0.3s ease !important;
+  padding: 0 16px !important;
+}
+
+.view-details-btn:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 8px rgba(var(--v-theme-primary), 0.3);
 }
 
 /* Mobile adjustments */

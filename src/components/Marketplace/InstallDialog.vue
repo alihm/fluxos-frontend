@@ -396,8 +396,12 @@
                     hide-details
                     class="modern-input"
                     color="primary"
-                    attach
-                    :menu-props="{ contentClass: 'install-dialog-select-menu' }"
+                    :menu-props="{
+                      contentClass: 'install-dialog-select-menu',
+                      maxHeight: 300,
+                      eager: true,
+                      closeOnContentClick: true
+                    }"
                   >
                     <template #append-inner>
                       <VTooltip location="top">
@@ -815,25 +819,25 @@
                         <img
                           v-else-if="detectedSigningMethod.includes('ZelCore')"
                           :src="fluxIDLogo"
-                          alt="Flux ID (ZelCore)"
+                          :alt="t('components.marketplace.installDialog.walletAltZelcore')"
                           class="walletIcon"
                         />
                         <img
                           v-else-if="detectedSigningMethod === 'SSP'"
                           :src="theme.global.name.value === 'dark' ? sspLogoWhite : sspLogoBlack"
-                          alt="SSP"
+                          :alt="t('components.marketplace.installDialog.walletAltSSP')"
                           class="walletIcon"
                         />
                         <img
                           v-else-if="detectedSigningMethod === 'MetaMask'"
                           :src="metamaskLogo"
-                          alt="MetaMask"
+                          :alt="t('components.marketplace.installDialog.walletAltMetaMask')"
                           class="walletIcon"
                         />
                         <img
                           v-else-if="detectedSigningMethod === 'WalletConnect'"
                           :src="walletConnectLogo"
-                          alt="WalletConnect"
+                          :alt="t('components.marketplace.installDialog.walletAltWalletConnect')"
                           class="walletIcon"
                         />
                         <!-- Manual - Use pen/signature icon -->
@@ -5069,6 +5073,11 @@ watch(isLoggedIn, (newValue, oldValue) => {
     0 2px 6px rgba(0, 0, 0, 0.08);
   position: relative;
   overflow: hidden;
+}
+
+/* Allow dropdowns to overflow in parameter items */
+.param-item.modern-section {
+  overflow: visible;
 }
 
 .modern-section::after {

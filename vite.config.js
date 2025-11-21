@@ -12,6 +12,7 @@ import { ClientSideLayout } from 'vite-plugin-vue-layouts';
 import vuetify from 'vite-plugin-vuetify';
 import svgLoader from 'vite-svg-loader';
 import { visualizer } from 'rollup-plugin-visualizer';
+import { ViteImageOptimizer } from 'vite-plugin-image-optimizer';
 import { aliases } from './aliases.mjs';
 
 export default defineConfig(({ mode }) => {
@@ -25,6 +26,7 @@ export default defineConfig(({ mode }) => {
             .replace(/([a-z\d])([A-Z])/g, '$1-$2')
             .toLowerCase();
         },
+        importMode: 'sync',
       }),
       vue({
         template: {
@@ -72,7 +74,7 @@ export default defineConfig(({ mode }) => {
         },
       }),
       VueI18nPlugin({
-        runtimeOnly: true,
+        runtimeOnly: false,
         compositionOnly: true,
         strictMessage: false,
         include: [
@@ -80,6 +82,44 @@ export default defineConfig(({ mode }) => {
         ],
       }),
       svgLoader(),
+      // Image optimization for production builds
+      ViteImageOptimizer({
+        // PNG optimization
+        png: {
+          quality: 80,
+        },
+        // JPEG optimization
+        jpeg: {
+          quality: 80,
+        },
+        // JPG optimization
+        jpg: {
+          quality: 80,
+        },
+        // WebP conversion
+        webp: {
+          quality: 80,
+        },
+        // SVG optimization
+        svg: {
+          multipass: true,
+          plugins: [
+            {
+              name: 'preset-default',
+              params: {
+                overrides: {
+                  cleanupNumericValues: false,
+                  // Removed removeViewBox from overrides - moved to separate plugin below
+                },
+              },
+            },
+            {
+              name: 'removeViewBox',
+              active: false, // Disable removeViewBox to preserve viewBox attributes
+            },
+          ],
+        },
+      }),
       // Bundle analyzer - generates stats.html
       visualizer({
         filename: 'dist/stats.html',

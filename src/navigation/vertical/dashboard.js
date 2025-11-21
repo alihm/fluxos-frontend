@@ -1,11 +1,6 @@
 
 export default [
   {
-    title: 'menu.home.title',  // Pass the key for the translation
-    icon: { icon: 'tabler-home' },
-    to: '/',
-  },
-  {
     title: 'menu.dashboard.title',  // Pass the key for the translation
     icon: { icon: 'tabler-device-desktop' },
     children: [
@@ -30,9 +25,9 @@ export default [
         icon: { icon: 'tabler-coins', size: 20 },
       },
       {
-        title: 'menu.dashboard.nodeList',  // Pass the key for the translation
-        to: 'dashboards-list',
-        icon: { icon: 'tabler-list', style: { width: '20px', height: '23px' } },
+        title: 'menu.fluxXdao.title',  // Pass the key for the translation
+        to: 'xdao-app',
+        icon: { icon: 'mdi-account-group', size: 20 },
       },
     ],
   },

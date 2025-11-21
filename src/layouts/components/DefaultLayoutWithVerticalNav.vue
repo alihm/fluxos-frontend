@@ -1,5 +1,5 @@
 <script setup>
-import navItems from "@/navigation/vertical"
+import navItemsRaw from "@/navigation/vertical"
 import { themeConfig } from "@themeConfig"
 
 import Footer from "@/layouts/components/Footer.vue"
@@ -16,7 +16,7 @@ import { useLoginSheet } from '@/composables/useLoginSheet'
 import { useFluxStore } from "@/stores/flux"
 import { storeToRefs } from "pinia"
 import { useI18n } from "vue-i18n"
-import { ref, computed } from "vue"
+import { ref, computed, watch, onMounted } from "vue"
 import LoginModal from "@/@core/components/LoginModal.vue"
 import { useConfigStore } from "@core/stores/config"
 import { useLayoutConfigStore } from "@layouts/stores/config"
@@ -32,7 +32,7 @@ const { showLoginSheet, openLoginBottomSheet, closeLoginBottomSheet } = useLogin
 // i18n and store
 const { t } = useI18n()
 const fluxStore = useFluxStore()
-const { privilege } = storeToRefs(fluxStore)
+const { privilege, hasUserApps, isUserAppsChecked } = storeToRefs(fluxStore)
 const configStore = useConfigStore()
 const { theme } = storeToRefs(configStore)
 const layoutConfigStore = useLayoutConfigStore()
@@ -62,7 +62,50 @@ const openCustomizer = event => {
 
 const handleLoginSuccess = () => {
   closeLoginBottomSheet()
+  // Check user apps after successful login
+  fluxStore.checkUserApps()
 }
+
+// Computed navItems that filters "My Applications" based on login and app ownership
+const navItems = computed(() => {
+  return navItemsRaw.filter(item => {
+    // Filter out "My Applications" if user is not logged in or has no apps
+    if (item.to === 'apps-management') {
+      // Show only if user is logged in AND has apps (or check hasn't completed yet)
+      if (privilege.value === 'none') {
+        return false // Not logged in, don't show
+      }
+
+      // If we haven't checked yet, show the menu item to avoid flashing
+      if (!isUserAppsChecked.value) {
+        return true
+      }
+
+      // Show only if user has apps
+      return hasUserApps.value
+    }
+
+    return true
+  })
+})
+
+// Check user apps when privilege changes (login/logout)
+watch(privilege, (newPrivilege, oldPrivilege) => {
+  if (newPrivilege !== 'none' && newPrivilege !== oldPrivilege) {
+    // User logged in, check their apps
+    fluxStore.checkUserApps()
+  } else if (newPrivilege === 'none') {
+    // User logged out, reset apps state
+    fluxStore.resetUserApps()
+  }
+})
+
+// Check user apps on mount if already logged in
+onMounted(() => {
+  if (privilege.value !== 'none') {
+    fluxStore.checkUserApps()
+  }
+})
 
 // const dropdownOpen = ref(false)
 // const customBackend = ref("")

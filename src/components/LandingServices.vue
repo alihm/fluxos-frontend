@@ -162,21 +162,22 @@ const exploreBanner = banner => {
 
 /* Features Section */
 .features-section {
-  padding: 1.5rem 2rem 1rem 2rem;
+  padding: 0;
   background: rgb(var(--v-theme-background));
 }
 
 .container {
   width: 100%;
   margin: 0 auto;
-  padding: 0 2rem;
+  padding: 0;
 }
 
 .section-title {
   font-size: clamp(1.8rem, 4vw, 2.5rem);
   font-weight: 800;
   text-align: center;
-  margin-bottom: 2.5rem;
+  margin-bottom: 0.5rem;
+  line-height: 1.3;
   color: rgb(var(--v-theme-on-background));
   position: relative;
 }
@@ -184,10 +185,10 @@ const exploreBanner = banner => {
 .section-title::after {
   content: '';
   display: block;
-  width: 100px;
-  height: 5px;
-  background: rgb(var(--v-theme-primary));
-  margin: 1.5rem auto 0;
+  width: 150px;
+  height: 4px;
+  background: rgb(var(--v-theme-on-background));
+  margin: 0.5rem auto 0;
   border-radius: 10px;
 }
 
@@ -196,6 +197,7 @@ const exploreBanner = banner => {
   grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
   gap: 2.5rem;
   margin-top: 0.5rem;
+  padding: 0.5rem;
   perspective: 1500px;
 }
 
@@ -203,9 +205,9 @@ const exploreBanner = banner => {
   background: rgb(var(--v-theme-surface));
   border-radius: clamp(16px, 3vw, 32px);
   overflow: hidden;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.08);
   transition: all 0.4s ease;
-  border: 2px solid rgba(128, 128, 128, 0.3);
+  border: 2px solid rgba(var(--v-theme-on-surface), 0.12);
   display: flex;
   flex-direction: column;
   transform: scale(0.95);
@@ -217,9 +219,9 @@ const exploreBanner = banner => {
 }
 
 .feature-card:hover {
-  transform: translateY(-12px) scale(1.03);
-  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.2);
-  border: 2px solid #3b82f6;
+  transform: translateY(-8px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08), 0 2px 4px rgba(0, 0, 0, 0.06);
+  border: 2px solid rgb(var(--v-theme-primary));
 }
 
 .feature-image-wrapper {
@@ -374,7 +376,7 @@ const exploreBanner = banner => {
   }
 
   .features-section {
-    padding: 1.5rem 1.5rem 2rem 1.5rem;
+    padding: 0;
   }
 
   .banner-indicators {
