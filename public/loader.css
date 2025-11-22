@@ -12,9 +12,9 @@ html {
   background-color: var(--initial-loader-bg, #fff) !important;
 }
 
-/* Force initial colors on all elements until app is ready */
-body *,
-html * {
+/* Disable transitions only during initial load for body and #app to prevent flash */
+body,
+#app {
   transition: none !important;
 }
 

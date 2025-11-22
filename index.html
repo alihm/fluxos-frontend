@@ -201,19 +201,8 @@
       document.documentElement.classList.remove('v-theme--dark')
     }
 
-    // Listen for app-ready event to re-enable transitions
-    window.addEventListener('app-ready', () => {
-      // Small delay to ensure Vue has fully rendered
-      setTimeout(() => {
-        const style = document.createElement('style')
-        style.textContent = `
-          body *, html * {
-            transition: all 0.3s ease !important;
-          }
-        `
-        document.head.appendChild(style)
-      }, 100)
-    })
+    // Transitions are managed by Vuetify and component styles
+    // Do not add global transitions as they interfere with Vuetify positioning
 
     // Check if page path should skip loader
     const skipLoaderPaths = ['/successcheckout']
