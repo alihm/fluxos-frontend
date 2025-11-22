@@ -232,6 +232,7 @@ module.exports = {
     "useAbility": true,
     "useAbs": true,
     "useActiveElement": true,
+    "useAnalytics": true,
     "useAnimate": true,
     "useApi": true,
     "useArrayDifference": true,
