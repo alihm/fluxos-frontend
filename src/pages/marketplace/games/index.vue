@@ -25,7 +25,7 @@
         <!-- Hero Section with Background -->
         <HeroSection
           :title="t('pages.marketplace.games.index.hero.title')"
-          background-image="/banner/FluxPlay.png"
+          background-image="/banner/FluxPlay.webp"
           overlay-color="rgba(0, 0, 0, 0.4)"
           min-height="300px"
         />

@@ -6,7 +6,7 @@
       <HeroSection
         :title="t('pages.apps.register.landing.title')"
         :subtitle="heroSubtitle"
-        background-image="/banner/FluxDeploy.png"
+        background-image="/banner/FluxDeploy.webp"
         overlay-gradient="linear-gradient(135deg, rgba(var(--v-theme-primary), 0.5) 0%, rgba(var(--v-theme-secondary), 0.5) 100%)"
         icon="mdi-cloud-upload"
         icon-aria-label="Flux Cloud Logo"
@@ -484,7 +484,7 @@ const webPageSchema = computed(() => ({
   'name': 'Deploy Your App on FluxCloud - Decentralized Cloud Computing',
   'description': 'Deploy your applications on FluxCloud\'s decentralized network. Affordable, secure, and globally distributed cloud computing with no vendor lock-in.',
   'url': 'https://home.runonflux.io/apps/register',
-  'image': 'https://home.runonflux.io/banner/FluxDeploy.png',
+  'image': 'https://home.runonflux.io/banner/FluxDeploy.webp',
   'publisher': {
     '@type': 'Organization',
     'name': 'FluxCloud',
@@ -671,7 +671,7 @@ useHead({
     },
     {
       property: 'og:image',
-      content: 'https://home.runonflux.io/banner/FluxDeploy.png',
+      content: 'https://home.runonflux.io/banner/FluxDeploy.webp',
     },
     {
       property: 'og:image:width',
@@ -695,7 +695,7 @@ useHead({
     },
     {
       name: 'twitter:image',
-      content: 'https://home.runonflux.io/banner/FluxDeploy.png',
+      content: 'https://home.runonflux.io/banner/FluxDeploy.webp',
     },
   ],
   link: [

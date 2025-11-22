@@ -92,12 +92,12 @@ onMounted(() => {
 
 // All available services
 const allBanners = computed(() => [
-  { file: 'FluxCloud.png', key: 'fluxCloud' },
-  { file: 'FluxAI.png', key: 'fluxAI' },
-  { file: 'FluxDrive.png', key: 'fluxDrive' },
-  { file: 'FluxEdge.png', key: 'fluxEdge' },
-  { file: 'FluxMarketplace.png', key: 'fluxMarketplace' },
-  { file: 'WordPressonFluxCloud.png', key: 'wordPressOnFlux' },
+  { file: 'FluxCloud.webp', key: 'fluxCloud' },
+  { file: 'FluxAI.webp', key: 'fluxAI' },
+  { file: 'FluxDrive.webp', key: 'fluxDrive' },
+  { file: 'FluxEdge.webp', key: 'fluxEdge' },
+  { file: 'FluxMarketplace.webp', key: 'fluxMarketplace' },
+  { file: 'WordPressonFluxCloud.webp', key: 'wordPressOnFlux' },
 ].map(item => ({
   image: `/banner/${item.file}`,
   key: item.key,

@@ -23,7 +23,7 @@
       <HeroSection
         :title="t('pages.marketplace.hero.title')"
         :subtitle="heroSubtitle"
-        background-image="/banner/FluxAppsMarketplace.png"
+        background-image="/banner/FluxAppsMarketplace.webp"
         icon="mdi-store"
         icon-aria-label="Marketplace Logo"
       />

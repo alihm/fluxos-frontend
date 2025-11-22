@@ -15,7 +15,7 @@
         v-if="!hasOrHadSubscription"
         :title="t('pages.fluxDrive.intro.title')"
         :subtitle="t('pages.fluxDrive.intro.subtitle')"
-        background-image="/banner/FluxDrive2.png"
+        background-image="/banner/FluxDrive2.webp"
         icon="mdi-cloud-upload"
         icon-aria-label="FluxDrive Cloud Storage"
         min-height="300px"

@@ -24,7 +24,7 @@
       <HeroSection
         :title="t('pages.marketplace.wordpress.landing.title')"
         :subtitle="t('pages.marketplace.wordpress.landing.subtitle')"
-        background-image="/banner/FluxWPMarketplace.png"
+        background-image="/banner/FluxWPMarketplace.webp"
         icon="mdi-wordpress"
         icon-aria-label="WordPress Logo"
       />
@@ -505,8 +505,8 @@ useHead({
     { property: 'og:description', content: 'Deploy WordPress websites on the decentralized FluxCloud network with multiple performance plans. MySQL, SSL, automatic backups included.' },
     { property: 'og:type', content: 'product' },
     { property: 'og:url', content: 'https://home.runonflux.io/marketplace/wordpress' },
-    { property: 'og:image', content: 'https://home.runonflux.io/banner/FluxWPMarketplace.png' },
-    { property: 'og:image:secure_url', content: 'https://home.runonflux.io/banner/FluxWPMarketplace.png' },
+    { property: 'og:image', content: 'https://home.runonflux.io/banner/FluxWPMarketplace.webp' },
+    { property: 'og:image:secure_url', content: 'https://home.runonflux.io/banner/FluxWPMarketplace.webp' },
     { property: 'og:image:width', content: '1200' },
     { property: 'og:image:height', content: '630' },
     { property: 'og:image:alt', content: 'WordPress Hosting on FluxCloud - Decentralized Infrastructure' },
@@ -517,7 +517,7 @@ useHead({
     { name: 'twitter:card', content: 'summary_large_image' },
     { name: 'twitter:title', content: 'WordPress Hosting on FluxCloud - Decentralized & Scalable' },
     { name: 'twitter:description', content: 'Deploy WordPress websites on the decentralized FluxCloud network with MySQL, SSL, and automatic backups.' },
-    { name: 'twitter:image', content: 'https://home.runonflux.io/banner/FluxWPMarketplace.png' },
+    { name: 'twitter:image', content: 'https://home.runonflux.io/banner/FluxWPMarketplace.webp' },
     { name: 'twitter:image:alt', content: 'WordPress Hosting on FluxCloud' },
     { name: 'twitter:site', content: '@RunOnFlux' },
 
