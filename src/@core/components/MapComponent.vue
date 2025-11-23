@@ -324,7 +324,7 @@ function initMap() {
 const usingPropsNodes = ref(props.nodes !== undefined)
 
 // Watch for nodes prop changes - this handles async data from store
-watch(() => props.nodes, (newNodes) => {
+watch(() => props.nodes, newNodes => {
   // Only update if we're explicitly using props.nodes (not in filter/showAll mode)
   if (usingPropsNodes.value && newNodes && newNodes.length > 0) {
     fluxList.value = newNodes
@@ -340,20 +340,24 @@ onMounted(async () => {
     if (props.nodes && props.nodes.length > 0) {
       fluxList.value = props.nodes
     }
+
     // Case 2: Filter mode (needs all nodes to filter)
     else if (props.filterNodes && props.filterNodes.length > 0) {
       usingPropsNodes.value = false
       fluxList.value = await getNodesViaApi()
     }
+
     // Case 3: ShowAll mode without nodes prop
     else if (props.showAll && props.nodes === undefined) {
       usingPropsNodes.value = false
       fluxList.value = await getNodesViaApi()
     }
+
     // Case 4: Nodes prop exists but empty - wait for watch to populate
     else if (props.nodes !== undefined) {
       // usingPropsNodes is already true, watch will handle the update
     }
+
     // Case 5: No clear usage pattern
     else {
       usingPropsNodes.value = false

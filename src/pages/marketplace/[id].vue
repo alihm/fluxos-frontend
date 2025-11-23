@@ -449,7 +449,7 @@ const whyFluxBenefits = computed(() => [
     color: 'info',
     title: t('pages.apps.register.landing.benefits.global.title'),
     description: t('pages.apps.register.landing.benefits.global.description', {
-      countryCount: countryCount.value
+      countryCount: countryCount.value,
     }),
   },
   {
@@ -768,14 +768,15 @@ const fetchNetworkData = async () => {
       await new Promise(resolve => {
         const unwatch = watch(
           () => serverLocations.fluxList.length,
-          (length) => {
+          length => {
             if (length > 0) {
               unwatch()
               resolve()
             }
           },
-          { immediate: true }
+          { immediate: true },
         )
+
         // Timeout after 5 seconds
         setTimeout(() => {
           unwatch()
@@ -805,6 +806,7 @@ const fetchNetworkData = async () => {
     }
   } catch (error) {
     console.error('Error loading network data from store:', error)
+
     // Keep default fallback values on error
   }
 }

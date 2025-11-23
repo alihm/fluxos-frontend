@@ -5,7 +5,7 @@
       <div class="grid-header">
         <div class="header-top">
           <h2 class="section-title">
-            <VIcon start color="secondary">mdi-apps</VIcon>
+            <VIcon start size="20" color="secondary">mdi-apps</VIcon>
             {{ labels.title }}
           </h2>
         </div>
@@ -117,19 +117,6 @@ import { useI18n } from 'vue-i18n'
 import AppCard from '@/components/Marketplace/AppCard.vue'
 import { useMarketplaceUtils } from '@/composables/useMarketplaceUtils'
 
-// Grid configuration constants
-const GRID_CONFIG = {
-  MIN_CARD_WIDTH: 300,      // Minimum width per app card
-  MIN_CARD_HEIGHT: 280,     // Approximate height of each card
-  GRID_GAP: 16,             // Gap between cards/rows
-  CONTAINER_PADDING: 40,    // Container padding
-  HEADER_HEIGHT: 200,       // Header with search/filters
-  PAGINATION_HEIGHT: 60,    // Pagination controls
-  RESERVED_SPACE: 150,      // Footer, statusbar, and padding
-  MAX_ROWS: 4,              // Maximum number of rows to display
-  MIN_ROWS: 1,              // Minimum number of rows to display
-}
-
 const props = defineProps({
   apps: {
     type: Array,
@@ -170,6 +157,19 @@ const props = defineProps({
 })
 
 const emit = defineEmits(['update:search', 'update:category', 'update:sort', 'deploy', 'refresh'])
+
+// Grid configuration constants
+const GRID_CONFIG = {
+  MIN_CARD_WIDTH: 300,      // Minimum width per app card
+  MIN_CARD_HEIGHT: 280,     // Approximate height of each card
+  GRID_GAP: 16,             // Gap between cards/rows
+  CONTAINER_PADDING: 40,    // Container padding
+  HEADER_HEIGHT: 200,       // Header with search/filters
+  PAGINATION_HEIGHT: 60,    // Pagination controls
+  RESERVED_SPACE: 150,      // Footer, statusbar, and padding
+  MAX_ROWS: 4,              // Maximum number of rows to display
+  MIN_ROWS: 1,              // Minimum number of rows to display
+}
 
 const { t } = useI18n()
 
@@ -236,7 +236,7 @@ const rowsCount = computed(() => {
 
   const maxRows = Math.max(
     GRID_CONFIG.MIN_ROWS,
-    Math.floor(availableHeight / GRID_CONFIG.MIN_CARD_HEIGHT)
+    Math.floor(availableHeight / GRID_CONFIG.MIN_CARD_HEIGHT),
   )
 
   // Limit to reasonable maximum
