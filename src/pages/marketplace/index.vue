@@ -148,7 +148,7 @@ const networkDataLoading = ref(true)
 const heroSubtitle = computed(() =>
   t('pages.marketplace.hero.subtitle', {
     nodeCount: nodeCount.value.toLocaleString(),
-  })
+  }),
 )
 
 // Search and filter state
@@ -263,14 +263,15 @@ const fetchNetworkData = async () => {
       await new Promise(resolve => {
         const unwatch = watch(
           () => serverLocations.fluxList.length,
-          (length) => {
+          length => {
             if (length > 0) {
               unwatch()
               resolve()
             }
           },
-          { immediate: true }
+          { immediate: true },
         )
+
         // Timeout after 5 seconds
         setTimeout(() => {
           unwatch()
@@ -289,6 +290,7 @@ const fetchNetworkData = async () => {
     })
   } catch (error) {
     console.error('Error loading network data from store:', error)
+
     // Keep default fallback values on error
   } finally {
     networkDataLoading.value = false
@@ -376,7 +378,8 @@ onMounted(async () => {
 
 .sponsored-section {
   width: 100%;
-  height: 125px;
+  height: auto;
+  margin-bottom: 2rem !important;
 }
 
 .apps-grid-section {
@@ -405,7 +408,8 @@ onMounted(async () => {
   }
 
   .sponsored-section {
-    height: 125px;
+    height: auto;
+    margin-bottom: 1.5rem !important;
   }
 
   .apps-grid-section {

@@ -14,6 +14,7 @@ export default [
     icon: { icon: 'mdi-shopping-search', size: 20 },
     itemClass: 'nav-marketplace-promoted',
     to: 'marketplace',
+    exact: true,
   },
   {
     title: 'menu.application.marketplaceGames',

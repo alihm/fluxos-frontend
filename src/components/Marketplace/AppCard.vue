@@ -20,8 +20,20 @@
           </div>
 
           <div class="app-name-section">
-            <h3 class="app-name">{{ app.displayName || app.name }}</h3>
-            <div class="app-category">
+            <div class="app-name-row">
+              <h3 class="app-name">{{ parsedAppName.cleanName }}</h3>
+              <VChip
+                v-for="(tag, index) in parsedAppName.networkTags"
+                :key="index"
+                size="x-small"
+                color="warning"
+                variant="tonal"
+                class="network-chip"
+              >
+                {{ tag }}
+              </VChip>
+            </div>
+            <div class="app-tags">
               <VChip
                 size="x-small"
                 color="grey"
@@ -29,6 +41,16 @@
                 class="category-chip"
               >
                 {{ categoryName }}
+              </VChip>
+              <VChip
+                v-for="(tag, index) in parsedAppName.hardwareTags"
+                :key="index"
+                size="x-small"
+                color="info"
+                variant="tonal"
+                class="hardware-chip"
+              >
+                {{ tag }}
               </VChip>
             </div>
           </div>
@@ -40,23 +62,25 @@
         <!-- Stats section (35px height) -->
         <div class="app-stats-section">
           <div class="stats-row">
+            <!-- Install count chip -->
             <VChip
               size="small"
-              color="primary"
-              variant="flat"
+              color="info"
+              variant="tonal"
               class="stat-chip"
             >
-              <VIcon start size="14">mdi-download</VIcon>
+              <VIcon icon="mdi-download" size="14" />
               {{ formatNumber(app.installCount || 0) }}
             </VChip>
+
+            <!-- Price chip -->
             <VChip
               size="small"
               color="success"
               variant="tonal"
-              class="stat-chip"
+              class="price-chip"
             >
-              <VIcon start size="14">mdi-currency-usd</VIcon>
-              {{ formatPrice(app.price) }}
+              ${{ formatPrice(app.price) }}
             </VChip>
           </div>
         </div>
@@ -127,6 +151,70 @@ const categoryName = computed(() => {
   return category ? category.name : t('components.marketplace.appCard.defaultCategory')
 })
 
+// Parse hardware info from app name
+const parsedAppName = computed(() => {
+  const fullName = props.app.displayName || props.app.name || ''
+
+  console.log('🔍 Parsing app name:', fullName)
+
+  const hardwareTags = []
+  const networkTags = []
+  let cleanName = fullName
+
+  // Pattern 1: Match hardware in brackets/parentheses like (4CPU, 8GB RAM), [2 vCPU, 4GB]
+  const bracketPattern = /[\[(]([^)\]]*(?:cpu|ram|gb|mb|vcpu|core)[^)\]]*)[\])]/gi
+  const bracketMatches = fullName.match(bracketPattern)
+
+  if (bracketMatches) {
+    console.log('📊 Found hardware in brackets:', bracketMatches)
+    cleanName = cleanName.replace(bracketPattern, '').trim()
+
+    bracketMatches.forEach(match => {
+      const content = match.replace(/[\[\]()]/g, '').trim()
+      const specs = content.split(/[,;]/).map(s => s.trim()).filter(s => s)
+      hardwareTags.push(...specs)
+    })
+  }
+
+  // Pattern 2: Match hardware directly in name like "16GB RAM", "24GB", "4 vCPU", "8 CPU"
+  // This matches: number + optional space + (GB|MB|CPU|vCPU|Core) + optional "RAM"
+  const directPattern = /\b(\d+(?:\.\d+)?\s*(?:GB|MB|CPU|vCPU|Cores?|GHz)(?:\s+RAM)?)\b/gi
+  const directMatches = cleanName.match(directPattern)
+
+  if (directMatches) {
+    console.log('📊 Found hardware directly in name:', directMatches)
+
+    directMatches.forEach(match => {
+      cleanName = cleanName.replace(match, '').trim()
+      hardwareTags.push(match.trim())
+    })
+  }
+
+  // Pattern 3: Match network types like "Testnet", "Mainnet", "Test"
+  const networkPattern = /\b(Testnet|Mainnet|Test)\b/gi
+  const networkMatches = cleanName.match(networkPattern)
+
+  if (networkMatches) {
+    console.log('🌐 Found network type in name:', networkMatches)
+
+    networkMatches.forEach(match => {
+      cleanName = cleanName.replace(match, '').trim()
+      networkTags.push(match.trim())
+    })
+  }
+
+  // Clean up any double spaces
+  cleanName = cleanName.replace(/\s+/g, ' ').trim()
+
+  console.log('✅ Parsed result:', { cleanName, hardwareTags, networkTags })
+
+  return {
+    cleanName,
+    hardwareTags,
+    networkTags,
+  }
+})
+
 const navigateToApp = () => {
   // FluxCloud uses app.name.toLowerCase() for navigation
   const appIdentifier = props.app.name?.toLowerCase() || props.app.uuid
@@ -153,7 +241,7 @@ onMounted(() => {
     },
     {
       threshold: 0.1,
-      rootMargin: '50px',
+      rootMargin: '200px', // Load cards 200px before they enter viewport
     },
   )
 
@@ -183,14 +271,15 @@ onUnmounted(() => {
 
 /* Scroll reveal animation - triggers when card becomes visible */
 .app-card-wrapper.is-visible {
-  animation: fadeInUp 0.6s ease-out forwards;
-  animation-delay: calc(var(--animation-order) * 0.05s);
+  animation: fadeInUp 0.4s ease-out forwards;
+  /* Smart stagger: cap at 750ms max delay (15 cards * 0.05s) */
+  animation-delay: calc(min(var(--animation-order), 15) * 0.05s);
 }
 
 @keyframes fadeInUp {
   from {
     opacity: 0;
-    transform: translateY(30px) scale(0.95);
+    transform: translateY(25px) scale(0.98);
   }
   to {
     opacity: 1;
@@ -280,12 +369,12 @@ onUnmounted(() => {
   height: 100%;
 }
 
-/* Top section - Centered layout (87px height) */
+/* Top section - Left-aligned layout (87px height) */
 .app-top-section {
   height: 87px;
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   gap: 12px;
   padding: 0 16px;
 }
@@ -299,9 +388,16 @@ onUnmounted(() => {
   display: flex;
   flex-direction: column;
   justify-content: center;
+  align-items: flex-start;
+  gap: 6px;
+  text-align: left;
+}
+
+.app-name-row {
+  display: flex;
   align-items: center;
   gap: 6px;
-  text-align: center;
+  width: 100%;
 }
 
 .app-name {
@@ -312,19 +408,34 @@ onUnmounted(() => {
   overflow: hidden;
   text-overflow: ellipsis;
   line-height: 1.2;
-  max-width: 100%;
+  text-align: left;
 }
 
-.app-category {
+.app-tags {
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
+  gap: 4px;
+  flex-wrap: wrap;
 }
 
 .category-chip {
   font-size: 0.7rem !important;
   height: 18px !important;
   padding: 0 6px !important;
+}
+
+.hardware-chip {
+  font-size: 0.7rem !important;
+  height: 18px !important;
+  padding: 0 6px !important;
+}
+
+.network-chip {
+  font-size: 0.7rem !important;
+  height: 18px !important;
+  padding: 0 6px !important;
+  flex-shrink: 0;
 }
 
 .card-divider {
@@ -344,15 +455,17 @@ onUnmounted(() => {
 .stats-row {
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   gap: 12px;
 }
 
-.stat-chip {
+/* Stat chips styling */
+.stat-chip,
+.price-chip {
   font-size: 0.8rem !important;
   height: 24px !important;
-  border-radius: 12px !important;
   padding: 0 8px !important;
+  font-weight: 600 !important;
 }
 
 /* Description section - FluxCloud style (flexible height) */

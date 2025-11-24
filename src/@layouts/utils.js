@@ -63,7 +63,15 @@ export const isNavLinkActive = (link, router) => {
   const resolveRoutedName = resolveNavLinkRouteName(link, router)
   if (!resolveRoutedName)
     return false
-  
+
+  // If exact match is required, only match the exact route name
+  if (link.exact) {
+    // Check only the current route name, not any parent routes
+    const currentRouteName = router.currentRoute.value.name
+    
+    return currentRouteName === resolveRoutedName || router.currentRoute.value.meta?.navActiveLink === resolveRoutedName
+  }
+
   return matchedRoutes.some(route => {
     return route.name === resolveRoutedName || route.meta.navActiveLink === resolveRoutedName
   })

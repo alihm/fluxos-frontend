@@ -1297,7 +1297,8 @@
         "install": "Install",
         "view": "View",
         "viewDetails": "View Details",
-        "noSponsoredApps": "No sponsored apps available"
+        "noSponsoredApps": "No sponsored apps available",
+        "free": "Free"
       },
       "newListedCard": {
         "title": "NEW LISTED APPLICATIONS",
@@ -1396,6 +1397,7 @@
         "twelveMonths": "12 Months",
         "showAdvanced": "Show Advanced",
         "configurationParameter": "Configuration parameter",
+        "containers": "Containers",
         "allSet": "All Set!",
         "noAdditionalConfig": "No additional configuration required",
         "deploymentLocation": "Deployment Location",

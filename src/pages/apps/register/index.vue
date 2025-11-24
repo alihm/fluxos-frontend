@@ -183,8 +183,8 @@ const networkDataLoading = ref(true)
 const heroSubtitle = computed(() =>
   t('pages.apps.register.landing.subtitle', {
     nodeCount: nodeCount.value.toLocaleString(),
-    countryCount: countryCount.value
-  })
+    countryCount: countryCount.value,
+  }),
 )
 
 // App types data
@@ -246,7 +246,7 @@ const benefits = computed(() => [
     color: 'info',
     title: t('pages.apps.register.landing.benefits.global.title'),
     description: t('pages.apps.register.landing.benefits.global.description', {
-      countryCount: countryCount.value
+      countryCount: countryCount.value,
     }),
   },
   {
@@ -382,7 +382,7 @@ const faqs = computed(() => [
     question: t('pages.apps.register.landing.faq.questions.whatIsFlux.question'),
     answer: t('pages.apps.register.landing.faq.questions.whatIsFlux.answer', {
       nodeCount: nodeCount.value.toLocaleString(),
-      countryCount: countryCount.value
+      countryCount: countryCount.value,
     }),
   },
   {
@@ -585,23 +585,29 @@ const fetchNetworkData = async () => {
     // Wait a bit for store to populate if needed
     if (serverLocations.fluxList.length === 0 && !serverLocations.lastFetched) {
       // Store hasn't loaded yet, wait for it
-      await new Promise(resolve => {
-        const unwatch = watch(
-          () => serverLocations.fluxList.length,
-          (length) => {
-            if (length > 0) {
-              unwatch()
-              resolve()
-            }
-          },
-          { immediate: true }
-        )
-        // Timeout after 5 seconds
-        setTimeout(() => {
-          unwatch()
-          resolve()
-        }, 5000)
-      })
+      try {
+        await new Promise((resolve, reject) => {
+          const unwatch = watch(
+            () => serverLocations.fluxList.length,
+            length => {
+              if (length > 0) {
+                unwatch()
+                resolve()
+              }
+            },
+            { immediate: true },
+          )
+
+          // Timeout after 5 seconds
+          setTimeout(() => {
+            unwatch()
+            reject(new Error('Timeout waiting for server locations to load'))
+          }, 5000)
+        })
+      } catch (error) {
+        console.warn('Failed to load server locations:', error.message)
+        // Continue anyway - page will use fallback values
+      }
     }
 
     // Update node count from store
@@ -622,11 +628,12 @@ const fetchNetworkData = async () => {
         nodeCount: nodeCount.value,
         countryCount: countryCount.value,
         totalFluxNodes: serverLocations.fluxList.length,
-        uniqueCountries: Array.from(countries).sort()
+        uniqueCountries: Array.from(countries).sort(),
       })
     }
   } catch (error) {
     console.error('Error loading network data from store:', error)
+
     // Keep default fallback values on error
   } finally {
     networkDataLoading.value = false
@@ -729,7 +736,7 @@ onMounted(async () => {
   try {
     await Promise.all([
       calculateFluxCloudPrice(),
-      fetchNetworkData()
+      fetchNetworkData(),
     ])
   } catch (error) {
     console.error('Error loading data:', error)
