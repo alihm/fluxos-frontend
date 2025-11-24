@@ -5,9 +5,102 @@
 <script setup>
 import LandingServices from "@/components/LandingServices.vue"
 import { useI18n } from "vue-i18n"
-import { computed } from "vue"
+import { useHead } from '@vueuse/head'
 
 const { t } = useI18n()
+
+// SEO meta tags
+const title = 'FluxCloud - Decentralized Web3 Cloud Infrastructure'
+const description = 'Deploy apps on FluxCloud\'s decentralized Web3 infrastructure. Host games, WordPress, custom apps on 8,000+ FluxNodes worldwide. From $0.99/month.'
+const pageUrl = 'https://home.runonflux.io/'
+const imageUrl = 'https://home.runonflux.io/logo.png'
+
+// Structured data schemas
+const structuredData = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'Organization',
+    name: 'Flux Network',
+    url: 'https://home.runonflux.io',
+    logo: 'https://home.runonflux.io/logo.png',
+    description: 'Decentralized Web3 cloud infrastructure powered by FluxNodes worldwide',
+    sameAs: [
+      'https://twitter.com/RunOnFlux',
+      'https://github.com/RunOnFlux',
+    ],
+  },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
+    name: 'FluxCloud',
+    url: 'https://home.runonflux.io',
+    description: description,
+    publisher: {
+      '@type': 'Organization',
+      name: 'Flux Network',
+      logo: {
+        '@type': 'ImageObject',
+        url: 'https://home.runonflux.io/logo.png',
+      },
+    },
+  },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'Service',
+    serviceType: 'Cloud Hosting',
+    provider: {
+      '@type': 'Organization',
+      name: 'Flux Network',
+    },
+    areaServed: 'Worldwide',
+    description: 'Decentralized cloud hosting for games, WordPress, and custom applications',
+    offers: {
+      '@type': 'Offer',
+      price: '0.99',
+      priceCurrency: 'USD',
+      priceSpecification: {
+        '@type': 'UnitPriceSpecification',
+        price: '0.99',
+        priceCurrency: 'USD',
+        unitText: 'monthly',
+      },
+    },
+  },
+]
+
+useHead({
+  title,
+  meta: [
+    { name: 'description', content: description },
+    { name: 'keywords', content: 'decentralized cloud, Web3 hosting, blockchain infrastructure, FluxNodes, decentralized apps, game server hosting, WordPress hosting, docker hosting, container hosting, affordable cloud hosting' },
+
+    // Open Graph
+    { property: 'og:title', content: title },
+    { property: 'og:description', content: description },
+    { property: 'og:image', content: imageUrl },
+    { property: 'og:url', content: pageUrl },
+    { property: 'og:type', content: 'website' },
+    { property: 'og:site_name', content: 'FluxCloud' },
+    { property: 'og:locale', content: 'en_US' },
+
+    // Twitter
+    { name: 'twitter:card', content: 'summary_large_image' },
+    { name: 'twitter:title', content: title },
+    { name: 'twitter:description', content: description },
+    { name: 'twitter:image', content: imageUrl },
+    { name: 'twitter:site', content: '@RunOnFlux' },
+    { name: 'twitter:creator', content: '@RunOnFlux' },
+  ],
+  link: [
+    { rel: 'canonical', href: pageUrl },
+  ],
+  script: [
+    {
+      type: 'application/ld+json',
+      children: JSON.stringify(structuredData),
+    },
+  ],
+})
 
 const sections = computed(() => [
   {

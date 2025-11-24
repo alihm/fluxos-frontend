@@ -2,7 +2,7 @@
   <VCard
     v-if="!isHidden"
     icon="mdi-server"
-    class="rounded-xl elevation-4 mb-6 pa-2"
+    class="rounded elevation-4 mb-0 pa-2 statusbar-card"
     style="width: 100%; position: relative;"
   >
     <VTooltip location="left">
@@ -156,6 +156,33 @@
           </span>
         </span>
       </div>
+
+      <!-- Manage Cookies -->
+      <div
+        v-if="windowWidth >= 768"
+        class="d-inline-flex align-center"
+      >
+        <VTooltip location="top">
+          <template #activator="{ props }">
+            <span
+              class="d-inline-flex align-center cursor-pointer"
+              style="position: relative"
+              v-bind="props"
+              @click="openCookieSettings"
+            >
+              <VIcon
+                size="20"
+                class="me-2"
+              >mdi-cookie-settings</VIcon>
+            </span>
+          </template>
+          <span>{{ t("core.statusBar.manageCookiesTooltip") }}</span>
+        </VTooltip>
+        <span
+          class="cursor-pointer"
+          @click="openCookieSettings"
+        >{{ t("common.cookieConsent.manageCookies") }}</span>
+      </div>
     </div>
   </VCard>
 </template>
@@ -202,6 +229,12 @@ const handleStatusBarToggle = event => {
 }
 
 window.addEventListener('statusbar-toggle', handleStatusBarToggle)
+
+// Function to open cookie settings
+const openCookieSettings = () => {
+  // Dispatch custom event that CookieConsent.vue will listen to
+  window.dispatchEvent(new CustomEvent('open-cookie-settings'))
+}
 
 
 

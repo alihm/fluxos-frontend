@@ -31,11 +31,10 @@
                 :key="app.uuid || app.name"
                 class="sponsored-app"
                 variant="outlined"
-                @click="navigateToApp(app)"
               >
                 <div class="sponsored-badge">
-                  <div>
-                    <VIcon size="12" color="#FFD700">mdi-star</VIcon>
+                  <div :style="badgeStyle">
+                    <VIcon size="12" class="star-icon" :style="starStyle">mdi-star</VIcon>
                     {{ labels.sponsored }}
                   </div>
                 </div>
@@ -46,28 +45,40 @@
                       <AppIcon :app="app" :size="48" sponsored :star-index="index" />
                     </div>
                     <div class="app-info">
-                      <h3 class="app-name">{{ app.displayName || app.name }}</h3>
-                      <div class="app-actions">
-                        <VBtn
-                          color="primary"
-                          variant="flat"
+                      <h3 class="app-name">{{ cleanAppName(app) }}</h3>
+
+                      <!-- Stats row -->
+                      <div class="app-stats">
+                        <!-- Install count -->
+                        <div v-if="app.installCount" class="stat-item">
+                          <VIcon icon="mdi-download" size="13" color="grey-darken-1" />
+                          <span class="stat-value">{{ formatInstallCount(app.installCount) }}</span>
+                        </div>
+
+                        <!-- Price -->
+                        <VChip
+                          :color="app.price > 0 ? 'success' : 'primary'"
                           size="x-small"
-                          class="action-btn"
-                          @click.stop="deployApp(app)"
+                          variant="tonal"
+                          class="price-chip"
                         >
-                          {{ labels.install }}
-                        </VBtn>
-                        <VBtn
-                          color="primary"
-                          variant="outlined"
-                          size="x-small"
-                          class="action-btn"
-                          @click.stop="navigateToApp(app)"
-                        >
-                          {{ labels.view }}
-                        </VBtn>
+                          {{ app.price > 0 ? `$${app.price}` : labels.free }}
+                        </VChip>
                       </div>
                     </div>
+                  </div>
+                  <div class="sponsored-action">
+                    <VBtn
+                      color="primary"
+                      variant="flat"
+                      size="x-small"
+                      rounded="pill"
+                      class="sponsored-view-btn"
+                      @click.stop="navigateToApp(app)"
+                    >
+                      <VIcon start size="13">mdi-eye</VIcon>
+                      {{ labels.viewDetails }}
+                    </VBtn>
                   </div>
                 </div>
               </VCard>
@@ -114,9 +125,20 @@ const { formatNumber } = useMarketplaceUtils()
 
 const labels = computed(() => ({
   sponsored: t('components.marketplace.sponsoredCard.sponsored'),
-  install: t('components.marketplace.sponsoredCard.install'),
-  view: t('components.marketplace.sponsoredCard.view'),
   noSponsoredApps: t('components.marketplace.sponsoredCard.noSponsoredApps'),
+  viewDetails: t('components.marketplace.sponsoredCard.viewDetails'),
+  free: t('components.marketplace.sponsoredCard.free'),
+}))
+
+// Badge styling - inline to ensure it overrides everything
+const badgeStyle = computed(() => ({
+  background: 'rgb(var(--v-theme-primary))',
+  color: '#ffffff',
+  fontWeight: '600',
+}))
+
+const starStyle = computed(() => ({
+  color: '#FFD700 !important',
 }))
 
 // Auto-sliding carousel state
@@ -143,17 +165,13 @@ const displayApps = computed(() => {
 // Dynamic items per slide based on minimum card width
 const itemsPerSlide = computed(() => {
   const minCardWidth3 = 280 // Minimum for 3 items
-  const minCardWidth2 = 250 // Higher minimum for 2 items to force 2→1 transition at ~600px
+  const minCardWidth2 = 200 // Minimum for 2 items (allow 2 on mobile)
+  const minCardWidth1 = 180 // Minimum for 1 item
   const gapSize = 12 // Gap between cards
   const containerPadding = 32 // Left + right padding
 
   // Calculate available width accounting for padding
   const availableWidth = width.value - containerPadding
-
-  // Force 1 item below 600px to match your requirement
-  if (width.value <= 600) {
-    return 1
-  }
 
   // Test 3 items first
   const totalGapWidth3 = 2 * gapSize // 2 gaps for 3 items
@@ -221,8 +239,37 @@ const navigateToApp = app => {
   router.push(`/marketplace/${app.uuid || app.name}`)
 }
 
-const deployApp = app => {
-  router.push(`/marketplace/${app.uuid || app.name}`)
+// Parse and clean app name (remove hardware and network info)
+const cleanAppName = app => {
+  const fullName = app.displayName || app.name || ''
+  let cleanName = fullName
+
+  // Remove hardware in brackets/parentheses
+  cleanName = cleanName.replace(/[\[(]([^)\]]*(?:cpu|ram|gb|mb|vcpu|core)[^)\]]*)[\])]/gi, '').trim()
+
+  // Remove inline hardware specs
+  cleanName = cleanName.replace(/\b(\d+(?:\.\d+)?\s*(?:GB|MB|CPU|vCPU|Cores?|GHz)(?:\s+RAM)?)\b/gi, '').trim()
+
+  // Remove network types
+  cleanName = cleanName.replace(/\b(Testnet|Mainnet|Test)\b/gi, '').trim()
+
+  // Clean up double spaces
+  cleanName = cleanName.replace(/\s+/g, ' ').trim()
+
+  return cleanName
+}
+
+// Format install count for display
+const formatInstallCount = count => {
+  if (!count) return '0'
+  if (count >= 1000000) {
+    return (count / 1000000).toFixed(1) + 'M'
+  }
+  if (count >= 1000) {
+    return (count / 1000).toFixed(1) + 'K'
+  }
+
+  return count.toString()
 }
 
 // FluxCloud auto-sliding functionality
@@ -250,6 +297,9 @@ const stopAutoSlide = () => {
 
 // Watch for data changes to restart slider
 watch([displayApps, itemsPerSlide], () => {
+  // Reset current slide to 0 when layout changes to prevent out-of-bounds
+  currentSlide.value = 0
+
   // Restart auto-slide when data or layout changes
   setTimeout(startAutoSlide, 500)
 }, { immediate: false })
@@ -268,12 +318,12 @@ onUnmounted(() => {
 <style scoped>
 .sponsored-card {
   border-radius: 12px;
-  height: 125px;
-  min-height: 125px;
-  max-height: 125px;
+  height: 163px;
+  min-height: 163px;
+  max-height: 163px;
   display: flex;
   flex-direction: column;
-  overflow: hidden;
+  overflow: visible;
 }
 
 .card-title {
@@ -289,9 +339,9 @@ onUnmounted(() => {
 }
 
 .card-content {
-  padding: 8px 16px 12px 16px;
+  padding: 14px 16px 12px 16px;
   flex: 1;
-  overflow: hidden;
+  overflow: visible;
 }
 
 .loading-container,
@@ -352,14 +402,16 @@ onUnmounted(() => {
   position: relative;
   flex: 1;
   height: 100%;
-  overflow: hidden;
+  overflow-x: clip;
+  overflow-y: visible;
   width: 100%;
 }
 
 .sponsored-window {
   border-radius: 8px;
   height: 100%;
-  overflow: hidden;
+  overflow-x: clip;
+  overflow-y: visible;
 }
 
 .sponsored-window .v-window__container {
@@ -376,13 +428,14 @@ onUnmounted(() => {
 .sponsored-grid {
   display: grid !important;
   gap: 12px;
-  padding: 4px;
+  padding: 12px 8px 12px 8px;
   width: 100%;
   box-sizing: border-box;
   justify-content: center;
   justify-items: center;
   align-items: center;
   place-items: center;
+  overflow-y: visible;
   /* grid-template-columns set by JavaScript inline style */
 }
 
@@ -399,10 +452,10 @@ onUnmounted(() => {
   cursor: pointer;
   transition: all 0.3s ease;
   border: 1px solid #e0e0e0;
-  height: 95px;
-  min-height: 95px;
-  max-height: 95px;
-  overflow: hidden;
+  height: 115px;
+  min-height: 115px;
+  max-height: 115px;
+  overflow: visible;
   display: flex;
   flex-direction: column;
   width: 100%;
@@ -416,39 +469,63 @@ onUnmounted(() => {
 }
 
 .sponsored-app:hover .sponsored-badge > div {
-  border-color: #bdbdbd !important;
-  box-shadow: 0 4px 12px rgba(255, 255, 255, 0.6) !important,
-              inset 0 1px 0 rgba(255, 255, 255, 0.7) !important;
-  text-shadow: 0 0 8px rgba(255, 255, 255, 0.9) !important;
-  background: linear-gradient(145deg, rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0.2)) !important;
+  transform: scale(1.02);
+  box-shadow: 0 3px 10px rgba(var(--v-theme-primary), 0.4);
 }
 
 .sponsored-badge {
   position: absolute;
-  top: 0;
-  right: 0;
+  top: -12px;
+  left: 50%;
+  transform: translateX(-50%);
   display: flex;
-  justify-content: flex-end;
-  z-index: 1;
+  justify-content: center;
+  z-index: 2;
 }
 
+/* Light theme - Blue background with white text - Enhanced visibility */
 .sponsored-badge > div {
-  background: linear-gradient(145deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.1));
-  color: #e0e0e0;
-  border: 1px solid #e0e0e0;
-  border-top: none;
-  border-right: none;
-  padding: 2px 8px;
-  border-radius: 0 8px 0 8px;
-  font-size: 0.65rem;
+  background: rgb(var(--v-theme-primary));
+  color: #ffffff;
+  border: 2px solid rgba(var(--v-theme-primary), 1);
+  padding: 3px 12px;
+  border-radius: 20px;
+  font-size: 0.7rem;
   font-weight: 600;
   display: flex;
   align-items: center;
-  gap: 2px;
+  gap: 3px;
+  box-shadow: 0 3px 12px rgba(var(--v-theme-primary), 0.5),
+              0 1px 4px rgba(0, 0, 0, 0.15);
+  line-height: 1.3;
+  height: 20px;
+}
+
+/* Star icon styling - Light theme */
+.sponsored-badge .star-icon {
+  color: #FFD700;
+}
+
+/* Dark theme adjustments */
+.v-theme--dark .sponsored-badge > div {
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.1));
+  color: #e0e0e0;
+  border-color: #e0e0e0;
   box-shadow: 0 2px 8px rgba(255, 255, 255, 0.3),
               inset 0 1px 0 rgba(255, 255, 255, 0.4);
-  backdrop-filter: blur(5px);
   text-shadow: 0 0 4px rgba(255, 255, 255, 0.5);
+}
+
+.v-theme--dark .sponsored-badge .star-icon {
+  color: #FFD700;
+}
+
+.v-theme--dark .sponsored-app:hover .sponsored-badge > div {
+  border-color: #bdbdbd;
+  box-shadow: 0 4px 12px rgba(255, 255, 255, 0.6),
+              inset 0 1px 0 rgba(255, 255, 255, 0.7);
+  text-shadow: 0 0 8px rgba(255, 255, 255, 0.9);
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0.2));
 }
 
 .app-body {
@@ -456,67 +533,92 @@ onUnmounted(() => {
   flex: 1;
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  justify-content: space-between;
 }
 
 .app-content {
   display: flex;
   align-items: center;
-  height: 65px; /* Adjusted internal row height */
-  padding: 0 8px; /* FluxCloud left/right content padding */
-  gap: 12px; /* Space between icon and text */
+  justify-content: flex-start;
+  padding: 0 12px;
+  gap: 8px;
+  flex: 1;
+}
+
+.sponsored-action {
+  padding: 2px 8px 0 8px;
+  display: flex;
+  justify-content: center;
+}
+
+.sponsored-view-btn {
+  height: 22px !important;
+  min-width: 100px !important;
+  font-size: 0.65rem !important;
+  font-weight: 600 !important;
+  text-transform: none !important;
+  transition: all 0.3s ease !important;
+  padding: 0 12px !important;
+}
+
+.sponsored-view-btn:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 8px rgba(var(--v-theme-primary), 0.3);
 }
 
 .icon-section {
-  width: 48px; /* Adjusted for smaller icon */
+  width: 48px;
   flex-shrink: 0;
 }
 
 .app-info {
-  flex: 1;
-  padding: 2px;
   display: flex;
   flex-direction: column;
   justify-content: center;
-  min-width: 0;
-  gap: 6px;
+  align-items: flex-start;
+  text-align: left;
 }
 
 .app-name {
-  font-size: 0.9rem;
-  font-weight: 600;
+  font-size: 1.1rem;
+  font-weight: 700;
   margin: 0;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  line-height: 1.2;
+  line-height: 1.3;
+  max-width: 100%;
+}
+
+.app-stats {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 2px;
+}
+
+.stat-item {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.stat-value {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: rgba(var(--v-theme-on-surface), 0.7);
+}
+
+.price-chip {
+  height: 20px !important;
+  font-size: 0.7rem !important;
+  font-weight: 600 !important;
 }
 
 .spacer {
-  width: 16px; /* Reduced spacer width */
+  width: 16px;
   flex-shrink: 0;
-}
-
-.app-actions {
-  display: flex;
-  flex-direction: row;
-  gap: 6px;
-  align-items: center;
-  flex-wrap: nowrap;
-}
-
-.action-btn {
-  height: 24px !important;
-  font-size: 0.6rem !important;
-  font-weight: 600 !important;
-  color: white !important;
-  min-width: 50px !important;
-  padding: 0 6px !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  line-height: 1 !important;
-  border-radius: 12px !important;
 }
 
 
@@ -531,6 +633,10 @@ onUnmounted(() => {
     padding: 6px 16px 16px 16px;
   }
 
+  .sponsored-grid {
+    padding: 16px 8px 18px 8px !important;
+  }
+
   .sponsored-app {
     height: 120px;
   }
@@ -539,8 +645,26 @@ onUnmounted(() => {
     padding: 10px;
   }
 
+  .app-content {
+    justify-content: flex-start;
+  }
+
+  .app-info {
+    align-items: flex-start;
+    text-align: left;
+  }
+
+  .app-name {
+    font-size: 0.8rem;
+  }
+
   .app-desc {
     -webkit-line-clamp: 1;
+  }
+
+  .sponsored-action {
+    justify-content: center;
+    padding-right: 0;
   }
 
   .nav-btn {

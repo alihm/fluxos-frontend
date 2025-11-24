@@ -623,6 +623,7 @@ const emailLoginFormRef = ref(null)
 
 const modalShow = ref(false)
 const ssoVerification = ref(false)
+const ssoProvider = ref('email') // Track which SSO provider is being used
 const loginPhrase = ref("")
 const currentTab = ref("one")
 const websocket = ref(null)
@@ -667,8 +668,8 @@ const backendURL = ref(localStorage.getItem("backendURL") || getDetectedBackendU
 
 const callbackValue = computed(() => encodeURI(`${backendURL.value}/id/verifylogin`))
 
-const handleSignInSuccessWithAuthResult = authResult => {
-  if (authResult.user) handleSignedInUser(authResult.user)
+const handleSignInSuccessWithAuthResult = (authResult, provider = 'email') => {
+  if (authResult.user) handleSignedInUser(authResult.user, provider)
 
   return false
 }
@@ -677,7 +678,7 @@ const loginWithGoogleBtn = async () => {
   try {
     const result = await loginWithGoogle()
 
-    handleSignInSuccessWithAuthResult(result)
+    handleSignInSuccessWithAuthResult(result, 'google')
   } catch (e) {
     showToast("error", t("core.login.googleError") || e.message)
   }
@@ -687,7 +688,7 @@ const loginWithAppleBtn = async () => {
   try {
     const result = await loginWithApple()
 
-    handleSignInSuccessWithAuthResult(result)
+    handleSignInSuccessWithAuthResult(result, 'apple')
   } catch (e) {
     showToast("error", t("core.login.appleError") || e.message)
   }
@@ -708,6 +709,8 @@ const isMMSDKInitialized = ref(false)
 // }
 
 const login = () => {
+  const analytics = useAnalytics()
+
   IDService.verifyLogin(loginForm.value)
     .then(response => {
       if (response.data.status === "success") {
@@ -720,19 +723,31 @@ const login = () => {
         fluxStore.setPrivilege(response.data.data.privilage)
         fluxStore.setZelid(zelidauth.zelid)
         localStorage.setItem("zelidauth", qs.stringify(zelidauth))
+
+        // Track successful ZelID authentication
+        analytics.trackAuth('zelid', true)
+
         emit('loginSuccess')
         showToast("success", response.data.data.message)
       } else {
+        // Track failed authentication
+        analytics.trackAuth('zelid', false)
         showToast(response.data.status, response.data.data.message || response.data.data)
       }
     })
     .catch(e => {
+      // Track authentication error
+      const analytics = useAnalytics()
+      analytics.trackAuth('zelid', false)
       showToast("error", e.toString())
     })
 }
 
-const handleSignedInUser = async user => {
+const handleSignedInUser = async (user, provider = 'email') => {
   try {
+    // Store provider for use in checkVerification
+    ssoProvider.value = provider
+
     if (user.emailVerified) {
       showSsoLoggedIn.value = true
 
@@ -768,10 +783,19 @@ const handleSignedInUser = async user => {
         fluxStore.setZelid(authLogin.zelid)
         localStorage.setItem('loginType', 'sso')
         localStorage.setItem("zelidauth", qs.stringify(authLogin))
+
+        // Track successful SSO authentication with specific provider
+        const analytics = useAnalytics()
+        analytics.trackAuth(provider, true)
+
         showSsoLoggedIn.value = false
         emit('loginSuccess')
         showToast("success", response.data.data.message)
       } else {
+        // Track failed SSO authentication
+        const analytics = useAnalytics()
+        analytics.trackAuth(provider, false)
+
         showToast("error", response.data.data.message || response.data.data)
         resetLoginUI()
       }
@@ -804,7 +828,9 @@ const checkVerification = async () => {
         showEmailVerify.value = false
         ssoVerification.value = false
         await nextTick()
-        handleSignedInUser(user)
+
+        // Use the stored provider from the original login attempt
+        handleSignedInUser(user, ssoProvider.value)
       } else {
         setTimeout(checkVerification, 5000)
       }
@@ -1026,6 +1052,11 @@ const initWalletConnect = async () => {
       fluxStore.setZelid(walletConnectInfo.zelid)
       localStorage.setItem('loginType', 'walletconnect')
       localStorage.setItem("zelidauth", qs.stringify(walletConnectInfo))
+
+      // Track successful WalletConnect authentication
+      const analytics = useAnalytics()
+      analytics.trackAuth('walletconnect', true)
+
       emit('loginSuccess')
       showToast("success", response.data.data.message)
 
@@ -1033,6 +1064,11 @@ const initWalletConnect = async () => {
       // closeWalletConnect()
     } else {
       console.log('[Login] ❌ Login failed:', response.data.data.message || response.data.data)
+
+      // Track failed WalletConnect authentication
+      const analytics = useAnalytics()
+      analytics.trackAuth('walletconnect', false)
+
       showToast(response.data.status, response.data.data.message || response.data.data)
     }
   } catch (error) {
@@ -1070,9 +1106,17 @@ const initMetamask = async () => {
       fluxStore.setZelid(metamaskLogin.zelid)
       localStorage.setItem("loginType", 'metamask')
       localStorage.setItem("zelidauth", qs.stringify(metamaskLogin))
+
+      // Track successful MetaMask authentication
+      const analytics = useAnalytics()
+      analytics.trackAuth('metamask', true)
+
       emit('loginSuccess')
       showToast("success", response.data.data.message)
     } else {
+      // Track failed MetaMask authentication
+      const analytics = useAnalytics()
+      analytics.trackAuth('metamask', false)
       showToast(response.data.status, response.data.data.message || response.data.data)
     }
   } catch (error) {
@@ -1107,9 +1151,18 @@ const initSSP = async () => {
       fluxStore.setZelid(sspLogin.zelid)
       localStorage.setItem("loginType", 'ssp')
       localStorage.setItem("zelidauth", qs.stringify(sspLogin))
+
+      // Track successful SSP authentication
+      const analytics = useAnalytics()
+      analytics.trackAuth('ssp', true)
+
       emit('loginSuccess')
       showToast("success", response.data.data.message)
     } else {
+      // Track failed SSP authentication
+      const analytics = useAnalytics()
+      analytics.trackAuth('ssp', false)
+
       showToast(response.data.status, response.data.data.message || response.data.data)
     }
   } catch (error) {

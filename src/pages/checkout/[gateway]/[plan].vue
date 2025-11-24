@@ -4,10 +4,10 @@
       <!-- Header Section -->
       <div class="text-center mb-8">
         <h1 class="text-h3 font-weight-bold mb-4">
-          <span class="text-primary">Flux Drive</span> Checkout
+          <span class="text-primary">{{ t('pages.checkout.header.title') }}</span> {{ t('pages.checkout.title') }}
         </h1>
         <p class="text-h6 text-medium-emphasis">
-          Complete your subscription to unlock decentralized storage
+          {{ t('pages.checkout.header.subtitle') }}
         </p>
       </div>
 
@@ -17,7 +17,7 @@
         <VCol cols="12" md="4">
           <VCard class="h-100">
             <VCardTitle class="text-h5 pa-6 pb-4">
-              Order Summary
+              {{ t('pages.checkout.orderSummary.title') }}
             </VCardTitle>
 
             <VCardText class="pa-6 pt-0">
@@ -38,7 +38,7 @@
                   <div>
                     <h3 class="text-h5">{{ selectedPlan.name }}</h3>
                     <p class="text-body-2 text-medium-emphasis mb-0">
-                      {{ selectedPlan.storage }} Storage
+                      {{ selectedPlan.storage }} {{ t('common.labels.storage') }}
                     </p>
                   </div>
                 </div>
@@ -46,22 +46,22 @@
                 <VDivider class="mb-4" />
 
                 <div class="d-flex justify-space-between mb-2">
-                  <span>Plan</span>
+                  <span>{{ t('pages.checkout.orderSummary.plan') }}</span>
                   <span class="font-weight-medium">{{ selectedPlan.name }}</span>
                 </div>
                 <div class="d-flex justify-space-between mb-2">
-                  <span>Storage</span>
+                  <span>{{ t('pages.checkout.orderSummary.storage') }}</span>
                   <span>{{ selectedPlan.storage }}</span>
                 </div>
                 <div class="d-flex justify-space-between mb-2">
-                  <span>Billing</span>
-                  <span>Monthly</span>
+                  <span>{{ t('pages.checkout.orderSummary.billing') }}</span>
+                  <span>{{ t('pages.checkout.orderSummary.monthly') }}</span>
                 </div>
 
                 <VDivider class="my-4" />
 
                 <div class="d-flex justify-space-between text-h6 font-weight-bold">
-                  <span>Total</span>
+                  <span>{{ t('pages.checkout.orderSummary.total') }}</span>
                   <span class="text-primary">{{ selectedPlan.pricePerMonth }}</span>
                 </div>
               </div>
@@ -69,17 +69,17 @@
               <!-- Current Subscription (if exists) -->
               <div v-if="currentSubscription && currentSubscription.plan_name" class="mt-6">
                 <VDivider class="mb-4" />
-                <h4 class="text-h6 mb-3">Current Plan</h4>
+                <h4 class="text-h6 mb-3">{{ t('pages.checkout.orderSummary.currentPlan') }}</h4>
                 <div class="d-flex justify-space-between mb-2">
-                  <span>Plan</span>
+                  <span>{{ t('pages.checkout.orderSummary.plan') }}</span>
                   <span>{{ currentSubscription.plan_name }}</span>
                 </div>
                 <div class="d-flex justify-space-between mb-2">
-                  <span>Storage</span>
-                  <span>{{ currentSubscription.storage }} GB</span>
+                  <span>{{ t('pages.checkout.orderSummary.storage') }}</span>
+                  <span>{{ currentSubscription.storage }} {{ t('common.units.gb') }}</span>
                 </div>
                 <div class="d-flex justify-space-between mb-2">
-                  <span>Status</span>
+                  <span>{{ t('pages.checkout.orderSummary.status') }}</span>
                   <VChip
                     :color="currentSubscription.payment_status === 'active' ? 'success' : 'warning'"
                     size="small"
@@ -97,13 +97,13 @@
                   width="3"
                   color="primary"
                 />
-                <p class="text-body-2 mt-3">Loading plan details...</p>
+                <p class="text-body-2 mt-3">{{ t('pages.checkout.loading.planDetails') }}</p>
               </div>
 
               <!-- No plan data (only show if not loading and no plan) -->
               <div v-else-if="!selectedPlan && !loading" class="text-center py-8">
                 <VIcon icon="mdi-alert-circle-outline" size="48" class="mb-3 text-warning" />
-                <p class="text-body-1">Unable to load plan details</p>
+                <p class="text-body-1">{{ t('pages.checkout.loading.unableToLoad') }}</p>
               </div>
             </VCardText>
           </VCard>
@@ -113,7 +113,7 @@
         <VCol cols="12" md="8">
           <VCard>
             <VCardTitle class="text-h5 pa-6 pb-4">
-              Payment Method
+              {{ t('pages.checkout.paymentMethod.title') }}
             </VCardTitle>
 
             <VCardText class="pa-6 pt-0">
@@ -142,11 +142,11 @@
                     max-height="20"
                     class="me-2"
                   />
-                  Flux Pay
+                  {{ t('pages.checkout.paymentMethod.fluxPay') }}
                 </VTab>
                 <VTab value="cryptocom">
                   <VIcon icon="mdi-credit-card" class="me-2" />
-                  Crypto.com
+                  {{ t('pages.checkout.paymentMethod.cryptoCom') }}
                 </VTab>
               </VTabs>
 
@@ -163,20 +163,20 @@
                           class="mx-auto mb-4 rounded"
                         />
 
-                        <h3 class="text-h5 mb-2">Pay with Flux</h3>
+                        <h3 class="text-h5 mb-2">{{ t('pages.checkout.fluxPay.title') }}</h3>
                         <p class="text-body-1 text-medium-emphasis mb-6">
-                          Secure payment using your Zelcore wallet
+                          {{ t('pages.checkout.fluxPay.subtitle') }}
                         </p>
 
                         <!-- Payment Details -->
                         <div v-if="fluxPayment" class="mb-6">
                           <VAlert type="info" class="mb-4 text-start">
                             <div class="d-flex justify-space-between">
-                              <span>Amount:</span>
+                              <span>{{ t('pages.checkout.fluxPay.amount') }}</span>
                               <span class="font-weight-bold">{{ fluxPayment.amount }} FLUX</span>
                             </div>
                             <div class="d-flex justify-space-between">
-                              <span>USD Value:</span>
+                              <span>{{ t('pages.checkout.fluxPay.usdValue') }}</span>
                               <span>${{ fluxPayment.usdValue }}</span>
                             </div>
                           </VAlert>
@@ -193,7 +193,7 @@
                             @click="initializeFluxPayment"
                           >
                             <VIcon icon="mdi-wallet" class="me-2" />
-                            Open Zelcore Wallet
+                            {{ t('pages.checkout.fluxPay.openWallet') }}
                           </VBtn>
 
                           <VBtn
@@ -204,7 +204,7 @@
                             loading
                           >
                             <VIcon icon="mdi-clock-outline" class="me-2" />
-                            Waiting for Payment...
+                            {{ t('pages.checkout.fluxPay.waitingForPayment') }}
                           </VBtn>
 
                           <VBtn
@@ -215,7 +215,7 @@
                             block
                             @click="cancelPayment"
                           >
-                            Cancel Payment
+                            {{ t('pages.checkout.fluxPay.cancelPayment') }}
                           </VBtn>
                         </div>
                       </div>
@@ -234,9 +234,9 @@
                           class="mx-auto mb-4"
                         />
 
-                        <h3 class="text-h5 mb-2">Pay with Crypto.com</h3>
+                        <h3 class="text-h5 mb-2">{{ t('pages.checkout.cryptoCom.title') }}</h3>
                         <p class="text-body-1 text-medium-emphasis mb-6">
-                          Recurring subscription via Crypto.com Pay
+                          {{ t('pages.checkout.cryptoCom.subtitle') }}
                         </p>
 
                         <VBtn
@@ -247,7 +247,7 @@
                           @click="initializeCryptoComPayment"
                         >
                           <VIcon icon="mdi-credit-card" class="me-2" />
-                          Continue with Crypto.com
+                          {{ t('pages.checkout.cryptoCom.continue') }}
                         </VBtn>
                       </div>
                     </VCardText>
@@ -266,9 +266,9 @@
           <div class="d-flex align-center">
             <VIcon icon="mdi-shield-check" color="success" class="me-3" size="24" />
             <div>
-              <h4 class="text-h6 mb-1">Secure Payment</h4>
+              <h4 class="text-h6 mb-1">{{ t('pages.checkout.security.title') }}</h4>
               <p class="text-body-2 text-medium-emphasis mb-0">
-                Your payment information is encrypted and secure. We never store your payment details.
+                {{ t('pages.checkout.security.message') }}
               </p>
             </div>
           </div>
@@ -281,10 +281,16 @@
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { useFluxStore } from '@/stores/flux'
 import { useSnackbar } from '@/composables/useSnackbar'
+import { useSEONoIndex } from '@/composables/useSEO'
 import qs from 'qs'
 
+// Prevent indexing of checkout/payment pages (security best practice)
+useSEONoIndex()
+
+const { t } = useI18n()
 const route = useRoute()
 const router = useRouter()
 const fluxStore = useFluxStore()
@@ -333,8 +339,8 @@ const loadSubscriptionData = async () => {
   try {
     const zelidauth = localStorage.getItem('zelidauth')
     if (!zelidauth) {
-      showAlert('Authentication required')
-      
+      showAlert(t('pages.checkout.messages.authenticationRequired'))
+
       return
     }
 
@@ -349,7 +355,7 @@ const loadSubscriptionData = async () => {
 
     if (!auth.zelid || !auth.signature || !auth.loginPhrase) {
       console.error('LoadSubscriptionData - Missing auth fields')
-      showAlert('Invalid authentication data format')
+      showAlert(t('pages.checkout.messages.invalidAuthData'))
 
       return
     }
@@ -415,12 +421,12 @@ const loadSubscriptionData = async () => {
       console.log('Selected plan set:', selectedPlan.value)
     } else {
       console.warn('No new_plan in response, full response:', result)
-      showAlert('Plan details not available')
+      showAlert(t('pages.checkout.messages.planDetailsNotAvailable'))
     }
 
   } catch (error) {
     console.error('Subscription load error:', error)
-    showAlert(`Failed to load subscription data: ${error.message}`)
+    showAlert(`${t('pages.checkout.messages.subscriptionLoadFailed')}: ${error.message}`)
   } finally {
     loading.value = false
   }
@@ -439,8 +445,8 @@ const showAlert = (message, type = 'error') => {
 
 const initializeFluxPayment = async () => {
   if (!isLoggedIn.value) {
-    showAlert('Please login first', 'warning')
-    
+    showAlert(t('pages.checkout.messages.pleaseLoginFirst'), 'warning')
+
     return
   }
 
@@ -449,15 +455,15 @@ const initializeFluxPayment = async () => {
   try {
     const zelidauth = localStorage.getItem('zelidauth')
     if (!zelidauth) {
-      showAlert('Authentication required')
-      
+      showAlert(t('pages.checkout.messages.authenticationRequired'))
+
       return
     }
 
     const auth = qs.parse(zelidauth)
     if (!auth.zelid || !auth.signature || !auth.loginPhrase) {
-      showAlert('Invalid authentication data')
-      
+      showAlert(t('pages.checkout.messages.invalidAuth'))
+
       return
     }
 
@@ -493,10 +499,10 @@ const initializeFluxPayment = async () => {
       // Start monitoring payment
       monitorPayment(result.payment_id)
     } else {
-      showAlert(result.error || 'Failed to initialize payment')
+      showAlert(result.error || t('pages.checkout.messages.paymentFailed'))
     }
   } catch (error) {
-    showAlert('Payment initialization failed. Please try again.')
+    showAlert(t('pages.checkout.messages.paymentInitFailed'))
     console.error('Payment error:', error)
   } finally {
     initializingPayment.value = false
@@ -505,8 +511,8 @@ const initializeFluxPayment = async () => {
 
 const initializeCryptoComPayment = async () => {
   if (!isLoggedIn.value) {
-    showAlert('Please login first', 'warning')
-    
+    showAlert(t('pages.checkout.messages.pleaseLoginFirst'), 'warning')
+
     return
   }
 
@@ -515,15 +521,15 @@ const initializeCryptoComPayment = async () => {
   try {
     const zelidauth = localStorage.getItem('zelidauth')
     if (!zelidauth) {
-      showAlert('Authentication required')
-      
+      showAlert(t('pages.checkout.messages.authenticationRequired'))
+
       return
     }
 
     const auth = qs.parse(zelidauth)
     if (!auth.zelid || !auth.signature || !auth.loginPhrase) {
-      showAlert('Invalid authentication data')
-      
+      showAlert(t('pages.checkout.messages.invalidAuth'))
+
       return
     }
 
@@ -547,10 +553,10 @@ const initializeCryptoComPayment = async () => {
       // Redirect to Crypto.com checkout
       window.location.href = result.checkout_url
     } else {
-      showAlert(result.error || 'Failed to initialize Crypto.com payment')
+      showAlert(result.error || t('pages.checkout.messages.cryptoComPaymentFailed'))
     }
   } catch (error) {
-    showAlert('Crypto.com payment initialization failed. Please try again.')
+    showAlert(t('pages.checkout.messages.cryptoComInitFailed'))
     console.error('Crypto.com error:', error)
   } finally {
     initializingPayment.value = false
@@ -576,7 +582,7 @@ const monitorPayment = async paymentId => {
 
       if (result.status === 'completed') {
         paymentProcessing.value = false
-        showSnackbar(t('pages.checkoutContent.messages.paymentSuccessfulRedirecting'), 'success')
+        showSnackbar(t('pages.checkout.messages.paymentSuccessfulRedirecting'), 'success')
 
         // Refresh user data and redirect to FluxDrive
         await fluxStore.refreshUserData()
@@ -585,7 +591,7 @@ const monitorPayment = async paymentId => {
         }, 2000)
       } else if (result.status === 'failed') {
         paymentProcessing.value = false
-        showAlert('Payment failed. Please try again.')
+        showAlert(t('pages.checkout.messages.paymentFailedRetry'))
       } else if (paymentProcessing.value) {
         // Continue monitoring
         setTimeout(checkPayment, 3000)
@@ -616,7 +622,7 @@ watch(isLoggedIn, newValue => {
     loadSubscriptionData()
   } else {
     // User logged out - show warning
-    showAlert('Please login to continue with your purchase', 'warning')
+    showAlert(t('pages.checkout.messages.pleaseLoginToContinue'), 'warning')
     loading.value = false
   }
 })
@@ -630,6 +636,14 @@ onMounted(async () => {
     // Default to fluxpay if invalid gateway
     activePaymentMethod.value = 'fluxpay'
   }
+
+  // Track payment system selection
+  const analytics = useAnalytics()
+  analytics.trackPaymentSystemSelected(activePaymentMethod.value, {
+    plan: planId.value,
+    plan_name: selectedPlan.value?.name,
+    price: selectedPlan.value?.pricePerMonth,
+  })
 
   // Check if user is logged in and restore zelid if needed
   const zelidauth = localStorage.getItem('zelidauth')
@@ -666,12 +680,35 @@ onMounted(async () => {
     console.log('Loading subscription data')
     loadSubscriptionData()
   } else if (!zelidauth) {
-    showAlert('Please login to continue with your purchase', 'warning')
+    showAlert(t('pages.checkout.messages.pleaseLoginToContinue'), 'warning')
     loading.value = false
   } else {
     // We have zelidauth but no zelid - shouldn't happen but handle it
-    showAlert('Session expired. Please login again.', 'warning')
+    showAlert(t('pages.checkout.messages.sessionExpired'), 'warning')
     loading.value = false
+  }
+})
+
+// Track when user manually switches payment method
+let initialPaymentMethodSet = false
+watch(activePaymentMethod, (newMethod, oldMethod) => {
+  // Skip the first watch trigger (from onMounted)
+  if (!initialPaymentMethodSet) {
+    initialPaymentMethodSet = true
+    
+    return
+  }
+
+  // Only track if user actually changed it (not initial load)
+  if (oldMethod && newMethod !== oldMethod) {
+    const analytics = useAnalytics()
+    analytics.trackPaymentSystemSelected(newMethod, {
+      plan: planId.value,
+      plan_name: selectedPlan.value?.name,
+      price: selectedPlan.value?.pricePerMonth,
+      previous_method: oldMethod,
+      user_changed: true,
+    })
   }
 })
 </script>

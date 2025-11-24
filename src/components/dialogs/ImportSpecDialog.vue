@@ -210,9 +210,6 @@ import { ref, watch, computed } from 'vue'
 import { useTheme } from 'vuetify'
 import { useI18n } from 'vue-i18n'
 import yaml from 'js-yaml'
-import { VueMonacoEditor } from '@guolao/vue-monaco-editor'
-import LoadingSpinner from '@/components/Marketplace/LoadingSpinner.vue'
-import { convertToLatestVersion } from '@/utils/specConverter'
 
 const props = defineProps({
   modelValue: {
@@ -220,8 +217,14 @@ const props = defineProps({
     required: true,
   },
 })
-
 const emit = defineEmits(['update:modelValue', 'import'])
+
+// Lazy-load Monaco Editor to reduce main bundle size
+const VueMonacoEditor = defineAsyncComponent(() =>
+  import('@guolao/vue-monaco-editor').then(m => m.VueMonacoEditor),
+)
+import LoadingSpinner from '@/components/Marketplace/LoadingSpinner.vue'
+import { convertToLatestVersion } from '@/utils/specConverter'
 
 const { t } = useI18n()
 

@@ -1,5 +1,28 @@
 <template>
   <div>
+    <!-- Flux Cloud Info Card -->
+    <VCard class="mb-4 management-intro-card">
+      <VCardText>
+        <div class="d-flex align-center mb-3">
+          <VAvatar
+            size="48"
+            color="primary"
+            variant="tonal"
+            class="mr-3"
+          >
+            <VIcon size="28">mdi-cloud-check-outline</VIcon>
+          </VAvatar>
+          <div>
+            <h2 class="text-h4 mb-1">{{ t('myApps.fluxCloudTitle') }}</h2>
+            <p class="text-body-2 mb-0 text-medium-emphasis">{{ t('myApps.fluxCloudSubtitle') }}</p>
+          </div>
+        </div>
+        <p class="text-body-1 mb-0">
+          {{ t('myApps.fluxCloudDescription') }}
+        </p>
+      </VCardText>
+    </VCard>
+
     <VTabs
       v-model="tabIndex"
       grow
@@ -108,7 +131,25 @@ import { decryptEnterpriseWithAes, encryptAesKeyWithRsaKey, importRsaPublicKey, 
 import { storeToRefs } from "pinia"
 import { useFluxStore } from "@/stores/flux"
 
+// SEO
+import { useSEO, generateOrganizationSchema, generateBreadcrumbSchema } from '@/composables/useSEO'
+
 const { t } = useI18n()
+
+// SEO configuration
+useSEO({
+  title: 'My Applications - Manage FluxCloud Apps | FluxCloud',
+  description: 'Manage your deployed applications on Flux decentralized cloud. View app status, monitor performance, update configurations, and manage your FluxCloud deployments from a unified dashboard.',
+  url: 'https://home.runonflux.io/apps/management',
+  keywords: 'manage apps, FluxCloud dashboard, app management, deployed apps, monitor apps, app status, flux applications, container management, cloud dashboard',
+  structuredData: [
+    generateOrganizationSchema(),
+    generateBreadcrumbSchema([
+      { name: 'Home', url: 'https://home.runonflux.io' },
+      { name: 'My Applications', url: 'https://home.runonflux.io/apps/management' },
+    ]),
+  ],
+})
 
 const fluxStore = useFluxStore()
 const { privilege } = storeToRefs(fluxStore)
@@ -446,6 +487,38 @@ onMounted(async () => {
   /* Optional: reduce tab content padding */
   .v-tab {
     padding: 0 6px !important;
+  }
+}
+
+/* Management intro card styling */
+.management-intro-card {
+  border-radius: 16px !important;
+  border: 1px solid rgba(var(--v-theme-on-surface), 0.12) !important;
+  box-shadow: none !important;
+}
+
+.management-intro-card h2 {
+  line-height: 1.2;
+  word-break: keep-all;
+}
+
+/* Mobile responsive adjustments */
+@media (max-width: 599px) {
+  .management-intro-card h2 {
+    font-size: 1.5rem !important;
+  }
+
+  .management-intro-card .v-avatar {
+    width: 48px !important;
+    height: 48px !important;
+  }
+
+  .management-intro-card .v-icon {
+    font-size: 24px !important;
+  }
+
+  .management-intro-card .v-card-text {
+    padding: 16px !important;
   }
 }
 </style>

@@ -356,7 +356,7 @@
           class="my-4"
         >
           <div class="text-caption">
-            <div><strong>Debug Info:</strong></div>
+            <div><strong>{{ t('components.fluxDrive.fileManager.debugInfo') }}</strong></div>
             <div>Files array length: {{ files.length }}</div>
             <div>Loading: {{ loading }}</div>
             <div>Current folder: {{ currentFolder }}</div>
@@ -414,7 +414,7 @@
           type="info"
           class="my-4"
         >
-          <div><strong>Display Logic Debug:</strong></div>
+          <div><strong>{{ t('components.fluxDrive.fileManager.displayLogicDebug') }}</strong></div>
           <div>loading: {{ loading }}</div>
           <div>files.length: {{ files?.length || 0 }}</div>
           <div>resultMessage: {{ !!resultMessage }}</div>
@@ -1665,10 +1665,10 @@
           <VTextField
             v-model="versionComment"
             :label="t('components.fluxDrive.fileManager.versionComment')"
-            placeholder="e.g., Bug fixes, new features..."
+            :placeholder="t('components.fluxDrive.fileManager.versionCommentPlaceholder')"
             prepend-icon="mdi-comment-text"
             :counter="100"
-            :rules="[(v) => !v || v.length <= 100 || 'Comment must be less than 100 characters']"
+            :rules="[(v) => !v || v.length <= 100 || t('components.fluxDrive.fileManager.commentValidation')]"
             class="mt-4"
           />
 
@@ -1811,12 +1811,16 @@ import { useI18n } from 'vue-i18n'
 import { useFluxDrive } from '@/composables/useFluxDrive'
 import PricingPlans from '@/components/FluxDrive/PricingPlans.vue'
 import VersionsDialog from '@/components/FluxDrive/VersionsDialog.vue'
-import { VueMonacoEditor } from '@guolao/vue-monaco-editor'
-import ClipboardJS from 'clipboard'
-import LoadingSpinner from '@/components/Marketplace/LoadingSpinner.vue'
 
 // Define emit for FileManager
 const emit = defineEmits(['select-plan', 'selectPlan'])
+
+// Lazy-load Monaco Editor to reduce main bundle size
+const VueMonacoEditor = defineAsyncComponent(() =>
+  import('@guolao/vue-monaco-editor').then(m => m.VueMonacoEditor),
+)
+import ClipboardJS from 'clipboard'
+import LoadingSpinner from '@/components/Marketplace/LoadingSpinner.vue'
 
 // Initialize i18n
 const { t } = useI18n()

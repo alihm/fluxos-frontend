@@ -1,5 +1,5 @@
 <script setup>
-import navItems from "@/navigation/horizontal"
+import navItemsRaw from "@/navigation/horizontal"
 import { themeConfig } from "@themeConfig"
 
 // Components
@@ -20,7 +20,7 @@ import { useLoginSheet } from '@/composables/useLoginSheet'
 import { useFluxStore } from "@/stores/flux"
 import { storeToRefs } from "pinia"
 import { useI18n } from "vue-i18n"
-import { ref } from "vue"
+import { ref, computed, watch, onMounted } from "vue"
 
 // Global snackbar
 const { snackbar } = useSnackbar()
@@ -33,7 +33,48 @@ const { t } = useI18n()
 
 // Flux store
 const fluxStore = useFluxStore()
-const { privilege } = storeToRefs(fluxStore)
+const { privilege, hasUserApps, isUserAppsChecked } = storeToRefs(fluxStore)
+
+// Computed navItems that filters "My Applications" based on login and app ownership
+const navItems = computed(() => {
+  return navItemsRaw.filter(item => {
+    // Filter out "My Applications" if user is not logged in or has no apps
+    if (item.to === 'apps-management') {
+      // Show only if user is logged in AND has apps (or check hasn't completed yet)
+      if (privilege.value === 'none') {
+        return false // Not logged in, don't show
+      }
+
+      // If we haven't checked yet, show the menu item to avoid flashing
+      if (!isUserAppsChecked.value) {
+        return true
+      }
+
+      // Show only if user has apps
+      return hasUserApps.value
+    }
+
+    return true
+  })
+})
+
+// Check user apps when privilege changes (login/logout)
+watch(privilege, (newPrivilege, oldPrivilege) => {
+  if (newPrivilege !== 'none' && newPrivilege !== oldPrivilege) {
+    // User logged in, check their apps
+    fluxStore.checkUserApps()
+  } else if (newPrivilege === 'none') {
+    // User logged out, reset apps state
+    fluxStore.resetUserApps()
+  }
+})
+
+// Check user apps on mount if already logged in
+onMounted(() => {
+  if (privilege.value !== 'none') {
+    fluxStore.checkUserApps()
+  }
+})
 
 // Customizer ref to open from navbar
 const customizerRef = ref(null)
@@ -46,6 +87,9 @@ const openCustomizer = event => {
 
 const handleLoginSuccess = () => {
   closeLoginBottomSheet()
+
+  // Check user apps after successful login
+  fluxStore.checkUserApps()
 }
 </script>
 

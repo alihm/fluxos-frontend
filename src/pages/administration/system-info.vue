@@ -248,6 +248,7 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { useSEONoIndex } from '@/composables/useSEO'
 import { useSnackbar } from '@/composables/useSnackbar'
 import BenchmarkService from '@/services/BenchmarkService'
 import FluxService from '@/services/FluxService'
@@ -256,6 +257,9 @@ import LoadingSpinner from '@/components/Marketplace/LoadingSpinner.vue'
 import MaintenanceCard from '@/components/Marketplace/MaintenanceCard.vue'
 import fluxLogo from '/images/logo.png?url'
 import syncthingLogo from '/images/syncthing-logo.png?url'
+
+// Prevent indexing of system info admin page (private admin data)
+useSEONoIndex()
 
 const { t } = useI18n()
 const { showSnackbar } = useSnackbar()

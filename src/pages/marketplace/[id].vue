@@ -293,6 +293,54 @@
           </div>
         </div>
       </div>
+
+      <!-- Why Host on Flux Cloud Section -->
+      <FeatureShowcase
+        :title="t('pages.apps.register.landing.benefits.title')"
+        :items="whyFluxBenefits"
+        :icon-size="40"
+        grid-min-width="300px"
+        class="why-flux-section"
+      />
+
+      <!-- Trustpilot Reviews Section -->
+      <div class="trustpilot-wrapper">
+        <TrustpilotPanel use-live-data :star-size="32" show-rating-label />
+      </div>
+
+      <!-- Global Server Network Section -->
+      <ServerLocationsPanel
+        :panel="serverLocationsPanel"
+        :app="app"
+        class="network-section"
+      />
+
+      <!-- Frequently Asked Questions Section -->
+      <VCard class="faq-section">
+        <VCardText class="pa-6">
+          <h2 class="faq-title">{{ t('pages.marketplace.common.genericFAQ.title') }}</h2>
+          <p class="faq-subtitle">{{ t('pages.marketplace.common.genericFAQ.subtitle') }}</p>
+
+          <VExpansionPanels class="faq-expansion-panels" multiple>
+            <VExpansionPanel
+              v-for="(faq, index) in genericFAQs"
+              :key="index"
+              class="faq-expansion-panel"
+              elevation="0"
+            >
+              <VExpansionPanelTitle class="faq-question">
+                <div class="question-wrapper">
+                  <VIcon icon="mdi-help-circle" size="24" color="primary" class="question-icon" />
+                  <h3 class="question-text">{{ faq.q }}</h3>
+                </div>
+              </VExpansionPanelTitle>
+              <VExpansionPanelText class="faq-answer">
+                <div v-html="sanitizeAnswer(faq.a)"></div>
+              </VExpansionPanelText>
+            </VExpansionPanel>
+          </VExpansionPanels>
+        </VCardText>
+      </VCard>
     </div>
 
     <!-- Image Viewer Dialog -->
@@ -317,6 +365,7 @@
         <!-- Image -->
         <img
           :src="selectedImage"
+          :alt="`${app.displayName || app.name} - Screenshot`"
           class="image-viewer-img"
           style="max-width: calc(100vw - 48px); max-height: calc(100vh - 48px); object-fit: contain; display: block;"
         />
@@ -337,12 +386,19 @@
 import { ref, onMounted, computed, watch, nextTick } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
+import { useSEO, generateBreadcrumbSchema } from '@/composables/useSEO'
+import DOMPurify from 'dompurify'
 import { useMarketplace } from '@/composables/useMarketplace'
+import { useFluxStore } from '@/stores/flux'
 import LoadingSpinner from '@/components/Marketplace/LoadingSpinner.vue'
 import AppIcon from '@/components/Marketplace/AppIcon.vue'
 import InstallDialog from '@/components/Marketplace/InstallDialog.vue'
+import FeatureShowcase from '@/components/FeatureShowcase.vue'
+import ServerLocationsPanel from '@/components/Marketplace/Panels/ServerLocationsPanel.vue'
+import TrustpilotPanel from '@/components/Marketplace/Panels/TrustpilotPanel.vue'
 
-const { t } = useI18n()
+const i18n = useI18n()
+const { t, tm, te } = i18n
 
 const route = useRoute()
 const router = useRouter()
@@ -363,14 +419,174 @@ const showImageViewer = computed({
   },
 })
 
+// Network data
+const nodeCount = ref(8000) // Default fallback
+const countryCount = ref(63) // Default fallback
+
+// Server Locations Panel Configuration
+const serverLocationsPanel = {
+  enabled: true,
+  title: 'i18n:pages.apps.register.landing.serverNetwork.title',
+  subtitle: 'i18n:pages.apps.register.landing.serverNetwork.subtitle',
+}
+
+// Why Flux Benefits data (using i18n translations like register page)
+const whyFluxBenefits = computed(() => [
+  {
+    icon: 'mdi-shield-check',
+    color: 'success',
+    title: t('pages.apps.register.landing.benefits.decentralized.title'),
+    description: t('pages.apps.register.landing.benefits.decentralized.description'),
+  },
+  {
+    icon: 'mdi-currency-usd-off',
+    color: 'warning',
+    title: t('pages.apps.register.landing.benefits.affordable.title'),
+    description: t('pages.apps.register.landing.benefits.affordable.description'),
+  },
+  {
+    icon: 'mdi-web',
+    color: 'info',
+    title: t('pages.apps.register.landing.benefits.global.title'),
+    description: t('pages.apps.register.landing.benefits.global.description', {
+      countryCount: countryCount.value,
+    }),
+  },
+  {
+    icon: 'mdi-scale-balance',
+    color: 'primary',
+    title: t('pages.apps.register.landing.benefits.censorship.title'),
+    description: t('pages.apps.register.landing.benefits.censorship.description'),
+  },
+  {
+    icon: 'mdi-chart-line',
+    color: 'success',
+    title: t('pages.apps.register.landing.benefits.scalable.title'),
+    description: t('pages.apps.register.landing.benefits.scalable.description'),
+  },
+  {
+    icon: 'mdi-lock-open',
+    color: 'error',
+    title: t('pages.apps.register.landing.benefits.noVendor.title'),
+    description: t('pages.apps.register.landing.benefits.noVendor.description'),
+  },
+  {
+    icon: 'mdi-cash-refund',
+    color: 'success',
+    title: t('pages.apps.register.landing.benefits.guarantee.title'),
+    description: t('pages.apps.register.landing.benefits.guarantee.description'),
+  },
+  {
+    icon: 'mdi-domain',
+    color: 'info',
+    title: t('pages.apps.register.landing.benefits.freeDomain.title'),
+    description: t('pages.apps.register.landing.benefits.freeDomain.description'),
+  },
+  {
+    icon: 'mdi-swap-horizontal',
+    color: 'primary',
+    title: t('pages.apps.register.landing.benefits.loadBalancer.title'),
+    description: t('pages.apps.register.landing.benefits.loadBalancer.description'),
+  },
+])
+
 const validScreenshots = computed(() => {
   if (!app.value?.screenshots) return []
-  
+
   return app.value.screenshots.filter(image => !failedImages.value.has(image))
+})
+
+// Get app-specific pricing FAQ (using i18n translations)
+const appSpecificFAQs = computed(() => {
+  if (!app.value) return []
+
+  const appName = app.value.displayName || app.value.name
+  const appPrice = app.value.price || 0
+  const priceText = appPrice > 0 ? `$${appPrice.toFixed(2)}` : 'free'
+
+  return [
+    {
+      q: t('pages.marketplace.common.appSpecificFAQ.pricingQuestion', { appName }),
+      a: appPrice > 0
+        ? t('pages.marketplace.common.appSpecificFAQ.pricingAnswerPaid', { appName, priceText })
+        : t('pages.marketplace.common.appSpecificFAQ.pricingAnswerFree', { appName }),
+    },
+  ]
+})
+
+// Get Generic FAQ questions from i18n (with pricing question prepended)
+const genericFAQs = computed(() => {
+  const key = 'pages.marketplace.common.genericFAQ.questions'
+
+  // Try direct access via locale messages
+  let questions = null
+  try {
+    const locale = i18n.locale.value
+    const parts = key.split('.')
+    let value = i18n.messages.value[locale]
+
+    for (const part of parts) {
+      if (value && typeof value === 'object') {
+        value = value[part]
+      } else {
+        break
+      }
+    }
+
+    questions = value
+  } catch (e) {
+    console.error('Error loading questions:', e)
+  }
+
+  let questionsArray = []
+
+  // Convert to array and unwrap proxy objects
+  if (questions && typeof questions === 'object') {
+    questionsArray = Array.isArray(questions) ? questions : Object.values(questions)
+
+    // Deep clone to unwrap all proxies
+    try {
+      questionsArray = JSON.parse(JSON.stringify(questionsArray))
+    } catch (e) {
+      console.error('Error parsing questions:', e)
+      questionsArray = []
+    }
+
+    // Extract actual string values from compiled i18n message objects
+    questionsArray = questionsArray.map(faq => {
+      const extractString = obj => {
+        if (typeof obj === 'string') return obj
+        if (obj && typeof obj === 'object') {
+          return obj.body?.static || obj.loc?.source || obj.static || JSON.stringify(obj)
+        }
+        
+        return String(obj)
+      }
+
+      return {
+        q: extractString(faq.q),
+        a: extractString(faq.a),
+      }
+    })
+  }
+
+  // Prepend pricing FAQ as the first question
+  if (app.value && appSpecificFAQs.value.length > 0) {
+    return [...appSpecificFAQs.value, ...questionsArray]
+  }
+
+  return questionsArray
 })
 
 const handleImageError = image => {
   failedImages.value.add(image)
+}
+
+const sanitizeAnswer = answer => {
+  return DOMPurify.sanitize(answer, {
+    ALLOWED_TAGS: ['p', 'br', 'strong', 'em', 'ul', 'ol', 'li', 'a', 'code'],
+    ALLOWED_ATTR: ['href', 'target', 'rel'],
+  })
 }
 
 
@@ -506,6 +722,18 @@ const handleAppDeployed = deployedApp => {
   // Handle successful deployment
   console.log('App deployed successfully:', deployedApp.displayName || deployedApp.name)
 
+  // Track successful app deployment
+  const analytics = useAnalytics()
+  analytics.trackAppAction(
+    deployedApp.displayName || deployedApp.name,
+    'deploy',
+    {
+      app_id: deployedApp.id,
+      category: deployedApp.category,
+      source: 'marketplace',
+    },
+  )
+
   // Show success notification or redirect to apps management
   // Could also update the UI to show "Manage" instead of "Install"
 }
@@ -520,7 +748,7 @@ const loadAppDetails = async () => {
   if (!appId) {
     localLoading.value = false
     router.push('/marketplace')
-    
+
     return
   }
 
@@ -539,11 +767,180 @@ const loadAppDetails = async () => {
   }
 }
 
+// Fetch network data from Pinia store (no API call needed)
+const fetchNetworkData = async () => {
+  try {
+    // Get data from Pinia store (already fetched in App.vue)
+    const fluxStore = useFluxStore()
+    const { serverLocations } = fluxStore
+
+    // Wait a bit for store to populate if needed
+    if (serverLocations.fluxList.length === 0 && !serverLocations.lastFetched) {
+      // Store hasn't loaded yet, wait for it
+      await new Promise(resolve => {
+        const unwatch = watch(
+          () => serverLocations.fluxList.length,
+          length => {
+            if (length > 0) {
+              unwatch()
+              resolve()
+            }
+          },
+          { immediate: true },
+        )
+
+        // Timeout after 5 seconds
+        setTimeout(() => {
+          unwatch()
+          resolve()
+        }, 5000)
+      })
+    }
+
+    // Update node count from store
+    if (serverLocations.fluxNodeCount > 0) {
+      nodeCount.value = serverLocations.fluxNodeCount
+    }
+
+    // Calculate country count from store data
+    if (serverLocations.fluxList.length > 0) {
+      const countries = new Set()
+      serverLocations.fluxList.forEach(flux => {
+        if (flux.geolocation?.country) {
+          countries.add(flux.geolocation.country)
+        }
+      })
+      countryCount.value = countries.size
+      console.log('✅ Network data loaded from store:', {
+        nodeCount: nodeCount.value,
+        countryCount: countryCount.value,
+      })
+    }
+  } catch (error) {
+    console.error('Error loading network data from store:', error)
+
+    // Keep default fallback values on error
+  }
+}
 
 // Watch for route changes (immediate: true handles initial load)
 watch(() => route.params.id, loadAppDetails, { immediate: true })
 
-onMounted(() => {
+// Dynamic SEO meta tags and structured data using computed
+const seoTitle = computed(() => {
+  if (!app.value) return 'Flux Cloud Marketplace'
+  
+  return `${app.value.displayName || app.value.name} - Flux Cloud Marketplace`
+})
+
+const seoDescription = computed(() => {
+  if (!app.value) return 'Flux Cloud Marketplace - Decentralized cloud hosting'
+  
+  return app.value.description || `Deploy ${app.value.displayName || app.value.name} on Flux Cloud. Decentralized cloud hosting with global infrastructure, 99.9% uptime, and affordable pricing.`
+})
+
+const seoImage = computed(() => {
+  if (!app.value) return 'https://home.runonflux.io/flux-logo.png'
+  
+  return app.value.icon || app.value.logo || 'https://home.runonflux.io/flux-logo.png'
+})
+
+const seoUrl = computed(() => `https://home.runonflux.io/marketplace/${route.params.id}`)
+
+const seoKeywords = computed(() => {
+  if (!app.value) return 'Flux, cloud hosting, decentralized hosting, Web3, blockchain hosting'
+  
+  return `${app.value.displayName || app.value.name}, Flux, cloud hosting, decentralized hosting, Web3, blockchain hosting`
+})
+
+// Structured data as computed refs
+const structuredData = computed(() => {
+  if (!app.value) return []
+
+  const newApp = app.value
+
+  // Build SoftwareApplication schema
+  const productStructuredData = {
+    '@context': 'https://schema.org',
+    '@type': 'SoftwareApplication',
+    'name': newApp.displayName || newApp.name,
+    'description': seoDescription.value,
+    'applicationCategory': 'WebApplication',
+    'operatingSystem': 'Web',
+    'offers': {
+      '@type': 'Offer',
+      'price': newApp.price || 0,
+      'priceCurrency': 'USD',
+      'availability': 'https://schema.org/InStock',
+      'url': seoUrl.value,
+    },
+    'provider': {
+      '@type': 'Organization',
+      'name': 'Flux',
+      'url': 'https://runonflux.io',
+    },
+  }
+
+  // Add developer/company info if available
+  if (newApp.developer || newApp.company) {
+    productStructuredData.author = {
+      '@type': 'Organization',
+      'name': newApp.developer || newApp.company,
+    }
+  }
+
+  // Add rating if available
+  if (newApp.rating) {
+    productStructuredData.aggregateRating = {
+      '@type': 'AggregateRating',
+      'ratingValue': newApp.rating,
+      'ratingCount': 1,
+    }
+  }
+
+  // Breadcrumb schema
+  const breadcrumbStructuredData = generateBreadcrumbSchema([
+    { name: 'Home', url: 'https://home.runonflux.io' },
+    { name: 'Marketplace', url: 'https://home.runonflux.io/marketplace' },
+    { name: newApp.displayName || newApp.name, url: seoUrl.value },
+  ])
+
+  // FAQ schema (if FAQs exist)
+  const schemas = [productStructuredData, breadcrumbStructuredData]
+
+  if (genericFAQs.value.length > 0) {
+    const faqStructuredData = {
+      '@context': 'https://schema.org',
+      '@type': 'FAQPage',
+      'mainEntity': genericFAQs.value.map(faq => ({
+        '@type': 'Question',
+        'name': faq.q,
+        'acceptedAnswer': {
+          '@type': 'Answer',
+          'text': faq.a.replace(/<[^>]*>/g, ''), // Strip HTML tags for structured data
+        },
+      })),
+    }
+    schemas.push(faqStructuredData)
+  }
+
+  return schemas
+})
+
+// Apply SEO using useSEO composable (called once during setup, handles reactivity)
+useSEO({
+  title: seoTitle,
+  description: seoDescription,
+  url: seoUrl,
+  image: seoImage,
+  keywords: seoKeywords,
+  structuredData, // Computed ref - useSEO will handle reactivity
+})
+
+onMounted(async () => {
+  // Load network data for dynamic node/country counts
+  await fetchNetworkData()
+
   // Check if user came here with install intent
   if (route.query.action === 'install') {
     // Could show install dialog or scroll to install button
@@ -554,7 +951,7 @@ onMounted(() => {
 
 <style scoped>
 .app-details-container {
-  padding: 0 20px 20px 20px;
+  padding: 0 0 20px 0;
   max-width: 1200px;
   margin: 0 auto !important;
   min-height: 100vh;
@@ -1536,7 +1933,7 @@ onMounted(() => {
 
 /* Modern Card Styling */
 .v-card {
-  border-radius: 24px !important;
+  border-radius: 16px !important;
   box-shadow:
     0 8px 32px rgba(0, 0, 0, 0.08),
     0 4px 16px rgba(0, 0, 0, 0.04),
@@ -1564,6 +1961,16 @@ onMounted(() => {
   pointer-events: none;
 }
 
+/* Disable transitions and ::before for Trustpilot section */
+.trustpilot-wrapper .v-card {
+  transition: none !important;
+}
+
+.trustpilot-wrapper .v-card::before {
+  content: none !important;
+  display: none !important;
+}
+
 .v-card:hover {
   box-shadow:
     0 12px 48px rgba(0, 0, 0, 0.15),
@@ -1571,6 +1978,11 @@ onMounted(() => {
     0 3px 12px rgba(0, 0, 0, 0.04),
     0 0 0 1px rgba(var(--v-theme-primary), 0.1) !important;
   transform: translateY(-4px) scale(1.01);
+}
+
+/* Disable hover transform for Trustpilot section */
+.trustpilot-wrapper .v-card:hover {
+  transform: none !important;
 }
 
 /* Avatar Styling */
@@ -1688,7 +2100,7 @@ onMounted(() => {
 /* Responsive Design */
 @media (max-width: 960px) {
   .app-details-container {
-    padding: 16px;
+    padding: 16px 0;
   }
 
   .screenshot-card:hover {
@@ -1822,5 +2234,371 @@ onMounted(() => {
 /* Smooth Transitions */
 * {
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Global Server Network Section */
+.network-section {
+  grid-column: 1 / -1;
+  margin-top: 24px;
+}
+
+.network-section :deep(.v-card),
+.network-section :deep(.locations-card) {
+  border-radius: 16px !important;
+}
+
+.network-avatar {
+  background: linear-gradient(135deg, rgb(var(--v-theme-info)) 0%, rgb(var(--v-theme-primary)) 100%) !important;
+  box-shadow:
+    0 4px 12px rgba(var(--v-theme-info), 0.3),
+    0 2px 6px rgba(0, 0, 0, 0.1);
+  border: 2px solid rgba(var(--v-theme-info), 0.2);
+}
+
+.map-container {
+  position: relative;
+  min-height: 400px;
+  margin: 24px 0 32px 0;
+  border-radius: 12px;
+  overflow: hidden;
+  background: rgba(var(--v-theme-surface), 0.4);
+  border: 1px solid rgba(var(--v-theme-on-surface), 0.08);
+}
+
+.server-map {
+  border-radius: 12px;
+}
+
+.no-data {
+  text-align: center;
+  font-size: 1rem;
+  color: rgba(var(--v-theme-on-surface), 0.5);
+  padding: 60px 20px;
+}
+
+.stats-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px;
+  margin-top: 24px;
+}
+
+.stat-item {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 20px;
+  background: rgba(var(--v-theme-primary), 0.05);
+  border-radius: 12px;
+  border: 1px solid rgba(var(--v-theme-primary), 0.1);
+  transition: all 0.3s ease;
+}
+
+.stat-item:hover {
+  background: rgba(var(--v-theme-primary), 0.1);
+  border-color: rgba(var(--v-theme-primary), 0.2);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(var(--v-theme-primary), 0.15);
+}
+
+.stat-content {
+  flex: 1;
+}
+
+.stat-value {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: rgb(var(--v-theme-primary));
+  line-height: 1.2;
+}
+
+.stat-label {
+  font-size: 0.875rem;
+  color: rgba(var(--v-theme-on-surface), 0.7);
+  margin-top: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Why Flux Section */
+.why-flux-section {
+  grid-column: 1 / -1;
+  margin-top: 24px;
+}
+
+.why-flux-section :deep(.v-card),
+.why-flux-section :deep(.feature-showcase) {
+  border-radius: 16px !important;
+}
+
+.section-subtitle {
+  font-size: 1rem;
+  text-align: center;
+  margin-bottom: 32px;
+  opacity: 0.85;
+  line-height: 1.6;
+  color: rgba(var(--v-theme-on-surface), 0.8);
+}
+
+
+/* FAQ Section */
+.faq-section {
+  grid-column: 1 / -1;
+  margin-top: 24px;
+  border-radius: 16px !important;
+}
+
+.faq-title {
+  font-size: 28px;
+  font-weight: 700;
+  margin-top: 0.5rem;
+  margin-bottom: 0;
+  text-align: center;
+  color: rgb(var(--v-theme-on-surface));
+  line-height: 1.3;
+}
+
+.faq-subtitle {
+  font-size: 1.125rem;
+  text-align: center;
+  margin-bottom: 16px;
+  opacity: 0.9;
+  line-height: 1.6;
+}
+
+.faq-expansion-panels {
+  margin-top: 24px;
+}
+
+.faq-expansion-panel {
+  margin-bottom: 12px;
+  border-radius: 12px !important;
+  overflow: hidden;
+  background: rgba(var(--v-theme-surface), 0.8) !important;
+  border: 1px solid rgba(var(--v-theme-primary), 0.1);
+  transition: all 0.3s ease;
+}
+
+.faq-expansion-panel:hover {
+  border-color: rgba(var(--v-theme-primary), 0.3);
+  box-shadow: 0 4px 12px rgba(var(--v-theme-primary), 0.1);
+}
+
+.faq-expansion-panel:last-child {
+  margin-bottom: 0;
+}
+
+.faq-question {
+  font-weight: 600;
+  padding: 20px 24px;
+}
+
+.question-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+}
+
+.question-icon {
+  flex-shrink: 0;
+}
+
+.question-text {
+  font-size: 1.0625rem;
+  font-weight: 600;
+  line-height: 1.5;
+  margin: 0;
+  color: rgb(var(--v-theme-on-surface));
+}
+
+.faq-answer {
+  padding: 0 24px 20px 24px !important;
+  font-size: 1rem;
+  line-height: 1.7;
+  color: rgba(var(--v-theme-on-surface), 0.85);
+}
+
+.faq-answer :deep(p) {
+  margin-bottom: 12px;
+}
+
+.faq-answer :deep(p:last-child) {
+  margin-bottom: 0;
+}
+
+.faq-answer :deep(strong) {
+  font-weight: 600;
+  color: rgb(var(--v-theme-on-surface));
+}
+
+.faq-answer :deep(ul) {
+  list-style-type: disc;
+  margin-left: 0;
+  padding-left: 24px;
+  margin-bottom: 12px;
+}
+
+.faq-answer :deep(ol) {
+  list-style-type: decimal;
+  margin-left: 0;
+  padding-left: 24px;
+  margin-bottom: 12px;
+}
+
+.faq-answer :deep(li) {
+  margin-bottom: 8px;
+  padding-left: 4px;
+}
+
+.faq-answer :deep(a) {
+  color: rgb(var(--v-theme-on-surface));
+  text-decoration: none;
+}
+
+.faq-answer :deep(a:hover) {
+  text-decoration: underline;
+}
+
+.faq-answer :deep(code) {
+  background: rgba(var(--v-theme-primary), 0.1);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-family: 'Courier New', monospace;
+  font-size: 0.9em;
+}
+
+.benefits-avatar,
+.faq-avatar {
+  background: rgb(var(--v-theme-primary)) !important;
+  box-shadow:
+    0 4px 12px rgba(var(--v-theme-primary), 0.3),
+    0 2px 6px rgba(0, 0, 0, 0.1);
+  border: 2px solid rgba(var(--v-theme-primary), 0.2);
+}
+
+/* Responsive adjustments for new sections */
+@media (max-width: 960px) {
+  .map-container {
+    min-height: 300px;
+  }
+
+  .stats-container {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .stat-value {
+    font-size: 1.5rem;
+  }
+
+  .benefits-grid {
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 20px;
+  }
+
+  .benefit-item {
+    padding: 24px 20px;
+  }
+
+  .benefit-icon-wrapper {
+    width: 64px;
+    height: 64px;
+  }
+}
+
+@media (max-width: 600px) {
+  .map-container {
+    min-height: 250px;
+  }
+
+  .stat-item {
+    padding: 16px;
+  }
+
+  .stat-value {
+    font-size: 1.25rem;
+  }
+
+  .stat-label {
+    font-size: 0.75rem;
+  }
+
+  .benefits-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .benefit-item {
+    padding: 20px 16px;
+  }
+
+  .benefit-icon-wrapper {
+    width: 56px;
+    height: 56px;
+  }
+
+  .benefit-title {
+    font-size: 1rem;
+  }
+
+  .benefit-description {
+    font-size: 0.875rem;
+  }
+
+  .faq-question {
+    padding: 12px 16px;
+  }
+
+  .question-text {
+    font-size: 0.875rem;
+  }
+
+  .faq-answer {
+    padding: 0 16px 12px 16px !important;
+    font-size: 0.8125rem;
+  }
+}
+
+/* Trustpilot Section */
+.trustpilot-wrapper {
+  margin-top: 24px;
+}
+
+.trustpilot-wrapper :deep(.section-card.trustpilot-section) {
+  border-radius: 16px !important;
+}
+
+.trustpilot-wrapper :deep(.section-card.trustpilot-section)::before {
+  display: none !important;
+  content: none !important;
+}
+
+.trustpilot-wrapper :deep(.section-card.trustpilot-section):hover {
+  transform: none !important;
+}
+
+.trustpilot-wrapper :deep(.trustpilot-link) {
+  text-decoration: none;
+  color: inherit;
+  display: inline-block;
+}
+
+.trustpilot-wrapper :deep(.trustpilot-rating-container) {
+  cursor: pointer;
+}
+</style>
+
+<style>
+/* Fix Trustpilot section backdrop-filter blur effect on hover */
+.trustpilot-wrapper .v-card,
+.trustpilot-wrapper .v-card * {
+  backdrop-filter: none !important;
+}
+
+/* Fix Why Flux section border-radius */
+.why-flux-section .v-card,
+.why-flux-section .feature-showcase {
+  border-radius: 16px !important;
 }
 </style>

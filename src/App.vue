@@ -44,6 +44,14 @@ onMounted(() => {
   const fluxStore = useFluxStore()
 
   fluxStore.fetchFluxIDs()
+
+  // Fetch server locations in background on app load
+  // This will populate the data once for all pages that use ServerLocationsPanel
+  fluxStore.fetchServerLocations()
+
+  // Fetch Trustpilot data in background on app load
+  // This will populate the data once for all pages that use TrustpilotPanel
+  fluxStore.fetchTrustpilot()
 })
 
 watch(
@@ -69,6 +77,7 @@ watch(
     >
       <RouterView />
       <ScrollToTop />
+      <CookieConsent />
     </VApp>
   </VLocaleProvider>
 </template>

@@ -5,7 +5,7 @@
       <div class="grid-header">
         <div class="header-top">
           <h2 class="section-title">
-            <VIcon start color="secondary">mdi-apps</VIcon>
+            <VIcon start size="20" color="secondary">mdi-apps</VIcon>
             {{ labels.title }}
           </h2>
         </div>
@@ -93,58 +93,20 @@
 
       <div v-else class="apps-container">
         <div class="apps-content">
-          <Transition :name="slideDirection === 'next' ? 'slide-next' : 'slide-prev'">
-            <div :key="currentPage" class="apps-grid" :class="gridClass">
-              <AppCard
-                v-for="app in paginatedApps"
-                :key="app.uuid || app.name"
-                :app="app"
-                :marketplace-categories="marketplaceCategories"
-                @deploy="$emit('deploy', app)"
-              />
-            </div>
-          </Transition>
+          <div class="apps-grid" :class="gridClass">
+            <AppCard
+              v-for="(app, index) in props.apps"
+              :key="app.uuid || app.name"
+              :app="app"
+              :marketplace-categories="marketplaceCategories"
+              :animation-order="index"
+              @deploy="$emit('deploy', app)"
+            />
+          </div>
         </div>
 
       </div>
     </VCard>
-
-    <!-- Pagination outside VCard -->
-    <div v-if="totalPages > 1" class="pagination">
-      <VBtn
-        variant="tonal"
-        color="primary"
-        :disabled="currentPage <= 1"
-        @click="changePage(currentPage - 1)"
-      >
-        <VIcon start>mdi-arrow-left</VIcon>
-        {{ labels.previous }}
-      </VBtn>
-
-      <div class="page-numbers">
-        <VBtn
-          v-for="page in displayPages"
-          :key="page"
-          size="small"
-          :variant="page === currentPage ? 'flat' : 'text'"
-          :color="page === currentPage ? 'primary' : undefined"
-          :disabled="page === '...'"
-          @click="page !== '...' && changePage(page)"
-        >
-          {{ page }}
-        </VBtn>
-      </div>
-
-      <VBtn
-        variant="tonal"
-        color="primary"
-        :disabled="currentPage >= totalPages"
-        @click="changePage(currentPage + 1)"
-      >
-        {{ labels.next }}
-        <VIcon end>mdi-arrow-right</VIcon>
-      </VBtn>
-    </div>
   </div>
 </template>
 
@@ -196,6 +158,19 @@ const props = defineProps({
 
 const emit = defineEmits(['update:search', 'update:category', 'update:sort', 'deploy', 'refresh'])
 
+// Grid configuration constants
+const GRID_CONFIG = {
+  MIN_CARD_WIDTH: 300,      // Minimum width per app card
+  MIN_CARD_HEIGHT: 280,     // Approximate height of each card
+  GRID_GAP: 16,             // Gap between cards/rows
+  CONTAINER_PADDING: 40,    // Container padding
+  HEADER_HEIGHT: 200,       // Header with search/filters
+  PAGINATION_HEIGHT: 60,    // Pagination controls
+  RESERVED_SPACE: 150,      // Footer, statusbar, and padding
+  MAX_ROWS: 4,              // Maximum number of rows to display
+  MIN_ROWS: 1,              // Minimum number of rows to display
+}
+
 const { t } = useI18n()
 
 const { width } = useDisplay()
@@ -240,25 +215,37 @@ const categoryItems = computed(() => [
 
 // Grid configuration - responsive based on available space for cards
 const columnsCount = computed(() => {
-  const minCardWidth = 300  // Minimum width per app card
-  const gridGap = 16        // Gap between cards
-  const containerPadding = 40  // Container padding
-
-  const availableWidth = width.value - containerPadding
+  const availableWidth = width.value - GRID_CONFIG.CONTAINER_PADDING
 
   // Calculate maximum columns that fit comfortably
-  if (availableWidth >= (minCardWidth * 3) + (gridGap * 2)) {
+  if (availableWidth >= (GRID_CONFIG.MIN_CARD_WIDTH * 3) + (GRID_CONFIG.GRID_GAP * 2)) {
     return 3  // FluxCloud standard: 3 columns
-  } else if (availableWidth >= (minCardWidth * 2) + gridGap) {
+  } else if (availableWidth >= (GRID_CONFIG.MIN_CARD_WIDTH * 2) + GRID_CONFIG.GRID_GAP) {
     return 2  // 2 columns for medium screens
   } else {
     return 1  // 1 column for small screens
   }
 })
 
+const rowsCount = computed(() => {
+  // Calculate rows based on window height
+  const availableHeight = window.innerHeight
+    - GRID_CONFIG.HEADER_HEIGHT
+    - GRID_CONFIG.PAGINATION_HEIGHT
+    - GRID_CONFIG.RESERVED_SPACE
+
+  const maxRows = Math.max(
+    GRID_CONFIG.MIN_ROWS,
+    Math.floor(availableHeight / GRID_CONFIG.MIN_CARD_HEIGHT),
+  )
+
+  // Limit to reasonable maximum
+  return Math.min(maxRows, GRID_CONFIG.MAX_ROWS)
+})
+
 const itemsPerPage = computed(() => {
-  const rows = 1  // Only 1 row per page
-  
+  const rows = 20  // Show 20 rows per page for better browsing
+
   return columnsCount.value * rows
 })
 
@@ -491,12 +478,13 @@ watch(() => props.sortBy, val => { sort.value = val })
   flex: 1;
   display: flex;
   flex-direction: column;
+  overflow: visible;
 }
 
 .apps-content {
   position: relative;
-  overflow: hidden;
-  height: 250px;
+  min-height: 250px;
+  height: auto;
 }
 
 
@@ -594,7 +582,7 @@ watch(() => props.sortBy, val => { sort.value = val })
   justify-content: center;
   align-items: center;
   gap: 20px;
-  padding: 16px 0;
+  padding: 8px 0 0 0;
 }
 
 

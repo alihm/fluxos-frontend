@@ -1,24 +1,39 @@
 <template>
   <div
+    ref="cardRef"
     class="app-card-wrapper"
-    :class="{ 'hovered': hovered }"
+    :class="{ 'hovered': hovered, 'is-visible': isVisible }"
+    :style="{ '--animation-order': animationOrder }"
     @mouseenter="hovered = true"
     @mouseleave="hovered = false"
+    @click="viewDetails"
   >
     <VCard
       class="app-card"
       elevation="0"
     >
       <div class="card-content">
-        <!-- Top section: Icon + Name + Buttons (87px height) -->
+        <!-- Top section: Icon + Name (87px height) -->
         <div class="app-top-section">
           <div class="app-icon-container">
             <AppIcon :app="app" :size="60" />
           </div>
 
           <div class="app-name-section">
-            <h3 class="app-name">{{ app.displayName || app.name }}</h3>
-            <div class="app-category">
+            <div class="app-name-row">
+              <h3 class="app-name">{{ parsedAppName.cleanName }}</h3>
+              <VChip
+                v-for="(tag, index) in parsedAppName.networkTags"
+                :key="index"
+                size="x-small"
+                color="warning"
+                variant="tonal"
+                class="network-chip"
+              >
+                {{ tag }}
+              </VChip>
+            </div>
+            <div class="app-tags">
               <VChip
                 size="x-small"
                 color="grey"
@@ -27,28 +42,17 @@
               >
                 {{ categoryName }}
               </VChip>
+              <VChip
+                v-for="(tag, index) in parsedAppName.hardwareTags"
+                :key="index"
+                size="x-small"
+                color="info"
+                variant="tonal"
+                class="hardware-chip"
+              >
+                {{ tag }}
+              </VChip>
             </div>
-          </div>
-
-          <div class="app-buttons">
-            <VBtn
-              color="primary"
-              variant="flat"
-              size="x-small"
-              class="install-btn"
-              @click.stop="deploy"
-            >
-              {{ t('components.marketplace.appCard.install') }}
-            </VBtn>
-            <VBtn
-              color="primary"
-              variant="flat"
-              size="x-small"
-              class="view-btn"
-              @click.stop="viewDetails"
-            >
-              {{ t('components.marketplace.appCard.view') }}
-            </VBtn>
           </div>
         </div>
 
@@ -58,23 +62,25 @@
         <!-- Stats section (35px height) -->
         <div class="app-stats-section">
           <div class="stats-row">
+            <!-- Install count chip -->
             <VChip
               size="small"
-              color="primary"
-              variant="flat"
+              color="info"
+              variant="tonal"
               class="stat-chip"
             >
-              <VIcon start size="14">mdi-download</VIcon>
+              <VIcon icon="mdi-download" size="14" />
               {{ formatNumber(app.installCount || 0) }}
             </VChip>
+
+            <!-- Price chip -->
             <VChip
               size="small"
               color="success"
               variant="tonal"
-              class="stat-chip"
+              class="price-chip"
             >
-              <VIcon start size="14">mdi-currency-usd</VIcon>
-              {{ formatPrice(app.price) }}
+              ${{ formatPrice(app.price) }}
             </VChip>
           </div>
         </div>
@@ -85,24 +91,31 @@
             {{ app.description || t('components.marketplace.appCard.noDescription') }}
           </p>
         </div>
+
+        <!-- Action button -->
+        <div class="app-action-section">
+          <VBtn
+            color="primary"
+            variant="flat"
+            size="x-small"
+            rounded="pill"
+            class="view-details-btn"
+            @click.stop="viewDetails"
+          >
+            <VIcon start size="14">mdi-eye</VIcon>
+            {{ t('components.marketplace.appCard.viewDetails') }}
+          </VBtn>
+        </div>
       </div>
     </VCard>
-
-    <!-- Install Dialog -->
-    <InstallDialog
-      v-model="showInstallDialog"
-      :app="app"
-      @deployed="handleDeploySuccess"
-    />
   </div>
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import AppIcon from '@/components/Marketplace/AppIcon.vue'
-import InstallDialog from '@/components/Marketplace/InstallDialog.vue'
 import { useMarketplaceUtils } from '@/composables/useMarketplaceUtils'
 
 const props = defineProps({
@@ -114,9 +127,11 @@ const props = defineProps({
     type: Array,
     default: () => [],
   },
+  animationOrder: {
+    type: Number,
+    default: 0,
+  },
 })
-
-const emit = defineEmits(['deploy'])
 
 const { t } = useI18n()
 
@@ -124,7 +139,8 @@ const router = useRouter()
 const { formatNumber, formatPrice } = useMarketplaceUtils()
 
 const hovered = ref(false)
-const showInstallDialog = ref(false)
+const cardRef = ref(null)
+const isVisible = ref(false)
 
 const categoryName = computed(() => {
   if (!props.app.category) return t('components.marketplace.appCard.defaultCategory')
@@ -133,6 +149,70 @@ const categoryName = computed(() => {
   const category = props.marketplaceCategories.find(cat => cat.uuid === props.app.category)
 
   return category ? category.name : t('components.marketplace.appCard.defaultCategory')
+})
+
+// Parse hardware info from app name
+const parsedAppName = computed(() => {
+  const fullName = props.app.displayName || props.app.name || ''
+
+  console.log('🔍 Parsing app name:', fullName)
+
+  const hardwareTags = []
+  const networkTags = []
+  let cleanName = fullName
+
+  // Pattern 1: Match hardware in brackets/parentheses like (4CPU, 8GB RAM), [2 vCPU, 4GB]
+  const bracketPattern = /[\[(]([^)\]]*(?:cpu|ram|gb|mb|vcpu|core)[^)\]]*)[\])]/gi
+  const bracketMatches = fullName.match(bracketPattern)
+
+  if (bracketMatches) {
+    console.log('📊 Found hardware in brackets:', bracketMatches)
+    cleanName = cleanName.replace(bracketPattern, '').trim()
+
+    bracketMatches.forEach(match => {
+      const content = match.replace(/[\[\]()]/g, '').trim()
+      const specs = content.split(/[,;]/).map(s => s.trim()).filter(s => s)
+      hardwareTags.push(...specs)
+    })
+  }
+
+  // Pattern 2: Match hardware directly in name like "16GB RAM", "24GB", "4 vCPU", "8 CPU"
+  // This matches: number + optional space + (GB|MB|CPU|vCPU|Core) + optional "RAM"
+  const directPattern = /\b(\d+(?:\.\d+)?\s*(?:GB|MB|CPU|vCPU|Cores?|GHz)(?:\s+RAM)?)\b/gi
+  const directMatches = cleanName.match(directPattern)
+
+  if (directMatches) {
+    console.log('📊 Found hardware directly in name:', directMatches)
+
+    directMatches.forEach(match => {
+      cleanName = cleanName.replace(match, '').trim()
+      hardwareTags.push(match.trim())
+    })
+  }
+
+  // Pattern 3: Match network types like "Testnet", "Mainnet", "Test"
+  const networkPattern = /\b(Testnet|Mainnet|Test)\b/gi
+  const networkMatches = cleanName.match(networkPattern)
+
+  if (networkMatches) {
+    console.log('🌐 Found network type in name:', networkMatches)
+
+    networkMatches.forEach(match => {
+      cleanName = cleanName.replace(match, '').trim()
+      networkTags.push(match.trim())
+    })
+  }
+
+  // Clean up any double spaces
+  cleanName = cleanName.replace(/\s+/g, ' ').trim()
+
+  console.log('✅ Parsed result:', { cleanName, hardwareTags, networkTags })
+
+  return {
+    cleanName,
+    hardwareTags,
+    networkTags,
+  }
 })
 
 const navigateToApp = () => {
@@ -145,25 +225,66 @@ const viewDetails = () => {
   navigateToApp()
 }
 
-const deploy = () => {
-  // FluxCloud opens InstallDialog as modal
-  showInstallDialog.value = true
-}
+// Intersection Observer for scroll-based animation
+let observer = null
 
-const handleDeploySuccess = deployedApp => {
-  // Emit deploy event for parent components to handle
-  emit('deploy', deployedApp)
-  console.log('🚀 App deployed successfully:', deployedApp.displayName || deployedApp.name)
-}
+onMounted(() => {
+  if (!cardRef.value) return
+
+  observer = new IntersectionObserver(
+    entries => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting && !isVisible.value) {
+          isVisible.value = true
+        }
+      })
+    },
+    {
+      threshold: 0.1,
+      rootMargin: '200px', // Load cards 200px before they enter viewport
+    },
+  )
+
+  observer.observe(cardRef.value)
+})
+
+onUnmounted(() => {
+  if (observer && cardRef.value) {
+    observer.unobserve(cardRef.value)
+  }
+})
 </script>
 
 <style scoped>
 .app-card-wrapper {
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   height: 250px;
+  width: 100%;
   border-radius: 12px;
   position: relative;
   overflow: hidden;
+  cursor: pointer;
+  /* Initial state - hidden */
+  opacity: 0;
+  transform: translateY(30px);
+}
+
+/* Scroll reveal animation - triggers when card becomes visible */
+.app-card-wrapper.is-visible {
+  animation: fadeInUp 0.4s ease-out forwards;
+  /* Smart stagger: cap at 750ms max delay (15 cards * 0.05s) */
+  animation-delay: calc(min(var(--animation-order), 15) * 0.05s);
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(25px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
 
 .app-card-wrapper::before {
@@ -248,13 +369,14 @@ const handleDeploySuccess = deployedApp => {
   height: 100%;
 }
 
-/* Top section - FluxCloud style (87px height) */
+/* Top section - Left-aligned layout (87px height) */
 .app-top-section {
   height: 87px;
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 0 8px;
+  justify-content: flex-start;
+  gap: 12px;
+  padding: 0 16px;
 }
 
 .app-icon-container {
@@ -263,28 +385,38 @@ const handleDeploySuccess = deployedApp => {
 }
 
 .app-name-section {
-  flex: 1;
-  min-width: 0;
-  padding: 0 4px;
   display: flex;
   flex-direction: column;
   justify-content: center;
-  gap: 4px;
+  align-items: flex-start;
+  gap: 6px;
+  text-align: left;
+}
+
+.app-name-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
 }
 
 .app-name {
-  font-size: 0.85rem;
+  font-size: 0.95rem;
   font-weight: 600;
   margin: 0;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   line-height: 1.2;
+  text-align: left;
 }
 
-.app-category {
+.app-tags {
   display: flex;
   align-items: center;
+  justify-content: flex-start;
+  gap: 4px;
+  flex-wrap: wrap;
 }
 
 .category-chip {
@@ -293,29 +425,17 @@ const handleDeploySuccess = deployedApp => {
   padding: 0 6px !important;
 }
 
-.spacer {
-  width: 20px;
-  flex-shrink: 0;
+.hardware-chip {
+  font-size: 0.7rem !important;
+  height: 18px !important;
+  padding: 0 6px !important;
 }
 
-.app-buttons {
-  width: 80px;
+.network-chip {
+  font-size: 0.7rem !important;
+  height: 18px !important;
+  padding: 0 6px !important;
   flex-shrink: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  padding: 8px 0 0 0;
-  margin-right: 3px;
-}
-
-.install-btn,
-.view-btn {
-  height: 25px !important;
-  font-size: 0.75rem !important;
-  font-weight: 600 !important;
-  color: white !important;
-  width: 100% !important;
-  border-radius: 12px !important;
 }
 
 .card-divider {
@@ -335,21 +455,23 @@ const handleDeploySuccess = deployedApp => {
 .stats-row {
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   gap: 12px;
 }
 
-.stat-chip {
+/* Stat chips styling */
+.stat-chip,
+.price-chip {
   font-size: 0.8rem !important;
   height: 24px !important;
-  border-radius: 12px !important;
   padding: 0 8px !important;
+  font-weight: 600 !important;
 }
 
 /* Description section - FluxCloud style (flexible height) */
 .app-description-section {
   flex: 1;
-  padding: 8px 16px 16px 16px;
+  padding: 8px 16px 4px 16px;
   display: flex;
   align-items: flex-start;
 }
@@ -365,6 +487,28 @@ const handleDeploySuccess = deployedApp => {
   overflow: hidden;
   text-overflow: ellipsis;
   word-break: break-word;
+}
+
+/* Action section */
+.app-action-section {
+  padding: 4px 16px 8px 16px;
+  display: flex;
+  justify-content: center;
+}
+
+.view-details-btn {
+  height: 28px !important;
+  min-width: 120px !important;
+  font-size: 0.75rem !important;
+  font-weight: 600 !important;
+  text-transform: none !important;
+  transition: all 0.3s ease !important;
+  padding: 0 16px !important;
+}
+
+.view-details-btn:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 8px rgba(var(--v-theme-primary), 0.3);
 }
 
 /* Mobile adjustments */

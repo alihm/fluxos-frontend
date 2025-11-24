@@ -81,7 +81,7 @@
                 v-model="ipSearchQuery"
                 density="compact"
                 variant="outlined"
-                placeholder="Search IP..."
+                :placeholder="t('pages.apps.manage.searchIpPlaceholder')"
                 hide-details
                 clearable
                 @click:clear="() => ipSearchQuery = ''"
@@ -702,7 +702,7 @@
                       >
                         mdi-chart-line
                       </VIcon>
-                      <span class="text-h6">Persistent Storage</span>
+                      <span class="text-h6">{{ t('pages.apps.manage.persistentStorage') }}</span>
                       <VTooltip bottom>
                         <template #activator="{ props }">
                           <VIcon
@@ -713,8 +713,7 @@
                             mdi-information
                           </VIcon>
                         </template>
-                        Tracks storage that persists across container restarts. Prevents
-                        disk overuse.
+                        {{ t('pages.apps.manage.persistentStorageTooltip') }}
                       </VTooltip>
                     </div>
                     <canvas id="diskPersistentChart" />
@@ -734,7 +733,7 @@
                       >
                         mdi-chart-line
                       </VIcon>
-                      <span class="text-h6">Root Filesystem (rootfs)</span>
+                      <span class="text-h6">{{ t('pages.apps.manage.rootFilesystem') }}</span>
                       <VTooltip bottom>
                         <template #activator="{ props }">
                           <VIcon
@@ -745,8 +744,7 @@
                             mdi-information
                           </VIcon>
                         </template>
-                        Temporary container storage. Monitoring rootfs helps avoid space
-                        issues.
+                        {{ t('pages.apps.manage.rootFilesystemTooltip') }}
                       </VTooltip>
                     </div>
                     <canvas id="diskFileSystemChart" />
@@ -996,8 +994,12 @@ import DaemonService from "@/services/DaemonService"
 import { storeToRefs } from "pinia"
 import { useConfigStore } from "@core/stores/config"
 import { useI18n } from 'vue-i18n'
+import { useSEONoIndex } from '@/composables/useSEO'
 import { clearStickyBackendDNS } from "@/utils/stickyBackend"
 import LoadingSpinner from "@/components/Marketplace/LoadingSpinner.vue"
+
+// Prevent indexing of app management page (authenticated private data)
+useSEONoIndex()
 import {
   Chart, LineController, LineElement, CategoryScale, LinearScale, PointElement, Tooltip, Legend, Title, Filler,
 } from 'chart.js'

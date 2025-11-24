@@ -491,11 +491,6 @@
 
 <script setup>
 import hljs from 'highlight.js'
-import { loader, VueMonacoEditor } from '@guolao/vue-monaco-editor'
-import { storeToRefs } from "pinia"
-import { useConfigStore } from "@core/stores/config"
-import { useI18n } from "vue-i18n"
-import { useDisplay } from 'vuetify'
 
 const props = defineProps({
   appSpec: {
@@ -520,6 +515,15 @@ const props = defineProps({
   },
 
 })
+
+// Lazy-load Monaco Editor to reduce main bundle size
+const VueMonacoEditor = defineAsyncComponent(() =>
+  import('@guolao/vue-monaco-editor').then(m => m.VueMonacoEditor),
+)
+import { storeToRefs } from "pinia"
+import { useConfigStore } from "@core/stores/config"
+import { useI18n } from "vue-i18n"
+import { useDisplay } from 'vuetify'
 
 const { smAndDown } = useDisplay()
 const configStore = useConfigStore()
@@ -1482,8 +1486,13 @@ function getUploadFolderBackup(saveAs) {
   return `https://${ip.replace(/\./g, '-')}-${port}.node.api.runonflux.io/ioutils/fileupload/backup/${props.appSpec.name}/${restoreRemoteFile.value}/null/${filename}`
 }
 
-loader.init().then(() => {
-  monacoReady.value = true
+// Initialize Monaco loader lazily
+onMounted(() => {
+  import('@guolao/vue-monaco-editor').then(({ loader }) => {
+    loader.init().then(() => {
+      monacoReady.value = true
+    })
+  })
 })
 </script>
 

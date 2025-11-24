@@ -13,14 +13,17 @@
           >
             <VImg
               :src="screenshot"
+              :alt="`${app.displayName || app.name} server screenshot ${(index % screenshots.length) + 1}`"
               height="200"
               cover
               class="screenshot-image"
+              eager
             />
           </div>
         </div>
       </div>
-      <div class="slider-controls">
+      <!-- Slider controls hidden -->
+      <div class="slider-controls" style="display: none;">
         <VBtn
           icon="mdi-chevron-left"
           variant="text"
@@ -56,7 +59,13 @@
       max-width="90vw"
     >
       <VCard>
-        <VImg :src="selectedImage" contain max-height="90vh" />
+        <VImg
+          :src="selectedImage"
+          :alt="`${app.displayName || app.name} server screenshot fullscreen`"
+          contain
+          max-height="90vh"
+          eager
+        />
         <VBtn
           icon="mdi-close"
           position="absolute"
@@ -123,7 +132,7 @@ const infiniteScreenshots = computed(() => {
 const panelStyle = computed(() => ({
   padding: props.panel.padding ?
     `${props.panel.padding.top}px ${props.panel.padding.right}px ${props.panel.padding.bottom}px ${props.panel.padding.left}px`
-    : '24px',
+    : '0',
 }))
 
 const prevSlide = () => {
@@ -230,7 +239,7 @@ onUnmounted(() => {
 .screenshots-slider {
   overflow: hidden;
   border-radius: 16px;
-  margin-bottom: 16px;
+  margin-bottom: 0;
 }
 
 .screenshots-track {

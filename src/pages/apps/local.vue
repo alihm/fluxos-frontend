@@ -81,6 +81,7 @@
 <script setup>
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { useSEONoIndex } from '@/composables/useSEO'
 import MyAppsTab from "@/views/apps/management/tabView.vue"
 import AppsService from "@/services/AppsService"
 import DaemonService from "@/services/DaemonService"
@@ -88,6 +89,9 @@ import qs from "qs"
 import { eventBus } from "@/utils/eventBus"
 import { storeToRefs } from "pinia"
 import { useFluxStore } from "@/stores/flux"
+
+// Prevent indexing of local apps dashboard (private node operator data)
+useSEONoIndex()
 
 const { t } = useI18n()
 

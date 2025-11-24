@@ -1,5 +1,13 @@
-import { Icon } from '@iconify/vue'
+import { Icon, addCollection } from '@iconify/vue'
 import { h } from 'vue'
+
+// Import icon data for offline use
+import mdiIcons from '@iconify-json/mdi/icons.json'
+import tablerIcons from '@iconify-json/tabler/icons.json'
+
+// Add icon collections for offline use (this automatically disables CDN when local data is available)
+addCollection(mdiIcons)
+addCollection(tablerIcons)
 
 // Custom SVG imports (checkboxes, radios, etc.)
 import checkboxChecked from '@images/svg/checkbox-checked.svg'

@@ -7,9 +7,9 @@
       <!-- No groups defined - show all configs in single grid -->
       <div class="configs-grid">
         <AppConfigCard
-          v-for="config in app.configs"
+          v-for="(config, index) in app.configs"
           :key="config.id"
-          :config="config"
+          :config="getConfigWithPopular(config, index, app.configs.length)"
           :app="app"
           @install="handleInstall"
         />
@@ -85,15 +85,28 @@ const getConfigsByGroup = groupTitle => {
 }
 
 const panelStyle = computed(() => {
-  const style = {
-    padding: props.panel.padding ?
-      `${props.panel.padding.top}px ${props.panel.padding.right}px ${props.panel.padding.bottom}px ${props.panel.padding.left}px`
-      : '8px 24px',
+  // Normalize padding to ensure consistency across games
+  const defaultPadding = { top: 48, right: 0, bottom: 0, left: 0 }
+  const padding = props.panel.padding || defaultPadding
+
+  return {
+    padding: `${padding.top || defaultPadding.top}px ${padding.right || defaultPadding.right}px ${padding.bottom || defaultPadding.bottom}px ${padding.left || defaultPadding.left}px`,
   }
-  console.log('🎨 GroupsPanel style:', style, 'Panel config:', props.panel)
-  
-  return style
 })
+
+// 🎯 CONFIGURE "MOST POPULAR" BADGE HERE
+// Change this number to mark a different config as popular:
+// - 0 = first config (cheapest)
+// - Math.floor(total / 2) = middle config (recommended)
+// - total - 1 = last config (most expensive)
+const POPULAR_CONFIG_INDEX = total => Math.floor(total / 2) // Middle option
+
+const getConfigWithPopular = (config, index, totalConfigs) => {
+  return {
+    ...config,
+    isPopular: index === POPULAR_CONFIG_INDEX(totalConfigs),
+  }
+}
 
 const handleInstall = data => {
   emit('install', data)
@@ -102,7 +115,7 @@ const handleInstall = data => {
 
 <style scoped>
 .groups-panel {
-  margin-bottom: 8px;
+  margin-bottom: 0;
 }
 
 .panel-title {
