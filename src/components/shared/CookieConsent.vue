@@ -6,59 +6,62 @@
     multi-line
     class="cookie-consent-banner"
     color="surface"
-    elevation="24"
+    elevation="0"
   >
     <VCard
       class="cookie-consent-card"
       elevation="0"
-      color="transparent"
     >
-      <VCardText class="pa-4">
-        <div class="d-flex flex-column ga-3">
-          <div class="d-flex justify-space-between align-center">
-            <div class="text-h6 font-weight-bold">
-              {{ t('common.cookieConsent.title') }}
+      <VCardText class="pa-6">
+        <div class="d-flex flex-column ga-4">
+          <!-- Header with icon -->
+          <div class="d-flex align-start gap-3">
+            <div class="cookie-icon-wrapper">
+              <VIcon size="24" color="success">mdi-cookie</VIcon>
             </div>
-            <VBtn
-              icon="mdi-close"
-              variant="text"
-              size="small"
-              @click="acceptNecessary"
-            />
+            <div class="flex-grow-1">
+              <div class="text-h6 font-weight-bold mb-2">
+                {{ t('common.cookieConsent.title') }}
+              </div>
+              <div class="text-body-2 text-medium-emphasis">
+                {{ t('common.cookieConsent.description') }}
+                <a
+                  href="https://runonflux.com/privacy"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="text-success font-weight-medium"
+                >
+                  {{ t('common.cookieConsent.learnMore') }}
+                </a>
+              </div>
+            </div>
           </div>
-          <div class="text-body-2">
-            {{ t('common.cookieConsent.description') }}
-            <a
-              href="https://runonflux.com/privacy"
-              target="_blank"
-              rel="noopener noreferrer"
-              class="text-primary text-decoration-none ml-1"
-            >
-              {{ t('common.cookieConsent.learnMore') }}
-            </a>
-          </div>
-          <div class="d-flex flex-wrap ga-2 mt-2">
+
+          <!-- Action buttons -->
+          <div class="d-flex flex-wrap gap-2">
             <VBtn
-              color="primary"
+              color="success"
               variant="flat"
-              size="default"
+              class="flex-grow-1 flex-sm-grow-0"
               @click="acceptAll"
             >
+              <VIcon start size="20">mdi-check-circle</VIcon>
               {{ t('common.cookieConsent.acceptAll') }}
             </VBtn>
             <VBtn
               color="secondary"
-              variant="outlined"
-              size="default"
+              variant="tonal"
+              class="flex-grow-1 flex-sm-grow-0"
               @click="acceptNecessary"
             >
               {{ t('common.cookieConsent.onlyNecessary') }}
             </VBtn>
             <VBtn
+              color="info"
               variant="text"
-              size="default"
               @click="showSettings = true"
             >
+              <VIcon start size="20">mdi-cog</VIcon>
               {{ t('common.cookieConsent.customize') }}
             </VBtn>
           </div>
@@ -71,20 +74,25 @@
   <VDialog
     v-model="showSettings"
     max-width="600"
+    content-class="cookie-settings-dialog"
   >
-    <VCard>
-      <VCardTitle class="d-flex justify-space-between align-center">
-        <span>{{ t('common.cookieConsent.settingsTitle') }}</span>
+    <VCard class="dialog-card">
+      <VCardTitle class="d-flex justify-space-between align-center pa-3 dialog-header">
+        <div class="d-flex align-center gap-3">
+          <VIcon size="28">mdi-cog</VIcon>
+          <span>{{ t('common.cookieConsent.settingsTitle') }}</span>
+        </div>
         <VBtn
           icon="mdi-close"
           variant="text"
           size="small"
+          class="close-btn"
           @click="showSettings = false"
         />
       </VCardTitle>
 
       <VCardText>
-        <div class="mb-4">
+        <div class="mb-4 ml-2">
           <div class="text-body-2 mb-2">
             {{ t('common.cookieConsent.settingsDescription') }}
           </div>
@@ -110,7 +118,7 @@
         </div>
 
         <!-- Analytics Cookies -->
-        <div class="cookie-category mb-4">
+        <div class="cookie-category">
           <div class="d-flex justify-space-between align-center mb-2">
             <div>
               <div class="text-subtitle-1 font-weight-medium">
@@ -128,9 +136,10 @@
         </div>
       </VCardText>
 
-      <VCardActions>
+      <VCardActions class="dialog-actions">
         <VSpacer />
         <VBtn
+          color="error"
           variant="text"
           @click="showSettings = false"
         >
@@ -237,10 +246,18 @@ const savePreferences = () => {
 <style scoped lang="scss">
 .cookie-consent-banner {
   :deep(.v-snackbar__wrapper) {
-    max-width: 700px;
+    max-width: 800px;
     min-width: 320px;
-    border-radius: 12px;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    border-radius: 16px;
+    box-shadow: 0 12px 48px rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(var(--v-border-color), var(--v-border-opacity));
+    backdrop-filter: blur(10px);
+    margin: 16px;
+
+    @media (max-width: 600px) {
+      margin: 12px;
+      max-width: calc(100% - 24px);
+    }
   }
 
   :deep(.v-snackbar__content) {
@@ -250,12 +267,89 @@ const savePreferences = () => {
 
 .cookie-consent-card {
   width: 100%;
+  background: rgb(var(--v-theme-surface));
+  border-radius: 16px;
+}
+
+.cookie-icon-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  min-width: 48px;
+  border-radius: 12px;
+  background: rgba(var(--v-theme-success), 0.1);
+
+  @media (max-width: 600px) {
+    width: 40px;
+    height: 40px;
+    min-width: 40px;
+  }
 }
 
 .cookie-category {
   border: 1px solid rgba(var(--v-border-color), var(--v-border-opacity));
-  border-radius: 8px;
-  padding: 16px;
+  border-radius: 12px;
+  padding: 20px;
   background: rgba(var(--v-theme-surface-variant), 0.05);
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: rgba(var(--v-theme-surface-variant), 0.08);
+    border-color: rgba(var(--v-border-color), calc(var(--v-border-opacity) * 1.5));
+  }
+
+  .d-flex {
+    gap: 16px;
+  }
+}
+
+// Better responsive button layout
+.d-flex.flex-wrap.gap-2 {
+  @media (max-width: 600px) {
+    flex-direction: column;
+
+    .v-btn {
+      width: 100%;
+    }
+  }
+}
+
+.dialog-card {
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.dialog-header {
+  background: rgb(var(--v-theme-primary));
+  color: rgb(var(--v-theme-on-primary));
+  border-bottom: 1px solid rgba(var(--v-border-color), var(--v-border-opacity));
+
+  :deep(.v-icon) {
+    color: rgb(var(--v-theme-on-primary)) !important;
+  }
+
+  .close-btn {
+    background: rgba(255, 255, 255, 0.1);
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
+  }
+}
+
+.dialog-actions {
+  :deep(.v-btn) {
+    height: 30px;
+    min-height: 30px;
+  }
+}
+</style>
+
+<style lang="scss">
+.cookie-settings-dialog {
+  border-radius: 16px;
+  overflow: hidden;
 }
 </style>
