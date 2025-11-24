@@ -1,4 +1,4 @@
-import { getDeviceCategory, detectDeviceType } from '../index'
+import { getDeviceCategory, detectDeviceType } from '../setup'
 import { hasAnalyticsConsent } from '@/composables/useCookieConsent'
 
 /**

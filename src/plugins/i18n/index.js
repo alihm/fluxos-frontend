@@ -1,9 +1,13 @@
 import { createI18n } from 'vue-i18n'
 import { cookieRef } from '@layouts/stores/config'
 import { themeConfig } from '@themeConfig'
+import en from './locales/en.json'
+import pl from './locales/pl.json'
 
-const messages = Object.fromEntries(Object.entries(import.meta.glob('./locales/*.json', { eager: true }))
-  .map(([key, value]) => [key.slice(10, -5), value.default]))
+const messages = {
+  en,
+  pl,
+}
 
 // Polish pluralization rules
 // Returns: 0 for singular, 1 for few (2-4), 2 for many (5+)
