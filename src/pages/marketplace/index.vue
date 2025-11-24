@@ -378,7 +378,8 @@ onMounted(async () => {
 
 .sponsored-section {
   width: 100%;
-  height: 125px;
+  height: auto;
+  margin-bottom: 2rem !important;
 }
 
 .apps-grid-section {
@@ -407,7 +408,8 @@ onMounted(async () => {
   }
 
   .sponsored-section {
-    height: 125px;
+    height: auto;
+    margin-bottom: 1.5rem !important;
   }
 
   .apps-grid-section {

@@ -62,23 +62,25 @@
         <!-- Stats section (35px height) -->
         <div class="app-stats-section">
           <div class="stats-row">
+            <!-- Install count chip -->
             <VChip
               size="small"
-              color="primary"
-              variant="flat"
+              color="info"
+              variant="tonal"
               class="stat-chip"
             >
-              <VIcon start size="14">mdi-download</VIcon>
+              <VIcon icon="mdi-download" size="14" />
               {{ formatNumber(app.installCount || 0) }}
             </VChip>
+
+            <!-- Price chip -->
             <VChip
               size="small"
               color="success"
               variant="tonal"
-              class="stat-chip"
+              class="price-chip"
             >
-              <VIcon start size="14">mdi-currency-usd</VIcon>
-              {{ formatPrice(app.price) }}
+              ${{ formatPrice(app.price) }}
             </VChip>
           </div>
         </div>
@@ -239,7 +241,7 @@ onMounted(() => {
     },
     {
       threshold: 0.1,
-      rootMargin: '50px',
+      rootMargin: '200px', // Load cards 200px before they enter viewport
     },
   )
 
@@ -269,14 +271,15 @@ onUnmounted(() => {
 
 /* Scroll reveal animation - triggers when card becomes visible */
 .app-card-wrapper.is-visible {
-  animation: fadeInUp 0.6s ease-out forwards;
-  animation-delay: calc(var(--animation-order) * 0.05s);
+  animation: fadeInUp 0.4s ease-out forwards;
+  /* Smart stagger: cap at 750ms max delay (15 cards * 0.05s) */
+  animation-delay: calc(min(var(--animation-order), 15) * 0.05s);
 }
 
 @keyframes fadeInUp {
   from {
     opacity: 0;
-    transform: translateY(30px) scale(0.95);
+    transform: translateY(25px) scale(0.98);
   }
   to {
     opacity: 1;
@@ -456,11 +459,13 @@ onUnmounted(() => {
   gap: 12px;
 }
 
-.stat-chip {
+/* Stat chips styling */
+.stat-chip,
+.price-chip {
   font-size: 0.8rem !important;
   height: 24px !important;
-  border-radius: 12px !important;
   padding: 0 8px !important;
+  font-weight: 600 !important;
 }
 
 /* Description section - FluxCloud style (flexible height) */
