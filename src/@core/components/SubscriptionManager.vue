@@ -323,13 +323,48 @@
       <VWindowItem :value="0">
         <div class="pa-4">
           <VForm>
+            <!-- Terms of Service Agreement (only for new apps) -->
+            <VCard v-if="props.newApp" variant="tonal" color="info" class="mb-4">
+              <VCardText class="pa-4">
+                <div class="d-flex align-center mb-3">
+                  <VIcon icon="mdi-shield-check-outline" size="28" color="info" class="mr-3" />
+                  <span class="text-h6 font-weight-semibold">{{ t('core.subscriptionManager.tos.title') }}</span>
+                </div>
+
+                <VAlert type="info" variant="tonal" density="compact" class="mb-3">
+                  {{ t('core.subscriptionManager.tos.description') }}
+                </VAlert>
+
+                <VCheckbox
+                  v-model="acceptedTerms"
+                  density="comfortable"
+                  color="primary"
+                  hide-details
+                >
+                  <template #label>
+                    <span class="text-body-1">
+                      {{ t('core.subscriptionManager.tos.agreement') }}
+                      <a
+                        href="#"
+                        class="text-primary font-weight-medium"
+                        style="text-decoration: underline;"
+                        @click.prevent="showTermsDialog = true"
+                      >
+                        {{ t('core.subscriptionManager.tos.link') }}
+                      </a>
+                    </span>
+                  </template>
+                </VCheckbox>
+              </VCardText>
+            </VCard>
+
             <VTextField
               v-model="appDetails.name"
               :label="t('core.subscriptionManager.name')"
               prepend-inner-icon="mdi-rename-box"
               variant="outlined"
               density="comfortable"
-              :disabled="isNameLocked"
+              :disabled="isNameLocked || (props.newApp && !acceptedTerms)"
               class="mb-3"
             >
               <template #append-inner>
@@ -2959,6 +2994,70 @@
     @cancel="cancelManualSign"
     @copy="showToast('success', t('core.subscriptionManager.copiedToClipboard'))"
   />
+
+  <!-- Terms of Service Dialog -->
+  <VDialog v-model="showTermsDialog" max-width="800" scrollable>
+    <VCard style="border-radius: 16px;">
+      <VCardTitle class="d-flex align-center justify-space-between pa-4 bg-primary">
+        <div class="d-flex align-center gap-3">
+          <VIcon icon="mdi-file-document-outline" size="32" color="white" />
+          <span class="text-h5 font-weight-semibold" style="color: white;">{{ t('core.subscriptionManager.tos.dialogTitle') }}</span>
+        </div>
+        <VBtn
+          icon="mdi-close"
+          variant="text"
+          size="small"
+          color="white"
+          @click="showTermsDialog = false"
+        />
+      </VCardTitle>
+
+      <VDivider />
+
+      <VCardText class="pa-6 tos-scroll-area" style="max-height: calc(80vh - 200px); overflow-y: auto;">
+        <div class="tos-content" v-html="tosHtmlContent"></div>
+      </VCardText>
+
+      <VDivider />
+
+      <VCardActions class="pa-4 justify-center">
+        <VBtn
+          color="success"
+          variant="flat"
+          size="large"
+          min-width="140"
+          prepend-icon="mdi-check-circle"
+          @click="acceptTerms"
+        >
+          {{ t('core.subscriptionManager.tos.agree') }}
+        </VBtn>
+        <VBtn
+          color="error"
+          variant="outlined"
+          size="large"
+          min-width="140"
+          prepend-icon="mdi-close-circle"
+          class="ml-4"
+          @click="showTermsDialog = false"
+        >
+          {{ t('core.subscriptionManager.tos.disagree') }}
+        </VBtn>
+      </VCardActions>
+    </VCard>
+  </VDialog>
+
+  <!-- TOS Error Snackbar -->
+  <VSnackbar
+    v-model="showTosError"
+    color="error"
+    :timeout="4000"
+    location="top"
+  >
+    <div class="d-flex align-center">
+      <VIcon icon="mdi-alert-circle" class="mr-2" />
+      <span>{{ t('core.subscriptionManager.tos.errorMessage') }}</span>
+    </div>
+  </VSnackbar>
 </template>
 
 <script setup>
@@ -3040,12 +3139,19 @@ const isSigning = ref(false) // Track if signing is in progress
 const signingFailed = ref(false) // Track if signing failed
 const clipboardInstance = ref(null) // ClipboardJS instance for proper cleanup
 const tab = ref(0)
+const previousTab = ref(0) // Track previous tab for TOS validation
 const renewalEnabled = ref(false)
 const managementAction = ref('renewal') // Management action: 'renewal', 'update', 'cancel'
 const isNameLocked = ref(false)
 const isUploadingCmd = ref(false)
 const isUploadingEnv = ref(false)
 const isUploadingContacts = ref(false)
+
+// TOS related
+const acceptedTerms = ref(false)
+const showTermsDialog = ref(false)
+const showTosError = ref(false)
+const tosHtmlContent = ref('')
 const fiatCheckoutURL = ref('')
 const checkoutLoading = ref(false)
 const logsExpanded = ref(true)
@@ -3070,10 +3176,50 @@ function isCryptoPayment(method) {
   return ['Zelcore', 'SSP'].includes(method)
 }
 
+// TOS Functions
+const acceptTerms = () => {
+  acceptedTerms.value = true
+  showTermsDialog.value = false
+}
+
+// Load TOS HTML content
+const loadTOS = async () => {
+  try {
+    const response = await fetch('/html/wordpress/tos.html')
+    if (!response.ok) {
+      throw new Error('Failed to load TOS')
+    }
+    const html = await response.text()
+    tosHtmlContent.value = html
+  } catch (error) {
+    console.error('Failed to load TOS:', error)
+    tosHtmlContent.value = `<p>${t('core.subscriptionManager.tos.loadError')} <a href="https://cdn.runonflux.io/Flux_Terms_of_Service.pdf" target="_blank">https://cdn.runonflux.io/Flux_Terms_of_Service.pdf</a></p>`
+  }
+}
+
+// Watch tab changes to prevent navigation without TOS acceptance (only for new apps)
+watch(tab, (newTab, oldTab) => {
+  // Only enforce TOS for new app registration
+  if (props.newApp && !acceptedTerms.value && newTab !== 0 && oldTab === 0) {
+    // Prevent leaving General tab without accepting TOS
+    nextTick(() => {
+      tab.value = 0 // Reset to General tab
+      showTosError.value = true // Show error message
+    })
+  } else {
+    previousTab.value = oldTab
+  }
+})
+
 // Check for payment success on page load
 onMounted(() => {
   // Initialize i18n labels after component is mounted
   updateRenewalLabels()
+
+  // Load TOS content if this is a new app
+  if (props.newApp) {
+    loadTOS()
+  }
 
   const urlParams = new URLSearchParams(window.location.search)
   const paymentSuccess = urlParams.get('payment_success')
@@ -4188,6 +4334,7 @@ function updateRenewalLabels() {
     ]
   } catch (error) {
     console.error('Error getting renewal labels:', error)
+
     // Keep fallback values
   }
 }
@@ -9356,5 +9503,88 @@ async function signMethod() {
     flex: 0 0 auto !important;
     margin-left: 0 !important;
   }
+}
+
+/* TOS content styling - override inline styles with !important */
+.tos-content,
+.tos-content *,
+.tos-content p,
+.tos-content h1,
+.tos-content h2,
+.tos-content h3,
+.tos-content h4,
+.tos-content h5,
+.tos-content h6,
+.tos-content ul,
+.tos-content ol,
+.tos-content li {
+  color: inherit !important;
+  font-family: inherit !important;
+}
+
+.tos-content {
+  line-height: 1.7 !important;
+}
+
+.tos-content h1 {
+  font-size: 1.75rem !important;
+  font-weight: 600 !important;
+  margin-bottom: 1rem !important;
+  margin-top: 1.5rem !important;
+}
+
+.tos-content h2 {
+  font-size: 1.5rem !important;
+  font-weight: 600 !important;
+  margin-bottom: 0.875rem !important;
+  margin-top: 1.25rem !important;
+}
+
+.tos-content h3 {
+  font-size: 1.25rem !important;
+  font-weight: 600 !important;
+  margin-bottom: 0.75rem !important;
+  margin-top: 1rem !important;
+}
+
+.tos-content p {
+  margin-bottom: 0.875rem !important;
+}
+
+.tos-content ul,
+.tos-content ol {
+  margin-bottom: 0.875rem !important;
+  padding-left: 1.5rem !important;
+}
+
+.tos-content li {
+  margin-bottom: 0.5rem !important;
+}
+
+.tos-content a {
+  color: rgb(var(--v-theme-primary)) !important;
+  text-decoration: underline !important;
+}
+
+.tos-scroll-area {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(var(--v-theme-on-surface), 0.3) transparent;
+}
+
+.tos-scroll-area::-webkit-scrollbar {
+  width: 8px;
+}
+
+.tos-scroll-area::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.tos-scroll-area::-webkit-scrollbar-thumb {
+  background: rgba(var(--v-theme-on-surface), 0.3);
+  border-radius: 4px;
+}
+
+.tos-scroll-area::-webkit-scrollbar-thumb:hover {
+  background: rgba(var(--v-theme-on-surface), 0.4);
 }
 </style>

@@ -1209,7 +1209,18 @@
       "testPaymentConfirmed": "TEST: Płatność potwierdzona! Twoja aplikacja jest teraz aktywna i działa.",
       "sspPaymentInitiated": "Płatność SSP zainicjowana: {txid}",
       "payment": "Płatność",
-      "testAndPay": "Testuj i Płać"
+      "testAndPay": "Testuj i Płać",
+      "tos": {
+        "title": "Umowa o warunkach świadczenia usług",
+        "dialogTitle": "Warunki świadczenia usług Flux",
+        "description": "Przed zarejestrowaniem aplikacji musisz przeczytać i zaakceptować nasze Warunki świadczenia usług. Dzięki temu zrozumiesz wytyczne i obowiązki związane z korzystaniem z naszej platformy.",
+        "agreement": "Przeczytałem/-am i akceptuję",
+        "link": "Warunki świadczenia usług",
+        "agree": "Akceptuję",
+        "disagree": "Odrzucam",
+        "errorMessage": "Proszę przeczytać i zaakceptować Warunki świadczenia usług przed przejściem do innych zakładek.",
+        "loadError": "Nie udało się załadować Warunków świadczenia usług. Odwiedź:"
+      }
     },
     "statusBar": {
       "backend": "Serwer",
