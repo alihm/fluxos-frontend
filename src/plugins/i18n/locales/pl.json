@@ -208,9 +208,11 @@
     "cookieConsent": {
       "title": "Szanujemy Twoją prywatność",
       "description": "Używamy plików cookie, aby poprawić komfort przeglądania i analizować ruch. Klikając Akceptuj wszystkie, zgadzasz się na nasze użycie plików cookie.",
+      "learnMore": "Dowiedz się więcej",
       "acceptAll": "Akceptuj wszystkie",
       "onlyNecessary": "Tylko niezbędne",
       "customize": "Dostosuj",
+      "manageCookies": "Zarządzaj plikami cookie",
       "settingsTitle": "Preferencje plików cookie",
       "settingsDescription": "Używamy plików cookie, aby poprawić Twoje wrażenia na naszej stronie. Możesz wybrać, które typy plików cookie chcesz zezwolić.",
       "necessary": "Niezbędne pliki cookie",
@@ -1244,7 +1246,8 @@
       "hideStatusBar": "Ukryj pasek statusu",
       "showStatusBar": "Pokaż pasek statusu",
       "backendError": "Nie udało się pobrać wersji serwera",
-      "error": "Nieosiągalny"
+      "error": "Nieosiągalny",
+      "manageCookiesTooltip": "Zarządzaj preferencjami plików cookie i ustawieniami prywatności"
     }
   },
   "components": {

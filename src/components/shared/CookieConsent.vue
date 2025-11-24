@@ -28,6 +28,14 @@
           </div>
           <div class="text-body-2">
             {{ t('common.cookieConsent.description') }}
+            <a
+              href="https://runonflux.com/privacy"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="text-primary text-decoration-none ml-1"
+            >
+              {{ t('common.cookieConsent.learnMore') }}
+            </a>
           </div>
           <div class="d-flex flex-wrap ga-2 mt-2">
             <VBtn
@@ -141,7 +149,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, onBeforeUnmount } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useCookieConsent } from '@/composables/useCookieConsent'
 
@@ -161,6 +169,11 @@ const preferences = ref({
   analytics: false,
 })
 
+// Listen for cookie settings open event from StatusBar
+const handleOpenCookieSettings = () => {
+  showSettings.value = true
+}
+
 onMounted(() => {
   // Show banner if user hasn't made a choice
   if (!hasConsent()) {
@@ -175,6 +188,13 @@ onMounted(() => {
       enableAnalytics()
     }
   }
+
+  // Listen for cookie settings open event
+  window.addEventListener('open-cookie-settings', handleOpenCookieSettings)
+})
+
+onBeforeUnmount(() => {
+  window.removeEventListener('open-cookie-settings', handleOpenCookieSettings)
 })
 
 const acceptAll = () => {

@@ -1,4 +1,4 @@
-import setupAnalytics, { getDeviceCategory, detectDeviceType } from './analytics/index'
+import setupAnalytics from './analytics/index'
 import { hasAnalyticsConsent } from '@/composables/useCookieConsent'
 
 /**
@@ -50,17 +50,12 @@ export default function (app) {
       const pageTitle = to.meta?.title || to.name || document.title
       const pagePath = to.path
 
-      // Get device info for this page view
-      const deviceCategory = getDeviceCategory()
-      const deviceType = detectDeviceType()
-
-      // Track page view with device info
+      // Device info is already set as user properties in analytics/index.js
+      // No need to send with page_view - reduces payload size
       window.gtag('event', 'page_view', {
         page_title: pageTitle,
         page_path: pagePath,
         page_location: window.location.href,
-        device_category: deviceCategory,
-        device_type: deviceType,
       })
 
       // Track navigation path (if coming from another page)

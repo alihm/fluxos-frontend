@@ -208,9 +208,11 @@
     "cookieConsent": {
       "title": "We value your privacy",
       "description": "We use cookies to enhance your browsing experience and analyze our traffic. By clicking Accept All, you consent to our use of cookies.",
+      "learnMore": "Learn more",
       "acceptAll": "Accept All",
       "onlyNecessary": "Only Necessary",
       "customize": "Customize",
+      "manageCookies": "Manage Cookies",
       "settingsTitle": "Cookie Preferences",
       "settingsDescription": "We use cookies to improve your experience on our site. You can choose which types of cookies to allow.",
       "necessary": "Necessary Cookies",
@@ -1244,7 +1246,8 @@
       "hideStatusBar": "Hide status bar",
       "showStatusBar": "Show status bar",
       "backendError": "Failed to fetch backend version",
-      "error": "Unreachable"
+      "error": "Unreachable",
+      "manageCookiesTooltip": "Manage cookie preferences and privacy settings"
     }
   },
   "components": {

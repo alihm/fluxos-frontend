@@ -39,14 +39,10 @@ export function useAnalytics() {
     }
 
     try {
-      const deviceCategory = getDeviceCategory()
-      const deviceType = detectDeviceType()
-
-      // Merge device info with custom params
+      // Device info is already set as user properties in analytics/index.js
+      // No need to send with every event - reduces payload size
       const eventParams = {
         ...params,
-        device_category: deviceCategory,
-        device_type: deviceType,
         timestamp: new Date().toISOString(),
       }
 
