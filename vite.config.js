@@ -79,7 +79,7 @@ export default defineConfig(({ mode }) => {
         compositionOnly: true,
         strictMessage: false,
         include: [
-          fileURLToPath(new URL('./src/plugins/i18n/locales/**', import.meta.url)),
+          fileURLToPath(new URL('./src/plugins/i18n/locales/*.json', import.meta.url)),
         ],
       }),
       svgLoader(),

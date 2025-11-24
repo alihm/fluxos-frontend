@@ -104,7 +104,6 @@ declare module 'vue' {
     ServerLocationsPanel: typeof import('./components/Marketplace/Panels/ServerLocationsPanel.vue')['default']
     Shortcuts: typeof import('./@core/components/Shortcuts.vue')['default']
     SmartChip: typeof import('./@core/components/SmartChip.vue')['default']
-    SponsoredAppCard: typeof import('./components/Marketplace/SponsoredAppCard.vue')['default']
     SponsoredCard: typeof import('./components/Marketplace/SponsoredCard.vue')['default']
     StatusBar: typeof import('./@core/components/StatusBar.vue')['default']
     StorageInfo: typeof import('./components/FluxDrive/StorageInfo.vue')['default']
