@@ -477,7 +477,7 @@
                   hide-details
                 >
                   <template #label>
-                    <span class="text-body-2" v-html="t('components.marketplace.installDialog.agreeToTerms')"></span>
+                    <span class="text-body-2 terms-label" @click="handleTermsLabelClick" v-html="t('components.marketplace.installDialog.agreeToTerms')"></span>
                   </template>
                 </VCheckbox>
               </div>
@@ -1666,6 +1666,16 @@ const signing = ref(false) // Deprecated - kept for compatibility
 const signatureCompleted = ref(false) // Deprecated - kept for compatibility
 const termsAccepted = ref(false)
 const signatureError = ref('') // Deprecated - kept for compatibility
+
+// Handle clicks on the terms label to allow link clicks without toggling checkbox
+const handleTermsLabelClick = (event) => {
+  // If the click was on a link, prevent checkbox toggle and let the link work
+  if (event.target.tagName === 'A') {
+    event.stopPropagation()
+    event.preventDefault()
+    window.open(event.target.href, '_blank', 'noopener,noreferrer')
+  }
+}
 
 // New signing state management (FluxCloud style)
 const signStepCompleted = ref([false, false]) // [signing, registration]
