@@ -164,22 +164,24 @@
       >
         <VTooltip location="top">
           <template #activator="{ props }">
-            <VBtn
-              variant="text"
-              size="small"
-              class="text-caption cookie-manage-btn"
+            <span
+              class="d-inline-flex align-center cursor-pointer"
+              style="position: relative"
               v-bind="props"
               @click="openCookieSettings"
             >
               <VIcon
-                size="16"
-                class="me-1"
+                size="20"
+                class="me-2"
               >mdi-cookie-settings</VIcon>
-              {{ t("common.cookieConsent.manageCookies") }}
-            </VBtn>
+            </span>
           </template>
           <span>{{ t("core.statusBar.manageCookiesTooltip") }}</span>
         </VTooltip>
+        <span
+          class="cursor-pointer"
+          @click="openCookieSettings"
+        >{{ t("common.cookieConsent.manageCookies") }}</span>
       </div>
     </div>
   </VCard>
