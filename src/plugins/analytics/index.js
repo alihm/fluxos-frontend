@@ -124,7 +124,7 @@ export function getResolutionCategory() {
  * Initialize Google Analytics 4
  * @param {object} app - Vue app instance
  */
-export default function setupAnalytics(app) {
+export function setupAnalytics(app) {
   const measurementId = import.meta.env.VITE_GA_MEASUREMENT_ID
   const analyticsEnabled = import.meta.env.VITE_ENABLE_ANALYTICS === 'true'
   const isProduction = import.meta.env.PROD

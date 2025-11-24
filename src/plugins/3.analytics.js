@@ -1,4 +1,4 @@
-import setupAnalytics from './analytics/index'
+import { setupAnalytics } from './analytics/index'
 import { hasAnalyticsConsent } from '@/composables/useCookieConsent'
 
 /**
