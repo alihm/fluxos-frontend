@@ -602,8 +602,8 @@ When running `npm run build`:
 - ⚡ Optimized performance
 
 **Requirements:**
-1. `VITE_GA_MEASUREMENT_ID` must be set
-2. `VITE_ENABLE_ANALYTICS=true` in `.env.production`
+1. `VITE_GA_MEASUREMENT_ID` must be set in `.env`
+2. `VITE_ENABLE_ANALYTICS=true` must be set in `.env` for production
 3. User must consent via cookie banner
 4. Production build deployed
 
