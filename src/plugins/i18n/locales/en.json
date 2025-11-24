@@ -1286,7 +1286,8 @@
         "install": "Install",
         "view": "View",
         "viewDetails": "View Details",
-        "noSponsoredApps": "No sponsored apps available"
+        "noSponsoredApps": "No sponsored apps available",
+        "free": "Free"
       },
       "newListedCard": {
         "title": "NEW LISTED APPLICATIONS",

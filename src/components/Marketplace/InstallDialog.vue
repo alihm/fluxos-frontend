@@ -1967,8 +1967,6 @@ const updateComposeTotal = () => {
 
     // Enforce maximum limits
     if (totalCpu > MAX_CPU) {
-      totalCpu = MAX_CPU
-
       // Proportionally reduce each container's CPU to fit within limit
       const ratio = MAX_CPU / totalCpu
       composeEntries.value.forEach(c => {
@@ -1978,8 +1976,6 @@ const updateComposeTotal = () => {
     }
 
     if (totalRam > MAX_RAM) {
-      totalRam = MAX_RAM
-
       // Proportionally reduce each container's RAM to fit within limit
       const ratio = MAX_RAM / totalRam
       composeEntries.value.forEach(c => {
@@ -1989,8 +1985,6 @@ const updateComposeTotal = () => {
     }
 
     if (totalHdd > MAX_HDD) {
-      totalHdd = MAX_HDD
-
       // Proportionally reduce each container's HDD to fit within limit
       const ratio = MAX_HDD / totalHdd
       composeEntries.value.forEach(c => {
@@ -2277,15 +2271,15 @@ watch(() => props.app, newApp => {
     // Initialize editable compose entries (deep clone for editing)
     composeEntries.value = newApp.compose.map(entry => ({
       ...entry,
-      cpu: Number(Number(entry.cpu).toFixed(1)),
-      ram: Number(entry.ram),
-      hdd: Number(entry.hdd),
+      cpu: Number((Number(entry.cpu) || 0.1).toFixed(1)),
+      ram: Number(entry.ram) || 100,
+      hdd: Number(entry.hdd) || 1,
     }))
 
     // Sum resources across all compose entries for multi-container apps
-    const totalCpu = newApp.compose.reduce((sum, c) => sum + Number(c.cpu), 0)
-    const totalRam = newApp.compose.reduce((sum, c) => sum + Number(c.ram), 0)
-    const totalHdd = newApp.compose.reduce((sum, c) => sum + Number(c.hdd), 0)
+    const totalCpu = newApp.compose.reduce((sum, c) => sum + (Number(c.cpu) || 0.1), 0)
+    const totalRam = newApp.compose.reduce((sum, c) => sum + (Number(c.ram) || 100), 0)
+    const totalHdd = newApp.compose.reduce((sum, c) => sum + (Number(c.hdd) || 1), 0)
 
     config.value.cpu = Number(totalCpu.toFixed(1))
     config.value.ram = totalRam
