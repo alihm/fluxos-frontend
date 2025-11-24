@@ -18,7 +18,7 @@ import { ref, onMounted, onBeforeUnmount, watch } from "vue"
 
 const isStatusBarHidden = ref(localStorage.getItem('statusBarHidden') === 'true')
 
-const handleStatusBarToggle = (event) => {
+const handleStatusBarToggle = event => {
   isStatusBarHidden.value = event.detail.hidden
 }
 

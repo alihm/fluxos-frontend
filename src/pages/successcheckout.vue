@@ -25,6 +25,12 @@ const isPopup = ref(false)
 const closeInterval = ref(null)
 
 onMounted(() => {
+  // Track successful payment completion
+  const analytics = useAnalytics()
+  analytics.trackCheckout('purchase', {
+    success: true,
+  })
+
   // Check if this window was opened as a popup
   isPopup.value = window.opener !== null
 

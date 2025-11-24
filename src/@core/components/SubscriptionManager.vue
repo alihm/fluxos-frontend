@@ -4188,6 +4188,7 @@ function updateRenewalLabels() {
     ]
   } catch (error) {
     console.error('Error getting renewal labels:', error)
+
     // Keep fallback values
   }
 }

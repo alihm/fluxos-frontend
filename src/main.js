@@ -55,7 +55,7 @@ window.addEventListener('error', event => {
 
     const chunkErrorPatterns = [
       'Failed to fetch dynamically imported module',
-      'Importing a module script failed'
+      'Importing a module script failed',
     ]
 
     return chunkErrorPatterns.some(pattern => event.message?.includes(pattern))
@@ -70,7 +70,7 @@ window.addEventListener('error', event => {
       isAppChunkError,
       message: event.message,
       target: event.target?.tagName,
-      src: event.target?.src || event.target?.href
+      src: event.target?.src || event.target?.href,
     })
   }
 

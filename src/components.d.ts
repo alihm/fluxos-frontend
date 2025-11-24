@@ -42,6 +42,7 @@ declare module 'vue' {
     CheckoutContent: typeof import('./components/CheckoutContent.vue')['default']
     ComponentDetails: typeof import('./@core/components/ComponentDetails.vue')['default']
     ConfirmCustomDialog: typeof import('./@core/components/ConfirmCustomDialog.vue')['default']
+    CookieConsent: typeof import('./components/shared/CookieConsent.vue')['default']
     CtaSection: typeof import('./components/CtaSection.vue')['default']
     CustomCheckboxes: typeof import('./@core/components/app-form-elements/CustomCheckboxes.vue')['default']
     CustomCheckboxesWithIcon: typeof import('./@core/components/app-form-elements/CustomCheckboxesWithIcon.vue')['default']

@@ -637,6 +637,14 @@ onMounted(async () => {
     activePaymentMethod.value = 'fluxpay'
   }
 
+  // Track payment system selection
+  const analytics = useAnalytics()
+  analytics.trackPaymentSystemSelected(activePaymentMethod.value, {
+    plan: planId.value,
+    plan_name: selectedPlan.value?.name,
+    price: selectedPlan.value?.pricePerMonth,
+  })
+
   // Check if user is logged in and restore zelid if needed
   const zelidauth = localStorage.getItem('zelidauth')
 
@@ -678,6 +686,29 @@ onMounted(async () => {
     // We have zelidauth but no zelid - shouldn't happen but handle it
     showAlert(t('pages.checkout.messages.sessionExpired'), 'warning')
     loading.value = false
+  }
+})
+
+// Track when user manually switches payment method
+let initialPaymentMethodSet = false
+watch(activePaymentMethod, (newMethod, oldMethod) => {
+  // Skip the first watch trigger (from onMounted)
+  if (!initialPaymentMethodSet) {
+    initialPaymentMethodSet = true
+    
+    return
+  }
+
+  // Only track if user actually changed it (not initial load)
+  if (oldMethod && newMethod !== oldMethod) {
+    const analytics = useAnalytics()
+    analytics.trackPaymentSystemSelected(newMethod, {
+      plan: planId.value,
+      plan_name: selectedPlan.value?.name,
+      price: selectedPlan.value?.pricePerMonth,
+      previous_method: oldMethod,
+      user_changed: true,
+    })
   }
 })
 </script>

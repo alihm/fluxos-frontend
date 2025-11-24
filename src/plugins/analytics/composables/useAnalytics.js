@@ -1,41 +1,67 @@
 import { getDeviceCategory, detectDeviceType } from '../index'
+import { hasAnalyticsConsent } from '@/composables/useCookieConsent'
 
 /**
  * Analytics composable for tracking events throughout the application
+ * GDPR-compliant with consent checking
  * Auto-imports enabled via vite.config.js
  */
 export function useAnalytics() {
+  /**
+   * Check if analytics tracking is allowed
+   * @returns {boolean}
+   */
+  const canTrack = () => {
+    // Always allow in development (logs to console only)
+    if (import.meta.env.DEV) return true
+
+    // In production, check consent
+    return hasAnalyticsConsent()
+  }
+
   /**
    * Track a custom event
    * @param {string} eventName - Event name (e.g., 'button_click', 'app_deploy')
    * @param {object} params - Event parameters
    */
   const trackEvent = (eventName, params = {}) => {
-    if (!window.gtag) {
-      console.warn('⚠️ Google Analytics not loaded, event not tracked:', eventName)
+    // Check consent first
+    if (!canTrack()) {
       return
     }
 
-    const deviceCategory = getDeviceCategory()
-    const deviceType = detectDeviceType()
-
-    // Merge device info with custom params
-    const eventParams = {
-      ...params,
-      device_category: deviceCategory,
-      device_type: deviceType,
-      timestamp: new Date().toISOString(),
+    if (!window.gtag) {
+      if (import.meta.env.DEV) {
+        console.warn('⚠️ Google Analytics not loaded')
+      }
+      
+      return
     }
 
-    window.gtag('event', eventName, eventParams)
+    try {
+      const deviceCategory = getDeviceCategory()
+      const deviceType = detectDeviceType()
 
-    if (import.meta.env.DEV) {
-      console.log('📊 Analytics Event:', eventName, eventParams)
+      // Merge device info with custom params
+      const eventParams = {
+        ...params,
+        device_category: deviceCategory,
+        device_type: deviceType,
+        timestamp: new Date().toISOString(),
+      }
+
+      window.gtag('event', eventName, eventParams)
+
+      if (import.meta.env.DEV) {
+        console.log('📊 Analytics Event:', eventName, eventParams)
+      }
+    } catch (error) {
+      console.error('Error tracking event:', error)
     }
   }
 
   /**
-   * Track page view
+   * Track page view (usually automatic, but can be called manually)
    * @param {string} pagePath - Page path
    * @param {string} pageTitle - Page title
    */
@@ -240,7 +266,7 @@ export function useAnalytics() {
    * Track theme changes
    * @param {string} theme - New theme (light/dark)
    */
-  const trackThemeChange = (theme) => {
+  const trackThemeChange = theme => {
     trackEvent('theme_change', {
       theme_name: theme,
     })

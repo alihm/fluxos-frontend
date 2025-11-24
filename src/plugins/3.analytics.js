@@ -1,42 +1,69 @@
-import setupAnalytics from './analytics/index'
-import { router } from './1.router/index'
+import setupAnalytics, { getDeviceCategory, detectDeviceType } from './analytics/index'
+import { hasAnalyticsConsent } from '@/composables/useCookieConsent'
 
 /**
  * Google Analytics Plugin
  * Load order: 3 (after router and pinia)
  *
- * Provides comprehensive analytics tracking with:
- * - Automatic page view tracking
- * - Device categorization (mobile/desktop)
- * - Browser and screen resolution tracking
- * - Custom event tracking via useAnalytics composable
+ * Features:
+ * - GDPR-compliant with consent management
+ * - Single page view tracking (no duplication)
+ * - Automatic route change tracking
+ * - Development mode support (no data sent)
+ * - IP anonymization enabled
+ * - Custom dimensions for device/browser tracking
+ *
+ * Note: Router is accessed dynamically to avoid circular dependencies
  */
+
+let routerUnsubscribe = null
+
 export default function (app) {
-  // Initialize Google Analytics with router for automatic page view tracking
-  setupAnalytics(app, router)
+  // Initialize Google Analytics (handles GDPR consent, dev mode, etc.)
+  setupAnalytics(app)
 
   // Setup automatic page view tracking on route changes
-  router.afterEach((to, from) => {
-    // Skip tracking if navigation failed or was cancelled
+  // Access router from app instance to avoid import issues
+  const router = app.config.globalProperties.$router
+
+  if (!router) {
+    console.error('❌ Analytics: Router not found on app instance')
+    
+    return
+  }
+
+  // Track page views on route navigation
+  // This is the ONLY place where page views are tracked (no triple tracking)
+  routerUnsubscribe = router.afterEach((to, from) => {
+    // Skip if navigation failed or was cancelled
     if (!to.name) return
 
-    // Track page view with Google Analytics
-    if (window.gtag) {
+    // Only track if user has consented and gtag is available
+    if (!window.gtag) return
+
+    // Check consent before tracking
+    if (!hasAnalyticsConsent() && import.meta.env.PROD) {
+      return // Don't track without consent in production
+    }
+
+    try {
       const pageTitle = to.meta?.title || to.name || document.title
       const pagePath = to.path
 
-      // Get device info for tracking
-      const deviceCategory = to.query?.device_category ||
-                             (window.innerWidth <= 768 ? 'mobile' : 'desktop')
+      // Get device info for this page view
+      const deviceCategory = getDeviceCategory()
+      const deviceType = detectDeviceType()
 
+      // Track page view with device info
       window.gtag('event', 'page_view', {
         page_title: pageTitle,
         page_path: pagePath,
         page_location: window.location.href,
         device_category: deviceCategory,
+        device_type: deviceType,
       })
 
-      // Track navigation from previous page (if exists)
+      // Track navigation path (if coming from another page)
       if (from.name) {
         window.gtag('event', 'navigation', {
           from_page: from.path,
@@ -44,7 +71,21 @@ export default function (app) {
           navigation_type: 'route_change',
         })
       }
+    } catch (error) {
+      console.error('Error tracking page view:', error)
     }
+  })
+
+  // Cleanup on app unmount to prevent memory leaks
+  app._context.app.unmount = new Proxy(app._context.app.unmount, {
+    apply(target, thisArg, args) {
+      if (routerUnsubscribe) {
+        routerUnsubscribe()
+        routerUnsubscribe = null
+      }
+      
+      return Reflect.apply(target, thisArg, args)
+    },
   })
 
   console.log('✅ Analytics plugin registered')

@@ -708,6 +708,8 @@ const isMMSDKInitialized = ref(false)
 // }
 
 const login = () => {
+  const analytics = useAnalytics()
+
   IDService.verifyLogin(loginForm.value)
     .then(response => {
       if (response.data.status === "success") {
@@ -720,13 +722,22 @@ const login = () => {
         fluxStore.setPrivilege(response.data.data.privilage)
         fluxStore.setZelid(zelidauth.zelid)
         localStorage.setItem("zelidauth", qs.stringify(zelidauth))
+
+        // Track successful ZelID authentication
+        analytics.trackAuth('zelid', true)
+
         emit('loginSuccess')
         showToast("success", response.data.data.message)
       } else {
+        // Track failed authentication
+        analytics.trackAuth('zelid', false)
         showToast(response.data.status, response.data.data.message || response.data.data)
       }
     })
     .catch(e => {
+      // Track authentication error
+      const analytics = useAnalytics()
+      analytics.trackAuth('zelid', false)
       showToast("error", e.toString())
     })
 }
@@ -768,6 +779,11 @@ const handleSignedInUser = async user => {
         fluxStore.setZelid(authLogin.zelid)
         localStorage.setItem('loginType', 'sso')
         localStorage.setItem("zelidauth", qs.stringify(authLogin))
+
+        // Track successful Firebase/SSO authentication
+        const analytics = useAnalytics()
+        analytics.trackAuth('firebase', true)
+
         showSsoLoggedIn.value = false
         emit('loginSuccess')
         showToast("success", response.data.data.message)

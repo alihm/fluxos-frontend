@@ -449,7 +449,7 @@ const whyFluxBenefits = computed(() => [
     color: 'info',
     title: t('pages.apps.register.landing.benefits.global.title'),
     description: t('pages.apps.register.landing.benefits.global.description', {
-      countryCount: countryCount.value
+      countryCount: countryCount.value,
     }),
   },
   {
@@ -722,6 +722,18 @@ const handleAppDeployed = deployedApp => {
   // Handle successful deployment
   console.log('App deployed successfully:', deployedApp.displayName || deployedApp.name)
 
+  // Track successful app deployment
+  const analytics = useAnalytics()
+  analytics.trackAppAction(
+    deployedApp.displayName || deployedApp.name,
+    'deploy',
+    {
+      app_id: deployedApp.id,
+      category: deployedApp.category,
+      source: 'marketplace',
+    },
+  )
+
   // Show success notification or redirect to apps management
   // Could also update the UI to show "Manage" instead of "Install"
 }
@@ -768,14 +780,15 @@ const fetchNetworkData = async () => {
       await new Promise(resolve => {
         const unwatch = watch(
           () => serverLocations.fluxList.length,
-          (length) => {
+          length => {
             if (length > 0) {
               unwatch()
               resolve()
             }
           },
-          { immediate: true }
+          { immediate: true },
         )
+
         // Timeout after 5 seconds
         setTimeout(() => {
           unwatch()
@@ -805,6 +818,7 @@ const fetchNetworkData = async () => {
     }
   } catch (error) {
     console.error('Error loading network data from store:', error)
+
     // Keep default fallback values on error
   }
 }

@@ -204,6 +204,19 @@
       "vCores": "vCores",
       "mb": "MB",
       "gb": "GB"
+    },
+    "cookieConsent": {
+      "title": "Szanujemy Twoją prywatność",
+      "description": "Używamy plików cookie, aby poprawić komfort przeglądania i analizować ruch. Klikając Akceptuj wszystkie, zgadzasz się na nasze użycie plików cookie.",
+      "acceptAll": "Akceptuj wszystkie",
+      "onlyNecessary": "Tylko niezbędne",
+      "customize": "Dostosuj",
+      "settingsTitle": "Preferencje plików cookie",
+      "settingsDescription": "Używamy plików cookie, aby poprawić Twoje wrażenia na naszej stronie. Możesz wybrać, które typy plików cookie chcesz zezwolić.",
+      "necessary": "Niezbędne pliki cookie",
+      "necessaryDescription": "Te pliki cookie są niezbędne do prawidłowego funkcjonowania witryny. Nie można ich wyłączyć.",
+      "analytics": "Analityczne pliki cookie",
+      "analyticsDescription": "Te pliki cookie pomagają nam zrozumieć, jak odwiedzający wchodzą w interakcje z naszą witryną, zbierając i raportując informacje anonimowo."
     }
   },
   "menu": {

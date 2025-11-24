@@ -5,14 +5,14 @@ import {
 } from '@layouts/components'
 import { ref, onMounted, onBeforeUnmount, nextTick, watch } from 'vue'
 
-const { t } = useI18n()
-
 const props = defineProps({
   navItems: {
     type: null,
     required: true,
   },
 })
+
+const { t } = useI18n()
 
 const resolveNavItemComponent = item => {
   if ('children' in item)

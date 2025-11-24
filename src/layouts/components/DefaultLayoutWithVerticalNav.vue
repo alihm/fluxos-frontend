@@ -62,6 +62,7 @@ const openCustomizer = event => {
 
 const handleLoginSuccess = () => {
   closeLoginBottomSheet()
+
   // Check user apps after successful login
   fluxStore.checkUserApps()
 }

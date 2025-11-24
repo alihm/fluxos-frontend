@@ -195,6 +195,7 @@ export const useFluxStore = defineStore("flux", {
         this.serverLocations.fluxList = Array.isArray(cached.fluxList) ? cached.fluxList : []
         this.serverLocations.fluxNodeCount = cached.fluxNodeCount || 0
         this.serverLocations.hasError = false
+
         // Don't set lastFetched yet - we'll fetch fresh data below
       }
 
@@ -385,6 +386,7 @@ export const useFluxStore = defineStore("flux", {
       const cached = await this.loadTrustpilotFromCache()
       if (cached) {
         this.trustpilot.data = cached
+
         // Don't set isFetched yet - we'll fetch fresh data below
       } else {
         // Start with fallback data immediately (for instant display)
@@ -451,6 +453,7 @@ export const useFluxStore = defineStore("flux", {
         this.userApps.isChecked = true
       } catch (error) {
         console.error('Error checking user apps:', error)
+
         // On error, assume user might have apps to avoid hiding the menu unnecessarily
         this.userApps.hasApps = true
         this.userApps.isChecked = true

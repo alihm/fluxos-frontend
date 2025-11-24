@@ -483,14 +483,15 @@ const fetchNetworkData = async () => {
       await new Promise(resolve => {
         const unwatch = watch(
           () => serverLocations.fluxList.length,
-          (length) => {
+          length => {
             if (length > 0) {
               unwatch()
               resolve()
             }
           },
-          { immediate: true }
+          { immediate: true },
         )
+
         // Timeout after 5 seconds
         setTimeout(() => {
           unwatch()
@@ -508,6 +509,7 @@ const fetchNetworkData = async () => {
     }
   } catch (error) {
     console.error('Error loading network data from store:', error)
+
     // Keep default fallback values on error
   }
 }
@@ -522,7 +524,7 @@ watch(() => route.params.name, () => {
 onMounted(async () => {
   await Promise.all([
     loadGameDetails(),
-    fetchNetworkData()
+    fetchNetworkData(),
   ])
 })
 </script>

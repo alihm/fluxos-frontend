@@ -382,13 +382,13 @@ const fetchFluxLocations = async () => {
       await new Promise(resolve => {
         const unwatch = watch(
           () => serverLocations.fluxList.length,
-          (length) => {
+          length => {
             if (length > 0) {
               unwatch()
               resolve()
             }
           },
-          { immediate: true }
+          { immediate: true },
         )
         setTimeout(() => {
           unwatch()
