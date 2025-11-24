@@ -5,7 +5,7 @@
       <div class="grid-header">
         <div class="header-top">
           <h2 class="section-title">
-            <VIcon start color="secondary">mdi-apps</VIcon>
+            <VIcon start size="20" color="secondary">mdi-apps</VIcon>
             {{ labels.title }}
           </h2>
         </div>

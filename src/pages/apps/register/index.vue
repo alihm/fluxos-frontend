@@ -585,24 +585,29 @@ const fetchNetworkData = async () => {
     // Wait a bit for store to populate if needed
     if (serverLocations.fluxList.length === 0 && !serverLocations.lastFetched) {
       // Store hasn't loaded yet, wait for it
-      await new Promise(resolve => {
-        const unwatch = watch(
-          () => serverLocations.fluxList.length,
-          length => {
-            if (length > 0) {
-              unwatch()
-              resolve()
-            }
-          },
-          { immediate: true },
-        )
+      try {
+        await new Promise((resolve, reject) => {
+          const unwatch = watch(
+            () => serverLocations.fluxList.length,
+            length => {
+              if (length > 0) {
+                unwatch()
+                resolve()
+              }
+            },
+            { immediate: true },
+          )
 
-        // Timeout after 5 seconds
-        setTimeout(() => {
-          unwatch()
-          resolve()
-        }, 5000)
-      })
+          // Timeout after 5 seconds
+          setTimeout(() => {
+            unwatch()
+            reject(new Error('Timeout waiting for server locations to load'))
+          }, 5000)
+        })
+      } catch (error) {
+        console.warn('Failed to load server locations:', error.message)
+        // Continue anyway - page will use fallback values
+      }
     }
 
     // Update node count from store

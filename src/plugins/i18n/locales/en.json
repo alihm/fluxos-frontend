@@ -1224,7 +1224,18 @@
       "updateDeployedSuccessfully": "Update deployed successfully!",
       "paymentConfirmedSpecUpdated": "Payment confirmed! Your application spec has been updated.",
       "testPaymentConfirmed": "TEST: Payment confirmed! Your application is now active and running.",
-      "sspPaymentInitiated": "SSP payment initiated: {txid}"
+      "sspPaymentInitiated": "SSP payment initiated: {txid}",
+      "tos": {
+        "title": "Terms of Service Agreement",
+        "dialogTitle": "Flux Terms of Service",
+        "description": "Before registering your application, you must read and accept our Terms of Service. This ensures you understand the guidelines and responsibilities for using our platform.",
+        "agreement": "I have read and accept the",
+        "link": "Terms of Service",
+        "agree": "I Agree",
+        "disagree": "I Disagree",
+        "errorMessage": "Please read and accept the Terms of Service before proceeding to other tabs.",
+        "loadError": "Failed to load Terms of Service. Please visit:"
+      }
     },
     "statusBar": {
       "backend": "Backend",
@@ -1302,7 +1313,8 @@
         "install": "Install",
         "view": "View",
         "viewDetails": "View Details",
-        "noSponsoredApps": "No sponsored apps available"
+        "noSponsoredApps": "No sponsored apps available",
+        "free": "Free"
       },
       "newListedCard": {
         "title": "NEW LISTED APPLICATIONS",
@@ -1401,6 +1413,7 @@
         "twelveMonths": "12 Months",
         "showAdvanced": "Show Advanced",
         "configurationParameter": "Configuration parameter",
+        "containers": "Containers",
         "allSet": "All Set!",
         "noAdditionalConfig": "No additional configuration required",
         "deploymentLocation": "Deployment Location",

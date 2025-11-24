@@ -112,9 +112,13 @@
                     <VIcon icon="mdi-memory" size="18" color="white" />
                   </VAvatar>
                   <h5>{{ t('components.marketplace.installDialog.hardwareRequirements') }}</h5>
+                  <VChip v-if="composeEntries?.length > 1" size="small" color="secondary" variant="tonal" class="ml-2">
+                    {{ composeEntries.length }} {{ t('components.marketplace.installDialog.containers') }}
+                  </VChip>
                 </div>
 
-                <div class="hardware-grid">
+                <!-- LOCKED: Show summed totals (existing UI) -->
+                <div v-if="isCpuLocked || isRamLocked || isStorageLocked" class="hardware-grid">
                   <div class="hardware-card" style="position: relative;" :class="{ 'hardware-card--disabled': isCpuLocked }">
                     <VIcon v-if="isCpuLocked" icon="mdi-lock" size="16" color="warning" style="position: absolute; top: 8px; right: 8px; z-index: 1;" />
                     <VAvatar size="36" color="success" variant="tonal">
@@ -130,15 +134,15 @@
                           variant="tonal"
                           color="success"
                           class="control-btn"
-                          @click="config.cpu = Math.max((app.compose?.[0]?.cpu || 1), (parseFloat(config.cpu) - 0.1)).toFixed(1)"
+                          @click="config.cpu = Number(Math.max(app.compose.reduce((sum, c) => sum + Number(c.cpu), 0), (parseFloat(config.cpu) - 0.1)).toFixed(1))"
                         />
                         <div class="hardware-value-display">
                           <input
-                            v-model="config.cpu"
+                            :value="Number(config.cpu).toFixed(1)"
                             type="text"
                             class="hardware-custom-input"
                             :disabled="isCpuLocked"
-                            @input="config.cpu = $event.target.value"
+                            @input="config.cpu = Number(parseFloat($event.target.value).toFixed(1))"
                           />
                         </div>
                         <VBtn
@@ -148,7 +152,7 @@
                           variant="tonal"
                           color="success"
                           class="control-btn"
-                          @click="config.cpu = (parseFloat(config.cpu) + 0.1).toFixed(1)"
+                          @click="config.cpu = Number((parseFloat(config.cpu) + 0.1).toFixed(1))"
                         />
                       </div>
                     </div>
@@ -169,7 +173,7 @@
                           variant="tonal"
                           color="info"
                           class="control-btn"
-                          @click="config.ram = Math.max((app.compose?.[0]?.ram || 512), config.ram - 100)"
+                          @click="config.ram = Math.max(app.compose.reduce((sum, c) => sum + Number(c.ram), 0), config.ram - 100)"
                         />
                         <div class="hardware-value-display">
                           <input
@@ -208,7 +212,7 @@
                           variant="tonal"
                           color="warning"
                           class="control-btn"
-                          @click="config.storage = Math.max((app.compose?.[0]?.hdd || 1), config.storage - 1)"
+                          @click="config.storage = Math.max(app.compose.reduce((sum, c) => sum + Number(c.hdd), 0), config.storage - 1)"
                         />
                         <div class="hardware-value-display">
                           <input
@@ -228,6 +232,130 @@
                           class="control-btn"
                           @click="config.storage = parseInt(config.storage) + 1"
                         />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- UNLOCKED: Show individual compose entries for editing -->
+                <div v-else class="compose-entries-container">
+                  <div
+                    v-for="(entry, index) in composeEntries"
+                    :key="index"
+                    class="compose-entry-item"
+                  >
+                    <div class="compose-entry-title">
+                      <VIcon icon="mdi-docker" size="20" color="secondary" class="ml-3" />
+                      <span class="entry-name">{{ entry.name || `Container ${index + 1}` }}</span>
+                    </div>
+
+                    <div class="hardware-grid">
+                      <!-- CPU -->
+                      <div class="hardware-card">
+                        <VAvatar size="36" color="success" variant="tonal">
+                          <VIcon icon="mdi-cpu-64-bit" size="20" />
+                        </VAvatar>
+                        <div class="hardware-details">
+                          <span class="hardware-label">CPU</span>
+                          <div class="hardware-control">
+                            <VBtn
+                              icon="mdi-minus"
+                              size="x-small"
+                              variant="tonal"
+                              color="success"
+                              class="control-btn"
+                              @click="entry.cpu = Number(Math.max(0.1, (parseFloat(entry.cpu) - 0.1)).toFixed(1)); updateComposeTotal()"
+                            />
+                            <div class="hardware-value-display">
+                              <input
+                                :value="Number(entry.cpu).toFixed(1)"
+                                type="text"
+                                class="hardware-custom-input"
+                                @input="entry.cpu = Number(parseFloat($event.target.value).toFixed(1)); updateComposeTotal()"
+                              />
+                            </div>
+                            <VBtn
+                              icon="mdi-plus"
+                              size="x-small"
+                              variant="tonal"
+                              color="success"
+                              class="control-btn"
+                              @click="entry.cpu = Number((parseFloat(entry.cpu) + 0.1).toFixed(1)); updateComposeTotal()"
+                            />
+                          </div>
+                        </div>
+                      </div>
+
+                      <!-- RAM -->
+                      <div class="hardware-card">
+                        <VAvatar size="36" color="info" variant="tonal">
+                          <VIcon icon="mdi-memory" size="20" />
+                        </VAvatar>
+                        <div class="hardware-details">
+                          <span class="hardware-label">RAM (MB)</span>
+                          <div class="hardware-control">
+                            <VBtn
+                              icon="mdi-minus"
+                              size="x-small"
+                              variant="tonal"
+                              color="info"
+                              class="control-btn"
+                              @click="entry.ram = Math.max(100, entry.ram - 100); updateComposeTotal()"
+                            />
+                            <div class="hardware-value-display">
+                              <input
+                                v-model="entry.ram"
+                                type="text"
+                                class="hardware-custom-input"
+                                @input="updateComposeTotal"
+                              />
+                            </div>
+                            <VBtn
+                              icon="mdi-plus"
+                              size="x-small"
+                              variant="tonal"
+                              color="info"
+                              class="control-btn"
+                              @click="entry.ram = parseInt(entry.ram) + 100; updateComposeTotal()"
+                            />
+                          </div>
+                        </div>
+                      </div>
+
+                      <!-- Storage -->
+                      <div class="hardware-card">
+                        <VAvatar size="36" color="warning" variant="tonal">
+                          <VIcon icon="mdi-harddisk" size="20" />
+                        </VAvatar>
+                        <div class="hardware-details">
+                          <span class="hardware-label">Storage (GB)</span>
+                          <div class="hardware-control">
+                            <VBtn
+                              icon="mdi-minus"
+                              size="x-small"
+                              variant="tonal"
+                              color="warning"
+                              class="control-btn"
+                              @click="entry.hdd = Math.max(1, entry.hdd - 1); updateComposeTotal()"
+                            />
+                            <div class="hardware-value-display">
+                              <input
+                                v-model="entry.hdd"
+                                type="text"
+                                class="hardware-custom-input"
+                                @input="updateComposeTotal"
+                              />
+                            </div>
+                            <VBtn
+                              icon="mdi-plus"
+                              size="x-small"
+                              variant="tonal"
+                              color="warning"
+                              class="control-btn"
+                              @click="entry.hdd = parseInt(entry.hdd) + 1; updateComposeTotal()"
+                            />
+                          </div>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -1822,6 +1950,58 @@ const config = ref({
   parameters: {},
 })
 
+// Editable compose entries for unlocked hardware (multi-container apps)
+const composeEntries = ref([])
+
+// Resource limits (Stratus tier - locked resources)
+const MAX_CPU = 15.0 // 150 - 10 locked = 140 / 10 = 14, but allow 15 for safety
+const MAX_RAM = 59000 // 61000 - 2000 locked
+const MAX_HDD = 820 // 880 - 60 locked
+
+// Update config totals when compose entries change (for unlocked mode)
+const updateComposeTotal = () => {
+  if (composeEntries.value.length > 0) {
+    let totalCpu = composeEntries.value.reduce((sum, c) => sum + Number(c.cpu), 0)
+    let totalRam = composeEntries.value.reduce((sum, c) => sum + Number(c.ram), 0)
+    let totalHdd = composeEntries.value.reduce((sum, c) => sum + Number(c.hdd), 0)
+
+    // Enforce maximum limits
+    if (totalCpu > MAX_CPU) {
+      // Proportionally reduce each container's CPU to fit within limit
+      const ratio = MAX_CPU / totalCpu
+      composeEntries.value.forEach(c => {
+        c.cpu = Number((Number(c.cpu) * ratio).toFixed(1))
+      })
+      totalCpu = composeEntries.value.reduce((sum, c) => sum + Number(c.cpu), 0)
+    }
+
+    if (totalRam > MAX_RAM) {
+      // Proportionally reduce each container's RAM to fit within limit
+      const ratio = MAX_RAM / totalRam
+      composeEntries.value.forEach(c => {
+        c.ram = Math.round(Number(c.ram) * ratio)
+      })
+      totalRam = composeEntries.value.reduce((sum, c) => sum + Number(c.ram), 0)
+    }
+
+    if (totalHdd > MAX_HDD) {
+      // Proportionally reduce each container's HDD to fit within limit
+      const ratio = MAX_HDD / totalHdd
+      composeEntries.value.forEach(c => {
+        c.hdd = Math.round(Number(c.hdd) * ratio)
+      })
+      totalHdd = composeEntries.value.reduce((sum, c) => sum + Number(c.hdd), 0)
+    }
+
+    config.value.cpu = Number(totalCpu.toFixed(1))
+    config.value.ram = totalRam
+    config.value.storage = totalHdd
+
+    // Trigger price recalculation after updating totals
+    fetchPricingFromAPI()
+  }
+}
+
 // Show advanced parameters toggle
 const showAdvanced = ref(false)
 
@@ -2088,10 +2268,23 @@ const isStorageLocked = computed(() => true) // Always lock storage for marketpl
 // Initialize config values when app prop is available (only if no selectedConfig)
 watch(() => props.app, newApp => {
   if (newApp && newApp.compose && newApp.compose.length > 0 && !props.selectedConfig) {
-    config.value.cpu = newApp.compose[0].cpu || 1
-    config.value.ram = newApp.compose[0].ram || 512
-    config.value.storage = newApp.compose[0].hdd || 1
-    config.value.instances = newApp.instances || 3
+    // Initialize editable compose entries (deep clone for editing)
+    composeEntries.value = newApp.compose.map(entry => ({
+      ...entry,
+      cpu: Number((Number(entry.cpu) || 0.1).toFixed(1)),
+      ram: Number(entry.ram) || 100,
+      hdd: Number(entry.hdd) || 1,
+    }))
+
+    // Sum resources across all compose entries for multi-container apps
+    const totalCpu = newApp.compose.reduce((sum, c) => sum + (Number(c.cpu) || 0.1), 0)
+    const totalRam = newApp.compose.reduce((sum, c) => sum + (Number(c.ram) || 100), 0)
+    const totalHdd = newApp.compose.reduce((sum, c) => sum + (Number(c.hdd) || 1), 0)
+
+    config.value.cpu = Number(totalCpu.toFixed(1))
+    config.value.ram = totalRam
+    config.value.storage = totalHdd
+    config.value.instances = newApp.instances
 
     // For WordPress, initialize subscription months from app
     if (isWordPress.value && newApp.subscriptionMonths) {
@@ -2193,13 +2386,27 @@ const fetchPricingFromAPI = async () => {
       }]
     } else {
       // Regular apps/games: Use API price from app spec
-      monthlyPrice = props.app.price || 0
-      appSpecCompose = [{
-        ...composeArray[0],
-        cpu: parseFloat(config.value.cpu),
-        ram: parseInt(config.value.ram),
-        hdd: parseInt(config.value.storage),
-      }]
+      monthlyPrice = props.app.price
+
+      // For price calculation: Send individual compose entries with their actual hardware
+      // (same as signature spec for multi-container apps)
+      if (composeArray.length > 1 && composeEntries.value.length > 0) {
+        // Multi-container: Use individual hardware from composeEntries
+        appSpecCompose = composeArray.map((entry, index) => ({
+          ...entry,
+          cpu: Number(composeEntries.value[index]?.cpu || entry.cpu),
+          ram: Number(composeEntries.value[index]?.ram || entry.ram),
+          hdd: Number(composeEntries.value[index]?.hdd || entry.hdd),
+        }))
+      } else {
+        // Single-container: Use config totals
+        appSpecCompose = [{
+          ...composeArray[0],
+          cpu: parseFloat(config.value.cpu),
+          ram: parseInt(config.value.ram),
+          hdd: parseInt(config.value.storage),
+        }]
+      }
     }
 
     const totalPriceUSD = monthlyPrice * config.value.subscriptionMonths
@@ -2369,7 +2576,26 @@ const monthlyPrice = computed(() => {
     return props.app.price || 0
   }
 
-  // Marketplace apps only: config price is for default instances (3)
+  // For marketplace apps with custom hardware: Use API-calculated price if available
+  if (apiPricing.value.usd > 0) {
+    // API price is already calculated based on actual hardware and instances
+    const apiPrice = Number(apiPricing.value.usd.toFixed(2))
+    const configPrice = props.app.price || 0
+
+    // Ensure price never goes below the original config price
+    const finalPrice = Math.max(apiPrice, configPrice)
+
+    console.log('💰 Using API-calculated price:', {
+      apiPrice,
+      configPrice,
+      finalPrice,
+      usedMinimum: finalPrice > apiPrice,
+    })
+
+    return finalPrice
+  }
+
+  // Fallback: Marketplace apps only - config price is for default instances (3)
   // Calculate price per instance, then multiply by current instances
   const configPrice = props.app.price || 0
   const defaultInstances = 3
@@ -2377,7 +2603,7 @@ const monthlyPrice = computed(() => {
   const pricePerInstance = configPrice / defaultInstances
   const totalPrice = Number((pricePerInstance * currentInstances).toFixed(2))
 
-  console.log('💰 Price calculation:', {
+  console.log('💰 Price calculation (fallback):', {
     configPrice,
     currentInstances,
     pricePerInstance,
@@ -3180,7 +3406,7 @@ const generateDeploymentMessage = async () => {
     name: appName,
     description: detailedApp.value.description || props.app.description || detailedApp.value.displayName || props.app.displayName,
     owner: owner,
-    compose: baseComponents.map(component => {
+    compose: baseComponents.map((component, index) => {
       // Build environmentParameters like FluxCloud
       // Note: API returns 'environmentParameters' but FluxOS expects 'enviromentParameters' (typo)
       const environmentParameters = [
@@ -3194,10 +3420,21 @@ const generateDeploymentMessage = async () => {
         }
       }
 
-      // Create new component with scaled hardware
-      const scaledCPU = parseFloat((component.cpu * coresMultiplier).toFixed(1))
-      const scaledRAM = Math.round(component.ram * ramMultiplier)
-      const scaledHDD = Math.round(component.hdd * ssdMultiplier)
+      // For signature spec: Use individual hardware from composeEntries when available
+      // For multi-container apps, composeEntries contains the actual values (edited or synced)
+      let scaledCPU, scaledRAM, scaledHDD
+
+      if (baseComponents.length > 1 && composeEntries.value.length > 0 && composeEntries.value[index]) {
+        // Multi-container: Use individual hardware from composeEntries
+        scaledCPU = Number(composeEntries.value[index].cpu)
+        scaledRAM = Number(composeEntries.value[index].ram)
+        scaledHDD = Number(composeEntries.value[index].hdd)
+      } else {
+        // Single-container or WordPress: Use hardware multipliers as before
+        scaledCPU = parseFloat((component.cpu * coresMultiplier).toFixed(1))
+        scaledRAM = Math.round(component.ram * ramMultiplier)
+        scaledHDD = Math.round(component.hdd * ssdMultiplier)
+      }
 
       // Auto-generate ports from portSpecs if available (matches FluxCloud deployment_mixin.dart:99-119)
       let componentPorts = component.ports || []
@@ -3899,10 +4136,25 @@ const resetDialog = () => {
   deploymentAppSpec.value = null
   paymentHash.value = ''
 
+  // Sum resources across all compose entries for multi-container apps
+  const composeArray = props.app.compose || []
+
+  // Initialize editable compose entries
+  composeEntries.value = composeArray.map(entry => ({
+    ...entry,
+    cpu: Number(entry.cpu),
+    ram: Number(entry.ram),
+    hdd: Number(entry.hdd),
+  }))
+
+  const totalCpu = composeArray.reduce((sum, c) => sum + Number(c.cpu), 0)
+  const totalRam = composeArray.reduce((sum, c) => sum + Number(c.ram), 0)
+  const totalHdd = composeArray.reduce((sum, c) => sum + Number(c.hdd), 0)
+
   config.value = {
-    cpu: props.app.compose?.[0]?.cpu || 1,
-    ram: props.app.compose?.[0]?.ram || 512,
-    storage: props.app.compose?.[0]?.hdd || 1,
+    cpu: totalCpu,
+    ram: totalRam,
+    storage: totalHdd,
     instances: props.app.instances || 3, // Use app's instances or default to 3
     subscriptionMonths: props.app.subscriptionMonths || 1, // Use app's subscription months or default to 1
     parameters: {},
@@ -5794,6 +6046,31 @@ watch(isLoggedIn, (newValue, oldValue) => {
 
 .section-avatar {
   box-shadow: 0 2px 6px rgba(var(--v-theme-primary), 0.3) !important;
+}
+
+.compose-entries-container {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.compose-entry-item {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.compose-entry-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 0;
+}
+
+.entry-name {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: rgba(var(--v-theme-on-surface), 0.87);
 }
 
 .hardware-grid {

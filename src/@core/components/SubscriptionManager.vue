@@ -321,15 +321,50 @@
     <!-- Shared VWindow Content (for new apps or update mode) -->
     <VWindow v-if="props.newApp || managementAction === 'update' || tab === 99 || tab === 100" v-model="tab" class="mt-4">
       <VWindowItem :value="0">
-        <div class="pa-4">
+        <div class="pa-2">
           <VForm>
+            <!-- Terms of Service Agreement (only for new apps) -->
+            <VCard v-if="props.newApp" variant="tonal" color="info" class="mb-4">
+              <VCardText class="pa-4">
+                <div class="d-flex align-center mb-3">
+                  <VIcon icon="mdi-shield-check-outline" size="28" color="info" class="mr-3" />
+                  <span class="text-h6 font-weight-semibold">{{ t('core.subscriptionManager.tos.title') }}</span>
+                </div>
+
+                <VAlert type="info" variant="tonal" density="compact" class="mb-3">
+                  {{ t('core.subscriptionManager.tos.description') }}
+                </VAlert>
+
+                <VCheckbox
+                  v-model="acceptedTerms"
+                  density="comfortable"
+                  color="primary"
+                  hide-details
+                >
+                  <template #label>
+                    <span class="text-body-1">
+                      {{ t('core.subscriptionManager.tos.agreement') }}
+                      <a
+                        href="#"
+                        class="text-primary font-weight-medium"
+                        style="text-decoration: underline;"
+                        @click.prevent="showTermsDialog = true"
+                      >
+                        {{ t('core.subscriptionManager.tos.link') }}
+                      </a>
+                    </span>
+                  </template>
+                </VCheckbox>
+              </VCardText>
+            </VCard>
+
             <VTextField
               v-model="appDetails.name"
               :label="t('core.subscriptionManager.name')"
               prepend-inner-icon="mdi-rename-box"
               variant="outlined"
               density="comfortable"
-              :disabled="isNameLocked"
+              :disabled="isNameLocked || (props.newApp && !acceptedTerms)"
               class="mb-3"
             >
               <template #append-inner>
@@ -857,13 +892,13 @@
               :key="`component-${componentIndex}`"
               :value="`component-${componentIndex}`"
             >
-              <div class="d-flex align-center mb-1 mt-2 px-2">
+              <div class="d-flex align-center mb-3 mt-2">
                 <VChip color="default" variant="tonal" style="width: 100%;" label>
                   <VIcon class="mr-1">mdi-information-box</VIcon>
                   {{ t('core.subscriptionManager.general') }}
                 </VChip>
               </div>
-              <div class="pa-2">
+              <div>
                 <VTextField
                   v-model="component.name"
                   :label="t('core.subscriptionManager.componentName')"
@@ -1275,6 +1310,7 @@
                           :label="t('core.subscriptionManager.key')"
                           density="compact"
                           hide-details
+                          @paste="handleEnvPaste"
                         />
                         <VTextField
                           v-model="envDialog.newValue"
@@ -1285,7 +1321,7 @@
                         <VBtn
                           icon
                           color="primary"
-                          density="comfortable"
+                          density="compact"
                           @click="addEnvEntry"
                           :disabled="!envDialog.newKey || !envDialog.newValue"
                         >
@@ -1529,6 +1565,7 @@
                         <VTextField
                           v-model.number="component.cpu"
                           type="number"
+                          min="0.1"
                           step="0.1"
                           hide-details
                           density="compact"
@@ -1560,6 +1597,7 @@
                         <VTextField
                           v-model.number="component.ram"
                           type="number"
+                          min="100"
                           dense
                           hide-details
                           density="compact"
@@ -1571,7 +1609,7 @@
                     <!-- SSD -->
                     <VCol cols="12">
                       <div class="hardware-item">
-                        <div class="hardware-label-box">
+                        <div class="hardware-label-box hardware-label-box-storage">
                           <VIcon size="26" class="hardware-icon">mdi-harddisk</VIcon>
                           <div class="hardware-label-text">
                             <span class="hardware-name">{{ t('core.subscriptionManager.ssd') }}</span>
@@ -1591,6 +1629,7 @@
                         <VTextField
                           v-model.number="component.hdd"
                           type="number"
+                          min="1"
                           dense
                           hide-details
                           density="compact"
@@ -1600,6 +1639,66 @@
                       </div>
                     </VCol>
                   </VRow>
+                  <!-- Mobile under 600px layout -->
+                  <div class="hardware-container">
+                    <div class="hardware-box-with-input">
+                      <div class="hardware-label-content">
+                        <VIcon size="20" class="hardware-icon">mdi-speedometer</VIcon>
+                        <div class="hardware-label-text">
+                          <span class="hardware-name">{{ t('core.subscriptionManager.cpu') }}</span>
+                          <span class="hardware-unit">{{ t('core.subscriptionManager.vCore') }}</span>
+                        </div>
+                      </div>
+                      <VTextField
+                        v-model.number="component.cpu"
+                        type="number"
+                        min="0.1"
+                        step="0.1"
+                        hide-details
+                        density="compact"
+                        variant="outlined"
+                        class="hardware-input"
+                      />
+                    </div>
+                    <div class="hardware-box-with-input">
+                      <div class="hardware-label-content">
+                        <VIcon size="20" class="hardware-icon">mdi-memory</VIcon>
+                        <div class="hardware-label-text">
+                          <span class="hardware-name">{{ t('core.subscriptionManager.ram') }}</span>
+                          <span class="hardware-unit">{{ t('core.subscriptionManager.mb') }}</span>
+                        </div>
+                      </div>
+                      <VTextField
+                        v-model.number="component.ram"
+                        type="number"
+                        min="100"
+                        dense
+                        hide-details
+                        density="compact"
+                        variant="outlined"
+                        class="hardware-input"
+                      />
+                    </div>
+                    <div class="hardware-box-with-input">
+                      <div class="hardware-label-content">
+                        <VIcon size="20" class="hardware-icon">mdi-harddisk</VIcon>
+                        <div class="hardware-label-text">
+                          <span class="hardware-name">{{ t('core.subscriptionManager.ssd') }}</span>
+                          <span class="hardware-unit">{{ t('core.subscriptionManager.gb') }}</span>
+                        </div>
+                      </div>
+                      <VTextField
+                        v-model.number="component.hdd"
+                        type="number"
+                        min="1"
+                        dense
+                        hide-details
+                        density="compact"
+                        variant="outlined"
+                        class="hardware-input"
+                      />
+                    </div>
+                  </div>
                 </div>
               </div>
             </VWindowItem>
@@ -2959,6 +3058,70 @@
     @cancel="cancelManualSign"
     @copy="showToast('success', t('core.subscriptionManager.copiedToClipboard'))"
   />
+
+  <!-- Terms of Service Dialog -->
+  <VDialog v-model="showTermsDialog" max-width="800" scrollable>
+    <VCard style="border-radius: 16px;">
+      <VCardTitle class="d-flex align-center justify-space-between pa-4 bg-primary">
+        <div class="d-flex align-center gap-3">
+          <VIcon icon="mdi-file-document-outline" size="32" color="white" />
+          <span class="text-h5 font-weight-semibold" style="color: white;">{{ t('core.subscriptionManager.tos.dialogTitle') }}</span>
+        </div>
+        <VBtn
+          icon="mdi-close"
+          variant="text"
+          size="small"
+          color="white"
+          @click="showTermsDialog = false"
+        />
+      </VCardTitle>
+
+      <VDivider />
+
+      <VCardText class="pa-6 tos-scroll-area" style="max-height: calc(80vh - 200px); overflow-y: auto;">
+        <div class="tos-content" v-html="tosHtmlContent"></div>
+      </VCardText>
+
+      <VDivider />
+
+      <VCardActions class="pa-4 justify-center">
+        <VBtn
+          color="success"
+          variant="flat"
+          size="large"
+          min-width="140"
+          prepend-icon="mdi-check-circle"
+          @click="acceptTerms"
+        >
+          {{ t('core.subscriptionManager.tos.agree') }}
+        </VBtn>
+        <VBtn
+          color="error"
+          variant="outlined"
+          size="large"
+          min-width="140"
+          prepend-icon="mdi-close-circle"
+          class="ml-4"
+          @click="showTermsDialog = false"
+        >
+          {{ t('core.subscriptionManager.tos.disagree') }}
+        </VBtn>
+      </VCardActions>
+    </VCard>
+  </VDialog>
+
+  <!-- TOS Error Snackbar -->
+  <VSnackbar
+    v-model="showTosError"
+    color="error"
+    :timeout="4000"
+    location="top"
+  >
+    <div class="d-flex align-center">
+      <VIcon icon="mdi-alert-circle" class="mr-2" />
+      <span>{{ t('core.subscriptionManager.tos.errorMessage') }}</span>
+    </div>
+  </VSnackbar>
 </template>
 
 <script setup>
@@ -3040,12 +3203,19 @@ const isSigning = ref(false) // Track if signing is in progress
 const signingFailed = ref(false) // Track if signing failed
 const clipboardInstance = ref(null) // ClipboardJS instance for proper cleanup
 const tab = ref(0)
+const previousTab = ref(0) // Track previous tab for TOS validation
 const renewalEnabled = ref(false)
 const managementAction = ref('renewal') // Management action: 'renewal', 'update', 'cancel'
 const isNameLocked = ref(false)
 const isUploadingCmd = ref(false)
 const isUploadingEnv = ref(false)
 const isUploadingContacts = ref(false)
+
+// TOS related
+const acceptedTerms = ref(false)
+const showTermsDialog = ref(false)
+const showTosError = ref(false)
+const tosHtmlContent = ref('')
 const fiatCheckoutURL = ref('')
 const checkoutLoading = ref(false)
 const logsExpanded = ref(true)
@@ -3070,10 +3240,50 @@ function isCryptoPayment(method) {
   return ['Zelcore', 'SSP'].includes(method)
 }
 
+// TOS Functions
+const acceptTerms = () => {
+  acceptedTerms.value = true
+  showTermsDialog.value = false
+}
+
+// Load TOS HTML content
+const loadTOS = async () => {
+  try {
+    const response = await fetch('/html/wordpress/tos.html')
+    if (!response.ok) {
+      throw new Error('Failed to load TOS')
+    }
+    const html = await response.text()
+    tosHtmlContent.value = html
+  } catch (error) {
+    console.error('Failed to load TOS:', error)
+    tosHtmlContent.value = `<p>${t('core.subscriptionManager.tos.loadError')} <a href="https://cdn.runonflux.io/Flux_Terms_of_Service.pdf" target="_blank">https://cdn.runonflux.io/Flux_Terms_of_Service.pdf</a></p>`
+  }
+}
+
+// Watch tab changes to prevent navigation without TOS acceptance (only for new apps)
+watch(tab, (newTab, oldTab) => {
+  // Only enforce TOS for new app registration
+  if (props.newApp && !acceptedTerms.value && newTab !== 0 && oldTab === 0) {
+    // Prevent leaving General tab without accepting TOS
+    nextTick(() => {
+      tab.value = 0 // Reset to General tab
+      showTosError.value = true // Show error message
+    })
+  } else {
+    previousTab.value = oldTab
+  }
+})
+
 // Check for payment success on page load
 onMounted(() => {
   // Initialize i18n labels after component is mounted
   updateRenewalLabels()
+
+  // Load TOS content if this is a new app
+  if (props.newApp) {
+    loadTOS()
+  }
 
   const urlParams = new URLSearchParams(window.location.search)
   const paymentSuccess = urlParams.get('payment_success')
@@ -5602,6 +5812,124 @@ function handleEnvImport(entries) {
     showToast('success', `Imported ${importedCount} environment variable(s), skipped ${skippedCount} duplicate(s)`)
   } else {
     showToast('success', `Imported ${importedCount} environment variable(s)`)
+  }
+}
+
+function handleEnvPaste(event) {
+  const pastedText = event.clipboardData?.getData('text')
+  if (!pastedText) return
+
+  // Helper function to parse a single line with multiple possible separators
+  const parseLine = line => {
+    const trimmedLine = line.trim()
+    if (!trimmedLine) return []
+
+    // Check for semicolon separator (e.g., KEY1=val1;KEY2=val2)
+    if (trimmedLine.includes(';') && (trimmedLine.match(/=/g) || []).length > 1) {
+      return trimmedLine.split(';').map(s => s.trim()).filter(s => s.length > 0)
+    }
+
+    // Check for comma separator (e.g., KEY1=val1,KEY2=val2)
+    if (trimmedLine.includes(',') && (trimmedLine.match(/=/g) || []).length > 1) {
+      const commaCount = (trimmedLine.match(/,/g) || []).length
+      const equalsCount = (trimmedLine.match(/=/g) || []).length
+      if (commaCount < equalsCount) {
+        return trimmedLine.split(',').map(s => s.trim()).filter(s => s.length > 0)
+      }
+    }
+
+    // Check for space separator with quoted values (e.g., KEY1="val 1" KEY2='val 2' KEY3=val3)
+    if (trimmedLine.includes(' ') && (trimmedLine.match(/=/g) || []).length > 1) {
+      // Match patterns like: KEY=value or KEY="value with spaces" or KEY='value with spaces'
+      const regex = /([^\s]+(?:=(?:"[^"]*"|'[^']*'|[^\s,;]+)))/g
+      const matches = trimmedLine.match(regex)
+      if (matches && matches.length > 1) {
+        return matches
+      }
+    }
+
+    // Single entry
+    return [trimmedLine]
+  }
+
+  // First split by newlines, then process each line
+  const rawLines = pastedText.split('\n')
+  const allEntries = []
+
+  for (const rawLine of rawLines) {
+    const lineEntries = parseLine(rawLine)
+    allEntries.push(...lineEntries)
+  }
+
+  // Clean up entries
+  const lines = allEntries.filter(line => line && line.trim().length > 0)
+
+  // If only single line without '=', let default paste behavior handle it
+  if (lines.length === 1 && !lines[0].includes('=')) {
+    return
+  }
+
+  // Check if at least one line has KEY=VALUE format
+  const hasKeyValueFormat = lines.some(line => line.includes('='))
+  if (!hasKeyValueFormat) {
+    return
+  }
+
+  // Prevent default paste behavior
+  event.preventDefault()
+
+  let importedCount = 0
+  let skippedCount = 0
+  let invalidCount = 0
+
+  for (const line of lines) {
+    // Skip lines that don't contain '='
+    if (!line.includes('=')) {
+      invalidCount++
+      continue
+    }
+
+    const [key, ...rest] = line.split('=')
+    const value = rest.join('=') // Join back in case value contains '='
+    let trimmedKey = key.trim()
+    let trimmedValue = value.trim()
+
+    // Remove quotes from key if present
+    if ((trimmedKey.startsWith('"') && trimmedKey.endsWith('"')) ||
+        (trimmedKey.startsWith("'") && trimmedKey.endsWith("'"))) {
+      trimmedKey = trimmedKey.slice(1, -1)
+    }
+
+    // Remove quotes from value if present
+    if ((trimmedValue.startsWith('"') && trimmedValue.endsWith('"')) ||
+        (trimmedValue.startsWith("'") && trimmedValue.endsWith("'"))) {
+      trimmedValue = trimmedValue.slice(1, -1)
+    }
+
+    // Skip if key or value is empty
+    if (!trimmedKey || trimmedValue === undefined) {
+      invalidCount++
+      continue
+    }
+
+    // Skip if key already exists
+    if (envDialog.entries.some(e => e.key === trimmedKey)) {
+      skippedCount++
+      continue
+    }
+
+    envDialog.entries.push({ key: trimmedKey, value: trimmedValue })
+    importedCount++
+  }
+
+  // Show toast with results
+  if (importedCount > 0) {
+    let message = `Imported ${importedCount} environment variable(s)`
+    if (skippedCount > 0) message += `, skipped ${skippedCount} duplicate(s)`
+    if (invalidCount > 0) message += `, ignored ${invalidCount} invalid line(s)`
+    showToast('success', message)
+  } else if (skippedCount > 0 || invalidCount > 0) {
+    showToast('warning', `No new variables imported. ${skippedCount} duplicate(s), ${invalidCount} invalid line(s)`)
   }
 }
 
@@ -8511,7 +8839,9 @@ async function signMethod() {
   padding: 8px 12px;
   border: 1px solid rgba(var(--v-theme-on-surface), 0.12);
   border-radius: 8px;
-  min-width: 110px;
+  width: 130px;
+  min-width: 130px;
+  max-width: 130px;
   flex-shrink: 0;
   background: rgba(var(--v-theme-surface), 0.5);
 }
@@ -8534,6 +8864,79 @@ async function signMethod() {
 .hardware-unit {
   font-size: 11px;
   opacity: 0.7;
+}
+
+/* Hide mobile container by default */
+.hardware-container {
+  display: none;
+}
+
+/* Mobile under 600px - all boxes in one horizontal row with inputs inside */
+@media (max-width: 600px) {
+  /* Hide desktop layout */
+  .border.rounded.pa-2 > .v-row {
+    display: none !important;
+  }
+
+  /* Show mobile layout - all boxes in horizontal row */
+  .hardware-container {
+    display: flex;
+    gap: 6px;
+    overflow-x: auto;
+  }
+
+  .hardware-box-with-input {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 8px;
+    border: 1px solid rgba(var(--v-theme-on-surface), 0.12);
+    border-radius: 8px;
+    background: rgba(var(--v-theme-surface), 0.5);
+    flex: 1;
+    min-width: 0;
+  }
+
+  .hardware-label-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .hardware-icon {
+    font-size: 20px !important;
+    flex-shrink: 0;
+  }
+
+  .hardware-label-text {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    line-height: 1.2;
+  }
+
+  .hardware-name {
+    font-size: 10px;
+    white-space: nowrap;
+    font-weight: 500;
+  }
+
+  .hardware-unit {
+    font-size: 8px;
+    opacity: 0.7;
+  }
+
+  .hardware-input {
+    width: 100%;
+  }
+
+  .hardware-input :deep(input) {
+    text-align: center;
+    font-size: 13px;
+    padding: 6px 4px;
+  }
 }
 
 .env-buttons-container {
@@ -9357,5 +9760,88 @@ async function signMethod() {
     flex: 0 0 auto !important;
     margin-left: 0 !important;
   }
+}
+
+/* TOS content styling - override inline styles with !important */
+.tos-content,
+.tos-content *,
+.tos-content p,
+.tos-content h1,
+.tos-content h2,
+.tos-content h3,
+.tos-content h4,
+.tos-content h5,
+.tos-content h6,
+.tos-content ul,
+.tos-content ol,
+.tos-content li {
+  color: inherit !important;
+  font-family: inherit !important;
+}
+
+.tos-content {
+  line-height: 1.7 !important;
+}
+
+.tos-content h1 {
+  font-size: 1.75rem !important;
+  font-weight: 600 !important;
+  margin-bottom: 1rem !important;
+  margin-top: 1.5rem !important;
+}
+
+.tos-content h2 {
+  font-size: 1.5rem !important;
+  font-weight: 600 !important;
+  margin-bottom: 0.875rem !important;
+  margin-top: 1.25rem !important;
+}
+
+.tos-content h3 {
+  font-size: 1.25rem !important;
+  font-weight: 600 !important;
+  margin-bottom: 0.75rem !important;
+  margin-top: 1rem !important;
+}
+
+.tos-content p {
+  margin-bottom: 0.875rem !important;
+}
+
+.tos-content ul,
+.tos-content ol {
+  margin-bottom: 0.875rem !important;
+  padding-left: 1.5rem !important;
+}
+
+.tos-content li {
+  margin-bottom: 0.5rem !important;
+}
+
+.tos-content a {
+  color: rgb(var(--v-theme-primary)) !important;
+  text-decoration: underline !important;
+}
+
+.tos-scroll-area {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(var(--v-theme-on-surface), 0.3) transparent;
+}
+
+.tos-scroll-area::-webkit-scrollbar {
+  width: 8px;
+}
+
+.tos-scroll-area::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.tos-scroll-area::-webkit-scrollbar-thumb {
+  background: rgba(var(--v-theme-on-surface), 0.3);
+  border-radius: 4px;
+}
+
+.tos-scroll-area::-webkit-scrollbar-thumb:hover {
+  background: rgba(var(--v-theme-on-surface), 0.4);
 }
 </style>
