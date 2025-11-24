@@ -77,6 +77,7 @@ watch(
     >
       <RouterView />
       <ScrollToTop />
+      <CookieConsent />
     </VApp>
   </VLocaleProvider>
 </template>

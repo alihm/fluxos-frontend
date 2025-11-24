@@ -722,6 +722,18 @@ const handleAppDeployed = deployedApp => {
   // Handle successful deployment
   console.log('App deployed successfully:', deployedApp.displayName || deployedApp.name)
 
+  // Track successful app deployment
+  const analytics = useAnalytics()
+  analytics.trackAppAction(
+    deployedApp.displayName || deployedApp.name,
+    'deploy',
+    {
+      app_id: deployedApp.id,
+      category: deployedApp.category,
+      source: 'marketplace',
+    },
+  )
+
   // Show success notification or redirect to apps management
   // Could also update the UI to show "Manage" instead of "Install"
 }

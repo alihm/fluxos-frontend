@@ -320,6 +320,12 @@ const handleRefresh = async () => {
 onMounted(async () => {
   try {
     console.log('🚀 Starting marketplace data load...')
+
+    // Track marketplace page view
+    const analytics = useAnalytics()
+    analytics.trackMarketplace('view', {
+      page: 'marketplace_index',
+    })
     await Promise.all([
       fetchApps(),
       fetchNewApps(),

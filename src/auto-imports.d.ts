@@ -23,6 +23,7 @@ declare global {
   const base64ToUint8Array: typeof import('./utils/enterpriseCrypto.js')['base64ToUint8Array']
   const betweenValidator: typeof import('./@core/utils/validators.js')['betweenValidator']
   const checkWebCryptoAvailability: typeof import('./utils/enterpriseCrypto.js')['checkWebCryptoAvailability']
+  const clearConsent: typeof import('./composables/useCookieConsent.js')['clearConsent']
   const clearStickyBackendDNS: typeof import('./utils/stickyBackend.js')['clearStickyBackendDNS']
   const closeWalletConnect: typeof import('./utils/walletService.js')['closeWalletConnect']
   const colors: typeof import('./utils/colors.js')['default']
@@ -59,10 +60,12 @@ declare global {
   const defineComponent: typeof import('vue')['defineComponent']
   const definePage: typeof import('unplugin-vue-router/runtime')['definePage']
   const defineStore: typeof import('pinia')['defineStore']
+  const disableAnalytics: typeof import('./composables/useCookieConsent.js')['disableAnalytics']
   const disconnectWalletConnect: typeof import('./utils/walletService.js')['disconnectWalletConnect']
   const eagerComputed: typeof import('@vueuse/core')['eagerComputed']
   const effectScope: typeof import('vue')['effectScope']
   const emailValidator: typeof import('./@core/utils/validators.js')['emailValidator']
+  const enableAnalytics: typeof import('./composables/useCookieConsent.js')['enableAnalytics']
   const encryptAesKeyWithRsaKey: typeof import('./utils/enterpriseCrypto.js')['encryptAesKeyWithRsaKey']
   const encryptEnterpriseWithAes: typeof import('./utils/enterpriseCrypto.js')['encryptEnterpriseWithAes']
   const encryptMessage: typeof import('./utils/enterpriseCrypto.js')['encryptMessage']
@@ -85,6 +88,7 @@ declare global {
   const getActivePinia: typeof import('pinia')['getActivePinia']
   const getAndConvertSpec: typeof import('./utils/specConverter.js')['getAndConvertSpec']
   const getConnectedAccount: typeof import('./utils/walletService.js')['getConnectedAccount']
+  const getConsent: typeof import('./composables/useCookieConsent.js')['getConsent']
   const getCurrentInstance: typeof import('vue')['getCurrentInstance']
   const getCurrentScope: typeof import('vue')['getCurrentScope']
   const getDetectedBackendURL: typeof import('./utils/backend.js')['getDetectedBackendURL']
@@ -97,6 +101,8 @@ declare global {
   const getStickyBackendDNS: typeof import('./utils/stickyBackend.js')['getStickyBackendDNS']
   const getUser: typeof import('./utils/firebase.js')['getUser']
   const h: typeof import('vue')['h']
+  const hasAnalyticsConsent: typeof import('./composables/useCookieConsent.js')['hasAnalyticsConsent']
+  const hasConsent: typeof import('./composables/useCookieConsent.js')['hasConsent']
   const hasWalletConnectSession: typeof import('./utils/walletService.js')['hasWalletConnectSession']
   const hexToRgb: typeof import('./@core/utils/colorConverter.js')['hexToRgb']
   const ignorableWatch: typeof import('@vueuse/core')['ignorableWatch']
@@ -191,6 +197,7 @@ declare global {
   const resolveVuetifyTheme: typeof import('./@core/utils/vuetify.js')['resolveVuetifyTheme']
   const rgbaToHex: typeof import('./@core/utils/colorConverter.js')['rgbaToHex']
   const sanitizeHtml: typeof import('./utils/sanitizeHtml.js')['default']
+  const saveConsent: typeof import('./composables/useCookieConsent.js')['saveConsent']
   const setActivePinia: typeof import('pinia')['setActivePinia']
   const setMapStoreSuffix: typeof import('pinia')['setMapStoreSuffix']
   const setStickyBackendDNS: typeof import('./utils/stickyBackend.js')['setStickyBackendDNS']
@@ -226,6 +233,7 @@ declare global {
   const useAbility: typeof import('./plugins/casl/composables/useAbility.js')['useAbility']
   const useAbs: typeof import('@vueuse/math')['useAbs']
   const useActiveElement: typeof import('@vueuse/core')['useActiveElement']
+  const useAnalytics: typeof import('./plugins/analytics/composables/useAnalytics.js')['useAnalytics']
   const useAnimate: typeof import('@vueuse/core')['useAnimate']
   const useApi: typeof import('./composables/useApi.js')['useApi']
   const useArrayDifference: typeof import('@vueuse/core')['useArrayDifference']
@@ -259,6 +267,7 @@ declare global {
   const useColorMode: typeof import('@vueuse/core')['useColorMode']
   const useConfirmDialog: typeof import('@vueuse/core')['useConfirmDialog']
   const useCookie: typeof import('./@core/composable/useCookie.js')['useCookie']
+  const useCookieConsent: typeof import('./composables/useCookieConsent.js')['useCookieConsent']
   const useCounter: typeof import('@vueuse/core')['useCounter']
   const useCssModule: typeof import('vue')['useCssModule']
   const useCssVar: typeof import('@vueuse/core')['useCssVar']
@@ -465,6 +474,7 @@ declare module 'vue' {
     readonly base64ToUint8Array: UnwrapRef<typeof import('./utils/enterpriseCrypto.js')['base64ToUint8Array']>
     readonly betweenValidator: UnwrapRef<typeof import('./@core/utils/validators.js')['betweenValidator']>
     readonly checkWebCryptoAvailability: UnwrapRef<typeof import('./utils/enterpriseCrypto.js')['checkWebCryptoAvailability']>
+    readonly clearConsent: UnwrapRef<typeof import('./composables/useCookieConsent.js')['clearConsent']>
     readonly clearStickyBackendDNS: UnwrapRef<typeof import('./utils/stickyBackend.js')['clearStickyBackendDNS']>
     readonly closeWalletConnect: UnwrapRef<typeof import('./utils/walletService.js')['closeWalletConnect']>
     readonly colors: UnwrapRef<typeof import('./utils/colors.js')['default']>
@@ -501,10 +511,12 @@ declare module 'vue' {
     readonly defineComponent: UnwrapRef<typeof import('vue')['defineComponent']>
     readonly definePage: UnwrapRef<typeof import('unplugin-vue-router/runtime')['definePage']>
     readonly defineStore: UnwrapRef<typeof import('pinia')['defineStore']>
+    readonly disableAnalytics: UnwrapRef<typeof import('./composables/useCookieConsent.js')['disableAnalytics']>
     readonly disconnectWalletConnect: UnwrapRef<typeof import('./utils/walletService.js')['disconnectWalletConnect']>
     readonly eagerComputed: UnwrapRef<typeof import('@vueuse/core')['eagerComputed']>
     readonly effectScope: UnwrapRef<typeof import('vue')['effectScope']>
     readonly emailValidator: UnwrapRef<typeof import('./@core/utils/validators.js')['emailValidator']>
+    readonly enableAnalytics: UnwrapRef<typeof import('./composables/useCookieConsent.js')['enableAnalytics']>
     readonly encryptAesKeyWithRsaKey: UnwrapRef<typeof import('./utils/enterpriseCrypto.js')['encryptAesKeyWithRsaKey']>
     readonly encryptEnterpriseWithAes: UnwrapRef<typeof import('./utils/enterpriseCrypto.js')['encryptEnterpriseWithAes']>
     readonly encryptMessage: UnwrapRef<typeof import('./utils/enterpriseCrypto.js')['encryptMessage']>
@@ -527,6 +539,7 @@ declare module 'vue' {
     readonly getActivePinia: UnwrapRef<typeof import('pinia')['getActivePinia']>
     readonly getAndConvertSpec: UnwrapRef<typeof import('./utils/specConverter.js')['getAndConvertSpec']>
     readonly getConnectedAccount: UnwrapRef<typeof import('./utils/walletService.js')['getConnectedAccount']>
+    readonly getConsent: UnwrapRef<typeof import('./composables/useCookieConsent.js')['getConsent']>
     readonly getCurrentInstance: UnwrapRef<typeof import('vue')['getCurrentInstance']>
     readonly getCurrentScope: UnwrapRef<typeof import('vue')['getCurrentScope']>
     readonly getDetectedBackendURL: UnwrapRef<typeof import('./utils/backend.js')['getDetectedBackendURL']>
@@ -538,6 +551,8 @@ declare module 'vue' {
     readonly getStickyBackendDNS: UnwrapRef<typeof import('./utils/stickyBackend.js')['getStickyBackendDNS']>
     readonly getUser: UnwrapRef<typeof import('./utils/firebase.js')['getUser']>
     readonly h: UnwrapRef<typeof import('vue')['h']>
+    readonly hasAnalyticsConsent: UnwrapRef<typeof import('./composables/useCookieConsent.js')['hasAnalyticsConsent']>
+    readonly hasConsent: UnwrapRef<typeof import('./composables/useCookieConsent.js')['hasConsent']>
     readonly hasWalletConnectSession: UnwrapRef<typeof import('./utils/walletService.js')['hasWalletConnectSession']>
     readonly hexToRgb: UnwrapRef<typeof import('./@core/utils/colorConverter.js')['hexToRgb']>
     readonly ignorableWatch: UnwrapRef<typeof import('@vueuse/core')['ignorableWatch']>
@@ -631,6 +646,7 @@ declare module 'vue' {
     readonly resolveVuetifyTheme: UnwrapRef<typeof import('./@core/utils/vuetify.js')['resolveVuetifyTheme']>
     readonly rgbaToHex: UnwrapRef<typeof import('./@core/utils/colorConverter.js')['rgbaToHex']>
     readonly sanitizeHtml: UnwrapRef<typeof import('./utils/sanitizeHtml.js')['default']>
+    readonly saveConsent: UnwrapRef<typeof import('./composables/useCookieConsent.js')['saveConsent']>
     readonly setActivePinia: UnwrapRef<typeof import('pinia')['setActivePinia']>
     readonly setMapStoreSuffix: UnwrapRef<typeof import('pinia')['setMapStoreSuffix']>
     readonly setStickyBackendDNS: UnwrapRef<typeof import('./utils/stickyBackend.js')['setStickyBackendDNS']>
@@ -666,6 +682,7 @@ declare module 'vue' {
     readonly useAbility: UnwrapRef<typeof import('./plugins/casl/composables/useAbility.js')['useAbility']>
     readonly useAbs: UnwrapRef<typeof import('@vueuse/math')['useAbs']>
     readonly useActiveElement: UnwrapRef<typeof import('@vueuse/core')['useActiveElement']>
+    readonly useAnalytics: UnwrapRef<typeof import('./plugins/analytics/composables/useAnalytics.js')['useAnalytics']>
     readonly useAnimate: UnwrapRef<typeof import('@vueuse/core')['useAnimate']>
     readonly useApi: UnwrapRef<typeof import('./composables/useApi.js')['useApi']>
     readonly useArrayDifference: UnwrapRef<typeof import('@vueuse/core')['useArrayDifference']>
@@ -699,6 +716,7 @@ declare module 'vue' {
     readonly useColorMode: UnwrapRef<typeof import('@vueuse/core')['useColorMode']>
     readonly useConfirmDialog: UnwrapRef<typeof import('@vueuse/core')['useConfirmDialog']>
     readonly useCookie: UnwrapRef<typeof import('./@core/composable/useCookie.js')['useCookie']>
+    readonly useCookieConsent: UnwrapRef<typeof import('./composables/useCookieConsent.js')['useCookieConsent']>
     readonly useCounter: UnwrapRef<typeof import('@vueuse/core')['useCounter']>
     readonly useCssModule: UnwrapRef<typeof import('vue')['useCssModule']>
     readonly useCssVar: UnwrapRef<typeof import('@vueuse/core')['useCssVar']>
