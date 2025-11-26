@@ -22,7 +22,7 @@
           v-if="isLoading"
           icon="mdi-file-document-outline"
           :title="t('core.tosDialog.loading')"
-          :rotate-icon="true"
+          rotate-icon
         />
         <div v-else class="tos-content" v-sanitize-html="tosContent"></div>
       </VCardText>
