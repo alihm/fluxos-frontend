@@ -30,7 +30,7 @@ const __dirname = path.dirname(__filename)
 const distPath = path.join(__dirname, '../dist')
 
 // Fallback static routes (used if prerender-routes.json doesn't exist)
-const FALLBACK_ROUTES = [
+const FALLBACK_ROUTES = Object.freeze([
   // Main landing pages
   '/',
   '/marketplace',
@@ -44,18 +44,20 @@ const FALLBACK_ROUTES = [
   '/dashboards/overview',
   '/dashboards/resources',
   '/dashboards/locations',
-]
+])
 
 /**
  * Load routes from prerender-routes.json or use fallback
+ * Returns a new array to avoid keeping file content in memory
  */
 function loadRoutes() {
   const routesFilePath = path.join(__dirname, 'prerender-routes.json')
 
   if (fs.existsSync(routesFilePath)) {
     try {
-      const routesData = JSON.parse(fs.readFileSync(routesFilePath, 'utf-8'))
-      const routes = routesData.allRoutes || FALLBACK_ROUTES
+      const fileContent = fs.readFileSync(routesFilePath, 'utf-8')
+      const routesData = JSON.parse(fileContent)
+      const routes = routesData.allRoutes ? [...routesData.allRoutes] : [...FALLBACK_ROUTES]
 
       console.log(`📄 Loaded ${routes.length} routes from prerender-routes.json`)
       console.log(`   Generated at: ${routesData.generatedAt || 'unknown'}`)
@@ -63,61 +65,67 @@ function loadRoutes() {
         console.log(`   Stats: ${routesData.stats.marketplaceApps} apps, ${routesData.stats.trendingGames} games`)
       }
 
+      // routesData goes out of scope here, allowing GC to collect it
       return routes
     } catch (error) {
       console.warn(`⚠️ Failed to parse prerender-routes.json: ${error.message}`)
       console.log('   Using fallback static routes')
 
-      return FALLBACK_ROUTES
+      return [...FALLBACK_ROUTES]
     }
   }
 
   console.log('⚠️ prerender-routes.json not found, using fallback static routes')
   console.log('   Run "node scripts/fetch-prerender-routes.js" to generate dynamic routes')
 
-  return FALLBACK_ROUTES
+  return [...FALLBACK_ROUTES]
 }
 
-// Load routes
-const routes = loadRoutes()
+/**
+ * Read file with promise wrapper to avoid nested callbacks
+ */
+function readFileAsync(filePath) {
+  return new Promise((resolve, reject) => {
+    fs.readFile(filePath, (err, data) => {
+      if (err) reject(err)
+      else resolve(data)
+    })
+  })
+}
 
 /**
  * Create a simple static file server
+ * Uses async handler to avoid nested callback closures
  */
 function createStaticServer(directory, port) {
+  const indexHtmlPath = path.join(directory, 'index.html')
+
   return new Promise((resolve, reject) => {
-    const server = createServer((req, res) => {
+    const server = createServer(async (req, res) => {
       let filePath = path.join(directory, req.url === '/' ? 'index.html' : req.url)
 
       // If path doesn't have extension, try index.html
       if (!path.extname(filePath)) {
-        filePath = path.join(directory, 'index.html')
+        filePath = indexHtmlPath
       }
 
-      fs.readFile(filePath, (err, data) => {
-        if (err) {
-          // Fallback to index.html for SPA routing
-          fs.readFile(path.join(directory, 'index.html'), (err2, data2) => {
-            if (err2) {
-              res.writeHead(404)
-              res.end('Not found')
-              
-              return
-            }
-            const ext = '.html'
-            const contentType = getContentType(ext)
-            res.writeHead(200, { 'Content-Type': contentType })
-            res.end(data2)
-          })
-          
-          return
-        }
-
+      try {
+        const data = await readFileAsync(filePath)
         const ext = path.extname(filePath)
         const contentType = getContentType(ext)
         res.writeHead(200, { 'Content-Type': contentType })
         res.end(data)
-      })
+      } catch {
+        // Fallback to index.html for SPA routing
+        try {
+          const data = await readFileAsync(indexHtmlPath)
+          res.writeHead(200, { 'Content-Type': 'text/html' })
+          res.end(data)
+        } catch {
+          res.writeHead(404)
+          res.end('Not found')
+        }
+      }
     })
 
     server.listen(port, () => {
@@ -151,94 +159,85 @@ function getContentType(ext) {
  * Clean up duplicate meta tags from HTML
  * @vueuse/head adds new meta tags but doesn't remove the original static ones from index.html
  * This function keeps only the last occurrence of each meta tag (the dynamically added one)
+ *
+ * Optimized to avoid memory issues:
+ * - Uses matchAll instead of exec loop to avoid regex state issues
+ * - Collects all replacements first, then applies them in a single pass
  */
 function cleanDuplicateMetaTags(html) {
-  // Parse all meta tags
+  // Parse all meta tags using matchAll (more memory efficient than exec loop)
   const metaTagRegex = /<meta\s+([^>]+)>/gi
-  const metaTags = []
-  let match
-
-  while ((match = metaTagRegex.exec(html)) !== null) {
-    metaTags.push({
-      fullTag: match[0],
-      attributes: match[1],
-      index: match.index,
-    })
-  }
+  const metaTags = [...html.matchAll(metaTagRegex)].map(match => ({
+    fullTag: match[0],
+    attributes: match[1],
+    index: match.index,
+  }))
 
   // Group meta tags by their identifier (name, property, or charset)
   const getMetaKey = attrs => {
     const nameMatch = attrs.match(/name=["']([^"']+)["']/i)
-    const propertyMatch = attrs.match(/property=["']([^"']+)["']/i)
-    const charsetMatch = attrs.match(/charset/i)
-    const httpEquivMatch = attrs.match(/http-equiv=["']([^"']+)["']/i)
-
     if (nameMatch) return `name:${nameMatch[1]}`
+
+    const propertyMatch = attrs.match(/property=["']([^"']+)["']/i)
     if (propertyMatch) return `property:${propertyMatch[1]}`
-    if (charsetMatch) return 'charset'
+
+    if (/charset/i.test(attrs)) return 'charset'
+
+    const httpEquivMatch = attrs.match(/http-equiv=["']([^"']+)["']/i)
     if (httpEquivMatch) return `http-equiv:${httpEquivMatch[1]}`
 
     return null
   }
 
-  // Find duplicates and mark earlier ones for removal
-  const seenKeys = new Map()
-  const tagsToRemove = []
+  // Collect all tags to remove (using Set for deduplication)
+  const tagsToRemove = new Set()
 
-  // Process in reverse order to keep the last occurrence (dynamically added one)
+  // Find duplicate meta tags - keep last occurrence
+  const seenKeys = new Map()
   for (let i = metaTags.length - 1; i >= 0; i--) {
     const tag = metaTags[i]
     const key = getMetaKey(tag.attributes)
 
     if (key) {
       if (seenKeys.has(key)) {
-        // This is a duplicate (earlier occurrence), mark for removal
-        tagsToRemove.push(tag.fullTag)
+        tagsToRemove.add(tag.fullTag)
       } else {
-        seenKeys.set(key, tag)
+        seenKeys.set(key, true)
       }
     }
   }
 
-  // Remove duplicate tags (earlier occurrences)
-  let cleanedHtml = html
-  for (const tagToRemove of tagsToRemove) {
-    // Only remove the first occurrence of each duplicate
-    cleanedHtml = cleanedHtml.replace(tagToRemove + '\n', '')
-    cleanedHtml = cleanedHtml.replace(tagToRemove, '')
-  }
-
-  // Also clean up duplicate canonical link tags
+  // Find duplicate canonical link tags - keep last occurrence
   const canonicalRegex = /<link\s+rel=["']canonical["']\s+href=["'][^"']+["']\s*\/?>/gi
-  const canonicalTags = []
-  while ((match = canonicalRegex.exec(html)) !== null) {
-    canonicalTags.push(match[0])
-  }
-
+  const canonicalTags = [...html.matchAll(canonicalRegex)].map(m => m[0])
   if (canonicalTags.length > 1) {
-    // Keep only the last canonical (dynamically added)
     for (let i = 0; i < canonicalTags.length - 1; i++) {
-      cleanedHtml = cleanedHtml.replace(canonicalTags[i] + '\n', '')
-      cleanedHtml = cleanedHtml.replace(canonicalTags[i], '')
+      tagsToRemove.add(canonicalTags[i])
     }
   }
 
-  // Clean up duplicate title tags - keep the last one (dynamically set)
+  // Find duplicate title tags - keep last occurrence
   const titleRegex = /<title>[^<]*<\/title>/gi
-  const titleTags = []
-  while ((match = titleRegex.exec(cleanedHtml)) !== null) {
-    titleTags.push(match[0])
-  }
-
+  const titleTags = [...html.matchAll(titleRegex)].map(m => m[0])
   if (titleTags.length > 1) {
-    // Keep only the last title (dynamically added)
     for (let i = 0; i < titleTags.length - 1; i++) {
-      cleanedHtml = cleanedHtml.replace(titleTags[i] + '\n', '')
-      cleanedHtml = cleanedHtml.replace(titleTags[i], '')
+      tagsToRemove.add(titleTags[i])
     }
   }
 
-  return cleanedHtml
+  // Apply all removals in a single pass using a regex that matches any tag to remove
+  if (tagsToRemove.size === 0) {
+    return html
+  }
+
+  // Escape special regex characters in tags and create a single removal pattern
+  const escapeRegex = str => str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+  const removalPattern = new RegExp(
+    [...tagsToRemove].map(tag => `${escapeRegex(tag)}\\n?`).join('|'),
+    'g',
+  )
+
+  return html.replace(removalPattern, '')
 }
 
 /**
@@ -254,6 +253,9 @@ function injectPrerenderMeta(html) {
 }
 
 async function prerender() {
+  // Load routes inside function to avoid global memory retention
+  const routes = loadRoutes()
+
   console.log('\n🚀 Starting pre-rendering for SEO...')
   console.log(`📄 Routes to pre-render: ${routes.length}\n`)
 
@@ -266,6 +268,7 @@ async function prerender() {
   const port = 3333
   let server
   let browser
+  let context
 
   try {
     // Start static file server
@@ -286,7 +289,7 @@ async function prerender() {
       ],
     })
 
-    const context = await browser.newContext({
+    context = await browser.newContext({
       viewport: { width: 1920, height: 1080 },
       userAgent: 'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)',
     })
@@ -384,6 +387,10 @@ async function prerender() {
     }
     process.exit(1)
   } finally {
+    // Close context explicitly before browser (proper cleanup order)
+    if (context) {
+      await context.close()
+    }
     if (browser) {
       await browser.close()
     }
