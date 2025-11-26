@@ -159,7 +159,7 @@
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { useHead } from '@vueuse/head'
+import { useSEO, generateOrganizationSchema, generateBreadcrumbSchema, generateFAQSchema } from '@/composables/useSEO'
 import { useFluxStore } from '@/stores/flux'
 import { useMarketplace } from '@/composables/useMarketplace'
 import { useGameUtils } from '@/composables/useGameUtils'
@@ -414,148 +414,67 @@ const title = 'Game Server Hosting - FluxPlay on FluxCloud'
 const description = 'Host Minecraft, Palworld, Factorio, Satisfactory & Enshrouded servers on FluxCloud. Global servers, instant deployment, DDoS protection. Flexible plans.'
 const imageUrl = 'https://cloud.runonflux.com/images/games/FluxPlay_white.svg'
 
+// FluxPlay Organization schema (custom for this page)
+const fluxPlayOrganizationSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'Organization',
+  'name': 'FluxPlay',
+  'url': 'https://cloud.runonflux.com',
+  'logo': imageUrl,
+  'description': 'Decentralized game server hosting on FluxCloud',
+}
+
 // Reactive structured data that updates when games load
 const structuredDataSchemas = computed(() => {
+  // FAQ schema with HTML tags stripped
+  const faqSchema = generateFAQSchema(faqs.value.map(faq => ({
+    question: faq.question,
+    answer: faq.answer.replace(/<[^>]*>/g, ''), // Strip HTML tags for schema
+  })))
+
+  // Breadcrumb schema
+  const breadcrumbSchema = generateBreadcrumbSchema([
+    { name: 'Home', url: 'https://cloud.runonflux.com' },
+    { name: 'Games', url: pageUrl },
+  ])
+
   if (!games.value || games.value.length === 0) {
     // Return only Organization, Breadcrumb, and FAQ when games haven't loaded yet
-    return [
-      {
-        '@context': 'https://schema.org',
-        '@type': 'Organization',
-        'name': 'FluxPlay',
-        'url': 'https://cloud.runonflux.com',
-        'logo': imageUrl,
-        'description': 'Decentralized game server hosting on FluxCloud',
-      },
-      {
-        '@context': 'https://schema.org',
-        '@type': 'BreadcrumbList',
-        'itemListElement': [
-          {
-            '@type': 'ListItem',
-            'position': 1,
-            'name': 'Home',
-            'item': 'https://cloud.runonflux.com',
-          },
-          {
-            '@type': 'ListItem',
-            'position': 2,
-            'name': 'Games',
-            'item': pageUrl,
-          },
-        ],
-      },
-      {
-        '@context': 'https://schema.org',
-        '@type': 'FAQPage',
-        'mainEntity': faqs.value.map(faq => ({
-          '@type': 'Question',
-          'name': t(faq.question),
-          'acceptedAnswer': {
-            '@type': 'Answer',
-            'text': faq.answer.replace(/<[^>]*>/g, ''), // Strip HTML tags for schema
-          },
-        })),
-      },
-    ]
+    return [fluxPlayOrganizationSchema, breadcrumbSchema, faqSchema]
   }
 
   // When games are loaded, include ItemList
-  return [
-    {
-      '@context': 'https://schema.org',
-      '@type': 'ItemList',
-      'itemListElement': games.value.map((game, index) => ({
-        '@type': 'ListItem',
-        'position': index + 1,
-        'item': {
-          '@type': 'Product',
-          'name': `${game.displayName || game.name} Server Hosting`,
-          'url': `https://cloud.runonflux.com/marketplace/games/${game.name.toLowerCase()}`,
-          'image': game.icon || game.logo || imageUrl,
-          'description': game.description || `Host your own ${game.displayName || game.name} server on FluxCloud`,
-        },
-      })),
-    },
-    {
-      '@context': 'https://schema.org',
-      '@type': 'Organization',
-      'name': 'FluxPlay',
-      'url': 'https://cloud.runonflux.com',
-      'logo': imageUrl,
-      'description': 'Decentralized game server hosting on FluxCloud',
-    },
-    {
-      '@context': 'https://schema.org',
-      '@type': 'BreadcrumbList',
-      'itemListElement': [
-        {
-          '@type': 'ListItem',
-          'position': 1,
-          'name': 'Home',
-          'item': 'https://cloud.runonflux.com',
-        },
-        {
-          '@type': 'ListItem',
-          'position': 2,
-          'name': 'Games',
-          'item': pageUrl,
-        },
-      ],
-    },
-    {
-      '@context': 'https://schema.org',
-      '@type': 'FAQPage',
-      'mainEntity': faqs.value.map(faq => ({
-        '@type': 'Question',
-        'name': t(faq.question),
-        'acceptedAnswer': {
-          '@type': 'Answer',
-          'text': faq.answer.replace(/<[^>]*>/g, ''), // Strip HTML tags for schema
-        },
-      })),
-    },
-  ]
+  const itemListSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'ItemList',
+    'itemListElement': games.value.map((game, index) => ({
+      '@type': 'ListItem',
+      'position': index + 1,
+      'item': {
+        '@type': 'Product',
+        'name': `${game.displayName || game.name} Server Hosting`,
+        'url': `https://cloud.runonflux.com/marketplace/games/${game.name.toLowerCase()}`,
+        'image': game.icon || game.logo || imageUrl,
+        'description': game.description || `Host your own ${game.displayName || game.name} server on FluxCloud`,
+      },
+    })),
+  }
+
+  return [itemListSchema, fluxPlayOrganizationSchema, breadcrumbSchema, faqSchema]
 })
 
-// useHead with reactive structured data (called once during setup)
-useHead({
+// useSEO with reactive structured data
+useSEO({
   title,
+  description,
+  url: pageUrl,
+  image: imageUrl,
+  imageAlt: 'FluxPlay - Game Server Hosting on FluxCloud',
+  keywords: 'game server hosting, minecraft hosting, palworld hosting, factorio hosting, satisfactory hosting, enshrouded hosting, decentralized hosting, flux network, dedicated game servers, affordable hosting, ddos protection, blockchain hosting, pay-as-you-go gaming',
+  structuredData: structuredDataSchemas,
   meta: [
-    {
-      name: 'description',
-      content: description,
-    },
-    {
-      name: 'keywords',
-      content: 'game server hosting, minecraft hosting, palworld hosting, factorio hosting, satisfactory hosting, enshrouded hosting, decentralized hosting, flux network, dedicated game servers, affordable hosting, ddos protection, blockchain hosting, pay-as-you-go gaming',
-    },
-
-    // Open Graph
-    { property: 'og:title', content: title },
-    { property: 'og:description', content: description },
-    { property: 'og:image', content: imageUrl },
-    { property: 'og:url', content: pageUrl },
-    { property: 'og:type', content: 'website' },
     { property: 'og:site_name', content: 'FluxPlay' },
-
-    // Twitter Card
-    { name: 'twitter:card', content: 'summary_large_image' },
-    { name: 'twitter:title', content: title },
-    { name: 'twitter:description', content: description },
-    { name: 'twitter:image', content: imageUrl },
-
-    // Additional SEO
-    { name: 'robots', content: 'index, follow' },
-    { name: 'author', content: 'Flux Network' },
   ],
-  link: [
-    { rel: 'canonical', href: pageUrl },
-  ],
-  script: computed(() => [{
-    type: 'application/ld+json',
-    children: JSON.stringify(structuredDataSchemas.value),
-  }]),
 })
 
 // Load games and flux locations on mount

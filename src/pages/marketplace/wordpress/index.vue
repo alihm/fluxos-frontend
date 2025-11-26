@@ -146,7 +146,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
-import { useHead } from '@vueuse/head'
+import { useSEO, generateOrganizationSchema, generateBreadcrumbSchema, generateFAQSchema } from '@/composables/useSEO'
 import { useWordPress } from '@/composables/useWordPress'
 import LoadingSpinner from '@/components/Marketplace/LoadingSpinner.vue'
 import MaintenanceCard from '@/components/Marketplace/MaintenanceCard.vue'
@@ -370,49 +370,25 @@ const relatedLinks = computed(() => {
   ]
 })
 
-// Generate JSON-LD structured data
+// SEO constants
+const pageUrl = 'https://cloud.runonflux.com/marketplace/wordpress'
+const title = 'WordPress Hosting on FluxCloud - Decentralized & Scalable'
+const description = 'Deploy WordPress on decentralized FluxCloud. Multiple performance plans with MySQL, SSL, automatic backups. Affordable pricing starting at $25/month.'
+const imageUrl = 'https://cloud.runonflux.com/banner/FluxWPMarketplace.webp'
+
+// Generate JSON-LD structured data (reactive for plans)
 const structuredData = computed(() => {
   const schemas = []
 
   // Organization Schema
-  schemas.push({
-    '@context': 'https://schema.org',
-    '@type': 'Organization',
-    name: 'FluxCloud',
-    url: 'https://cloud.runonflux.com',
-    logo: 'https://cloud.runonflux.com/banner/FluxCloud.png',
-    description: 'Decentralized cloud infrastructure powered by Flux',
-    sameAs: [
-      'https://twitter.com/RunOnFlux',
-      'https://github.com/RunOnFlux',
-    ],
-  })
+  schemas.push(generateOrganizationSchema())
 
   // BreadcrumbList Schema
-  schemas.push({
-    '@context': 'https://schema.org',
-    '@type': 'BreadcrumbList',
-    itemListElement: [
-      {
-        '@type': 'ListItem',
-        position: 1,
-        name: 'Home',
-        item: 'https://cloud.runonflux.com',
-      },
-      {
-        '@type': 'ListItem',
-        position: 2,
-        name: 'Marketplace',
-        item: 'https://cloud.runonflux.com/marketplace',
-      },
-      {
-        '@type': 'ListItem',
-        position: 3,
-        name: 'WordPress Hosting',
-        item: 'https://cloud.runonflux.com/marketplace/wordpress',
-      },
-    ],
-  })
+  schemas.push(generateBreadcrumbSchema([
+    { name: 'Home', url: 'https://cloud.runonflux.com' },
+    { name: 'Marketplace', url: 'https://cloud.runonflux.com/marketplace' },
+    { name: 'WordPress Hosting', url: pageUrl },
+  ]))
 
   // Product/Service Schema with offers
   if (plans.value.length > 0) {
@@ -451,18 +427,7 @@ const structuredData = computed(() => {
 
   // FAQPage Schema
   if (faqs.value.length > 0) {
-    schemas.push({
-      '@context': 'https://schema.org',
-      '@type': 'FAQPage',
-      mainEntity: faqs.value.map(faq => ({
-        '@type': 'Question',
-        name: faq.question,
-        acceptedAnswer: {
-          '@type': 'Answer',
-          text: faq.answer,
-        },
-      })),
-    })
+    schemas.push(generateFAQSchema(faqs.value))
   }
 
   return schemas
@@ -491,53 +456,23 @@ const selectPlan = plan => {
   })
 }
 
-// SEO
-useHead({
-  title: 'WordPress Hosting on FluxCloud - Decentralized & Scalable',
+// SEO using useSEO composable
+useSEO({
+  title,
+  description,
+  url: pageUrl,
+  image: imageUrl,
+  imageAlt: 'WordPress Hosting on FluxCloud - Decentralized Infrastructure',
+  type: 'product',
+  keywords: 'WordPress hosting, decentralized WordPress, Web3 WordPress, FluxCloud WordPress, managed WordPress hosting, docker WordPress, container WordPress, affordable WordPress hosting',
+  robots: 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1',
+  structuredData: structuredData,
   meta: [
-    // Primary Meta Tags
-    { name: 'title', content: 'WordPress Hosting on FluxCloud - Decentralized & Scalable' },
-    {
-      name: 'description',
-      content: 'Deploy WordPress on decentralized FluxCloud. Multiple performance plans with MySQL, SSL, automatic backups. Affordable pricing starting at $25/month.',
-    },
-    { name: 'keywords', content: 'WordPress hosting, decentralized WordPress, Web3 WordPress, FluxCloud WordPress, managed WordPress hosting, docker WordPress, container WordPress, affordable WordPress hosting' },
-
-    // Open Graph
-    { property: 'og:title', content: 'WordPress Hosting on FluxCloud - Decentralized & Scalable' },
-    { property: 'og:description', content: 'Deploy WordPress websites on the decentralized FluxCloud network with multiple performance plans. MySQL, SSL, automatic backups included.' },
-    { property: 'og:type', content: 'product' },
-    { property: 'og:url', content: 'https://cloud.runonflux.com/marketplace/wordpress' },
-    { property: 'og:image', content: 'https://cloud.runonflux.com/banner/FluxWPMarketplace.webp' },
-    { property: 'og:image:secure_url', content: 'https://cloud.runonflux.com/banner/FluxWPMarketplace.webp' },
-    { property: 'og:image:width', content: '1200' },
-    { property: 'og:image:height', content: '630' },
-    { property: 'og:image:alt', content: 'WordPress Hosting on FluxCloud - Decentralized Infrastructure' },
-    { property: 'og:site_name', content: 'FluxCloud' },
-    { property: 'og:locale', content: 'en_US' },
-
-    // Twitter Card
-    { name: 'twitter:card', content: 'summary_large_image' },
-    { name: 'twitter:url', content: 'https://cloud.runonflux.com/marketplace/wordpress' },
-    { name: 'twitter:title', content: 'WordPress Hosting on FluxCloud - Decentralized & Scalable' },
-    { name: 'twitter:description', content: 'Deploy WordPress websites on the decentralized FluxCloud network with MySQL, SSL, and automatic backups.' },
-    { name: 'twitter:image', content: 'https://cloud.runonflux.com/banner/FluxWPMarketplace.webp' },
-    { name: 'twitter:image:alt', content: 'WordPress Hosting on FluxCloud' },
-    { name: 'twitter:site', content: '@RunOnFlux' },
-
-    // Additional SEO
-    { name: 'robots', content: 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1' },
+    { name: 'title', content: title },
+    { property: 'og:image:secure_url', content: imageUrl },
+    { name: 'twitter:url', content: pageUrl },
     { name: 'author', content: 'FluxCloud' },
   ],
-  link: [
-    { rel: 'canonical', href: 'https://cloud.runonflux.com/marketplace/wordpress' },
-  ],
-  script: computed(() =>
-    structuredData.value.map(schema => ({
-      type: 'application/ld+json',
-      innerHTML: JSON.stringify(schema),
-    })),
-  ),
 })
 
 onMounted(() => {

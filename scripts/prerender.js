@@ -319,6 +319,7 @@ async function prerender() {
         try {
           await page.waitForFunction(() => {
             const title = document.title
+
             // Wait until title changes from the default
             return title && !title.includes('FluxCloud - Decentralized Web3 Cloud Infrastructure')
           }, { timeout: 5000 })
