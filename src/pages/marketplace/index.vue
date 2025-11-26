@@ -93,15 +93,15 @@ const {
   fetchCategories,
 } = useMarketplace()
 
-const pageUrl = 'https://home.runonflux.io/marketplace'
+const pageUrl = 'https://cloud.runonflux.com/marketplace'
 const title = 'Marketplace - Deploy Decentralized Apps on Flux | FluxCloud'
 const description = 'Deploy decentralized apps on Flux\'s Web3 cloud. Docker containers, web apps, APIs on 8,000+ FluxNodes worldwide. One-click deployment, transparent pricing.'
-const imageUrl = 'https://home.runonflux.io/logo.png'
+const imageUrl = 'https://cloud.runonflux.com/logo.png'
 
 // Generate structured data
 const organizationSchema = generateOrganizationSchema()
 const breadcrumbSchema = generateBreadcrumbSchema([
-  { name: 'Home', url: 'https://home.runonflux.io' },
+  { name: 'Home', url: 'https://cloud.runonflux.com' },
   { name: 'Marketplace', url: pageUrl },
 ])
 
@@ -112,7 +112,7 @@ const itemListSchema = computed(() => {
   // Take top 20 apps for structured data
   const topApps = apps.value.slice(0, 20).map(app => ({
     name: app.displayName || app.name || 'Unknown App',
-    url: `https://home.runonflux.io/marketplace/${app.uuid || app.name}`,
+    url: `https://cloud.runonflux.com/marketplace/${app.uuid || app.name}`,
     description: app.description || `Deploy ${app.displayName || app.name} on Flux decentralized cloud`,
   }))
 

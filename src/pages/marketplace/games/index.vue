@@ -409,10 +409,10 @@ const fetchFluxLocations = async () => {
 }
 
 // SEO meta tags and structured data
-const pageUrl = 'https://home.runonflux.io/marketplace/games'
+const pageUrl = 'https://cloud.runonflux.com/marketplace/games'
 const title = 'Game Server Hosting - FluxPlay on FluxCloud'
 const description = 'Host Minecraft, Palworld, Factorio, Satisfactory & Enshrouded servers on FluxCloud. Global servers, instant deployment, DDoS protection. Flexible plans.'
-const imageUrl = 'https://home.runonflux.io/images/games/FluxPlay_white.svg'
+const imageUrl = 'https://cloud.runonflux.com/images/games/FluxPlay_white.svg'
 
 // Reactive structured data that updates when games load
 const structuredDataSchemas = computed(() => {
@@ -423,7 +423,7 @@ const structuredDataSchemas = computed(() => {
         '@context': 'https://schema.org',
         '@type': 'Organization',
         'name': 'FluxPlay',
-        'url': 'https://home.runonflux.io',
+        'url': 'https://cloud.runonflux.com',
         'logo': imageUrl,
         'description': 'Decentralized game server hosting on FluxCloud',
       },
@@ -435,7 +435,7 @@ const structuredDataSchemas = computed(() => {
             '@type': 'ListItem',
             'position': 1,
             'name': 'Home',
-            'item': 'https://home.runonflux.io',
+            'item': 'https://cloud.runonflux.com',
           },
           {
             '@type': 'ListItem',
@@ -471,7 +471,7 @@ const structuredDataSchemas = computed(() => {
         'item': {
           '@type': 'Product',
           'name': `${game.displayName || game.name} Server Hosting`,
-          'url': `https://home.runonflux.io/marketplace/games/${game.name.toLowerCase()}`,
+          'url': `https://cloud.runonflux.com/marketplace/games/${game.name.toLowerCase()}`,
           'image': game.icon || game.logo || imageUrl,
           'description': game.description || `Host your own ${game.displayName || game.name} server on FluxCloud`,
         },
@@ -481,7 +481,7 @@ const structuredDataSchemas = computed(() => {
       '@context': 'https://schema.org',
       '@type': 'Organization',
       'name': 'FluxPlay',
-      'url': 'https://home.runonflux.io',
+      'url': 'https://cloud.runonflux.com',
       'logo': imageUrl,
       'description': 'Decentralized game server hosting on FluxCloud',
     },
@@ -493,7 +493,7 @@ const structuredDataSchemas = computed(() => {
           '@type': 'ListItem',
           'position': 1,
           'name': 'Home',
-          'item': 'https://home.runonflux.io',
+          'item': 'https://cloud.runonflux.com',
         },
         {
           '@type': 'ListItem',

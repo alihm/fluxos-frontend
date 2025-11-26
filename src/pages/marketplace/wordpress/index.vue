@@ -379,8 +379,8 @@ const structuredData = computed(() => {
     '@context': 'https://schema.org',
     '@type': 'Organization',
     name: 'FluxCloud',
-    url: 'https://home.runonflux.io',
-    logo: 'https://home.runonflux.io/banner/FluxCloud.png',
+    url: 'https://cloud.runonflux.com',
+    logo: 'https://cloud.runonflux.com/banner/FluxCloud.png',
     description: 'Decentralized cloud infrastructure powered by Flux',
     sameAs: [
       'https://twitter.com/RunOnFlux',
@@ -397,19 +397,19 @@ const structuredData = computed(() => {
         '@type': 'ListItem',
         position: 1,
         name: 'Home',
-        item: 'https://home.runonflux.io',
+        item: 'https://cloud.runonflux.com',
       },
       {
         '@type': 'ListItem',
         position: 2,
         name: 'Marketplace',
-        item: 'https://home.runonflux.io/marketplace',
+        item: 'https://cloud.runonflux.com/marketplace',
       },
       {
         '@type': 'ListItem',
         position: 3,
         name: 'WordPress Hosting',
-        item: 'https://home.runonflux.io/marketplace/wordpress',
+        item: 'https://cloud.runonflux.com/marketplace/wordpress',
       },
     ],
   })
@@ -422,7 +422,7 @@ const structuredData = computed(() => {
       price: plan.usd.toFixed(2),
       priceCurrency: 'USD',
       availability: 'https://schema.org/InStock',
-      url: 'https://home.runonflux.io/marketplace/wordpress/configure',
+      url: 'https://cloud.runonflux.com/marketplace/wordpress/configure',
       priceSpecification: {
         '@type': 'UnitPriceSpecification',
         price: plan.usd.toFixed(2),
@@ -504,9 +504,9 @@ useHead({
     { property: 'og:title', content: 'WordPress Hosting on FluxCloud - Decentralized & Scalable' },
     { property: 'og:description', content: 'Deploy WordPress websites on the decentralized FluxCloud network with multiple performance plans. MySQL, SSL, automatic backups included.' },
     { property: 'og:type', content: 'product' },
-    { property: 'og:url', content: 'https://home.runonflux.io/marketplace/wordpress' },
-    { property: 'og:image', content: 'https://home.runonflux.io/banner/FluxWPMarketplace.webp' },
-    { property: 'og:image:secure_url', content: 'https://home.runonflux.io/banner/FluxWPMarketplace.webp' },
+    { property: 'og:url', content: 'https://cloud.runonflux.com/marketplace/wordpress' },
+    { property: 'og:image', content: 'https://cloud.runonflux.com/banner/FluxWPMarketplace.webp' },
+    { property: 'og:image:secure_url', content: 'https://cloud.runonflux.com/banner/FluxWPMarketplace.webp' },
     { property: 'og:image:width', content: '1200' },
     { property: 'og:image:height', content: '630' },
     { property: 'og:image:alt', content: 'WordPress Hosting on FluxCloud - Decentralized Infrastructure' },
@@ -517,7 +517,7 @@ useHead({
     { name: 'twitter:card', content: 'summary_large_image' },
     { name: 'twitter:title', content: 'WordPress Hosting on FluxCloud - Decentralized & Scalable' },
     { name: 'twitter:description', content: 'Deploy WordPress websites on the decentralized FluxCloud network with MySQL, SSL, and automatic backups.' },
-    { name: 'twitter:image', content: 'https://home.runonflux.io/banner/FluxWPMarketplace.webp' },
+    { name: 'twitter:image', content: 'https://cloud.runonflux.com/banner/FluxWPMarketplace.webp' },
     { name: 'twitter:image:alt', content: 'WordPress Hosting on FluxCloud' },
     { name: 'twitter:site', content: '@RunOnFlux' },
 
@@ -526,7 +526,7 @@ useHead({
     { name: 'author', content: 'FluxCloud' },
   ],
   link: [
-    { rel: 'canonical', href: 'https://home.runonflux.io/marketplace/wordpress' },
+    { rel: 'canonical', href: 'https://cloud.runonflux.com/marketplace/wordpress' },
   ],
   script: computed(() =>
     structuredData.value.map(schema => ({

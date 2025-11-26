@@ -183,12 +183,12 @@ const seoDescription = computed(() => {
 })
 
 const seoImage = computed(() => {
-  if (!game.value) return 'https://home.runonflux.io/images/games/FluxPlay_white.svg'
+  if (!game.value) return 'https://cloud.runonflux.com/images/games/FluxPlay_white.svg'
   
-  return gameIcon.value || 'https://home.runonflux.io/images/games/FluxPlay_white.svg'
+  return gameIcon.value || 'https://cloud.runonflux.com/images/games/FluxPlay_white.svg'
 })
 
-const seoUrl = computed(() => `https://home.runonflux.io/marketplace/games/${route.params.name}`)
+const seoUrl = computed(() => `https://cloud.runonflux.com/marketplace/games/${route.params.name}`)
 
 const seoKeywords = computed(() => {
   if (!game.value) return 'game server hosting, decentralized hosting, flux network, affordable game hosting'
@@ -284,8 +284,8 @@ const structuredData = computed(() => {
 
   // Breadcrumb structured data
   const breadcrumbStructuredData = generateBreadcrumbSchema([
-    { name: 'Home', url: 'https://home.runonflux.io' },
-    { name: 'Games', url: 'https://home.runonflux.io/marketplace/games' },
+    { name: 'Home', url: 'https://cloud.runonflux.com' },
+    { name: 'Games', url: 'https://cloud.runonflux.com/marketplace/games' },
     { name: gameName, url: pageUrl },
   ])
 

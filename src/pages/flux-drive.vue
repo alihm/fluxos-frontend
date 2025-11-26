@@ -116,10 +116,10 @@ import BreadcrumbNav from '@/components/BreadcrumbNav.vue'
 const { t } = useI18n()
 
 // SEO meta tags and structured data
-const pageUrl = 'https://home.runonflux.io/flux-drive'
+const pageUrl = 'https://cloud.runonflux.com/flux-drive'
 const title = 'FluxDrive - Decentralized IPFS Cloud Storage | Flux Network'
 const description = 'Secure IPFS cloud storage on Flux network. Store files across distributed FluxNodes with encryption, redundancy & censorship resistance. Decentralized.'
-const imageUrl = 'https://home.runonflux.io/banner/FluxDriveBanner.png'
+const imageUrl = 'https://cloud.runonflux.com/banner/FluxDriveBanner.png'
 
 // SoftwareApplication structured data
 const softwareApplicationStructuredData = {
@@ -159,8 +159,8 @@ const organizationStructuredData = {
   '@context': 'https://schema.org',
   '@type': 'Organization',
   'name': 'Flux Network',
-  'url': 'https://home.runonflux.io',
-  'logo': 'https://home.runonflux.io/logo.png',
+  'url': 'https://cloud.runonflux.com',
+  'logo': 'https://cloud.runonflux.com/logo.png',
   'description': 'Decentralized Web3 cloud infrastructure powered by FluxNodes worldwide',
   'sameAs': [
     'https://twitter.com/RunOnFlux',
@@ -177,7 +177,7 @@ const breadcrumbStructuredData = {
       '@type': 'ListItem',
       'position': 1,
       'name': 'Home',
-      'item': 'https://home.runonflux.io',
+      'item': 'https://cloud.runonflux.com',
     },
     {
       '@type': 'ListItem',

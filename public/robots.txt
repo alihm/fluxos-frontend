@@ -5,4 +5,4 @@ Disallow: /apps/manage/
 Disallow: /checkout/
 Disallow: /unauthorized
 
-Sitemap: https://home.runonflux.io/sitemap.xml
+Sitemap: https://cloud.runonflux.com/sitemap.xml
