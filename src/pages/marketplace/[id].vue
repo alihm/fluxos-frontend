@@ -840,9 +840,9 @@ const seoDescription = computed(() => {
 })
 
 const seoImage = computed(() => {
-  if (!app.value) return 'https://cloud.runonflux.com/flux-logo.png'
-  
-  return app.value.icon || app.value.logo || 'https://cloud.runonflux.com/flux-logo.png'
+  if (!app.value) return 'https://cloud.runonflux.com/images/logo.png'
+
+  return app.value.icon || app.value.logo || 'https://cloud.runonflux.com/images/logo.png'
 })
 
 const seoUrl = computed(() => `https://cloud.runonflux.com/marketplace/${route.params.id}`)
