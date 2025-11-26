@@ -74,6 +74,7 @@ import {
   generateOrganizationSchema,
   generateBreadcrumbSchema,
   generateItemListSchema,
+  generateArticleSchema,
 } from '@/composables/useSEO'
 
 const { t } = useI18n()
@@ -98,12 +99,24 @@ const title = 'Marketplace - Deploy Decentralized Apps on Flux | FluxCloud'
 const description = 'Deploy decentralized apps on Flux\'s Web3 cloud. Docker containers, web apps, APIs on 8,000+ FluxNodes worldwide. One-click deployment, transparent pricing.'
 const imageUrl = 'https://cloud.runonflux.com/images/logo.png'
 
+// Article timestamps for SEO (static dates for this landing page)
+const datePublished = '2023-06-01T00:00:00Z' // Initial launch date
+const dateModified = '2025-01-20T00:00:00Z'  // Last significant update
+
 // Generate structured data
 const organizationSchema = generateOrganizationSchema()
 const breadcrumbSchema = generateBreadcrumbSchema([
   { name: 'Home', url: 'https://cloud.runonflux.com' },
   { name: 'Marketplace', url: pageUrl },
 ])
+const articleSchema = generateArticleSchema({
+  headline: title,
+  description,
+  url: pageUrl,
+  image: imageUrl,
+  datePublished,
+  dateModified,
+})
 
 // Generate dynamic ItemList schema for marketplace apps
 const itemListSchema = computed(() => {
@@ -121,8 +134,8 @@ const itemListSchema = computed(() => {
 
 // Create reactive structured data that updates when itemListSchema changes
 const structuredData = computed(() => {
-  const baseSchemas = [organizationSchema, breadcrumbSchema]
-  
+  const baseSchemas = [organizationSchema, breadcrumbSchema, articleSchema]
+
   return itemListSchema.value ? [...baseSchemas, itemListSchema.value] : baseSchemas
 })
 

@@ -29,6 +29,17 @@ const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 const distPath = path.join(__dirname, '../dist')
 
+// Retry configuration
+const MAX_RETRIES = 3
+const INITIAL_RETRY_DELAY_MS = 1000 // 1 second
+
+/**
+ * Sleep for a given number of milliseconds
+ */
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms))
+}
+
 // Fallback static routes (used if prerender-routes.json doesn't exist)
 const FALLBACK_ROUTES = Object.freeze([
   // Main landing pages
@@ -252,6 +263,77 @@ function injectPrerenderMeta(html) {
   return cleanedHtml.replace('<head>', `<head>\n    ${prerenderMeta}`)
 }
 
+/**
+ * Render a single page with retry logic and exponential backoff
+ * @param {Object} context - Playwright browser context
+ * @param {string} route - Route to render
+ * @param {number} port - Local server port
+ * @returns {Promise<{success: boolean, html?: string, error?: string}>}
+ */
+async function renderPageWithRetry(context, route, port) {
+  let lastError = null
+
+  for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+    const page = await context.newPage()
+
+    try {
+      const url = `http://localhost:${port}${route}`
+
+      // Navigate to the page
+      await page.goto(url, { waitUntil: 'networkidle', timeout: 30000 })
+
+      // Wait for app content to render
+      try {
+        await page.waitForFunction(() => {
+          return document.querySelector('#app')?.innerHTML?.length > 100
+        }, { timeout: 10000 })
+      } catch {
+        // If the app content check fails, wait a bit more
+        await page.waitForTimeout(3000)
+      }
+
+      // Wait for @vueuse/head to update the title (non-default title means SEO loaded)
+      try {
+        await page.waitForFunction(() => {
+          const title = document.title
+
+          // Wait until title changes from the default
+          return title && !title.includes('FluxCloud - Decentralized Web3 Cloud Infrastructure')
+        }, { timeout: 5000 })
+      } catch {
+        // Some pages might keep default title, that's ok
+      }
+
+      // Extra wait for head meta tags to fully update
+      await page.waitForTimeout(1000)
+
+      // Get the rendered HTML
+      let html = await page.content()
+
+      // Clean up duplicate meta tags (keep dynamically added ones)
+      html = cleanDuplicateMetaTags(html)
+
+      // Inject prerender meta tag
+      html = injectPrerenderMeta(html)
+
+      await page.close()
+
+      return { success: true, html }
+    } catch (err) {
+      lastError = err
+      await page.close()
+
+      if (attempt < MAX_RETRIES) {
+        const delay = INITIAL_RETRY_DELAY_MS * Math.pow(2, attempt - 1)
+        console.log(`  ⚠️ ${route}: Attempt ${attempt} failed, retrying in ${delay}ms...`)
+        await sleep(delay)
+      }
+    }
+  }
+
+  return { success: false, error: lastError?.message || 'Unknown error' }
+}
+
 async function prerender() {
   // Load routes inside function to avoid global memory retention
   const routes = loadRoutes()
@@ -300,48 +382,9 @@ async function prerender() {
     let errorCount = 0
 
     for (const route of routes) {
-      const page = await context.newPage()
+      const result = await renderPageWithRetry(context, route, port)
 
-      try {
-        const url = `http://localhost:${port}${route}`
-
-        // Navigate to the page
-        await page.goto(url, { waitUntil: 'networkidle', timeout: 30000 })
-
-        // Wait for app content to render
-        try {
-          await page.waitForFunction(() => {
-            return document.querySelector('#app')?.innerHTML?.length > 100
-          }, { timeout: 10000 })
-        } catch {
-          // If the app content check fails, wait a bit more
-          await page.waitForTimeout(3000)
-        }
-
-        // Wait for @vueuse/head to update the title (non-default title means SEO loaded)
-        try {
-          await page.waitForFunction(() => {
-            const title = document.title
-
-            // Wait until title changes from the default
-            return title && !title.includes('FluxCloud - Decentralized Web3 Cloud Infrastructure')
-          }, { timeout: 5000 })
-        } catch {
-          // Some pages might keep default title, that's ok
-        }
-
-        // Extra wait for head meta tags to fully update
-        await page.waitForTimeout(1000)
-
-        // Get the rendered HTML
-        let html = await page.content()
-
-        // Clean up duplicate meta tags (keep dynamically added ones)
-        html = cleanDuplicateMetaTags(html)
-
-        // Inject prerender meta tag
-        html = injectPrerenderMeta(html)
-
+      if (result.success) {
         // Determine output path
         let outputPath
         if (route === '/') {
@@ -358,14 +401,12 @@ async function prerender() {
         }
 
         // Write the pre-rendered HTML
-        fs.writeFileSync(outputPath, html)
+        fs.writeFileSync(outputPath, result.html)
         console.log(`  ✅ ${route}`)
         successCount++
-      } catch (err) {
-        console.error(`  ❌ ${route}: ${err.message}`)
+      } else {
+        console.error(`  ❌ ${route}: ${result.error} (failed after ${MAX_RETRIES} attempts)`)
         errorCount++
-      } finally {
-        await page.close()
       }
     }
 

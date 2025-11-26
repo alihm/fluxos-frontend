@@ -146,7 +146,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
-import { useSEO, generateOrganizationSchema, generateBreadcrumbSchema, generateFAQSchema } from '@/composables/useSEO'
+import { useSEO, generateOrganizationSchema, generateBreadcrumbSchema, generateFAQSchema, generateArticleSchema } from '@/composables/useSEO'
 import { useWordPress } from '@/composables/useWordPress'
 import LoadingSpinner from '@/components/Marketplace/LoadingSpinner.vue'
 import MaintenanceCard from '@/components/Marketplace/MaintenanceCard.vue'
@@ -376,12 +376,26 @@ const title = 'WordPress Hosting on FluxCloud - Decentralized & Scalable'
 const description = 'Deploy WordPress on decentralized FluxCloud. Multiple performance plans with MySQL, SSL, automatic backups. Affordable pricing starting at $25/month.'
 const imageUrl = 'https://cloud.runonflux.com/banner/FluxWPMarketplace.webp'
 
+// Article timestamps for SEO (static dates for this landing page)
+const datePublished = '2024-01-15T00:00:00Z' // Initial launch date
+const dateModified = '2025-01-20T00:00:00Z'  // Last significant update
+
 // Generate JSON-LD structured data (reactive for plans)
 const structuredData = computed(() => {
   const schemas = []
 
   // Organization Schema
   schemas.push(generateOrganizationSchema())
+
+  // Article Schema with timestamps
+  schemas.push(generateArticleSchema({
+    headline: title,
+    description,
+    url: pageUrl,
+    image: imageUrl,
+    datePublished,
+    dateModified,
+  }))
 
   // BreadcrumbList Schema
   schemas.push(generateBreadcrumbSchema([

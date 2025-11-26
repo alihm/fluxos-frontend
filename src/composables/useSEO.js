@@ -13,6 +13,7 @@ import { computed } from 'vue'
  */
 function escapeHtml(str) {
   if (typeof str !== 'string') return str
+  
   return str
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
@@ -385,6 +386,62 @@ export function generateSoftwareApplicationSchema(software) {
       'bestRating': aggregateRating.bestRating || '5',
       'worstRating': '1',
     }
+  }
+
+  return schema
+}
+
+/**
+ * Generate Article structured data with timestamps
+ * @param {Object} article - Article information
+ * @param {string} article.headline - Article headline/title
+ * @param {string} article.description - Article description
+ * @param {string} article.url - Article URL
+ * @param {string} article.image - Article image URL
+ * @param {string} [article.datePublished] - ISO date string for publication date
+ * @param {string} [article.dateModified] - ISO date string for last modification date
+ * @param {string} [article.author] - Author name (defaults to 'Flux Network')
+ * @returns {Object} Article schema
+ */
+export function generateArticleSchema(article) {
+  const {
+    headline,
+    description,
+    url,
+    image,
+    datePublished,
+    dateModified,
+    author = 'Flux Network',
+  } = article
+
+  const schema = {
+    '@context': 'https://schema.org',
+    '@type': 'Article',
+    'headline': headline,
+    'description': description,
+    'url': url,
+    'image': image,
+    'author': {
+      '@type': 'Organization',
+      'name': author,
+      'url': 'https://runonflux.com',
+    },
+    'publisher': {
+      '@type': 'Organization',
+      'name': 'Flux Network',
+      'logo': {
+        '@type': 'ImageObject',
+        'url': 'https://cloud.runonflux.com/images/logo.png',
+      },
+    },
+  }
+
+  if (datePublished) {
+    schema.datePublished = datePublished
+  }
+
+  if (dateModified) {
+    schema.dateModified = dateModified
   }
 
   return schema

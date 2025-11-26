@@ -25,6 +25,14 @@ const GAMES_CATEGORY_UUIDS = [
   '7ce5a03c-b808-478b-94a1-2a1b3eaaeb36', // NewGames
 ]
 
+// SEO Priority Constants for sitemap
+const SEO_PRIORITY = Object.freeze({
+  HIGHEST: 1.0,   // Homepage
+  HIGH: 0.9,      // Main landing pages (calculator, flux-drive, games, wordpress)
+  MEDIUM: 0.8,    // Dashboard overview, marketplace index, game detail pages
+  STANDARD: 0.7,  // Dashboard pages, marketplace app detail pages, app registration
+})
+
 // Get current date in ISO format (YYYY-MM-DD)
 const currentDate = new Date().toISOString().split('T')[0]
 
@@ -33,31 +41,31 @@ const staticUrls = [
   // High Priority Pages
   {
     loc: '/',
-    priority: 1.0,
+    priority: SEO_PRIORITY.HIGHEST,
     changefreq: 'daily',
     description: 'Homepage',
   },
   {
     loc: '/cost-calculator',
-    priority: 0.9,
+    priority: SEO_PRIORITY.HIGH,
     changefreq: 'weekly',
     description: 'Cost Calculator',
   },
   {
     loc: '/flux-drive',
-    priority: 0.9,
+    priority: SEO_PRIORITY.HIGH,
     changefreq: 'weekly',
     description: 'FluxDrive',
   },
   {
     loc: '/marketplace/games',
-    priority: 0.9,
+    priority: SEO_PRIORITY.HIGH,
     changefreq: 'weekly',
     description: 'Games Landing Page',
   },
   {
     loc: '/marketplace/wordpress',
-    priority: 0.9,
+    priority: SEO_PRIORITY.HIGH,
     changefreq: 'weekly',
     description: 'WordPress Hosting',
   },
@@ -65,31 +73,31 @@ const staticUrls = [
   // Dashboard Pages
   {
     loc: '/dashboards/overview',
-    priority: 0.8,
+    priority: SEO_PRIORITY.MEDIUM,
     changefreq: 'daily',
     description: 'Flux Network Overview',
   },
   {
     loc: '/marketplace',
-    priority: 0.8,
+    priority: SEO_PRIORITY.MEDIUM,
     changefreq: 'weekly',
     description: 'Marketplace',
   },
   {
     loc: '/dashboards/resources',
-    priority: 0.7,
+    priority: SEO_PRIORITY.STANDARD,
     changefreq: 'daily',
     description: 'Flux Network Resources',
   },
   {
     loc: '/dashboards/locations',
-    priority: 0.7,
+    priority: SEO_PRIORITY.STANDARD,
     changefreq: 'weekly',
     description: 'Flux Node Locations',
   },
   {
     loc: '/apps/register',
-    priority: 0.7,
+    priority: SEO_PRIORITY.STANDARD,
     changefreq: 'monthly',
     description: 'App Registration',
   },
@@ -259,7 +267,7 @@ async function main() {
         existingLocs.add(loc)
         allUrls.push({
           loc,
-          priority: 0.7,
+          priority: SEO_PRIORITY.STANDARD,
           changefreq: 'weekly',
           description: `Marketplace App: ${app.displayName || app.name}`,
         })
@@ -276,7 +284,7 @@ async function main() {
         existingLocs.add(loc)
         allUrls.push({
           loc,
-          priority: 0.8,
+          priority: SEO_PRIORITY.MEDIUM,
           changefreq: 'weekly',
           description: `Game Server: ${game.displayName || game.name}`,
         })

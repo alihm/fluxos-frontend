@@ -18,6 +18,7 @@ const __dirname = path.dirname(__filename)
 // API Configuration
 const MARKETPLACE_API_URL = 'https://jetpackbridge.runonflux.io'
 const API_VERSION = 1
+const API_TIMEOUT_MS = 10000 // 10 second timeout for API requests
 
 // Games category UUIDs (excluded from marketplace apps, shown in games section)
 const GAMES_CATEGORY_UUIDS = [
@@ -44,7 +45,14 @@ const STATIC_ROUTES = [
  */
 async function fetchAllApps() {
   try {
-    const response = await fetch(`${MARKETPLACE_API_URL}/api/v${API_VERSION}/marketplace/apps`)
+    const controller = new AbortController()
+    const timeoutId = setTimeout(() => controller.abort(), API_TIMEOUT_MS)
+
+    const response = await fetch(`${MARKETPLACE_API_URL}/api/v${API_VERSION}/marketplace/apps`, {
+      signal: controller.signal,
+    })
+    clearTimeout(timeoutId)
+
     const data = await response.json()
 
     if (data && data.status === 'success') {
@@ -58,7 +66,11 @@ async function fetchAllApps() {
 
     return []
   } catch (error) {
-    console.error('❌ Failed to fetch marketplace apps:', error.message)
+    if (error.name === 'AbortError') {
+      console.error(`❌ Fetch marketplace apps timed out after ${API_TIMEOUT_MS / 1000} seconds`)
+    } else {
+      console.error('❌ Failed to fetch marketplace apps:', error.message)
+    }
 
     return []
   }
@@ -69,7 +81,14 @@ async function fetchAllApps() {
  */
 async function fetchTrendingGamesUUIDs() {
   try {
-    const response = await fetch(`${MARKETPLACE_API_URL}/api/v${API_VERSION}/marketplace/trending`)
+    const controller = new AbortController()
+    const timeoutId = setTimeout(() => controller.abort(), API_TIMEOUT_MS)
+
+    const response = await fetch(`${MARKETPLACE_API_URL}/api/v${API_VERSION}/marketplace/trending`, {
+      signal: controller.signal,
+    })
+    clearTimeout(timeoutId)
+
     const data = await response.json()
 
     if (data && data.status === 'success') {
@@ -78,7 +97,11 @@ async function fetchTrendingGamesUUIDs() {
 
     return []
   } catch (error) {
-    console.error('❌ Failed to fetch trending games:', error.message)
+    if (error.name === 'AbortError') {
+      console.error(`❌ Fetch trending games timed out after ${API_TIMEOUT_MS / 1000} seconds`)
+    } else {
+      console.error('❌ Failed to fetch trending games:', error.message)
+    }
 
     return []
   }
