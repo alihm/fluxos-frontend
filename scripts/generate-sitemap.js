@@ -100,7 +100,14 @@ const staticUrls = [
  */
 async function fetchAllApps() {
   try {
-    const response = await fetch(`${MARKETPLACE_API_URL}/api/v${API_VERSION}/marketplace/apps`)
+    const controller = new AbortController()
+    const timeoutId = setTimeout(() => controller.abort(), 10000)
+
+    const response = await fetch(`${MARKETPLACE_API_URL}/api/v${API_VERSION}/marketplace/apps`, {
+      signal: controller.signal,
+    })
+    clearTimeout(timeoutId)
+
     const data = await response.json()
 
     if (data && data.status === 'success') {
@@ -114,7 +121,11 @@ async function fetchAllApps() {
 
     return []
   } catch (error) {
-    console.error('❌ Failed to fetch marketplace apps:', error.message)
+    if (error.name === 'AbortError') {
+      console.error('❌ Fetch marketplace apps timed out after 10 seconds')
+    } else {
+      console.error('❌ Failed to fetch marketplace apps:', error.message)
+    }
 
     return []
   }
@@ -125,7 +136,14 @@ async function fetchAllApps() {
  */
 async function fetchTrendingGamesUUIDs() {
   try {
-    const response = await fetch(`${MARKETPLACE_API_URL}/api/v${API_VERSION}/marketplace/trending`)
+    const controller = new AbortController()
+    const timeoutId = setTimeout(() => controller.abort(), 10000)
+
+    const response = await fetch(`${MARKETPLACE_API_URL}/api/v${API_VERSION}/marketplace/trending`, {
+      signal: controller.signal,
+    })
+    clearTimeout(timeoutId)
+
     const data = await response.json()
 
     if (data && data.status === 'success') {
@@ -134,7 +152,11 @@ async function fetchTrendingGamesUUIDs() {
 
     return []
   } catch (error) {
-    console.error('❌ Failed to fetch trending games:', error.message)
+    if (error.name === 'AbortError') {
+      console.error('❌ Fetch trending games timed out after 10 seconds')
+    } else {
+      console.error('❌ Failed to fetch trending games:', error.message)
+    }
 
     return []
   }

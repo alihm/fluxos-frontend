@@ -7,6 +7,21 @@ import { useHead } from '@vueuse/head'
 import { computed } from 'vue'
 
 /**
+ * Escape HTML special characters to prevent XSS in user-provided content
+ * @param {string} str - String to sanitize
+ * @returns {string} Sanitized string with HTML entities escaped
+ */
+function escapeHtml(str) {
+  if (typeof str !== 'string') return str
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;')
+}
+
+/**
  * Generate comprehensive SEO meta tags using useHead
  * @param {Object} options - SEO configuration options
  * @param {string} options.title - Page title
@@ -40,14 +55,19 @@ export function useSEO(options) {
     robots = 'index, follow',
   } = options
 
+  // Sanitize user-provided content to prevent XSS
+  const safeTitle = escapeHtml(title)
+  const safeDescription = escapeHtml(description)
+  const safeKeywords = escapeHtml(keywords)
+
   // Use title as default alt text if not provided
-  const imgAlt = imageAlt || title
+  const imgAlt = escapeHtml(imageAlt || title)
 
   // Default meta tags
   const defaultMeta = [
     {
       name: 'description',
-      content: description,
+      content: safeDescription,
     },
     {
       name: 'author',
@@ -59,8 +79,8 @@ export function useSEO(options) {
     },
 
     // Open Graph
-    { property: 'og:title', content: title },
-    { property: 'og:description', content: description },
+    { property: 'og:title', content: safeTitle },
+    { property: 'og:description', content: safeDescription },
     { property: 'og:image', content: image },
     { property: 'og:image:width', content: imageWidth },
     { property: 'og:image:height', content: imageHeight },
@@ -72,8 +92,8 @@ export function useSEO(options) {
 
     // Twitter Card
     { name: 'twitter:card', content: 'summary_large_image' },
-    { name: 'twitter:title', content: title },
-    { name: 'twitter:description', content: description },
+    { name: 'twitter:title', content: safeTitle },
+    { name: 'twitter:description', content: safeDescription },
     { name: 'twitter:image', content: image },
     { name: 'twitter:image:alt', content: imgAlt },
     { name: 'twitter:site', content: '@RunOnFlux' },
@@ -81,10 +101,10 @@ export function useSEO(options) {
   ]
 
   // Add keywords if provided
-  if (keywords) {
+  if (safeKeywords) {
     defaultMeta.push({
       name: 'keywords',
-      content: keywords,
+      content: safeKeywords,
     })
   }
 
@@ -109,7 +129,7 @@ export function useSEO(options) {
   })
 
   useHead({
-    title,
+    title: safeTitle,
     meta: [...defaultMeta, ...meta],
     link: [...defaultLink, ...link],
     script: scripts, // Pass computed ref so useHead can track changes
