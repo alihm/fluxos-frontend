@@ -96,7 +96,7 @@ const {
 const pageUrl = 'https://cloud.runonflux.com/marketplace'
 const title = 'Marketplace - Deploy Decentralized Apps on Flux | FluxCloud'
 const description = 'Deploy decentralized apps on Flux\'s Web3 cloud. Docker containers, web apps, APIs on 8,000+ FluxNodes worldwide. One-click deployment, transparent pricing.'
-const imageUrl = 'https://cloud.runonflux.com/logo.png'
+const imageUrl = 'https://cloud.runonflux.com/images/logo.png'
 
 // Generate structured data
 const organizationSchema = generateOrganizationSchema()

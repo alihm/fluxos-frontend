@@ -481,7 +481,7 @@ const { t } = useI18n()
 const title = 'Flux Network Overview - Real-Time Node Statistics | FluxCloud'
 const description = 'View real-time statistics of the Flux decentralized network. Track 8,000+ active FluxNodes across Cumulus, Nimbus, and Stratus tiers. Monitor network health, supply, and node distribution worldwide.'
 const pageUrl = 'https://cloud.runonflux.com/dashboards/overview'
-const imageUrl = 'https://cloud.runonflux.com/logo.png'
+const imageUrl = 'https://cloud.runonflux.com/images/logo.png'
 
 // Structured data schemas
 const structuredData = [
@@ -490,7 +490,7 @@ const structuredData = [
     '@type': 'Organization',
     name: 'Flux Network',
     url: 'https://cloud.runonflux.com',
-    logo: 'https://cloud.runonflux.com/logo.png',
+    logo: 'https://cloud.runonflux.com/images/logo.png',
     description: 'Decentralized Web3 cloud infrastructure powered by FluxNodes worldwide',
     sameAs: [
       'https://twitter.com/RunOnFlux',

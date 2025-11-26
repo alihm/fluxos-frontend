@@ -13,7 +13,7 @@ const { t } = useI18n()
 const title = 'FluxCloud - Decentralized Web3 Cloud Infrastructure'
 const description = 'Deploy apps on FluxCloud\'s decentralized Web3 infrastructure. Host games, WordPress, custom apps on 8,000+ FluxNodes worldwide. From $0.99/month.'
 const pageUrl = 'https://cloud.runonflux.com/'
-const imageUrl = 'https://cloud.runonflux.com/logo.png'
+const imageUrl = 'https://cloud.runonflux.com/images/logo.png'
 
 // Structured data schemas
 const structuredData = [
@@ -22,7 +22,7 @@ const structuredData = [
     '@type': 'Organization',
     name: 'Flux Network',
     url: 'https://cloud.runonflux.com',
-    logo: 'https://cloud.runonflux.com/logo.png',
+    logo: 'https://cloud.runonflux.com/images/logo.png',
     description: 'Decentralized Web3 cloud infrastructure powered by FluxNodes worldwide',
     sameAs: [
       'https://twitter.com/RunOnFlux',
@@ -40,7 +40,7 @@ const structuredData = [
       name: 'Flux Network',
       logo: {
         '@type': 'ImageObject',
-        url: 'https://cloud.runonflux.com/logo.png',
+        url: 'https://cloud.runonflux.com/images/logo.png',
       },
     },
   },

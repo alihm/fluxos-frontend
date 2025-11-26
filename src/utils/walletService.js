@@ -66,7 +66,7 @@ const metadata = {
   name: "Flux Cloud",
   description: "Flux, Your Gateway to a Decentralized World",
   url: isLocalhost ? window.location.origin : "https://cloud.runonflux.com",
-  icons: ["https://cloud.runonflux.com/img/logo.png"],
+  icons: ["https://cloud.runonflux.com/images/logo.png"],
 }
 
 // Singleton pattern to ensure AppKit and WagmiAdapter are only created once globally

@@ -102,7 +102,7 @@ import DashboardService from "@/services/DashboardService"
 const title = 'Flux Network Node List - Live Node Directory'
 const description = 'Browse the complete list of Flux network nodes. View node details, locations, and performance metrics across the decentralized infrastructure.'
 const pageUrl = 'https://cloud.runonflux.com/dashboards/list'
-const imageUrl = 'https://cloud.runonflux.com/logo.png'
+const imageUrl = 'https://cloud.runonflux.com/images/logo.png'
 
 // Structured data schemas
 const structuredData = [
@@ -111,7 +111,7 @@ const structuredData = [
     '@type': 'Organization',
     name: 'Flux Network',
     url: 'https://cloud.runonflux.com',
-    logo: 'https://cloud.runonflux.com/logo.png',
+    logo: 'https://cloud.runonflux.com/images/logo.png',
     description: 'Decentralized Web3 cloud infrastructure powered by FluxNodes worldwide',
     sameAs: [
       'https://twitter.com/RunOnFlux',

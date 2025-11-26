@@ -686,7 +686,7 @@ const organizationStructuredData = {
   '@type': 'Organization',
   'name': 'Flux Network',
   'url': 'https://cloud.runonflux.com',
-  'logo': 'https://cloud.runonflux.com/logo.png',
+  'logo': 'https://cloud.runonflux.com/images/logo.png',
   'description': 'Decentralized Web3 cloud infrastructure powered by FluxNodes worldwide',
   'sameAs': [
     'https://twitter.com/RunOnFlux',
