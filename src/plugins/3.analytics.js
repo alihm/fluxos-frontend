@@ -19,9 +19,9 @@ import { hasAnalyticsConsent, enableAnalytics, disableAnalytics } from '@/compos
  * Note: Router is accessed dynamically to avoid circular dependencies
  */
 
-let routerUnsubscribe = null
-let consentEventListener = null
-let engagementTracker = null
+// Cleanup functions stored per app instance to avoid memory leaks
+// Using WeakMap ensures cleanup references don't prevent garbage collection
+const appCleanupMap = new WeakMap()
 
 /**
  * Setup global error handler for tracking unhandled errors
@@ -210,32 +210,67 @@ function setupConsentListener() {
   }
 }
 
+/**
+ * Cleanup all analytics resources for an app instance
+ * @param {object} app - Vue app instance
+ */
+function cleanupAnalytics(app) {
+  const cleanup = appCleanupMap.get(app)
+  if (!cleanup) return
+
+  // Call all cleanup functions
+  cleanup.forEach(fn => {
+    try {
+      fn()
+    } catch (e) {
+      console.warn('Analytics cleanup error:', e)
+    }
+  })
+
+  // Clear the cleanup array
+  appCleanupMap.delete(app)
+}
+
 export default function (app) {
+  // Prevent double initialization
+  if (appCleanupMap.has(app)) {
+    console.warn('Analytics plugin already initialized for this app instance')
+
+    return
+  }
+
+  // Initialize cleanup array for this app
+  const cleanupFunctions = []
+  appCleanupMap.set(app, cleanupFunctions)
+
   // Initialize Google Analytics (handles GDPR consent, dev mode, etc.)
   setupAnalytics(app)
 
   // Setup consent event listener for dynamic enable/disable
-  consentEventListener = setupConsentListener()
+  const cleanupConsentListener = setupConsentListener()
+  cleanupFunctions.push(cleanupConsentListener)
 
   // Setup global error handler
   const cleanupErrorHandler = setupGlobalErrorHandler(app)
+  cleanupFunctions.push(cleanupErrorHandler)
 
   // Setup automatic page view tracking on route changes
   // Access router from app instance to avoid import issues
   const router = app.config.globalProperties.$router
 
   if (!router) {
-    console.error('❌ Analytics: Router not found on app instance')
+    console.error('Analytics: Router not found on app instance')
 
     return
   }
 
   // Setup engagement tracking
-  engagementTracker = setupEngagementTracking(router)
+  const cleanupEngagementTracker = setupEngagementTracking(router)
+  cleanupFunctions.push(cleanupEngagementTracker)
 
   // Track page views on route navigation
   // This is the ONLY place where page views are tracked (no triple tracking)
-  routerUnsubscribe = router.afterEach((to, from) => {
+  const routerUnsubscribe = router.afterEach((to, from) => {
     // Skip if navigation failed or was cancelled
     if (!to.name) return
 
@@ -251,7 +286,7 @@ export default function (app) {
       const pageTitle = to.meta?.title || to.name || document.title
       const pagePath = to.path
 
-      // Device info is already set as user properties in analytics/index.js
+      // Device info is already set as user properties in analytics/setup.js
       // No need to send with page_view - reduces payload size
       window.gtag('event', 'page_view', {
         page_title: pageTitle,
@@ -271,34 +306,17 @@ export default function (app) {
       console.error('Error tracking page view:', error)
     }
   })
+  cleanupFunctions.push(routerUnsubscribe)
 
-  // Store cleanup function on app for proper lifecycle management
-  app._analyticsCleanup = () => {
-    if (routerUnsubscribe) {
-      routerUnsubscribe()
-      routerUnsubscribe = null
-    }
-    if (consentEventListener) {
-      consentEventListener()
-      consentEventListener = null
-    }
-    if (engagementTracker) {
-      engagementTracker()
-      engagementTracker = null
-    }
-    cleanupErrorHandler()
-    console.log('🧹 Analytics: Cleanup complete')
-  }
-
-  // Use Vue's unmount hook properly instead of Proxy
+  // Register cleanup with Vue's app lifecycle using onUnmounted pattern
+  // Store original unmount and wrap it
   const originalUnmount = app.unmount.bind(app)
   app.unmount = function() {
-    if (app._analyticsCleanup) {
-      app._analyticsCleanup()
-    }
+    cleanupAnalytics(app)
 
     return originalUnmount()
   }
 
-  console.log('✅ Analytics plugin registered with error tracking and engagement monitoring')
+  // Also expose cleanup for manual use if needed
+  app.config.globalProperties.$analyticsCleanup = () => cleanupAnalytics(app)
 }

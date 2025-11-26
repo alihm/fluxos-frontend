@@ -141,24 +141,20 @@ export function setupAnalytics(app) {
 
   // Don't send analytics in development to avoid polluting production data
   if (isDevelopment) {
-    console.log('📊 Google Analytics: Development mode - tracking disabled')
+    console.log('📊 Analytics: Development mode - tracking disabled')
 
-    // Create mock gtag for development
-    window.gtag = function(...args) {
-      console.log('📊 [DEV] Analytics Event:', ...args)
-    }
+    // Create mock gtag for development (silent - avoids duplicate logging with main plugin)
+    window.gtag = function() {}
 
     return
   }
 
   // Check if analytics is explicitly enabled (production safety check)
   if (!analyticsEnabled) {
-    console.log('📊 Google Analytics: Disabled (VITE_ENABLE_ANALYTICS=false)')
+    console.log('📊 Analytics: Disabled (VITE_ENABLE_ANALYTICS=false)')
 
-    // Create mock gtag for disabled state
-    window.gtag = function(...args) {
-      console.log('📊 [DISABLED] Analytics Event:', ...args)
-    }
+    // Create mock gtag for disabled state (silent)
+    window.gtag = function() {}
 
     return
   }
