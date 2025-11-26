@@ -854,7 +854,7 @@
       "quickAddLogs": "Dodaj Logi",
       "quickAddConfig": "Dodaj Konfigurację",
       "quickAddData": "Dodaj Folder Danych",
-      "advancedMode": "Tryb Zaawansowany",
+      "advancedMode": "Zaawansowane",
       "entryNumber": "Montowanie #{number}",
       "validationSubdirRequired": "Podkatalog jest wymagany",
       "validationInvalidSubdir": "Podkatalog nie może zawierać / lub ..",
@@ -1234,8 +1234,12 @@
         "agree": "Akceptuję",
         "disagree": "Odrzucam",
         "errorMessage": "Proszę przeczytać i zaakceptować Warunki świadczenia usług przed przejściem do innych zakładek.",
-        "loadError": "Nie udało się załadować Warunków świadczenia usług. Odwiedź:"
+        "loadError": "Nie udało się załadować Warunków świadczenia usług. Odwiedź:",
+        "loading": "Ładowanie Warunków świadczenia usług..."
       }
+    },
+    "tosDialog": {
+      "loading": "Ładowanie Warunków świadczenia usług..."
     },
     "statusBar": {
       "backend": "Serwer",
@@ -2676,9 +2680,7 @@
             "noData": "Dane mapy serwerów są obecnie niedostępne",
             "subtitle": "Twoje aplikacje wdrożone w globalnej zdecentralizowanej infrastrukturze z węzłami na każdym kontynencie.",
             "title": "Globalna Sieć Serwerów"
-          },
-          "subtitle": "Doświadcz mocy prawdziwie zdecentralizowanego cloud computing. Wdrażaj kontenery Docker, aplikacje internetowe, bazy danych, API i mikrousługi w naszej globalnej sieci ponad 13 000 węzłów w ponad 62 krajach.",
-          "title": "Wdróż Swoją Aplikację w FluxCloud"
+          }
         }
       }
     },
