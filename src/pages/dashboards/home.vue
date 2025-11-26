@@ -3,11 +3,21 @@
 </template>
 
 <script setup>
+import { onMounted, computed } from 'vue'
 import LandingServices from "@/components/LandingServices.vue"
 import { useI18n } from "vue-i18n"
 import { useHead } from '@vueuse/head'
+import { useAnalytics } from '@/plugins/analytics/composables/useAnalytics'
 
 const { t } = useI18n()
+const analytics = useAnalytics()
+
+// Track home page view on mount
+onMounted(() => {
+  analytics.trackEvent('page_view', {
+    page: 'home',
+  })
+})
 
 // SEO meta tags
 const title = 'FluxCloud - Decentralized Web3 Cloud Infrastructure'

@@ -606,6 +606,7 @@ const fetchNetworkData = async () => {
         })
       } catch (error) {
         console.warn('Failed to load server locations:', error.message)
+
         // Continue anyway - page will use fallback values
       }
     }

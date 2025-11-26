@@ -386,6 +386,7 @@
 import { ref, computed, onMounted, watch, nextTick } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useSEO, generateOrganizationSchema, generateBreadcrumbSchema } from '@/composables/useSEO'
+import { useAnalytics } from '@/plugins/analytics/composables/useAnalytics'
 import axios from 'axios'
 import { useFluxStore } from '@/stores/flux'
 import { storeToRefs } from 'pinia'
@@ -394,6 +395,9 @@ import { useLoginSheet } from '@/composables/useLoginSheet'
 // Import components
 import ProposalDetailDialog from '@/components/xdao/ProposalDetailDialog.vue'
 import AddProposalTab from '@/components/xdao/AddProposalTab.vue'
+
+// Analytics
+const analytics = useAnalytics()
 
 // SEO for FluxDAO governance page
 useSEO({
@@ -604,10 +608,22 @@ const openAddProposal = () => {
 const openProposal = proposal => {
   selectedProposal.value = proposal
   showProposalDetail.value = true
+
+  // Track proposal view
+  analytics.trackXDAO('view_proposal', {
+    proposal_hash: proposal.hash,
+    proposal_status: proposal.status,
+    proposal_topic: proposal.topic?.substring(0, 100),
+  })
 }
 
 
 const onProposalAdded = () => {
+  // Track proposal creation
+  analytics.trackXDAO('create_proposal', {
+    success: true,
+  })
+
   fetchProposals() // Refresh proposals list
   activeTab.value = 0 // Switch back to view proposals tab
 }
@@ -772,6 +788,12 @@ watch(isLoggedIn, newValue => {
 })
 
 onMounted(() => {
+  // Track xDAO page view
+  analytics.trackXDAO('page_view', {
+    page: 'xdao',
+    is_logged_in: isLoggedIn.value,
+  })
+
   fetchProposals()
 })
 

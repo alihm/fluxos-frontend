@@ -1,5 +1,5 @@
 import { setupAnalytics } from './analytics/setup'
-import { hasAnalyticsConsent } from '@/composables/useCookieConsent'
+import { hasAnalyticsConsent, enableAnalytics, disableAnalytics } from '@/composables/useCookieConsent'
 
 /**
  * Google Analytics Plugin
@@ -12,15 +12,213 @@ import { hasAnalyticsConsent } from '@/composables/useCookieConsent'
  * - Development mode support (no data sent)
  * - IP anonymization enabled
  * - Custom dimensions for device/browser tracking
+ * - Global error tracking
+ * - User engagement/time-on-page tracking
+ * - Dynamic consent updates via event listener
  *
  * Note: Router is accessed dynamically to avoid circular dependencies
  */
 
 let routerUnsubscribe = null
+let consentEventListener = null
+let engagementTracker = null
+
+/**
+ * Setup global error handler for tracking unhandled errors
+ * @param {object} app - Vue app instance
+ */
+function setupGlobalErrorHandler(app) {
+  // Vue error handler for component errors
+  const originalErrorHandler = app.config.errorHandler
+  app.config.errorHandler = (err, instance, info) => {
+    // Track the error
+    trackError('vue_error', err?.message || 'Unknown error', info || 'unknown')
+
+    // Call original handler if exists
+    if (originalErrorHandler) {
+      originalErrorHandler(err, instance, info)
+    } else {
+      console.error('Vue Error:', err)
+    }
+  }
+
+  // Global unhandled promise rejection handler
+  const unhandledRejectionHandler = event => {
+    const error = event.reason
+    trackError(
+      'unhandled_promise_rejection',
+      error?.message || String(error) || 'Unknown rejection',
+      'global',
+    )
+  }
+  window.addEventListener('unhandledrejection', unhandledRejectionHandler)
+
+  // Global error handler for uncaught errors (excluding chunk load errors handled in main.js)
+  const globalErrorHandler = event => {
+    // Skip chunk load errors - they're handled in main.js
+    if (event.message?.includes('dynamically imported module') ||
+        event.message?.includes('module script failed')) {
+      return
+    }
+
+    trackError(
+      'uncaught_error',
+      event.message || 'Unknown error',
+      event.filename ? `${event.filename}:${event.lineno}:${event.colno}` : 'unknown',
+    )
+  }
+  window.addEventListener('error', globalErrorHandler)
+
+  // Return cleanup function
+  return () => {
+    window.removeEventListener('unhandledrejection', unhandledRejectionHandler)
+    window.removeEventListener('error', globalErrorHandler)
+  }
+}
+
+/**
+ * Track error to analytics
+ */
+function trackError(errorType, errorMessage, context) {
+  if (!window.gtag) return
+  if (!hasAnalyticsConsent() && import.meta.env.PROD) return
+
+  try {
+    window.gtag('event', 'error', {
+      error_type: errorType,
+      error_message: errorMessage?.substring(0, 500), // Limit message length
+      error_context: context,
+      fatal: false,
+      timestamp: new Date().toISOString(),
+    })
+  } catch (e) {
+    // Silently fail - don't cause more errors trying to track errors
+    console.warn('Failed to track error:', e)
+  }
+}
+
+/**
+ * Setup engagement/time-on-page tracking
+ * @param {object} router - Vue router instance
+ */
+function setupEngagementTracking(router) {
+  let pageStartTime = Date.now()
+  let currentPath = window.location.pathname
+  let visibilityStartTime = Date.now()
+  let totalVisibleTime = 0
+  let isPageVisible = !document.hidden
+
+  // Track time when page visibility changes
+  const visibilityHandler = () => {
+    if (document.hidden) {
+      // Page became hidden - accumulate visible time
+      if (isPageVisible) {
+        totalVisibleTime += Date.now() - visibilityStartTime
+      }
+      isPageVisible = false
+    } else {
+      // Page became visible - start new visible period
+      visibilityStartTime = Date.now()
+      isPageVisible = true
+    }
+  }
+  document.addEventListener('visibilitychange', visibilityHandler)
+
+  // Track engagement when navigating away
+  const trackEngagement = (path, startTime) => {
+    if (!window.gtag) return
+    if (!hasAnalyticsConsent() && import.meta.env.PROD) return
+
+    // Calculate total visible time
+    let engagementTime = totalVisibleTime
+    if (isPageVisible) {
+      engagementTime += Date.now() - visibilityStartTime
+    }
+
+    const engagementSeconds = Math.round(engagementTime / 1000)
+
+    // Only track if user spent meaningful time (> 1 second)
+    if (engagementSeconds > 1) {
+      try {
+        window.gtag('event', 'user_engagement', {
+          page_path: path,
+          engagement_time_seconds: engagementSeconds,
+          total_time_seconds: Math.round((Date.now() - startTime) / 1000),
+        })
+      } catch (e) {
+        console.warn('Failed to track engagement:', e)
+      }
+    }
+  }
+
+  // Track on route change
+  const routeChangeHandler = router.beforeEach((to, from) => {
+    if (from.path && from.path !== to.path) {
+      trackEngagement(from.path, pageStartTime)
+    }
+
+    // Reset for new page
+    pageStartTime = Date.now()
+    currentPath = to.path
+    totalVisibleTime = 0
+    visibilityStartTime = Date.now()
+    isPageVisible = !document.hidden
+  })
+
+  // Track on page unload
+  const beforeUnloadHandler = () => {
+    trackEngagement(currentPath, pageStartTime)
+  }
+  window.addEventListener('beforeunload', beforeUnloadHandler)
+
+  // Return cleanup function
+  return () => {
+    document.removeEventListener('visibilitychange', visibilityHandler)
+    window.removeEventListener('beforeunload', beforeUnloadHandler)
+    routeChangeHandler() // Unsubscribe from router
+  }
+}
+
+/**
+ * Setup consent event listener for dynamic enable/disable
+ */
+function setupConsentListener() {
+  const handler = event => {
+    const consent = event.detail
+    if (consent?.analytics) {
+      enableAnalytics()
+      console.log('✅ Analytics: Consent granted, tracking enabled')
+    } else {
+      disableAnalytics()
+      console.log('🔒 Analytics: Consent revoked, tracking disabled')
+    }
+  }
+
+  window.addEventListener('consentUpdate', handler)
+
+  // Also listen for consent cleared event
+  const clearedHandler = () => {
+    disableAnalytics()
+    console.log('🔒 Analytics: Consent cleared, tracking disabled')
+  }
+  window.addEventListener('consentCleared', clearedHandler)
+
+  // Return cleanup function
+  return () => {
+    window.removeEventListener('consentUpdate', handler)
+    window.removeEventListener('consentCleared', clearedHandler)
+  }
+}
 
 export default function (app) {
   // Initialize Google Analytics (handles GDPR consent, dev mode, etc.)
   setupAnalytics(app)
+
+  // Setup consent event listener for dynamic enable/disable
+  consentEventListener = setupConsentListener()
+
+  // Setup global error handler
+  const cleanupErrorHandler = setupGlobalErrorHandler(app)
 
   // Setup automatic page view tracking on route changes
   // Access router from app instance to avoid import issues
@@ -28,9 +226,12 @@ export default function (app) {
 
   if (!router) {
     console.error('❌ Analytics: Router not found on app instance')
-    
+
     return
   }
+
+  // Setup engagement tracking
+  engagementTracker = setupEngagementTracking(router)
 
   // Track page views on route navigation
   // This is the ONLY place where page views are tracked (no triple tracking)
@@ -71,17 +272,33 @@ export default function (app) {
     }
   })
 
-  // Cleanup on app unmount to prevent memory leaks
-  app._context.app.unmount = new Proxy(app._context.app.unmount, {
-    apply(target, thisArg, args) {
-      if (routerUnsubscribe) {
-        routerUnsubscribe()
-        routerUnsubscribe = null
-      }
-      
-      return Reflect.apply(target, thisArg, args)
-    },
-  })
+  // Store cleanup function on app for proper lifecycle management
+  app._analyticsCleanup = () => {
+    if (routerUnsubscribe) {
+      routerUnsubscribe()
+      routerUnsubscribe = null
+    }
+    if (consentEventListener) {
+      consentEventListener()
+      consentEventListener = null
+    }
+    if (engagementTracker) {
+      engagementTracker()
+      engagementTracker = null
+    }
+    cleanupErrorHandler()
+    console.log('🧹 Analytics: Cleanup complete')
+  }
 
-  console.log('✅ Analytics plugin registered')
+  // Use Vue's unmount hook properly instead of Proxy
+  const originalUnmount = app.unmount.bind(app)
+  app.unmount = function() {
+    if (app._analyticsCleanup) {
+      app._analyticsCleanup()
+    }
+
+    return originalUnmount()
+  }
+
+  console.log('✅ Analytics plugin registered with error tracking and engagement monitoring')
 }

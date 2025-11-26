@@ -148,6 +148,7 @@ import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useHead } from '@vueuse/head'
 import { useWordPress } from '@/composables/useWordPress'
+import { useAnalytics } from '@/plugins/analytics/composables/useAnalytics'
 import LoadingSpinner from '@/components/Marketplace/LoadingSpinner.vue'
 import MaintenanceCard from '@/components/Marketplace/MaintenanceCard.vue'
 import ServerLocationsPanel from '@/components/Marketplace/Panels/ServerLocationsPanel.vue'
@@ -160,6 +161,7 @@ import HeroSection from '@/components/HeroSection.vue'
 import BreadcrumbNav from '@/components/BreadcrumbNav.vue'
 
 const { t, tm, locale, te } = useI18n()
+const analytics = useAnalytics()
 const router = useRouter()
 const { fetchPlans } = useWordPress()
 
@@ -537,6 +539,11 @@ useHead({
 })
 
 onMounted(() => {
+  // Track WordPress page view
+  analytics.trackMarketplace('page_view', {
+    page: 'wordpress',
+  })
+
   loadPlans()
 })
 </script>
