@@ -495,10 +495,13 @@ const selectPlan = plan => {
 useHead({
   title: 'WordPress Hosting on FluxCloud - Decentralized & Scalable',
   meta: [
+    // Primary Meta Tags
+    { name: 'title', content: 'WordPress Hosting on FluxCloud - Decentralized & Scalable' },
     {
       name: 'description',
       content: 'Deploy WordPress on decentralized FluxCloud. Multiple performance plans with MySQL, SSL, automatic backups. Affordable pricing starting at $25/month.',
     },
+    { name: 'keywords', content: 'WordPress hosting, decentralized WordPress, Web3 WordPress, FluxCloud WordPress, managed WordPress hosting, docker WordPress, container WordPress, affordable WordPress hosting' },
 
     // Open Graph
     { property: 'og:title', content: 'WordPress Hosting on FluxCloud - Decentralized & Scalable' },
@@ -515,6 +518,7 @@ useHead({
 
     // Twitter Card
     { name: 'twitter:card', content: 'summary_large_image' },
+    { name: 'twitter:url', content: 'https://cloud.runonflux.com/marketplace/wordpress' },
     { name: 'twitter:title', content: 'WordPress Hosting on FluxCloud - Decentralized & Scalable' },
     { name: 'twitter:description', content: 'Deploy WordPress websites on the decentralized FluxCloud network with MySQL, SSL, and automatic backups.' },
     { name: 'twitter:image', content: 'https://cloud.runonflux.com/banner/FluxWPMarketplace.webp' },
