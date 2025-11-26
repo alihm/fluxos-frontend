@@ -151,13 +151,15 @@ function setupEngagementTracking(router) {
     }
   }
 
-  // Track on route change
-  const routeChangeHandler = router.beforeEach((to, from) => {
+  // Track on route change - use afterEach to avoid race condition
+  // beforeEach runs async and navigation may be cancelled/fail
+  // afterEach only fires after navigation has successfully completed
+  const routeChangeHandler = router.afterEach((to, from) => {
     if (from.path && from.path !== to.path) {
       trackEngagement(from.path, pageStartTime)
     }
 
-    // Reset for new page
+    // Reset for new page - safe now because navigation completed
     pageStartTime = Date.now()
     currentPath = to.path
     totalVisibleTime = 0
