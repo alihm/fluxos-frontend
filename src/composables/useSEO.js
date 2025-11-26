@@ -13,6 +13,9 @@ import { computed } from 'vue'
  * @param {string} options.description - Page description
  * @param {string} options.url - Canonical URL
  * @param {string} [options.image] - Social sharing image URL
+ * @param {string} [options.imageWidth='1200'] - Image width for OG/Twitter
+ * @param {string} [options.imageHeight='630'] - Image height for OG/Twitter
+ * @param {string} [options.imageAlt] - Image alt text (defaults to title)
  * @param {string} [options.type='website'] - Open Graph type
  * @param {string} [options.keywords] - Comma-separated keywords
  * @param {Array<Object>} [options.structuredData] - Array of structured data objects
@@ -26,6 +29,9 @@ export function useSEO(options) {
     description,
     url,
     image = 'https://cloud.runonflux.com/images/logo.png',
+    imageWidth = '1200',
+    imageHeight = '630',
+    imageAlt,
     type = 'website',
     keywords = '',
     structuredData = [],
@@ -33,6 +39,9 @@ export function useSEO(options) {
     link = [],
     robots = 'index, follow',
   } = options
+
+  // Use title as default alt text if not provided
+  const imgAlt = imageAlt || title
 
   // Default meta tags
   const defaultMeta = [
@@ -53,6 +62,9 @@ export function useSEO(options) {
     { property: 'og:title', content: title },
     { property: 'og:description', content: description },
     { property: 'og:image', content: image },
+    { property: 'og:image:width', content: imageWidth },
+    { property: 'og:image:height', content: imageHeight },
+    { property: 'og:image:alt', content: imgAlt },
     { property: 'og:url', content: url },
     { property: 'og:type', content: type },
     { property: 'og:site_name', content: 'FluxCloud' },
@@ -63,6 +75,7 @@ export function useSEO(options) {
     { name: 'twitter:title', content: title },
     { name: 'twitter:description', content: description },
     { name: 'twitter:image', content: image },
+    { name: 'twitter:image:alt', content: imgAlt },
     { name: 'twitter:site', content: '@RunOnFlux' },
     { name: 'twitter:creator', content: '@RunOnFlux' },
   ]
@@ -113,7 +126,7 @@ export function generateOrganizationSchema() {
     '@type': 'Organization',
     'name': 'Flux Network',
     'url': 'https://cloud.runonflux.com',
-    'logo': 'https://cloud.runonflux.com/logo.png',
+    'logo': 'https://cloud.runonflux.com/images/logo.png',
     'description': 'Decentralized Web3 cloud infrastructure powered by FluxNodes worldwide',
     'sameAs': [
       'https://twitter.com/RunOnFlux',
