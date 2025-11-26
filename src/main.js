@@ -7,6 +7,7 @@ import sanitizeHtml from '@/utils/sanitizeHtml'
 // Styles
 import '@core/scss/template/index.scss'
 import '@styles/styles.scss'
+import 'element-plus/dist/index.css'
 
 // Fonts
 import '@fontsource/montserrat/700.css' // Bold
