@@ -102,6 +102,7 @@ import { onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useSEO, generateOrganizationSchema, generateBreadcrumbSchema, generateFAQSchema } from '@/composables/useSEO'
 import { useFluxDrive } from '@/composables/useFluxDrive'
+import { useAnalytics } from '@/plugins/analytics/composables/useAnalytics'
 import LoadingSpinner from '@/components/Marketplace/LoadingSpinner.vue'
 import PricingPlans from '@/components/FluxDrive/PricingPlans.vue'
 import FileManager from '@/components/FluxDrive/FileManager.vue'
@@ -114,6 +115,7 @@ import HeroSection from '@/components/HeroSection.vue'
 import BreadcrumbNav from '@/components/BreadcrumbNav.vue'
 
 const { t } = useI18n()
+const analytics = useAnalytics()
 
 // SEO meta tags and structured data
 const pageUrl = 'https://cloud.runonflux.com/flux-drive'
@@ -339,6 +341,12 @@ const checkoutContentRef = ref(null)
 const handlePlanSelection = async (planId, actionType = null) => {
   console.log('🎯 Plan selected:', planId, 'Action:', actionType)
 
+  // Track plan selection
+  analytics.trackFluxDrive('plan_selected', {
+    plan_id: planId,
+    action_type: actionType || 'browse',
+  })
+
   // Handle signin action - just show login dialog without saving plan
   if (actionType === 'signin') {
     console.log('🔐 Sign in action - showing login dialog without plan selection')
@@ -557,6 +565,12 @@ watch(isLoggedIn, async (newValue, oldValue) => {
 
 // Handle payment success
 const handlePaymentSuccess = async () => {
+  // Track successful payment
+  analytics.trackFluxDrive('payment_success', {
+    plan_id: selectedCheckoutPlan.value,
+    action_type: selectedActionType.value,
+  })
+
   showCheckout.value = false
   selectedCheckoutPlan.value = ''
   selectedActionType.value = ''
@@ -628,6 +642,13 @@ onMounted(async () => {
   console.log('🔄 FluxDrive page mounted')
   console.log('🔍 Initial hasActiveSubscription value:', hasActiveSubscription.value)
   console.log('🔍 Initial isLoggedIn value:', isLoggedIn.value)
+
+  // Track FluxDrive page view
+  analytics.trackFluxDrive('page_view', {
+    page: 'fluxdrive',
+    has_subscription: hasActiveSubscription.value,
+    is_logged_in: isLoggedIn.value,
+  })
 
   // Clear any stale checkout selections from previous sessions
   // These should only be set when user actively selects a plan

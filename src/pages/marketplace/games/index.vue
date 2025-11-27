@@ -163,6 +163,7 @@ import { useSEO, generateOrganizationSchema, generateBreadcrumbSchema, generateF
 import { useFluxStore } from '@/stores/flux'
 import { useMarketplace } from '@/composables/useMarketplace'
 import { useGameUtils } from '@/composables/useGameUtils'
+import { useAnalytics } from '@/plugins/analytics/composables/useAnalytics'
 import LoadingSpinner from '@/components/Marketplace/LoadingSpinner.vue'
 import MaintenanceCard from '@/components/Marketplace/MaintenanceCard.vue'
 import GameCard from '@/components/Marketplace/GameCard.vue'
@@ -174,6 +175,7 @@ import HeroSection from '@/components/HeroSection.vue'
 import CtaSection from '@/components/CtaSection.vue'
 
 const { t } = useI18n()
+const analytics = useAnalytics()
 
 const { games, loading, fetchGames } = useMarketplace()
 const { getMinimumPrice } = useGameUtils()
@@ -493,6 +495,11 @@ useSEO({
 
 // Load games and flux locations on mount
 onMounted(async () => {
+  // Track games page view
+  analytics.trackMarketplace('page_view', {
+    page: 'games',
+  })
+
   try {
     await Promise.all([
       fetchGames(),

@@ -113,6 +113,7 @@ import { useSEO, generateSoftwareApplicationSchema, generateBreadcrumbSchema } f
 import { useMarketplace } from '@/composables/useMarketplace'
 import { useGameUtils } from '@/composables/useGameUtils'
 import { useFluxStore } from '@/stores/flux'
+import { useAnalytics } from '@/plugins/analytics/composables/useAnalytics'
 import LoadingSpinner from '@/components/Marketplace/LoadingSpinner.vue'
 import PanelRenderer from '@/components/Marketplace/PanelRenderer.vue'
 import AppConfigCard from '@/components/Marketplace/AppConfigCard.vue'
@@ -120,6 +121,7 @@ import InstallDialog from '@/components/Marketplace/InstallDialog.vue'
 import TrustpilotPanel from '@/components/Marketplace/Panels/TrustpilotPanel.vue'
 
 const { t, tm, te } = useI18n()
+const analytics = useAnalytics()
 
 const route = useRoute()
 const router = useRouter()
@@ -437,6 +439,13 @@ const loadGameDetails = async () => {
     }
 
     game.value = foundGame
+
+    // Track game detail view with game name
+    analytics.trackMarketplace('game_view', {
+      page: 'game_detail',
+      game_name: foundGame.displayName || foundGame.name,
+      game_id: foundGame.name,
+    })
   } catch (err) {
     console.error('Failed to load game details:', err)
     error.value = err.message || t('pages.marketplace.games.detail.failedToLoad')

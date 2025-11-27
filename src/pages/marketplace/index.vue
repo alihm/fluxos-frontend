@@ -336,8 +336,8 @@ onMounted(async () => {
 
     // Track marketplace page view
     const analytics = useAnalytics()
-    analytics.trackMarketplace('view', {
-      page: 'marketplace_index',
+    analytics.trackMarketplace('page_view', {
+      page: 'marketplace',
     })
     await Promise.all([
       fetchApps(),
