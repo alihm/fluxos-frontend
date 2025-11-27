@@ -840,12 +840,12 @@ const seoDescription = computed(() => {
 })
 
 const seoImage = computed(() => {
-  if (!app.value) return 'https://home.runonflux.io/flux-logo.png'
-  
-  return app.value.icon || app.value.logo || 'https://home.runonflux.io/flux-logo.png'
+  if (!app.value) return 'https://cloud.runonflux.com/images/logo.png'
+
+  return app.value.icon || app.value.logo || 'https://cloud.runonflux.com/images/logo.png'
 })
 
-const seoUrl = computed(() => `https://home.runonflux.io/marketplace/${route.params.id}`)
+const seoUrl = computed(() => `https://cloud.runonflux.com/marketplace/${route.params.id}`)
 
 const seoKeywords = computed(() => {
   if (!app.value) return 'Flux, cloud hosting, decentralized hosting, Web3, blockchain hosting'
@@ -900,8 +900,8 @@ const structuredData = computed(() => {
 
   // Breadcrumb schema
   const breadcrumbStructuredData = generateBreadcrumbSchema([
-    { name: 'Home', url: 'https://home.runonflux.io' },
-    { name: 'Marketplace', url: 'https://home.runonflux.io/marketplace' },
+    { name: 'Home', url: 'https://cloud.runonflux.com' },
+    { name: 'Marketplace', url: 'https://cloud.runonflux.com/marketplace' },
     { name: newApp.displayName || newApp.name, url: seoUrl.value },
   ])
 

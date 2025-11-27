@@ -399,13 +399,13 @@ import AddProposalTab from '@/components/xdao/AddProposalTab.vue'
 useSEO({
   title: 'FluxDAO - Decentralized Governance | Flux Network',
   description: 'Participate in FluxDAO governance. Vote on proposals, submit ideas, and shape the future of Flux decentralized cloud. Community-driven decisions.',
-  url: 'https://home.runonflux.io/xdao-app',
+  url: 'https://cloud.runonflux.com/xdao-app',
   keywords: 'FluxDAO, DAO, decentralized governance, voting, proposals, blockchain governance, community governance, flux governance, DAO voting',
   structuredData: [
     generateOrganizationSchema(),
     generateBreadcrumbSchema([
-      { name: 'Home', url: 'https://home.runonflux.io' },
-      { name: 'FluxDAO', url: 'https://home.runonflux.io/xdao-app' },
+      { name: 'Home', url: 'https://cloud.runonflux.com' },
+      { name: 'FluxDAO', url: 'https://cloud.runonflux.com/xdao-app' },
     ]),
   ],
 })
