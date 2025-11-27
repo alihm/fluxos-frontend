@@ -97,6 +97,10 @@ function trackError(errorType, errorMessage, context) {
   }
 }
 
+// Maximum engagement time to track (1 hour in milliseconds)
+// Prevents unbounded tracking if tab stays open for days
+const MAX_ENGAGEMENT_TIME_MS = 3600 * 1000
+
 /**
  * Setup engagement/time-on-page tracking
  * @param {object} router - Vue router instance
@@ -135,6 +139,9 @@ function setupEngagementTracking(router) {
       engagementTime += Date.now() - visibilityStartTime
     }
 
+    // Cap engagement time to prevent unrealistic values from long-open tabs
+    engagementTime = Math.min(engagementTime, MAX_ENGAGEMENT_TIME_MS)
+
     const engagementSeconds = Math.round(engagementTime / 1000)
 
     // Only track if user spent meaningful time (> 1 second)
@@ -143,7 +150,10 @@ function setupEngagementTracking(router) {
         window.gtag('event', 'user_engagement', {
           page_path: path,
           engagement_time_seconds: engagementSeconds,
-          total_time_seconds: Math.round((Date.now() - startTime) / 1000),
+          total_time_seconds: Math.min(
+            Math.round((Date.now() - startTime) / 1000),
+            MAX_ENGAGEMENT_TIME_MS / 1000,
+          ),
         })
       } catch (e) {
         console.warn('Failed to track engagement:', e)
