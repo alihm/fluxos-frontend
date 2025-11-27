@@ -222,10 +222,6 @@ export function setupAnalytics(app) {
         browser_version: browserVersion,
         resolution_category: resolutionCategory,
       })
-
-      if (isDevelopment) {
-        console.log('✅ Google Analytics initialized (consent required)')
-      }
     }
 
     const handleScriptError = () => {
