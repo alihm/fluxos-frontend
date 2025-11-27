@@ -199,10 +199,14 @@ function setupConsentListener() {
     const consent = event.detail
     if (consent?.analytics) {
       enableAnalytics()
-      console.log('✅ Analytics: Consent granted, tracking enabled')
+      if (import.meta.env.DEV) {
+        console.log('✅ Analytics: Consent granted, tracking enabled')
+      }
     } else {
       disableAnalytics()
-      console.log('🔒 Analytics: Consent revoked, tracking disabled')
+      if (import.meta.env.DEV) {
+        console.log('🔒 Analytics: Consent revoked, tracking disabled')
+      }
     }
   }
 
@@ -211,7 +215,9 @@ function setupConsentListener() {
   // Also listen for consent cleared event
   const clearedHandler = () => {
     disableAnalytics()
-    console.log('🔒 Analytics: Consent cleared, tracking disabled')
+    if (import.meta.env.DEV) {
+      console.log('🔒 Analytics: Consent cleared, tracking disabled')
+    }
   }
   window.addEventListener('consentCleared', clearedHandler)
 

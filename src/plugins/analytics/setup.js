@@ -36,23 +36,6 @@ export function detectDeviceType() {
 }
 
 /**
- * Get device category for analytics (mobile or desktop)
- * Tablets are grouped as mobile for simpler analytics
- * @returns {string} Device category
- */
-export function getDeviceCategory() {
-  try {
-    const deviceType = detectDeviceType()
-    
-    return deviceType === 'mobile' || deviceType === 'tablet' ? 'mobile' : 'desktop'
-  } catch (error) {
-    console.error('Error getting device category:', error)
-    
-    return 'desktop' // Safe fallback
-  }
-}
-
-/**
  * Get browser information
  * Detects major browsers including privacy-focused and alternative browsers
  * @returns {object} Browser name and version
@@ -240,7 +223,7 @@ export function setupAnalytics(app) {
         resolution_category: resolutionCategory,
       })
 
-      if (isProduction) {
+      if (isDevelopment) {
         console.log('✅ Google Analytics initialized (consent required)')
       }
     }

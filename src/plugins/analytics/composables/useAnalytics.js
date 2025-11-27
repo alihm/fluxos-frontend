@@ -1,4 +1,3 @@
-import { getDeviceCategory, detectDeviceType } from '../setup'
 import { hasAnalyticsConsent } from '@/composables/useCookieConsent'
 
 /**
@@ -178,7 +177,7 @@ export function useAnalytics() {
   const trackError = (errorType, errorMessage, context = 'unknown') => {
     trackEvent('error', {
       error_type: errorType,
-      error_message: errorMessage,
+      error_message: errorMessage?.substring(0, 500), // Limit message length (consistent with plugin)
       error_context: context,
       fatal: false,
     })
