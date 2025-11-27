@@ -1258,7 +1258,8 @@
         "disagree": "I Disagree",
         "errorMessage": "Please read and accept the Terms of Service before proceeding to other tabs.",
         "loadError": "Failed to load Terms of Service. Please visit:",
-        "loading": "Loading Terms of Service..."
+        "loading": "Loading Terms of Service...",
+        "acceptFirst": "Accept Terms of Service first to import"
       }
     },
     "tosDialog": {

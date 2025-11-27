@@ -1237,7 +1237,8 @@
         "disagree": "Odrzucam",
         "errorMessage": "Proszę przeczytać i zaakceptować Warunki świadczenia usług przed przejściem do innych zakładek.",
         "loadError": "Nie udało się załadować Warunków świadczenia usług. Odwiedź:",
-        "loading": "Ładowanie Warunków świadczenia usług..."
+        "loading": "Ładowanie Warunków świadczenia usług...",
+        "acceptFirst": "Najpierw zaakceptuj Warunki świadczenia usług, aby importować"
       }
     },
     "tosDialog": {

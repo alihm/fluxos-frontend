@@ -39,7 +39,7 @@
               <span>{{ t('core.subscriptionManager.upgradeToLatest') }}</span>
             </VTooltip>
 
-            <!-- Import Spec Button (only for new apps) -->
+            <!-- Import Spec Button (only for new apps, disabled until ToS accepted) -->
             <VTooltip v-if="props.newApp" location="top">
               <template #activator="{ props: tooltipProps }">
                 <VBtn
@@ -49,12 +49,13 @@
                   variant="tonal"
                   density="comfortable"
                   class="import-glow-btn border-frame-btn"
+                  :disabled="!acceptedTerms"
                   @click="showSpecImportDialog = true"
                 >
                   <VIcon size="22">mdi-file-import</VIcon>
                 </VBtn>
               </template>
-              <span>{{ t('core.subscriptionManager.importSpec') }}</span>
+              <span>{{ acceptedTerms ? t('core.subscriptionManager.importSpec') : t('core.subscriptionManager.tos.acceptFirst') }}</span>
             </VTooltip>
           </div>
         </div>
