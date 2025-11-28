@@ -108,6 +108,7 @@ module.exports = {
     "getSpecFromPermanentMessages": true,
     "getStickyBackendDNS": true,
     "getUser": true,
+    "getWagmiAdapterAsync": true,
     "h": true,
     "hasAnalyticsConsent": true,
     "hasConsent": true,

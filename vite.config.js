@@ -184,37 +184,297 @@ export default defineConfig(({ mode }) => {
       },
       rollupOptions: {
         output: {
-          manualChunks: {
-            // UI Framework
-            'vuetify': ['vuetify'],
+          manualChunks: (id) => {
+            // Skip non-node_modules
+            if (!id.includes('node_modules')) {
+              return undefined
+            }
+
+            // UI Framework - Vuetify
+            if (id.includes('vuetify')) {
+              return 'vuetify'
+            }
+
+            // Element Plus (if used)
+            if (id.includes('element-plus')) {
+              return 'element-plus'
+            }
 
             // Charts & Visualization
-            'apexcharts': ['vue3-apexcharts'],
+            if (id.includes('apexcharts') || id.includes('vue3-apexcharts')) {
+              return 'apexcharts'
+            }
+            if (id.includes('chart.js') || id.includes('vue-chartjs')) {
+              return 'chartjs'
+            }
 
-            // Code Editor
-            'monaco': ['@guolao/vue-monaco-editor', 'monaco-editor'],
+            // Code Editor - Monaco
+            if (id.includes('monaco-editor') || id.includes('vue-monaco-editor')) {
+              return 'monaco'
+            }
 
-            // Maps
-            'leaflet-core': ['leaflet', '@vue-leaflet/vue-leaflet'],
-            'leaflet-cluster': ['leaflet.markercluster'],
+            // Maps - Leaflet
+            if (id.includes('leaflet.markercluster')) {
+              return 'leaflet-cluster'
+            }
+            if (id.includes('leaflet') || id.includes('vue-leaflet')) {
+              return 'leaflet-core'
+            }
+
+            // Terminal - xterm
+            if (id.includes('@xterm') || id.includes('xterm')) {
+              return 'xterm'
+            }
+
+            // Rich Text Editor - Tiptap
+            if (id.includes('@tiptap') || id.includes('prosemirror')) {
+              return 'tiptap'
+            }
 
             // Crypto - MetaMask
-            'crypto-metamask': ['@metamask/sdk', '@metamask/providers'],
+            if (id.includes('@metamask')) {
+              return 'crypto-metamask'
+            }
 
-            // Crypto - WalletConnect
-            'crypto-walletconnect': [
-              '@reown/appkit',
-              '@reown/appkit-adapter-wagmi',
-              '@walletconnect/universal-provider',
-              '@walletconnect/ethereum-provider',
-              '@walletconnect/utils'
-            ],
+            // Crypto - WalletConnect/Reown
+            if (id.includes('@reown') || id.includes('@walletconnect')) {
+              return 'crypto-walletconnect'
+            }
 
-            // Crypto - Core Libraries (let wagmi/viem bundle naturally with their dependencies)
-            'crypto-query': ['@tanstack/react-query'],
+            // Crypto - Wagmi/Viem (including @wagmi scoped packages)
+            if (id.includes('wagmi') || id.includes('viem') || id.includes('@wagmi')) {
+              return 'crypto-viem'
+            }
 
-            // Encryption
-            'pgp': ['openpgp'],
+            // Crypto - React Query (wagmi dependency)
+            if (id.includes('@tanstack')) {
+              return 'crypto-query'
+            }
+
+            // Encryption - OpenPGP
+            if (id.includes('openpgp')) {
+              return 'pgp'
+            }
+
+            // Firebase
+            if (id.includes('firebase') || id.includes('@firebase')) {
+              return 'firebase'
+            }
+
+            // Code Highlighting
+            if (id.includes('highlight.js') || id.includes('prismjs') || id.includes('shiki')) {
+              return 'syntax-highlight'
+            }
+
+            // Internationalization
+            if (id.includes('vue-i18n') || id.includes('@intlify')) {
+              return 'i18n'
+            }
+
+            // VueUse utilities
+            if (id.includes('@vueuse')) {
+              return 'vueuse'
+            }
+
+            // Lodash utilities
+            if (id.includes('lodash')) {
+              return 'lodash'
+            }
+
+            // Carousel - Swiper
+            if (id.includes('swiper')) {
+              return 'swiper'
+            }
+
+            // JSON viewer
+            if (id.includes('vue-json-pretty')) {
+              return 'json-viewer'
+            }
+
+            // Date picker
+            if (id.includes('flatpickr')) {
+              return 'datepicker'
+            }
+
+            // Drag and drop
+            if (id.includes('draggable') || id.includes('@formkit/drag-and-drop')) {
+              return 'drag-drop'
+            }
+
+            // Shepherd.js (guided tours)
+            if (id.includes('shepherd')) {
+              return 'shepherd'
+            }
+
+            // YAML parser
+            if (id.includes('js-yaml')) {
+              return 'yaml'
+            }
+
+            // Core Vue ecosystem - keep together
+            if (id.includes('vue-router') || id.includes('pinia')) {
+              return 'vue-core'
+            }
+
+            // Axios and HTTP
+            if (id.includes('axios')) {
+              return 'http'
+            }
+
+            // DOMPurify
+            if (id.includes('dompurify')) {
+              return 'sanitizer'
+            }
+
+            // Buffer/process polyfills
+            if (id.includes('/buffer/') || id.includes('/process/')) {
+              return 'polyfills'
+            }
+
+            // Date utilities
+            if (id.includes('date-fns') || id.includes('dayjs') || id.includes('moment')) {
+              return 'date-utils'
+            }
+
+            // Geospatial utilities (used with leaflet)
+            if (id.includes('@turf')) {
+              return 'geo-utils'
+            }
+
+            // Crypto primitives (noble curves, etc.)
+            if (id.includes('@noble') || id.includes('@scure')) {
+              return 'crypto-primitives'
+            }
+
+            // Additional wallet dependencies (Solana, Porto, Coinbase, Base)
+            if (id.includes('@solana') || id.includes('porto') || id.includes('@coinbase') || id.includes('@base-org') || id.includes('coinbase')) {
+              return 'crypto-wallets-extra'
+            }
+
+            // 3D rendering (if used)
+            if (id.includes('three')) {
+              return 'three'
+            }
+
+            // Vue core (keep vue itself small and in main bundle, but split heavy parts)
+            if (id.includes('@vue/') && !id.includes('@vue/runtime') && !id.includes('@vue/reactivity') && !id.includes('@vue/shared')) {
+              return 'vue-utils'
+            }
+
+            // QR code
+            if (id.includes('qr') || id.includes('qrcode')) {
+              return 'qrcode'
+            }
+
+            // Perfect scrollbar
+            if (id.includes('perfect-scrollbar')) {
+              return 'scrollbar'
+            }
+
+            // Clipboard
+            if (id.includes('clipboard')) {
+              return 'clipboard'
+            }
+
+            // LZ-String compression
+            if (id.includes('lz-string')) {
+              return 'compression'
+            }
+
+            // CASL authorization
+            if (id.includes('@casl')) {
+              return 'casl'
+            }
+
+            // Eventemitter
+            if (id.includes('eventemitter')) {
+              return 'eventemitter'
+            }
+
+            // OX library (crypto related)
+            if (id.includes('/ox/')) {
+              return 'crypto-ox'
+            }
+
+            // UUID library
+            if (id.includes('uuid')) {
+              return 'uuid'
+            }
+
+            // Socket.io and related
+            if (id.includes('socket.io') || id.includes('engine.io')) {
+              return 'socketio'
+            }
+
+            // Floating UI
+            if (id.includes('@floating-ui')) {
+              return 'floating-ui'
+            }
+
+            // Additional wallet/crypto packages (WalletConnect dependencies)
+            if (id.includes('@gemini-wallet') || id.includes('@safe-global') || id.includes('@msgpack')) {
+              return 'crypto-wallets-extra'
+            }
+
+            // Phosphor icons (large icon library used by wallets)
+            if (id.includes('@phosphor-icons')) {
+              return 'phosphor-icons'
+            }
+
+            // Iconify and MDI icons
+            if (id.includes('@iconify') || id.includes('@mdi') || id.includes('mdi')) {
+              return 'icons-mdi'
+            }
+
+            // Lit web components (used by wallets)
+            if (id.includes('@lit')) {
+              return 'lit'
+            }
+
+            // @ctrl packages
+            if (id.includes('@ctrl')) {
+              return 'ctrl'
+            }
+
+            // @unhead packages (SEO/head management)
+            if (id.includes('@unhead')) {
+              return 'unhead'
+            }
+
+            // @ucast packages (CASL dependencies)
+            if (id.includes('@ucast')) {
+              return 'casl'
+            }
+
+            // Keep Vue core in main bundle (essential for app)
+            // Don't split these to vendor chunks
+            if (id.includes('@vue/') || id.includes('/vue/')) {
+              return undefined  // Stay in main bundle
+            }
+
+            // Remaining heavy vendor libraries - catch-all for node_modules
+            // This helps prevent the main bundle from growing with unhandled deps
+            const nodeModulesMatch = id.match(/node_modules\/(@?[^/]+)/)
+            if (nodeModulesMatch) {
+              const pkgName = nodeModulesMatch[1]
+
+              // Keep essential small packages in main bundle
+              const keepInMain = [
+                'vue', '@vue', 'pinia', 'destr', 'cookie-es',
+                'ofetch', 'ufo', '@sindresorhus'
+              ]
+              if (keepInMain.some(p => pkgName.includes(p))) {
+                return undefined
+              }
+
+              // Group remaining scoped packages
+              if (pkgName.startsWith('@')) {
+                return 'vendor-scoped'
+              }
+              return 'vendor-misc'
+            }
+
+            return undefined
           },
         },
       },

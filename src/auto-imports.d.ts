@@ -101,6 +101,7 @@ declare global {
   const getSpecFromPermanentMessages: typeof import('./utils/specConverter.js')['getSpecFromPermanentMessages']
   const getStickyBackendDNS: typeof import('./utils/stickyBackend.js')['getStickyBackendDNS']
   const getUser: typeof import('./utils/firebase.js')['getUser']
+  const getWagmiAdapterAsync: typeof import('./utils/walletService.js')['getWagmiAdapterAsync']
   const h: typeof import('vue')['h']
   const hasAnalyticsConsent: typeof import('./composables/useCookieConsent.js')['hasAnalyticsConsent']
   const hasConsent: typeof import('./composables/useCookieConsent.js')['hasConsent']
@@ -552,6 +553,7 @@ declare module 'vue' {
     readonly getSpecFromPermanentMessages: UnwrapRef<typeof import('./utils/specConverter.js')['getSpecFromPermanentMessages']>
     readonly getStickyBackendDNS: UnwrapRef<typeof import('./utils/stickyBackend.js')['getStickyBackendDNS']>
     readonly getUser: UnwrapRef<typeof import('./utils/firebase.js')['getUser']>
+    readonly getWagmiAdapterAsync: UnwrapRef<typeof import('./utils/walletService.js')['getWagmiAdapterAsync']>
     readonly h: UnwrapRef<typeof import('vue')['h']>
     readonly hasAnalyticsConsent: UnwrapRef<typeof import('./composables/useCookieConsent.js')['hasAnalyticsConsent']>
     readonly hasConsent: UnwrapRef<typeof import('./composables/useCookieConsent.js')['hasConsent']>
