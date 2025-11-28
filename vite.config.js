@@ -26,7 +26,7 @@ export default defineConfig(({ mode }) => {
             .replace(/([a-z\d])([A-Z])/g, '$1-$2')
             .toLowerCase();
         },
-        importMode: 'sync',
+        importMode: 'async',
       }),
       vue({
         template: {
@@ -44,7 +44,7 @@ export default defineConfig(({ mode }) => {
       }),
       ClientSideLayout({
         layoutsDir: 'src/layouts',
-        importMode: 'sync',
+        importMode: 'async',
       }),
       Components({
         dirs: ['src/@core/components', 'src/views/demos', 'src/components'],

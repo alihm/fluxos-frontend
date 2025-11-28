@@ -40,9 +40,13 @@
   <link rel="preconnect" href="https://api.runonflux.io" crossorigin />
   <link rel="preconnect" href="https://stats.runonflux.io" crossorigin />
 
-  <!-- DNS-prefetch for third-party resources -->
-  <link rel="dns-prefetch" href="https://widget.kapa.ai" />
-  <link rel="dns-prefetch" href="https://raw.githubusercontent.com" />
+  <!-- Preconnect for third-party resources that will be used -->
+  <link rel="preconnect" href="https://widget.kapa.ai" crossorigin />
+  <link rel="preconnect" href="https://raw.githubusercontent.com" crossorigin />
+
+  <!-- DNS-prefetch for additional resources -->
+  <link rel="dns-prefetch" href="https://fonts.googleapis.com" />
+  <link rel="dns-prefetch" href="https://fonts.gstatic.com" />
 
   <link rel="stylesheet" type="text/css" href="/loader.css" />
   <style>
@@ -99,49 +103,51 @@
   <div id="app"></div>
   <script type="module" src="/src/main.js"></script>
 
-  <!-- Set Kapa AI disclaimer based on user language -->
+  <!-- Kapa AI widget - deferred loading after app is ready -->
   <script>
     (function() {
-      try {
-        // Default English disclaimer (fallback)
-        const defaultDisclaimer = 'Get instant answers about Flux products, deployment, and app management. Powered by AI trained on official docs, whitepapers, and support resources.'
+      // Default English disclaimer (fallback)
+      const defaultDisclaimer = 'Get instant answers about Flux products, deployment, and app management. Powered by AI trained on official docs, whitepapers, and support resources.'
 
-        // Function to initialize Kapa widget with disclaimer
-        function initKapaWidget(disclaimer) {
-          const kapaScript = document.createElement('script')
-          kapaScript.defer = true
-          kapaScript.id = 'kapa-widget-script'
-          kapaScript.src = 'https://widget.kapa.ai/kapa-widget.bundle.js'
-          kapaScript.setAttribute('data-website-id', '16d7ee8e-1911-40a9-9bed-15eaadbcd99d')
-          kapaScript.setAttribute('data-project-name', 'Flux')
-          kapaScript.setAttribute('data-button-hide', 'true')
-          kapaScript.setAttribute('data-modal-override-open-id-ask-ai', 'flux-ai-button')
-          kapaScript.setAttribute('data-user-analytics-fingerprint-enabled', 'true')
-          kapaScript.setAttribute('data-search-mode-enabled', 'true')
-          kapaScript.setAttribute('data-project-logo', 'https://raw.githubusercontent.com/RunOnFlux/media-logos/refs/heads/master/Flux_Asset_SVG/Flux%20Logo/Symbol/Round%20Symbol/SVG/Flux_symbol_blue-white.svg')
-          kapaScript.setAttribute('data-modal-image', 'https://raw.githubusercontent.com/RunOnFlux/media-logos/refs/heads/master/Flux_Asset_SVG/Flux%20Logo/Symbol/Round%20Symbol/SVG/Flux_symbol_blue-white.svg')
-          kapaScript.setAttribute('data-modal-disclaimer', disclaimer)
-          document.body.appendChild(kapaScript)
-        }
-
-        // Listen for i18n ready event from Vue app (will be emitted after i18n loads)
-        const handleI18nReady = function(event) {
-          const disclaimer = event.detail?.disclaimer || defaultDisclaimer
-          initKapaWidget(disclaimer)
-          // Remove listener after first use to prevent memory leak
-          window.removeEventListener('i18n-ready', handleI18nReady)
-        }
-        window.addEventListener('i18n-ready', handleI18nReady)
-
-        // Timeout fallback: if i18n doesn't load within 3 seconds, use default
-        setTimeout(function() {
-          if (!document.getElementById('kapa-widget-script')) {
-            initKapaWidget(defaultDisclaimer)
-          }
-        }, 3000)
-      } catch (error) {
-        // Silent fail - worst case, Kapa loads with default English disclaimer
+      // Function to initialize Kapa widget with disclaimer
+      function initKapaWidget(disclaimer) {
+        if (document.getElementById('kapa-widget-script')) return
+        const kapaScript = document.createElement('script')
+        kapaScript.defer = true
+        kapaScript.id = 'kapa-widget-script'
+        kapaScript.src = 'https://widget.kapa.ai/kapa-widget.bundle.js'
+        kapaScript.setAttribute('data-website-id', '16d7ee8e-1911-40a9-9bed-15eaadbcd99d')
+        kapaScript.setAttribute('data-project-name', 'Flux')
+        kapaScript.setAttribute('data-button-hide', 'true')
+        kapaScript.setAttribute('data-modal-override-open-id-ask-ai', 'flux-ai-button')
+        kapaScript.setAttribute('data-user-analytics-fingerprint-enabled', 'true')
+        kapaScript.setAttribute('data-search-mode-enabled', 'true')
+        kapaScript.setAttribute('data-project-logo', 'https://raw.githubusercontent.com/RunOnFlux/media-logos/refs/heads/master/Flux_Asset_SVG/Flux%20Logo/Symbol/Round%20Symbol/SVG/Flux_symbol_blue-white.svg')
+        kapaScript.setAttribute('data-modal-image', 'https://raw.githubusercontent.com/RunOnFlux/media-logos/refs/heads/master/Flux_Asset_SVG/Flux%20Logo/Symbol/Round%20Symbol/SVG/Flux_symbol_blue-white.svg')
+        kapaScript.setAttribute('data-modal-disclaimer', disclaimer)
+        document.body.appendChild(kapaScript)
       }
+
+      // Wait for app-ready event before loading Kapa (non-blocking)
+      window.addEventListener('app-ready', function() {
+        // Use requestIdleCallback if available, otherwise setTimeout
+        const scheduleLoad = window.requestIdleCallback || function(cb) { setTimeout(cb, 1) }
+        scheduleLoad(function() {
+          // Listen for i18n ready event from Vue app
+          const handleI18nReady = function(event) {
+            initKapaWidget(event.detail?.disclaimer || defaultDisclaimer)
+            window.removeEventListener('i18n-ready', handleI18nReady)
+          }
+          window.addEventListener('i18n-ready', handleI18nReady)
+
+          // Fallback: if i18n doesn't fire within 2 seconds after app-ready, use default
+          setTimeout(function() {
+            if (!document.getElementById('kapa-widget-script')) {
+              initKapaWidget(defaultDisclaimer)
+            }
+          }, 2000)
+        })
+      })
     })()
   </script>
 

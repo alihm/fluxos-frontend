@@ -367,6 +367,8 @@
           :src="selectedImage"
           :alt="`${app.displayName || app.name} - Screenshot`"
           class="image-viewer-img"
+          width="auto"
+          height="auto"
           style="max-width: calc(100vw - 48px); max-height: calc(100vh - 48px); object-fit: contain; display: block;"
         />
       </VCard>
