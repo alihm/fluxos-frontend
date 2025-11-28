@@ -7,6 +7,7 @@ import sanitizeHtml from '@/utils/sanitizeHtml'
 // Styles
 import '@core/scss/template/index.scss'
 import '@styles/styles.scss'
+
 // Element Plus - only import styles for components we use (ElTree)
 import 'element-plus/es/components/tree/style/css'
 

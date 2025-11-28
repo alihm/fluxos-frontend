@@ -3861,7 +3861,7 @@ const signWithWalletConnect = async message => {
     const signature = await walletServiceSignWithWalletConnect(message)
     console.log('[InstallDialog] Sign function returned, signature:', signature?.substring(0, 20) + '...')
 
-    const connectedAccount = getConnectedAccount()
+    const connectedAccount = await getConnectedAccount()
     console.log('[InstallDialog] Connected account:', connectedAccount)
 
     if (!connectedAccount?.address) {

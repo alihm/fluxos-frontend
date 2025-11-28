@@ -80,6 +80,7 @@ async function loadAppKitModules() {
       mainnet: networks.mainnet,
     }
   }
+  
   return { appKitModule, wagmiModule }
 }
 
@@ -91,6 +92,7 @@ async function loadWagmiCore() {
     import('@wagmi/core'),
     import('@wagmi/connectors'),
   ])
+  
   return {
     getAccount: core.getAccount,
     watchAccount: core.watchAccount,
@@ -107,6 +109,7 @@ async function loadMetaMaskSDK() {
     const mod = await import('@metamask/sdk')
     metamaskModule = mod
   }
+  
   return metamaskModule
 }
 
@@ -210,6 +213,7 @@ export const appKit = new Proxy({}, {
       if (typeof value === 'function') {
         return value.apply(instance, args)
       }
+      
       return value
     }
   },
@@ -231,16 +235,20 @@ export const wagmiAdapter = new Proxy({}, {
       if (wagmiAdapterInstance) {
         return wagmiAdapterInstance.wagmiConfig
       }
+
       // Return undefined if not loaded yet - callers should use getWagmiAdapterAsync
       console.warn('[WalletService] wagmiAdapter.wagmiConfig accessed before initialization. Use getWagmiAdapterAsync() instead.')
+      
       return undefined
     }
+    
     return async (...args) => {
       const adapter = await getWagmiAdapter()
       const value = adapter[prop]
       if (typeof value === 'function') {
         return value.apply(adapter, args)
       }
+      
       return value
     }
   },
@@ -277,6 +285,7 @@ export async function openWalletConnect() {
       if (currentAccount?.address && currentAccount?.isConnected && hasValidSession) {
         console.log('[WalletConnect] Reusing existing session')
         resolve(currentAccount.address)
+        
         return
       }
 
@@ -413,6 +422,7 @@ export async function signWithWalletConnect(message) {
         if (connectionAttempts < 2) {
           try {
             await kit.disconnect()
+
             // Clear storage
             const keysToRemove = []
             for (let i = 0; i < localStorage.length; i++) {
@@ -465,6 +475,7 @@ export async function signWithWalletConnect(message) {
       params: [message, address],
     }).then(sig => {
       clearTimeout(timeoutId)
+      
       return sig
     }).catch(err => {
       clearTimeout(timeoutId)
@@ -479,6 +490,7 @@ export async function signWithWalletConnect(message) {
 
     const signature = await Promise.race([signaturePromise, timeoutPromise])
     console.log('[WalletConnect] ✅ Signature received')
+    
     return signature
   } catch (error) {
     console.error('[WalletConnect] ❌ Sign error:', error.message)
@@ -495,6 +507,7 @@ export function hasWalletConnectSession() {
     if (loginType !== 'walletconnect') return false
 
     const storageKeys = Object.keys(localStorage)
+    
     return storageKeys.some(key =>
       key.startsWith('wc@2:client:') ||
       key.startsWith('wc@2:core:') ||
@@ -534,6 +547,7 @@ export async function getConnectedAccount() {
     return null
   } catch (error) {
     console.warn('[WalletService] getConnectedAccount error:', error.message)
+    
     return null
   }
 }
@@ -624,6 +638,7 @@ async function getMMSDK() {
       },
     })
   }
+  
   return MMSDKInstance
 }
 
@@ -695,6 +710,7 @@ export async function signWithMetaMask(message, account) {
   try {
     const signature = await Promise.race([signaturePromise, timeoutPromise])
     clearTimeout(timeoutId)
+    
     return { address: account, signature }
   } catch (error) {
     clearTimeout(timeoutId)
@@ -730,6 +746,7 @@ export async function signWithSSP(message) {
     }
 
     console.log('[SSP] ✅ Successfully signed message')
+    
     return { signature: response.signature, address: response.address }
   } catch (error) {
     console.error('[SSP] ❌ Sign error:', error.message)
@@ -821,6 +838,7 @@ export async function signWithZelcore(message, zelid, callbackUrl = null, icon =
           }
         } catch (error) {
           reject(new Error('Message too long for ZelCore and Flux Storage is unavailable'))
+          
           return
         }
       }
@@ -838,6 +856,7 @@ export async function signWithZelcore(message, zelid, callbackUrl = null, icon =
         } catch (error) {
           reject(new Error('ZelCore Extension signing failed: ' + error.message))
         }
+        
         return
       }
 
@@ -863,6 +882,7 @@ export async function signWithZelcore(message, zelid, callbackUrl = null, icon =
             }
           } catch (error) {
             reject(new Error('Failed to establish WebSocket connection'))
+            
             return
           }
         }
@@ -884,6 +904,7 @@ export async function signWithZelcore(message, zelid, callbackUrl = null, icon =
         if (!callbackUrl) {
           resolve()
         }
+        
         return
       }
 

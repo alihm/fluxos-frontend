@@ -8162,7 +8162,7 @@ async function initSSPPay() {
 
 async function initWalletConnect() {
   try {
-    const account = getConnectedAccount()
+    const account = await getConnectedAccount()
     if (!account) {
       showToast('error', 'WalletConnect not connected. Please log into FluxOS first.')
 
@@ -8299,12 +8299,12 @@ function onError(evt) { console.error('WS error', evt) }
 // === WalletConnect ===
 async function initSignWalletConnect() {
   try {
-    const account = getConnectedAccount()
+    const account = await getConnectedAccount()
     if (!account) {
       showToast('error', 'WalletConnect not connected. Please log into FluxOS first.')
       isSigning.value = false
       signingFailed.value = true
-      
+
       return
     }
 
