@@ -1,3 +1,20 @@
+// Suppress third-party library warnings (must be before any imports that load wallet libraries)
+// This runs early to catch font preload warnings from Reown AppKit
+if (typeof window !== 'undefined') {
+  const originalWarn = console.warn
+  console.warn = (...args) => {
+    const message = args[0] || ''
+    const str = typeof message === 'string' ? message : ''
+
+    // Suppress font preload warnings from AppKit/Reown
+    if (str.includes('was preloaded') && str.includes('fonts.reown.com')) return
+
+    // Suppress Lit update warnings from AppKit components
+    if (str.includes('scheduled an update') || str.includes('change-in-update')) return
+    originalWarn.apply(console, args)
+  }
+}
+
 import App from '@/App.vue'
 import { registerPlugins } from '@core/utils/plugins'
 import { createApp } from 'vue'

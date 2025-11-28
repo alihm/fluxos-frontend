@@ -12,37 +12,16 @@ let MMSDKInstance = null
 const APPKIT_INITIALIZED_KEY = '__appkit_initialized__'
 const WAGMI_ADAPTER_KEY = '__wagmi_adapter__'
 
-// Suppress warnings/errors from wallet libraries
+// Suppress wallet library console.error messages (warnings handled in main.js)
 if (typeof window !== 'undefined') {
-  const originalWarn = console.warn
   const originalError = console.error
-
-  console.warn = (...args) => {
-    const message = args[0] || ''
-    const stringMessage = typeof message === 'string' ? message : ''
-
-    // Suppress Lit update warnings
-    if (stringMessage.includes('scheduled an update') || stringMessage.includes('change-in-update')) {
-      return
-    }
-
-    // Suppress font preload warnings from AppKit
-    if (stringMessage.includes('was preloaded') && stringMessage.includes('fonts.reown.com')) {
-      return
-    }
-
-    originalWarn.apply(console, args)
-  }
-
   console.error = (...args) => {
-    // Check if first argument is an error context object {context: 'client'}
     const firstArg = args[0]
     const secondArg = args[1]
 
     // WalletConnect errors come as: {context: 'client'}, Error(...)
     if (firstArg && typeof firstArg === 'object' && firstArg.context) {
-      const errorObj = secondArg
-      const errorMsg = errorObj?.message || errorObj?.toString?.() || ''
+      const errorMsg = secondArg?.message || secondArg?.toString?.() || ''
 
       // Suppress stale WalletConnect relay errors that don't affect functionality
       if (errorMsg.includes('No matching key. history:') ||
