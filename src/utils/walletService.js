@@ -953,3 +953,68 @@ export async function payWithZelcore({ address, amount, message, coin = 'zelcash
     throw new Error(`Failed to open Zelcore: ${error.message}`)
   }
 }
+
+// ===== Text Sanitization for Signing =====
+
+/**
+ * Sanitize Unicode punctuation to ASCII equivalents for consistent signature verification.
+ *
+ * Problem: Backend's toHex() uses charCodeAt() which returns UTF-16 code units,
+ * but Ethereum wallets sign messages as UTF-8 bytes. This causes signature mismatches
+ * for Unicode characters like smart quotes.
+ *
+ * Example: Smart quote " (U+201C) becomes 0x201C in UTF-16 but 0xE2 0x80 0x9C in UTF-8
+ *
+ * This function replaces common Unicode punctuation with ASCII equivalents to ensure
+ * consistent byte representation across frontend and backend.
+ *
+ * @param {string} text - Text that may contain Unicode punctuation
+ * @returns {string} Text with Unicode punctuation replaced by ASCII equivalents
+ */
+export function sanitizeUnicodeForSigning(text) {
+  if (!text || typeof text !== 'string') {
+    return text
+  }
+
+  return text
+
+    // Smart quotes (double)
+    .replace(/[\u201C\u201D\u201E\u201F\u2033\u2036]/g, '"')
+
+    // Smart quotes (single) and apostrophes
+    .replace(/[\u2018\u2019\u201A\u201B\u2032\u2035]/g, "'")
+
+    // Dashes (em-dash, en-dash, figure dash, horizontal bar)
+    .replace(/[\u2013\u2014\u2015\u2212]/g, '-')
+
+    // Ellipsis
+    .replace(/\u2026/g, '...')
+
+    // Non-breaking space
+    .replace(/\u00A0/g, ' ')
+
+    // Bullet point
+    .replace(/\u2022/g, '*')
+
+    // Trademark, copyright, registered
+    .replace(/\u2122/g, '(TM)')
+    .replace(/\u00A9/g, '(C)')
+    .replace(/\u00AE/g, '(R)')
+
+    // Fraction characters
+    .replace(/\u00BC/g, '1/4')
+    .replace(/\u00BD/g, '1/2')
+    .replace(/\u00BE/g, '3/4')
+
+    // Degree symbol
+    .replace(/\u00B0/g, ' deg')
+
+    // Plus-minus
+    .replace(/\u00B1/g, '+/-')
+
+    // Multiplication sign
+    .replace(/\u00D7/g, 'x')
+
+    // Division sign
+    .replace(/\u00F7/g, '/')
+}

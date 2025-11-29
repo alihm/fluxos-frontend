@@ -1555,7 +1555,7 @@ import geolocationData from '@/utils/geolocation'
 import { paymentBridge } from '@/utils/fiatGateways'
 import { getUser } from '@/utils/firebase'
 import { importRsaPublicKey, encryptAesKeyWithRsaKey, encryptEnterpriseWithAes, isWebCryptoAvailable } from '@/utils/enterpriseCrypto'
-import { payWithZelcore, payWithSSP, isSSPAvailable, isZelcoreAvailable, isBrowserMetaMaskAvailable, getConnectedAccount, hasWalletConnectSession, signWithWalletConnect as walletServiceSignWithWalletConnect, watchWalletAccount, signWithSSP as walletServiceSignWithSSP, signWithZelcore as walletServiceSignWithZelcore } from '@/utils/walletService'
+import { payWithZelcore, payWithSSP, isSSPAvailable, isZelcoreAvailable, isBrowserMetaMaskAvailable, getConnectedAccount, hasWalletConnectSession, signWithWalletConnect as walletServiceSignWithWalletConnect, watchWalletAccount, signWithSSP as walletServiceSignWithSSP, signWithZelcore as walletServiceSignWithZelcore, sanitizeUnicodeForSigning } from '@/utils/walletService'
 import axios from 'axios'
 import qs from 'query-string'
 import ManualSignDialog from '@/@core/components/ManualSignDialog.vue'
@@ -3411,10 +3411,16 @@ const generateDeploymentMessage = async () => {
   const ramMultiplier = isWordPress.value ? 1.0 : (appRAM > 0 ? config.value.ram / appRAM : 1.0)
   const ssdMultiplier = isWordPress.value ? 1.0 : (appSSD > 0 ? config.value.storage / appSSD : 1.0)
 
+  // Sanitize description to replace Unicode punctuation with ASCII equivalents
+  // This prevents signature verification failures with Ethereum wallets (WalletConnect/MetaMask)
+  // due to UTF-16 vs UTF-8 encoding differences in backend's toHex() function
+  const rawDescription = detailedApp.value.description || props.app.description || detailedApp.value.displayName || props.app.displayName
+  const sanitizedDescription = sanitizeUnicodeForSigning(rawDescription)
+
   const globalAppSpec = {
     version: 8,
     name: appName,
-    description: detailedApp.value.description || props.app.description || detailedApp.value.displayName || props.app.displayName,
+    description: sanitizedDescription,
     owner: owner,
     compose: baseComponents.map((component, index) => {
       // Build environmentParameters like FluxCloud
@@ -3469,14 +3475,15 @@ const generateDeploymentMessage = async () => {
       }
 
       // Match exact structure from FluxCloud AppComponent (lines 150-176)
+      // Sanitize text fields to prevent Unicode encoding issues with Ethereum signatures
       const appComponent = {
         name: component.name,
-        description: component.description,
+        description: sanitizeUnicodeForSigning(component.description),
         repotag: component.repotag,
         ports: componentPorts,
-        domains: component.domains.map(d => d.replace(/"/g, '"')),
+        domains: component.domains.map(d => sanitizeUnicodeForSigning(d.replace(/"/g, '"'))),
         environmentParameters: environmentParameters, // Version 4+ uses correct spelling
-        commands: component.commands.map(c => c.replace(/"/g, '"')),
+        commands: component.commands.map(c => sanitizeUnicodeForSigning(c.replace(/"/g, '"'))),
         containerPorts: component.containerPorts,
         containerData: component.containerData,
         tiered: component.tiered,

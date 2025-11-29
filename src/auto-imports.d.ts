@@ -200,6 +200,7 @@ declare global {
   const resolveVuetifyTheme: typeof import('./@core/utils/vuetify.js')['resolveVuetifyTheme']
   const rgbaToHex: typeof import('./@core/utils/colorConverter.js')['rgbaToHex']
   const sanitizeHtml: typeof import('./utils/sanitizeHtml.js')['default']
+  const sanitizeUnicodeForSigning: typeof import('./utils/walletService.js')['sanitizeUnicodeForSigning']
   const saveConsent: typeof import('./composables/useCookieConsent.js')['saveConsent']
   const setActivePinia: typeof import('pinia')['setActivePinia']
   const setMapStoreSuffix: typeof import('pinia')['setMapStoreSuffix']
@@ -652,6 +653,7 @@ declare module 'vue' {
     readonly resolveVuetifyTheme: UnwrapRef<typeof import('./@core/utils/vuetify.js')['resolveVuetifyTheme']>
     readonly rgbaToHex: UnwrapRef<typeof import('./@core/utils/colorConverter.js')['rgbaToHex']>
     readonly sanitizeHtml: UnwrapRef<typeof import('./utils/sanitizeHtml.js')['default']>
+    readonly sanitizeUnicodeForSigning: UnwrapRef<typeof import('./utils/walletService.js')['sanitizeUnicodeForSigning']>
     readonly saveConsent: UnwrapRef<typeof import('./composables/useCookieConsent.js')['saveConsent']>
     readonly setActivePinia: UnwrapRef<typeof import('pinia')['setActivePinia']>
     readonly setMapStoreSuffix: UnwrapRef<typeof import('pinia')['setMapStoreSuffix']>
