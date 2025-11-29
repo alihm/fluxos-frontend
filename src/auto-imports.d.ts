@@ -109,6 +109,7 @@ declare global {
   const hexToRgb: typeof import('./@core/utils/colorConverter.js')['hexToRgb']
   const ignorableWatch: typeof import('@vueuse/core')['ignorableWatch']
   const importRsaPublicKey: typeof import('./utils/enterpriseCrypto.js')['importRsaPublicKey']
+  const initializeWalletSDKs: typeof import('./utils/walletService.js')['initializeWalletSDKs']
   const inject: typeof import('vue')['inject']
   const injectLocal: typeof import('@vueuse/core')['injectLocal']
   const integerValidator: typeof import('./@core/utils/validators.js')['integerValidator']
@@ -561,6 +562,7 @@ declare module 'vue' {
     readonly hexToRgb: UnwrapRef<typeof import('./@core/utils/colorConverter.js')['hexToRgb']>
     readonly ignorableWatch: UnwrapRef<typeof import('@vueuse/core')['ignorableWatch']>
     readonly importRsaPublicKey: UnwrapRef<typeof import('./utils/enterpriseCrypto.js')['importRsaPublicKey']>
+    readonly initializeWalletSDKs: UnwrapRef<typeof import('./utils/walletService.js')['initializeWalletSDKs']>
     readonly inject: UnwrapRef<typeof import('vue')['inject']>
     readonly injectLocal: UnwrapRef<typeof import('@vueuse/core')['injectLocal']>
     readonly integerValidator: UnwrapRef<typeof import('./@core/utils/validators.js')['integerValidator']>

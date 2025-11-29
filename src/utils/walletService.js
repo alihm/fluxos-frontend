@@ -181,22 +181,52 @@ async function getAppKit() {
 
 /**
  * Proxy that lazily initializes AppKit on first access
- * Note: Most methods need to be called with await since they require async initialization
+ * This proxy handles both sync property access (after init) and async method calls
  */
 export const appKit = new Proxy({}, {
   get(target, prop) {
-    // Return a function that lazily loads and calls the method
+    // If already initialized, return the property directly (sync access)
+    if (appKitInstance) {
+      const value = appKitInstance[prop]
+      
+      return typeof value === 'function' ? value.bind(appKitInstance) : value
+    }
+
+    // Check global window cache
+    if (typeof window !== 'undefined' && window[APPKIT_INITIALIZED_KEY]) {
+      const instance = window[APPKIT_INITIALIZED_KEY]
+      const value = instance[prop]
+      
+      return typeof value === 'function' ? value.bind(instance) : value
+    }
+
+    // Not initialized yet - return an async function that initializes first
+    // This ensures first-time callers get proper async behavior
     return async (...args) => {
       const instance = await getAppKit()
       const value = instance[prop]
       if (typeof value === 'function') {
         return value.apply(instance, args)
       }
-      
+
       return value
     }
   },
 })
+
+/**
+ * Initialize AppKit and WagmiAdapter proactively
+ * Call this before opening wallet dialogs to ensure smooth UX
+ * @returns {Promise<{appKit: object, wagmiAdapter: object}>}
+ */
+export async function initializeWalletSDKs() {
+  const [kit, adapter] = await Promise.all([
+    getAppKit(),
+    getWagmiAdapter(),
+  ])
+
+  return { appKit: kit, wagmiAdapter: adapter }
+}
 
 /**
  * Get wagmiAdapter (lazy, for compatibility)
@@ -209,25 +239,36 @@ export async function getWagmiAdapterAsync() {
 // For backward compatibility - create a lazy proxy
 export const wagmiAdapter = new Proxy({}, {
   get(target, prop) {
-    if (prop === 'wagmiConfig') {
-      // This needs synchronous access, so we cache it after first async load
-      if (wagmiAdapterInstance) {
-        return wagmiAdapterInstance.wagmiConfig
-      }
+    // If already initialized, return the property directly (sync access)
+    if (wagmiAdapterInstance) {
+      const value = wagmiAdapterInstance[prop]
+      
+      return typeof value === 'function' ? value.bind(wagmiAdapterInstance) : value
+    }
 
-      // Return undefined if not loaded yet - callers should use getWagmiAdapterAsync
+    // Check global window cache
+    if (typeof window !== 'undefined' && window[WAGMI_ADAPTER_KEY]) {
+      const instance = window[WAGMI_ADAPTER_KEY]
+      const value = instance[prop]
+      
+      return typeof value === 'function' ? value.bind(instance) : value
+    }
+
+    // Special handling for wagmiConfig - warn if accessed before init
+    if (prop === 'wagmiConfig') {
       console.warn('[WalletService] wagmiAdapter.wagmiConfig accessed before initialization. Use getWagmiAdapterAsync() instead.')
       
       return undefined
     }
-    
+
+    // Not initialized yet - return an async function that initializes first
     return async (...args) => {
       const adapter = await getWagmiAdapter()
       const value = adapter[prop]
       if (typeof value === 'function') {
         return value.apply(adapter, args)
       }
-      
+
       return value
     }
   },
