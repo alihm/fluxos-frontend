@@ -1077,7 +1077,7 @@
       "componentNameTooltip": "Nazwa komponentu (musi być unikalna w aplikacji)",
       "componentDescriptionTooltip": "Krótki opis celu tego komponentu",
       "repositoryTagTooltipNew": "Repozytorium obrazu Docker i tag (np. nginx:latest)",
-      "repositoryTagTooltipUpdate": "Tag repozytorium nie może być zmieniony przy aktualizacji istniejącej aplikacji",
+      "repositoryTagTooltipUpdate": "Repozytorium obrazu Docker i tag (np. nginx:latest)",
       "enableEnterpriseHint": "Włącz tryb Enterprise w sekcji Ogólne aby użyć tej funkcji",
       "enterpriseFeatureTooltip": "Funkcja Enterprise - Włącz tryb Enterprise aby użyć uwierzytelniania prywatnego repozytorium",
       "dockerRegistryCredentialsTooltip": "Dane logowania do rejestru Docker (format: użytkownik:hasło lub użytkownik:token)",

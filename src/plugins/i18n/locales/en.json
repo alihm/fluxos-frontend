@@ -1099,7 +1099,7 @@
       "componentNameTooltip": "Component name (must be unique within the app)",
       "componentDescriptionTooltip": "Brief description of this component's purpose",
       "repositoryTagTooltipNew": "Docker image repository and tag (e.g., nginx:latest)",
-      "repositoryTagTooltipUpdate": "Repository tag cannot be changed when updating an existing app",
+      "repositoryTagTooltipUpdate": "Docker image repository and tag (e.g., nginx:latest)",
       "enableEnterpriseHint": "Enable Enterprise mode in General section to use this feature",
       "enterpriseFeatureTooltip": "Enterprise feature - Enable Enterprise mode to use private repository authentication",
       "dockerRegistryCredentialsTooltip": "Docker registry credentials (format: username:password or username:token)",

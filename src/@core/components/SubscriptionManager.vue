@@ -963,7 +963,6 @@
                   density="comfortable"
                   variant="outlined"
                   class="mb-3"
-                  :readonly="!props.newApp"
                 >
                   <template #append-inner>
                     <VTooltip location="top">
