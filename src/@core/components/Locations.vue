@@ -71,9 +71,9 @@
       >
         <VDataTable
           :headers="appLocationFields"
-          :items="paginatedLocations"
+          :items="filteredLocations"
           :items-per-page="appLocationOptions.perPage"
-          :page="appLocationOptions.currentPage"
+          v-model:page="appLocationOptions.currentPage"
           v-model:sort-by="appLocationOptions.sortBy"
           must-sort
           class="locations-table"
@@ -82,27 +82,24 @@
           density="compact"
           :no-data-text="t('core.locations.noInstancesFound')"
         >
-          <template #header.ip="{ column, getSortIcon }">
+          <template #header.ip>
             <div class="d-flex align-center">
               <VIcon :icon="headerIcons.ip" size="18" class="mr-2" />
-              <span>{{ column.title }}</span>
-              <VIcon :icon="getSortIcon(column)" size="18" class="ml-1" />
+              <span>{{ t('core.locations.ipAddress') }}</span>
             </div>
           </template>
 
-          <template #header.osUptime="{ column, getSortIcon }">
+          <template #header.osUptime>
             <div class="d-flex align-center">
               <VIcon :icon="headerIcons.osUptime" size="18" class="mr-2" />
-              <span>{{ column.title }}</span>
-              <VIcon :icon="getSortIcon(column)" size="18" class="ml-1" />
+              <span>{{ t('core.locations.uptime') }}</span>
             </div>
           </template>
 
-          <template #header.runningSince="{ column, getSortIcon }">
+          <template #header.runningSince>
             <div class="d-flex align-center">
               <VIcon :icon="headerIcons.running" size="18" class="mr-2" />
-              <span>{{ column.title }}</span>
-              <VIcon :icon="getSortIcon(column)" size="18" class="ml-1" />
+              <span>{{ t('core.locations.running') }}</span>
             </div>
           </template>
 
@@ -142,27 +139,24 @@
             </VChip>
           </template>
 
-          <template #header.continent="{ column, getSortIcon }">
+          <template #header.continent>
             <div class="d-flex align-center">
               <VIcon :icon="headerIcons.continent" size="18" class="mr-2" />
-              <span>{{ column.title }}</span>
-              <VIcon :icon="getSortIcon(column)" size="18" class="ml-1" />
+              <span>{{ t('core.locations.continent') }}</span>
             </div>
           </template>
 
-          <template #header.country="{ column, getSortIcon }">
+          <template #header.country>
             <div class="d-flex align-center">
               <VIcon :icon="headerIcons.country" size="18" class="mr-2" />
-              <span>{{ column.title }}</span>
-              <VIcon :icon="getSortIcon(column)" size="18" class="ml-1" />
+              <span>{{ t('core.locations.country') }}</span>
             </div>
           </template>
 
-          <template #header.region="{ column, getSortIcon }">
+          <template #header.region>
             <div class="d-flex align-center">
               <VIcon :icon="headerIcons.region" size="18" class="mr-2" />
-              <span>{{ column.title }}</span>
-              <VIcon :icon="getSortIcon(column)" size="18" class="ml-1" />
+              <span>{{ t('core.locations.region') }}</span>
             </div>
           </template>
 
@@ -321,14 +315,7 @@ const appLocationOptions = ref({
   pageOptions: [5, 10, 25, 50, 100],
   currentPage: 1,
   filter: "",
-  sortBy: [
-    { key: 'ip', order: 'asc' },
-    { key: 'osUptime', order: 'asc' },
-    { key: 'runningSince', order: 'asc' },
-    { key: 'continent', order: 'asc' },
-    { key: 'country', order: 'asc' },
-    { key: 'region', order: 'asc' }
-  ],
+  sortBy: [],
 })
 
 const appLocationFields = computed(() => [
