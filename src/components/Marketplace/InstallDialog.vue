@@ -2742,26 +2742,35 @@ const isFluxCloudGame = computed(() => {
 const getEnvironmentParameters = () => {
   const params = []
 
-  // For FluxCloud games, parameters come from compose section (not configs)
-  // For regular apps, also check compose section
-  if (detailedApp.value.compose) {
-    for (const component of detailedApp.value.compose) {
-      if (component.userEnvironmentParameters) {
-        for (const param of component.userEnvironmentParameters) {
-          const paramObj = {
-            name: param.name,
-            description: param.description || param.name,
-            placeholder: param.placeholder || '',
-            optional: param.optional || false,
-            advanced: param.advanced || false,
-            options: param.parameterConfig?.values || null,
-            defaultValue: param.parameterConfig?.defaultValue || param.defaultValue || '',
-            source: 'compose.userEnvironmentParameters',
+  try {
+    // For FluxCloud games, parameters come from compose section (not configs)
+    // For regular apps, also check compose section
+    if (detailedApp.value && detailedApp.value.compose && Array.isArray(detailedApp.value.compose)) {
+      for (let componentIndex = 0; componentIndex < detailedApp.value.compose.length; componentIndex++) {
+        const component = detailedApp.value.compose[componentIndex]
+        if (component && component.userEnvironmentParameters && Array.isArray(component.userEnvironmentParameters)) {
+          for (const param of component.userEnvironmentParameters) {
+            if (param && param.name) {
+              const paramObj = {
+                name: param.name,
+                description: param.description || param.name,
+                placeholder: param.placeholder || '',
+                optional: param.optional || false,
+                advanced: param.advanced || false,
+                options: param.parameterConfig?.values || null,
+                defaultValue: param.parameterConfig?.defaultValue || param.defaultValue || '',
+                source: 'compose.userEnvironmentParameters',
+                componentIndex: componentIndex, // Track which component this param belongs to
+                componentName: component.name || `Component ${componentIndex}`, // Also store component name for reference
+              }
+              params.push(paramObj)
+            }
           }
-          params.push(paramObj)
         }
       }
     }
+  } catch (error) {
+    console.error('Error processing environment parameters:', error)
   }
 
   return params
@@ -3423,10 +3432,27 @@ const generateDeploymentMessage = async () => {
         ...(component.environmentParameters || component.enviromentParameters || []),
       ]
 
-      // Add user-configured parameters
-      for (const [key, value] of Object.entries(config.value.parameters)) {
-        if (value) {
-          environmentParameters.push(`${key}=${value}`)
+      // Add user-configured parameters - ONLY for this specific component
+      try {
+        const envParams = getEnvironmentParameters()
+        for (const [key, value] of Object.entries(config.value.parameters || {})) {
+          if (value) {
+            // Find the parameter definition to check which component it belongs to
+            const paramDef = envParams.find(p => p && p.name === key)
+
+            // Only add this parameter if it belongs to the current component (or if no component tracking exists)
+            if (!paramDef || paramDef.componentIndex === undefined || paramDef.componentIndex === index) {
+              environmentParameters.push(`${key}=${value}`)
+            }
+          }
+        }
+      } catch (error) {
+        console.warn(`Failed to process environment parameters for component ${index}:`, error)
+        // Fallback: Add all parameters if there's an error (backward compatibility)
+        for (const [key, value] of Object.entries(config.value.parameters || {})) {
+          if (value) {
+            environmentParameters.push(`${key}=${value}`)
+          }
         }
       }
 
