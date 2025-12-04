@@ -1369,7 +1369,7 @@
                   <div class="d-flex justify-center align-center flex-wrap gap-2">
                     <VChip color="warning" variant="tonal" size="small" class="summary-chip">
                       <VIcon start icon="mdi-cpu-64-bit" size="14" />
-                      {{ t('components.marketplace.installDialog.coresCount', { count: config.cpu }) }}
+                      {{ t('components.marketplace.installDialog.coresCount', { count: Number(config.cpu).toFixed(1) }) }}
                     </VChip>
                     <VChip color="success" variant="tonal" size="small" class="summary-chip">
                       <VIcon start icon="mdi-memory" size="14" />
