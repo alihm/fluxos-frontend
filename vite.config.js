@@ -133,6 +133,9 @@ export default defineConfig(({ mode }) => {
     define: {
       'process.env': {},
       global: 'globalThis', // ✅ important for some node packages
+      // Map buffer/process to window globals (loaded from index.html)
+      'Buffer': 'window.Buffer',
+      'process': 'window.process',
       // Disable Lit dev mode in production
       ...(mode === 'production' && {
         'globalThis.litIssuedWarnings': 'false',
@@ -142,6 +145,9 @@ export default defineConfig(({ mode }) => {
     resolve: {
       alias: {
         ...aliases,
+        // Point buffer and process to stub modules - actual polyfills loaded from index.html
+        'buffer': fileURLToPath(new URL('./src/polyfills/buffer-stub.js', import.meta.url)),
+        'process': fileURLToPath(new URL('./src/polyfills/process-stub.js', import.meta.url)),
       },
     },
     server: {
@@ -185,10 +191,71 @@ export default defineConfig(({ mode }) => {
       rollupOptions: {
         output: {
           manualChunks: (id) => {
+            // Polyfills strategy: Bundle buffer, process, eventemitter2 into main entry
+            // This ensures they load BEFORE any async chunks
+            // NO chunking for polyfills - let them inline in entry
+            if (id.includes('node_modules/buffer') || id.includes('node_modules\\buffer') ||
+                id.includes('node_modules/process') || id.includes('node_modules\\process') ||
+                id.includes('node_modules/eventemitter2') || id.includes('node_modules\\eventemitter2')) {
+              // Don't chunk - stay with entry chunk
+              return undefined
+            }
+
             // Skip non-node_modules
             if (!id.includes('node_modules')) {
               return undefined
             }
+
+            // PRIORITY 1: Crypto libraries FIRST (before any other rules)
+            // These are large and need to be chunked to keep main bundle small
+
+            // Crypto - MetaMask SDK (separate to reduce initial load)
+            if (id.includes('@metamask')) {
+              return 'crypto-metamask'
+            }
+
+            // Crypto - WalletConnect/Reown + wallet dependencies + shared crypto primitives
+            // Bundle @noble/@scure WITH walletconnect to avoid circular deps
+            // WalletConnect is the primary user of these crypto primitives
+            if (id.includes('@reown') || id.includes('@walletconnect') ||
+                id.includes('@solana') || id.includes('porto') || id.includes('@coinbase') ||
+                id.includes('@base-org') || id.includes('coinbase') ||
+                id.includes('@gemini-wallet') || id.includes('@safe-global') || id.includes('@msgpack') ||
+                id.includes('@noble') || id.includes('@scure')) {
+              return 'crypto-walletconnect'
+            }
+
+            // Crypto - Wagmi/Viem (including @wagmi scoped packages)
+            if (id.includes('wagmi') || id.includes('viem') || id.includes('@wagmi')) {
+              return 'crypto-viem'
+            }
+
+            // Crypto - React Query (wagmi dependency) - separate from crypto
+            if (id.includes('@tanstack')) {
+              return 'react-query'
+            }
+
+            // OX library (crypto related)
+            if (id.includes('/ox/')) {
+              return 'crypto-ox'
+            }
+
+            // Encryption - OpenPGP
+            if (id.includes('openpgp')) {
+              return 'pgp'
+            }
+
+            // Firebase (large, lazy loadable)
+            if (id.includes('firebase') || id.includes('@firebase')) {
+              return 'firebase'
+            }
+
+            // Code Editor - Monaco (huge, lazy load)
+            if (id.includes('monaco-editor') || id.includes('vue-monaco-editor')) {
+              return 'monaco'
+            }
+
+            // PRIORITY 2: UI Frameworks and Components
 
             // UI Framework - Vuetify
             if (id.includes('vuetify')) {
@@ -208,11 +275,6 @@ export default defineConfig(({ mode }) => {
               return 'chartjs'
             }
 
-            // Code Editor - Monaco
-            if (id.includes('monaco-editor') || id.includes('vue-monaco-editor')) {
-              return 'monaco'
-            }
-
             // Maps - Leaflet
             if (id.includes('leaflet.markercluster')) {
               return 'leaflet-cluster'
@@ -229,36 +291,6 @@ export default defineConfig(({ mode }) => {
             // Rich Text Editor - Tiptap
             if (id.includes('@tiptap') || id.includes('prosemirror')) {
               return 'tiptap'
-            }
-
-            // Crypto - MetaMask
-            if (id.includes('@metamask')) {
-              return 'crypto-metamask'
-            }
-
-            // Crypto - WalletConnect/Reown
-            if (id.includes('@reown') || id.includes('@walletconnect')) {
-              return 'crypto-walletconnect'
-            }
-
-            // Crypto - Wagmi/Viem (including @wagmi scoped packages)
-            if (id.includes('wagmi') || id.includes('viem') || id.includes('@wagmi')) {
-              return 'crypto-viem'
-            }
-
-            // Crypto - React Query (wagmi dependency)
-            if (id.includes('@tanstack')) {
-              return 'crypto-query'
-            }
-
-            // Encryption - OpenPGP
-            if (id.includes('openpgp')) {
-              return 'pgp'
-            }
-
-            // Firebase
-            if (id.includes('firebase') || id.includes('@firebase')) {
-              return 'firebase'
             }
 
             // Code Highlighting
@@ -326,11 +358,6 @@ export default defineConfig(({ mode }) => {
               return 'sanitizer'
             }
 
-            // Buffer/process polyfills
-            if (id.includes('/buffer/') || id.includes('/process/')) {
-              return 'polyfills'
-            }
-
             // Date utilities
             if (id.includes('date-fns') || id.includes('dayjs') || id.includes('moment')) {
               return 'date-utils'
@@ -339,16 +366,6 @@ export default defineConfig(({ mode }) => {
             // Geospatial utilities (used with leaflet)
             if (id.includes('@turf')) {
               return 'geo-utils'
-            }
-
-            // Crypto primitives (noble curves, etc.)
-            if (id.includes('@noble') || id.includes('@scure')) {
-              return 'crypto-primitives'
-            }
-
-            // Additional wallet dependencies (Solana, Porto, Coinbase, Base)
-            if (id.includes('@solana') || id.includes('porto') || id.includes('@coinbase') || id.includes('@base-org') || id.includes('coinbase')) {
-              return 'crypto-wallets-extra'
             }
 
             // 3D rendering (if used)
@@ -361,10 +378,8 @@ export default defineConfig(({ mode }) => {
               return 'vue-utils'
             }
 
-            // QR code
-            if (id.includes('qr') || id.includes('qrcode')) {
-              return 'qrcode'
-            }
+            // QR code - keep in vendor-misc to avoid CommonJS module.exports issues
+            // (qrcode uses process which is bundled in vendor-misc)
 
             // Perfect scrollbar
             if (id.includes('perfect-scrollbar')) {
@@ -386,15 +401,10 @@ export default defineConfig(({ mode }) => {
               return 'casl'
             }
 
-            // Eventemitter
-            if (id.includes('eventemitter')) {
-              return 'eventemitter'
-            }
-
-            // OX library (crypto related)
-            if (id.includes('/ox/')) {
-              return 'crypto-ox'
-            }
+            // Eventemitter and eventemitter2 - DO NOT CHUNK
+            // main.js imports eventemitter2 and sets window.EventEmitter2
+            // vendor-scoped and other chunks need this available immediately
+            // Let it stay in main bundle for guaranteed availability
 
             // UUID library
             if (id.includes('uuid')) {
@@ -409,11 +419,6 @@ export default defineConfig(({ mode }) => {
             // Floating UI
             if (id.includes('@floating-ui')) {
               return 'floating-ui'
-            }
-
-            // Additional wallet/crypto packages (WalletConnect dependencies)
-            if (id.includes('@gemini-wallet') || id.includes('@safe-global') || id.includes('@msgpack')) {
-              return 'crypto-wallets-extra'
             }
 
             // Phosphor icons (large icon library used by wallets)
@@ -446,33 +451,81 @@ export default defineConfig(({ mode }) => {
               return 'casl'
             }
 
+            // QR code library - keep in vendor-misc to avoid module.exports issues
+            // (qrcode uses CommonJS and needs to load with other vendor code)
+            // if (id.includes('qr') || id.includes('qrcode')) {
+            //   return 'qrcode'
+            // }
+
+            // Query string parsers
+            if (id.includes('/qs/') || id.includes('\\qs\\') || id.includes('query-string')) {
+              return 'query-parser'
+            }
+
+            // Mitt event emitter
+            if (id.includes('mitt')) {
+              return 'event-utils'
+            }
+
+            // ANSI to HTML converter
+            if (id.includes('ansi-to-html')) {
+              return 'ansi-utils'
+            }
+
+            // JWT decode
+            if (id.includes('jwt-decode')) {
+              return 'jwt'
+            }
+
+            // @vueuse/head (SEO)
+            if (id.includes('@vueuse/head')) {
+              return 'unhead'
+            }
+
+            // Cookie handling
+            if (id.includes('cookie-es')) {
+              return 'cookie'
+            }
+
+            // destr, ufo, ofetch (unjs ecosystem - keep together)
+            if (id.includes('destr') || id.includes('ufo') || id.includes('ofetch')) {
+              return 'unjs-utils'
+            }
+
+            // Axios retry
+            if (id.includes('axios-retry')) {
+              return 'http'
+            }
+
             // Keep Vue core in main bundle (essential for app)
             // Don't split these to vendor chunks
             if (id.includes('@vue/') || id.includes('/vue/')) {
               return undefined  // Stay in main bundle
             }
 
-            // Remaining heavy vendor libraries - catch-all for node_modules
-            // This helps prevent the main bundle from growing with unhandled deps
-            const nodeModulesMatch = id.match(/node_modules\/(@?[^/]+)/)
-            if (nodeModulesMatch) {
-              const pkgName = nodeModulesMatch[1]
-
-              // Keep essential small packages in main bundle
-              const keepInMain = [
-                'vue', '@vue', 'pinia', 'destr', 'cookie-es',
-                'ofetch', 'ufo', '@sindresorhus'
-              ]
-              if (keepInMain.some(p => pkgName.includes(p))) {
-                return undefined
-              }
-
-              // Group remaining scoped packages
-              if (pkgName.startsWith('@')) {
-                return 'vendor-scoped'
-              }
-              return 'vendor-misc'
-            }
+            // DISABLED: Vendor catch-all strategy
+            // This was causing circular dependency with crypto-walletconnect
+            // Let remaining packages stay in main bundle instead
+            //
+            // const excludeFromVendor = [
+            //   'eventemitter2', 'buffer', 'process',
+            //   '@vue/', '/vue/', 'pinia', 'vue-router',
+            //   '@metamask', '@reown', '@walletconnect', '@solana', 'porto', '@coinbase',
+            //   '@base-org', '@gemini-wallet', '@safe-global', '@msgpack',
+            //   '@noble', '@scure', 'wagmi', 'viem', '@wagmi', '@tanstack', '/ox/',
+            // ]
+            //
+            // const shouldExclude = excludeFromVendor.some(pattern => id.includes(pattern))
+            // if (!shouldExclude) {
+            //   if (id.includes('node_modules/@')) {
+            //     const match = id.match(/node_modules\/@([^/]+)/)
+            //     if (match) {
+            //       const scope = match[1]
+            //       return `vendor-${scope}`
+            //     }
+            //   }
+            //   return 'vendor-misc'
+            // }
 
             return undefined
           },
@@ -485,11 +538,10 @@ export default defineConfig(({ mode }) => {
         'leaflet.markercluster',
         '@metamask/sdk',
         '@metamask/providers',
-        'buffer',
-        'process',
         'events',
         'util',
-        'eventemitter2',
+        // NOTE: buffer, process, eventemitter2 removed from here
+        // They need to stay in main bundle (not pre-bundled)
       ],
       exclude: [
         'vuetify',

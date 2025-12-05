@@ -1,3 +1,11 @@
+// Node.js polyfills - global, Buffer, process loaded from index.html
+// Only import EventEmitter2 here since it needs the actual library
+import { EventEmitter2 } from 'eventemitter2'
+
+// window.process and window.Buffer are already set by index.html polyfills
+// Just set EventEmitter2
+window.EventEmitter2 = EventEmitter2
+
 // Suppress third-party library warnings (must be before any imports that load wallet libraries)
 // This runs early to catch font preload warnings from Reown AppKit
 if (typeof window !== 'undefined') {
@@ -31,13 +39,6 @@ import 'element-plus/es/components/tree/style/css'
 // Fonts
 import '@fontsource/montserrat/700.css' // Bold
 import '@fontsource/montserrat/600.css' // Semi-bold
-
-import process from 'process'
-import { Buffer } from 'buffer'
-import { EventEmitter2 } from 'eventemitter2'
-
-window.process = process
-window.Buffer = Buffer
 
 // Handle chunk load failures after deployment (stale cache)
 window.addEventListener('error', event => {

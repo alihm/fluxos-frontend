@@ -265,6 +265,44 @@
     </div>
   </div>
   <div id="app"></div>
+
+  <!-- Node.js polyfills - Load Buffer locally (must block) -->
+  <script src="/polyfills/buffer.min.js"></script>
+  <script>
+    // Set window.Buffer from bundled buffer exports
+    if (typeof bufferExports !== 'undefined') {
+      window.Buffer = bufferExports.Buffer;
+    }
+  </script>
+
+  <!-- Set global and process polyfills -->
+  <script>
+    // Polyfills MUST be available before any module loads (including async chunks)
+    (function() {
+      'use strict';
+
+      // Global
+      if (typeof window.global === 'undefined') {
+        window.global = window.globalThis || window;
+      }
+
+      // Process polyfill - inline minimal implementation
+      if (typeof window.process === 'undefined') {
+        window.process = {
+          env: {},
+          version: 'v16.0.0',
+          platform: 'browser',
+          browser: true,
+          cwd: function() { return '/'; },
+          nextTick: function(fn) {
+            var args = Array.prototype.slice.call(arguments, 1);
+            Promise.resolve().then(function() { fn.apply(null, args); });
+          }
+        };
+      }
+    })();
+  </script>
+
   <script type="module" src="/src/main.js"></script>
 
   <!-- Kapa AI widget - deferred loading after app is ready -->

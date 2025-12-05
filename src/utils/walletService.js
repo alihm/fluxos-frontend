@@ -392,20 +392,33 @@ export async function openWalletConnect() {
 export async function signWithWalletConnect(message) {
   console.log('[WalletConnect] 🔐 Starting sign request...')
   const kit = await getAppKit()
+  const adapter = await getWagmiAdapter()
+  const wagmiCore = await loadWagmiCore()
 
   try {
-    const currentAccount = kit.getAccount?.()
-    console.log('[WalletConnect] Current account state:', {
-      address: currentAccount?.address,
-      isConnected: currentAccount?.isConnected,
+    // Check BOTH AppKit and Wagmi account states
+    // Wagmi is more reliable for session persistence
+    const appKitAccount = kit.getAccount?.()
+    const wagmiAccount = wagmiCore.getAccount(adapter.wagmiConfig)
+
+    console.log('[WalletConnect] Account states:', {
+      appKit: { address: appKitAccount?.address, isConnected: appKitAccount?.isConnected },
+      wagmi: { address: wagmiAccount?.address, isConnected: wagmiAccount?.isConnected },
     })
 
-    // Validate session
+    // Validate session - check if we have a working provider
     let hasValidSession = false
-    if (currentAccount?.address && currentAccount?.isConnected) {
+    const hasWagmiConnection = wagmiAccount?.isConnected && wagmiAccount?.address
+    const hasAppKitConnection = appKitAccount?.isConnected && appKitAccount?.address
+
+    if (hasWagmiConnection || hasAppKitConnection) {
       try {
         const provider = await kit.getWalletProvider()
         hasValidSession = !!(provider?.namespaces && Object.keys(provider.namespaces).length > 0)
+
+        if (hasValidSession) {
+          console.log('[WalletConnect] Valid session found via provider check')
+        }
       } catch (e) {
         console.log('[WalletConnect] Session validation failed:', e.message)
       }
@@ -471,12 +484,17 @@ export async function signWithWalletConnect(message) {
       }
     }
 
-    const appKitAccount = kit.getAccount?.()
-    if (!appKitAccount?.address || !appKitAccount?.isConnected) {
+    // Get address from Wagmi first (more reliable), fallback to AppKit
+    const finalWagmiAccount = wagmiCore.getAccount(adapter.wagmiConfig)
+    const finalAppKitAccount = kit.getAccount?.()
+
+    const address = finalWagmiAccount?.address || finalAppKitAccount?.address
+
+    if (!address) {
       throw new Error('Wallet not connected - please reconnect via WalletConnect')
     }
 
-    const address = appKitAccount.address
+    console.log('[WalletConnect] Using address for signing:', address)
     const provider = await kit.getWalletProvider()
 
     if (!provider || typeof provider.request !== 'function') {
