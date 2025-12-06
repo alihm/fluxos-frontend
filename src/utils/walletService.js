@@ -130,6 +130,21 @@ async function getWagmiAdapter() {
       connectors,
     })
 
+    // Best practice: Reconnect to restore previous session from localStorage
+    // This is critical for session persistence across tabs/refreshes
+    console.log('[WagmiAdapter] Attempting to reconnect previous session...')
+    try {
+      await wagmiCore.reconnect(wagmiAdapterInstance.wagmiConfig)
+      const account = wagmiCore.getAccount(wagmiAdapterInstance.wagmiConfig)
+      if (account?.isConnected) {
+        console.log('[WagmiAdapter] ✅ Session restored:', account.address)
+      } else {
+        console.log('[WagmiAdapter] No previous session to restore')
+      }
+    } catch (e) {
+      console.log('[WagmiAdapter] Reconnect failed (expected if no previous session):', e.message)
+    }
+
     if (typeof window !== 'undefined') {
       window[WAGMI_ADAPTER_KEY] = wagmiAdapterInstance
     }
@@ -398,13 +413,55 @@ export async function signWithWalletConnect(message) {
   try {
     // Check BOTH AppKit and Wagmi account states
     // Wagmi is more reliable for session persistence
-    const appKitAccount = kit.getAccount?.()
-    const wagmiAccount = wagmiCore.getAccount(adapter.wagmiConfig)
+    let appKitAccount = kit.getAccount?.()
+    let wagmiAccount = wagmiCore.getAccount(adapter.wagmiConfig)
 
     console.log('[WalletConnect] Account states:', {
       appKit: { address: appKitAccount?.address, isConnected: appKitAccount?.isConnected },
       wagmi: { address: wagmiAccount?.address, isConnected: wagmiAccount?.isConnected },
     })
+
+    // Check if session exists in localStorage but account state not ready yet (new tab scenario)
+    const hasLocalStorageSession = Object.keys(localStorage).some(key =>
+      (key.startsWith('wc@2:client:') ||
+       key.startsWith('wc@2:core:')) &&
+      localStorage.getItem('loginType') === 'walletconnect',
+    )
+
+    const hasAccountState = wagmiAccount?.address || appKitAccount?.address
+    const possiblyInitializing = hasLocalStorageSession && !hasAccountState
+
+    // If localStorage has session but account state not ready, wait briefly for reconnect() to complete
+    if (possiblyInitializing) {
+      console.log('[WalletConnect] Session in localStorage, waiting for reconnect() to complete...')
+
+      let initWaitAttempts = 0
+      let sessionRestored = false
+
+      while (initWaitAttempts < 6) {  // Max 3 seconds
+        await new Promise(r => setTimeout(r, 500))
+
+        const updatedWagmiAccount = wagmiCore.getAccount(adapter.wagmiConfig)
+        const updatedAppKitAccount = kit.getAccount?.()
+
+        // Check if session became active (isConnected changed from false -> true)
+        if (updatedWagmiAccount?.isConnected || updatedAppKitAccount?.isConnected) {
+          console.log('[WalletConnect] ✅ Session restored from localStorage (not expired)')
+          wagmiAccount = updatedWagmiAccount
+          appKitAccount = updatedAppKitAccount
+          sessionRestored = true
+          break
+        }
+
+        initWaitAttempts++
+      }
+
+      if (!sessionRestored) {
+        console.log('[WalletConnect] ⚠️ Session did not restore - likely expired or invalid')
+
+        // Will fall through to session validation below
+      }
+    }
 
     // Validate session - check if we have a working provider
     let hasValidSession = false

@@ -21,6 +21,20 @@ if (typeof window !== 'undefined') {
     if (str.includes('scheduled an update') || str.includes('change-in-update')) return
     originalWarn.apply(console, args)
   }
+
+  // Suppress console.error for third-party library issues
+  const originalError = console.error
+  console.error = (...args) => {
+    const message = args[0] || ''
+    const str = typeof message === 'string' ? message : String(message)
+
+    // Suppress SVG attribute errors from phosphor-icons (used by AppKit wallet modal)
+    // These are cosmetic - icons render correctly despite the error
+    if (str.includes('<svg> attribute') && str.includes('Unexpected end of attribute')) return
+    if (str.includes('<svg> attribute') && str.includes('Expected length')) return
+
+    originalError.apply(console, args)
+  }
 }
 
 import App from '@/App.vue'

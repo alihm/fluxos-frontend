@@ -373,10 +373,8 @@ export default defineConfig(({ mode }) => {
               return 'three'
             }
 
-            // Vue core (keep vue itself small and in main bundle, but split heavy parts)
-            if (id.includes('@vue/') && !id.includes('@vue/runtime') && !id.includes('@vue/reactivity') && !id.includes('@vue/shared')) {
-              return 'vue-utils'
-            }
+            // Vue core - keep all @vue packages in main bundle (small, essential)
+            // @vue/compiler-* and @vue/devtools-* are build-time only, not in runtime
 
             // QR code - keep in vendor-misc to avoid CommonJS module.exports issues
             // (qrcode uses process which is bundled in vendor-misc)
@@ -436,10 +434,7 @@ export default defineConfig(({ mode }) => {
               return 'lit'
             }
 
-            // @ctrl packages
-            if (id.includes('@ctrl')) {
-              return 'ctrl'
-            }
+            // @ctrl packages - only @ctrl/tinycolor exists (small, stays in main bundle)
 
             // @unhead packages (SEO/head management)
             if (id.includes('@unhead')) {
