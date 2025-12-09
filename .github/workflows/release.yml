@@ -29,12 +29,12 @@ jobs:
       - name: Build for SEO
         run: npm run build:seo
 
-      - name: Zip dist folder
-        run: zip -r dist.zip dist
+      - name: Create dist tarball
+        run: tar -czvf dist.tar.gz dist
 
-      - name: Upload dist.zip to release
+      - name: Upload dist.tar.gz to release
         uses: softprops/action-gh-release@v2
         with:
-          files: dist.zip
+          files: dist.tar.gz
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
