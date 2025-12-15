@@ -517,7 +517,7 @@
                 <div v-if="versionFlags.supportsContacts" class="d-flex align-center mb-3">
                   <VCombobox
                     v-model="appDetails.contacts"
-                    :label="t('core.subscriptionManager.contact')"
+                    :label="props.newApp ? t('core.subscriptionManager.contact') + ' *' : t('core.subscriptionManager.contact')"
                     prepend-inner-icon="mdi-email"
                     multiple
                     variant="outlined"
@@ -3226,9 +3226,10 @@ const tosPanel = computed({
     // If accepted, return internal state (allows manual toggle)
     const value = acceptedTerms.value ? tosPanelInternal.value : '0'
     console.log('[ToS] tosPanel.get():', { acceptedTerms: acceptedTerms.value, internal: tosPanelInternal.value, returning: value })
+    
     return value
   },
-  set: (newValue) => {
+  set: newValue => {
     console.log('[ToS] tosPanel.set():', { newValue, acceptedTerms: acceptedTerms.value })
 
     // Check if trying to close (newValue is undefined/null)
@@ -3246,7 +3247,7 @@ const tosPanel = computed({
       tosPanelInternal.value = newValue
       console.log('[ToS] Allowed expansion - updating internal state to:', newValue)
     }
-  }
+  },
 })
 const paymentCompleted = ref(false)
 const paymentMethod = ref('')
@@ -3290,7 +3291,7 @@ watch(tab, (newTab, oldTab) => {
 })
 
 // Save ToS acceptance state to session storage and collapse panel when accepted
-watch(acceptedTerms, (newValue) => {
+watch(acceptedTerms, newValue => {
   console.log('[ToS] acceptedTerms changed:', { newValue })
   sessionStorage.setItem('flux-tos-accepted', newValue.toString())
 
@@ -4204,6 +4205,7 @@ const testableFieldsHaveChanged = computed(() => {
   try {
     const currentSpecCopy = cloneDeep(props.appSpec)
     NON_TESTABLE_FIELDS.forEach(field => delete currentSpecCopy[field])
+
     // Also exclude from compose components
     if (currentSpecCopy.compose && Array.isArray(currentSpecCopy.compose)) {
       currentSpecCopy.compose.forEach(component => {
@@ -4213,6 +4215,7 @@ const testableFieldsHaveChanged = computed(() => {
 
     const snapshotCopy = cloneDeep(snapshotToCompare)
     NON_TESTABLE_FIELDS.forEach(field => delete snapshotCopy[field])
+
     // Also exclude from compose components
     if (snapshotCopy.compose && Array.isArray(snapshotCopy.compose)) {
       snapshotCopy.compose.forEach(component => {
@@ -4312,6 +4315,7 @@ watch(() => props.appSpec, newSpec => {
         delete currentSpecForTest[field]
         delete signedSpecForTest[field]
       })
+
       // Also exclude from compose components
       if (currentSpecForTest.compose && Array.isArray(currentSpecForTest.compose)) {
         currentSpecForTest.compose.forEach(component => {
@@ -5785,7 +5789,7 @@ watch(() => props.appSpec?.compose?.length, newLength => {
 }, { immediate: true })
 
 // Watch for initialAction changes to update managementAction
-watch(() => props.initialAction, (newAction) => {
+watch(() => props.initialAction, newAction => {
   if (newAction && !props.newApp) {
     managementAction.value = newAction
   }
@@ -6802,6 +6806,15 @@ async function verifyAppSpec() {
       if (!appSpecTemp.geolocation) appSpecTemp.geolocation = []
     }
 
+    // Validate contacts field - at least one contact is required for new app registration
+    if (props.newApp) {
+      const contacts = appSpecTemp.contacts || []
+      const validContacts = contacts.filter(c => c && c.trim())
+      if (validContacts.length === 0) {
+        throw new Error(t('core.subscriptionManager.contactRequired'))
+      }
+    }
+
     // For UPDATE without renewal: Send fork-aware remaining blocks
     // This represents the time remaining on the current subscription
     // Backend should recognize this as maintaining current expiry (not extending)
@@ -7507,6 +7520,7 @@ async function testAppInstall() {
     if (props.newApp && props.appSpec && !testError.value) {
       const specCopy = cloneDeep(props.appSpec)
       NON_TESTABLE_FIELDS.forEach(field => delete specCopy[field])
+
       // Also exclude from compose components
       if (specCopy.compose && Array.isArray(specCopy.compose)) {
         specCopy.compose.forEach(component => {

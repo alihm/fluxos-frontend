@@ -866,11 +866,11 @@
                           <VTextField
                             v-model="emailNotifications.email"
                             :label="t('components.marketplace.installDialog.emailAddress')"
-                            :placeholder="t('components.marketplace.installDialog.enterEmailOptional')"
+                            :placeholder="t('components.marketplace.installDialog.enterEmailRequired')"
                             variant="outlined"
                             density="comfortable"
                             type="email"
-                            :rules="emailRules"
+                            :rules="emailRulesRequired"
                             class="email-input"
                             @input="validateEmail"
                           >
@@ -2263,6 +2263,12 @@ const emailRules = computed(() => [
   v => !v || /.+@.+\..+/.test(v) || t('components.marketplace.installDialog.emailMustBeValid'),
 ])
 
+// Email validation rules (required with format validation)
+const emailRulesRequired = computed(() => [
+  v => !!v || t('components.marketplace.installDialog.emailRequired'),
+  v => /.+@.+\..+/.test(v) || t('components.marketplace.installDialog.emailMustBeValid'),
+])
+
 // Locked values functionality - check if configuration values are locked by the app
 const isValueLocked = valueName => {
   return props.app?.lockedValues?.includes(valueName) || false
@@ -2875,8 +2881,8 @@ const canProceed = computed(() => {
     return true
   }
   if (currentStep.value === 3) {
-    // Email step - always allow proceeding (email is optional)
-    return true
+    // Email step - email is required
+    return validateEmail()
   }
   if (currentStep.value === 4) {
     // Signing step - block until both signing and registry are completed (for both SSO and wallet)
@@ -3454,6 +3460,7 @@ const generateDeploymentMessage = async () => {
         }
       } catch (error) {
         console.warn(`Failed to process environment parameters for component ${index}:`, error)
+
         // Fallback: Add all parameters if there's an error (backward compatibility)
         for (const [key, value] of Object.entries(config.value.parameters || {})) {
           if (value) {
