@@ -2429,7 +2429,9 @@ const fetchPricingFromAPI = async () => {
 
     const appSpec = {
       version: 8,
-      name: props.app.name || props.app.displayName,
+
+      // Convert app name to lowercase for consistency
+      name: (props.app.name || props.app.displayName || '').toLowerCase(),
       description: props.app.description || props.app.displayName || 'Marketplace App',
       owner: props.app.owner || 'marketplace',
       compose: appSpecCompose,
@@ -3351,7 +3353,8 @@ const generateDeploymentMessage = async () => {
   // Generate FluxCloud-compatible deployment message
   const timestamp = Date.now()
   deploymentTimestamp.value = timestamp // Store for WebSocket
-  const appName = `${props.app.name}${timestamp}`
+  // Convert app name to lowercase for consistency
+  const appName = `${props.app.name.toLowerCase()}${timestamp}`
 
   // Get owner from zelidauth
   let owner = ''
@@ -4354,11 +4357,11 @@ const processStripePayment = async () => {
       signature: authData.signature,
       loginPhrase: authData.loginPhrase,
       details: {
-        name: props.app.name,
+        name: props.app.name.toLowerCase(),
         description: props.app.description,
         hash: paymentHash.value,
         price: parseFloat(estimatedCost.value),
-        productName: props.app.name,
+        productName: props.app.name.toLowerCase(),
         success_url: `${window.location.origin}/successcheckout`,
         cancel_url: `${window.location.origin}/marketplace`,
         kpi: {
@@ -4441,11 +4444,11 @@ const processPayPalPayment = async () => {
       signature: authData.signature,
       loginPhrase: authData.loginPhrase,
       details: {
-        name: props.app.name,
+        name: props.app.name.toLowerCase(),
         description: props.app.description,
         hash: paymentHash.value,
         price: parseFloat(estimatedCost.value),
-        productName: props.app.name,
+        productName: props.app.name.toLowerCase(),
         return_url: `${window.location.origin}/successcheckout`,
         cancel_url: `${window.location.origin}/marketplace`,
         kpi: {

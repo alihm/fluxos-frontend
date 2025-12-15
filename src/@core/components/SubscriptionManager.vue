@@ -402,6 +402,7 @@
                   density="comfortable"
                   :disabled="isNameLocked"
                   class="mb-3"
+                  @input="props.newApp && (appDetails.name = appDetails.name.toLowerCase())"
                 >
                   <template #append-inner>
                     <VTooltip location="top">
@@ -945,6 +946,7 @@
                   variant="outlined"
                   class="mb-3"
                   :disabled="!props.newApp"
+                  @input="props.newApp && (component.name = component.name.toLowerCase())"
                 >
                   <template #append-inner>
                     <VTooltip location="top">
@@ -6624,6 +6626,25 @@ async function verifyAppSpec() {
   appSpecFormated.value = null
   try {
     const appSpecTemp = cloneDeep(props.appSpec)
+
+    // ========================================================================
+    // CONVERT APP NAME TO LOWERCASE (only for new app registration)
+    // App name changes are not allowed on updates
+    // ========================================================================
+    if (props.newApp) {
+      if (appSpecTemp.name) {
+        appSpecTemp.name = appSpecTemp.name.toLowerCase()
+      }
+
+      // Also convert component names in compose array
+      if (appSpecTemp.compose && Array.isArray(appSpecTemp.compose)) {
+        appSpecTemp.compose.forEach(component => {
+          if (component.name) {
+            component.name = component.name.toLowerCase()
+          }
+        })
+      }
+    }
 
     // ========================================================================
     // MARKETPLACE APP REPOTAG CHECK (only for new app registration)
