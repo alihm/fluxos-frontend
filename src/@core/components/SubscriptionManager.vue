@@ -3147,6 +3147,7 @@ import { paymentBridge } from '@/utils/fiatGateways'
 import AppsService from "@/services/AppsService"
 import ExplorerService from '@/services/ExplorerService'
 import DaemonService from '@/services/DaemonService'
+import StorageService from '@/services/StorageService'
 import { storeToRefs } from "pinia"
 import ManualSignDialog from '@/@core/components/ManualSignDialog.vue'
 import { useFluxStore } from "@/stores/flux"
@@ -6811,6 +6812,29 @@ async function verifyAppSpec() {
     const validContacts = contacts.filter(c => c && c.trim())
     if (validContacts.length === 0) {
       throw new Error(t('core.subscriptionManager.contactRequired'))
+    }
+
+    // Auto-upload contacts to Flux Storage if they are email addresses (not already storage references)
+    // This matches the behavior in InstallDialog for marketplace/games
+    const hasStorageReference = validContacts.some(c => c.startsWith('F_S_CONTACTS='))
+    if (!hasStorageReference && validContacts.length > 0) {
+      try {
+        console.log('📧 Auto-uploading contacts to Flux Storage:', validContacts)
+        const contactsId = StorageService.generateContactsId()
+        const contactsData = {
+          contactsid: contactsId,
+          contacts: validContacts,
+        }
+        await StorageService.uploadContacts(contactsData)
+        const storageReference = StorageService.getContactsStorageReference(contactsId)
+
+        // Replace contacts with storage reference
+        appSpecTemp.contacts = [storageReference]
+        console.log('✅ Contacts uploaded to storage:', storageReference)
+      } catch (error) {
+        console.error('❌ Failed to upload contacts to Flux Storage:', error)
+        throw new Error(`Uploading contacts to Flux Storage failed: ${error.message}`)
+      }
     }
 
     // For UPDATE without renewal: Send fork-aware remaining blocks
