@@ -517,7 +517,7 @@
                 <div v-if="versionFlags.supportsContacts" class="d-flex align-center mb-3">
                   <VCombobox
                     v-model="appDetails.contacts"
-                    :label="props.newApp ? t('core.subscriptionManager.contact') + ' *' : t('core.subscriptionManager.contact')"
+                    :label="t('core.subscriptionManager.contact') + ' *'"
                     prepend-inner-icon="mdi-email"
                     multiple
                     variant="outlined"
@@ -6806,13 +6806,11 @@ async function verifyAppSpec() {
       if (!appSpecTemp.geolocation) appSpecTemp.geolocation = []
     }
 
-    // Validate contacts field - at least one contact is required for new app registration
-    if (props.newApp) {
-      const contacts = appSpecTemp.contacts || []
-      const validContacts = contacts.filter(c => c && c.trim())
-      if (validContacts.length === 0) {
-        throw new Error(t('core.subscriptionManager.contactRequired'))
-      }
+    // Validate contacts field - at least one contact is required for both registration and updates
+    const contacts = appSpecTemp.contacts || []
+    const validContacts = contacts.filter(c => c && c.trim())
+    if (validContacts.length === 0) {
+      throw new Error(t('core.subscriptionManager.contactRequired'))
     }
 
     // For UPDATE without renewal: Send fork-aware remaining blocks
