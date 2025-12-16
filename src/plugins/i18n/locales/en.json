@@ -303,7 +303,8 @@
       "manageUsers": "Manage Users",
       "loggedSessions": "Logged Sessions",
       "myFluxShare": "My FluxShare",
-      "fluxShare": "FluxShare"
+      "fluxShare": "FluxShare",
+      "daemon": "Daemon"
     },
     "fluxXdao": {
       "title": "Flux XDAO"
@@ -2110,6 +2111,31 @@
         "appsHashes": "Apps Hashes",
         "notSynced": "{count} not synced",
         "componentVersions": "Component Versions"
+      },
+      "daemon": {
+        "loadingTitle": "Loading Blockchain Information...",
+        "errorTitle": "Blockchain Information Unavailable",
+        "errorSubtitle": "Unable to load blockchain information at this time.",
+        "errorDescription": "The daemon is currently unavailable or experiencing connectivity issues. Please check your connection and try again in a few moments. If the problem persists, contact your system administrator.",
+        "title": "Daemon - Blockchain Info",
+        "subtitle": "View blockchain status and network information",
+        "blockchainOverview": "Blockchain Overview",
+        "chain": "Chain",
+        "blocks": "Blocks",
+        "headers": "Headers",
+        "difficulty": "Difficulty",
+        "blockchainDetails": "Blockchain Details",
+        "verificationProgress": "Verification Progress",
+        "chainWork": "Chain Work",
+        "pruned": "Pruned",
+        "sizeOnDisk": "Size on Disk",
+        "commitments": "Commitments",
+        "valuePools": "Value Pools",
+        "bestBlockHash": "Best Block Hash",
+        "rawData": "Raw JSON Data",
+        "copy": "Copy",
+        "copiedToClipboard": "Blockchain info copied to clipboard",
+        "copyFailed": "Failed to copy to clipboard"
       },
       "dockerEvents": {
         "loadingTitle": "Loading Docker Events...",

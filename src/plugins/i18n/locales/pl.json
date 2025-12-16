@@ -303,7 +303,8 @@
       "manageUsers": "Użytkownicy",
       "loggedSessions": "Sesje Użytkowników",
       "myFluxShare": "Mój FluxShare",
-      "fluxShare": "FluxShare"
+      "fluxShare": "FluxShare",
+      "daemon": "Daemon"
     },
     "fluxXdao": {
       "title": "Flux XDAO"
@@ -2087,6 +2088,31 @@
         "appsHashes": "Sumy kontrolne aplikacji",
         "notSynced": "{count} niezsynchronizowanych",
         "componentVersions": "Wersje komponentów"
+      },
+      "daemon": {
+        "loadingTitle": "Ładowanie informacji o blockchainie...",
+        "errorTitle": "Informacje o blockchainie niedostępne",
+        "errorSubtitle": "Nie można załadować informacji o blockchainie w tej chwili.",
+        "errorDescription": "Daemon jest obecnie niedostępny lub występują problemy z połączeniem. Sprawdź swoje połączenie i spróbuj ponownie za chwilę. Jeśli problem będzie się utrzymywał, skontaktuj się z administratorem systemu.",
+        "title": "Daemon - Informacje o Blockchainie",
+        "subtitle": "Zobacz status blockchaina i informacje o sieci",
+        "blockchainOverview": "Przegląd Blockchaina",
+        "chain": "Łańcuch",
+        "blocks": "Bloki",
+        "headers": "Nagłówki",
+        "difficulty": "Trudność",
+        "blockchainDetails": "Szczegóły Blockchaina",
+        "verificationProgress": "Postęp weryfikacji",
+        "chainWork": "Praca łańcucha",
+        "pruned": "Przycięty",
+        "sizeOnDisk": "Rozmiar na dysku",
+        "commitments": "Zobowiązania",
+        "valuePools": "Pule wartości",
+        "bestBlockHash": "Hash najlepszego bloku",
+        "rawData": "Surowe dane JSON",
+        "copy": "Kopiuj",
+        "copiedToClipboard": "Informacje o blockchainie skopiowane do schowka",
+        "copyFailed": "Nie udało się skopiować do schowka"
       },
       "dockerEvents": {
         "loadingTitle": "Ładowanie zdarzeń Docker...",

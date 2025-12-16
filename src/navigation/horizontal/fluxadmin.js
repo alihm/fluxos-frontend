@@ -36,6 +36,12 @@ export default [
         privilege: ['admin', 'fluxteam'],
       },
       {
+        title: 'menu.administration.daemon',
+        to: 'administration-daemon',
+        icon: { icon: 'mdi-link-variant', size: 20 },
+        privilege: ['admin', 'fluxteam'],
+      },
+      {
         title: 'menu.application.globalApps',
         icon: { icon: 'tabler-world-search', size: 20 },
         to: 'apps-global',
