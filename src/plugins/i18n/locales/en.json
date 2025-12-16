@@ -305,7 +305,8 @@
       "myFluxShare": "My FluxShare",
       "fluxShare": "FluxShare",
       "daemon": "Daemon",
-      "benchmarks": "Benchmarks"
+      "benchmarks": "Benchmarks",
+      "debug": "Debug"
     },
     "fluxXdao": {
       "title": "Flux XDAO"
@@ -2169,6 +2170,31 @@
         "copy": "Copy",
         "copiedToClipboard": "Benchmark info copied to clipboard",
         "copyFailed": "Failed to copy to clipboard"
+      },
+      "debug": {
+        "title": "Debug Logs",
+        "subtitle": "Download and view debug logs for Flux, Daemon, and Benchmark",
+        "downloadInstruction": "Click 'Download File' to download the log. This may take a few minutes depending on file size.",
+        "showInstruction": "Click 'Show File' to view the last 100 lines of the log file.",
+        "fluxLogs": "Flux Logs",
+        "daemonDebug": "Daemon Debug",
+        "benchmarkDebug": "Benchmark Debug",
+        "log": "Log",
+        "daemonDebugFile": "Daemon Debug File",
+        "benchmarkDebugFile": "Benchmark Debug File",
+        "downloadFile": "Download File",
+        "showFile": "Show File",
+        "cancel": "Cancel",
+        "download": "Download",
+        "show": "Show",
+        "confirmTitle": "Are you sure?",
+        "downloadConfirmMessage": "Do you want to download the {title}?",
+        "showConfirmMessage": "Do you want to view the last 100 lines of the {title}?",
+        "last100Lines": "Last 100 Lines",
+        "authRequired": "Authentication required. Please log in.",
+        "downloadSuccess": "Downloaded {filename} successfully",
+        "downloadError": "Error downloading file",
+        "tailError": "Error retrieving log file"
       },
       "dockerEvents": {
         "loadingTitle": "Loading Docker Events...",

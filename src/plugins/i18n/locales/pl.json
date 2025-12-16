@@ -305,7 +305,8 @@
       "myFluxShare": "Mój FluxShare",
       "fluxShare": "FluxShare",
       "daemon": "Daemon",
-      "benchmarks": "Benchmarki"
+      "benchmarks": "Benchmarki",
+      "debug": "Debug"
     },
     "fluxXdao": {
       "title": "Flux XDAO"
@@ -2146,6 +2147,31 @@
         "copy": "Kopiuj",
         "copiedToClipboard": "Informacje o benchmarkach skopiowane do schowka",
         "copyFailed": "Nie udało się skopiować do schowka"
+      },
+      "debug": {
+        "title": "Logi debugowania",
+        "subtitle": "Pobierz i przeglądaj logi debugowania dla Flux, Daemon i Benchmark",
+        "downloadInstruction": "Kliknij 'Pobierz plik', aby pobrać log. Może to potrwać kilka minut w zależności od rozmiaru pliku.",
+        "showInstruction": "Kliknij 'Pokaż plik', aby zobaczyć ostatnie 100 linii pliku logu.",
+        "fluxLogs": "Logi Flux",
+        "daemonDebug": "Debug Daemon",
+        "benchmarkDebug": "Debug Benchmark",
+        "log": "Log",
+        "daemonDebugFile": "Plik debugowania Daemon",
+        "benchmarkDebugFile": "Plik debugowania Benchmark",
+        "downloadFile": "Pobierz plik",
+        "showFile": "Pokaż plik",
+        "cancel": "Anuluj",
+        "download": "Pobierz",
+        "show": "Pokaż",
+        "confirmTitle": "Czy na pewno?",
+        "downloadConfirmMessage": "Czy chcesz pobrać {title}?",
+        "showConfirmMessage": "Czy chcesz zobaczyć ostatnie 100 linii {title}?",
+        "last100Lines": "Ostatnie 100 linii",
+        "authRequired": "Wymagana autoryzacja. Proszę się zalogować.",
+        "downloadSuccess": "Pobrano {filename} pomyślnie",
+        "downloadError": "Błąd podczas pobierania pliku",
+        "tailError": "Błąd podczas pobierania pliku logu"
       },
       "dockerEvents": {
         "loadingTitle": "Ładowanie zdarzeń Docker...",
