@@ -19,9 +19,6 @@ declare module 'vue-router/auto-routes' {
    */
   export interface RouteNamedMap {
     '$error': RouteRecordInfo<'$error', '/:error(.*)', { error: ParamValue<true> }, { error: ParamValue<false> }>,
-    'administration-benchmarks': RouteRecordInfo<'administration-benchmarks', '/administration/benchmarks', Record<never, never>, Record<never, never>>,
-    'administration-daemon': RouteRecordInfo<'administration-daemon', '/administration/daemon', Record<never, never>, Record<never, never>>,
-    'administration-debug': RouteRecordInfo<'administration-debug', '/administration/debug', Record<never, never>, Record<never, never>>,
     'administration-docker-events': RouteRecordInfo<'administration-docker-events', '/administration/docker-events', Record<never, never>, Record<never, never>>,
     'administration-flux-share': RouteRecordInfo<'administration-flux-share', '/administration/flux-share', Record<never, never>, Record<never, never>>,
     'administration-manage-flux': RouteRecordInfo<'administration-manage-flux', '/administration/manage-flux', Record<never, never>, Record<never, never>>,
