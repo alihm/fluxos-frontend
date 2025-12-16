@@ -8,7 +8,7 @@
 
       <!-- Action Buttons -->
       <VBtn
-        variant="tonal"
+        variant="flat"
         color="primary"
         size="small"
         class="mr-2"
@@ -19,7 +19,7 @@
       </VBtn>
 
       <VBtn
-        variant="tonal"
+        variant="flat"
         color="secondary"
         size="small"
         class="mr-2"
@@ -40,10 +40,8 @@
       </VBtn>
     </VCardTitle>
 
-    <VDivider />
-
     <!-- Breadcrumbs -->
-    <div class="px-3 py-2 bg-surface-variant">
+    <div class="px-3 py-1">
       <VBreadcrumbs :items="breadcrumbItems" density="compact">
         <template #divider>
           <VIcon icon="mdi-chevron-right" size="small" />
@@ -53,7 +51,10 @@
             :disabled="item.disabled"
             @click="!item.disabled && navigateToBreadcrumb(item.path)"
           >
-            <span :class="{ 'text-primary cursor-pointer': !item.disabled }">
+            <span v-if="item.isHome" :class="{ 'text-primary cursor-pointer': !item.disabled }">
+              <VIcon icon="mdi-home" size="20" />
+            </span>
+            <span v-else :class="{ 'text-primary cursor-pointer': !item.disabled }">
               {{ item.title }}
             </span>
           </VBreadcrumbsItem>
@@ -83,23 +84,12 @@
         <thead>
           <tr>
             <th class="text-left">
-              <!-- Up button if in subfolder -->
-              <VBtn
-                v-if="currentFolder"
-                icon
-                variant="text"
-                size="small"
-                class="mr-2"
-                @click="navigateUp"
-              >
-                <VIcon icon="mdi-arrow-up-circle" />
-              </VBtn>
               {{ t('pages.administration.fluxShare.columns.name') }}
             </th>
             <th class="text-left">{{ t('pages.administration.fluxShare.columns.modified') }}</th>
             <th class="text-left">{{ t('pages.administration.fluxShare.columns.type') }}</th>
             <th class="text-left">{{ t('pages.administration.fluxShare.columns.size') }}</th>
-            <th class="text-center" style="width: 200px;">{{ t('pages.administration.fluxShare.columns.actions') }}</th>
+            <th class="text-right" style="width: 200px;">{{ t('pages.administration.fluxShare.columns.actions') }}</th>
           </tr>
         </thead>
         <tbody>
@@ -108,12 +98,19 @@
             <td>
               <div class="d-flex align-center">
                 <VIcon
-                  :icon="item.isDirectory ? 'mdi-folder' : getFileIcon(item.name)"
-                  :color="item.isDirectory ? 'warning' : 'grey'"
+                  :icon="item.isParent ? 'mdi-folder-upload' : item.isDirectory ? 'mdi-folder' : getFileIcon(item.name)"
+                  color="grey"
                   class="mr-2"
                 />
                 <span
-                  v-if="item.isDirectory"
+                  v-if="item.isParent"
+                  class="text-primary cursor-pointer"
+                  @click="navigateUp"
+                >
+                  {{ item.name }}
+                </span>
+                <span
+                  v-else-if="item.isDirectory"
                   class="text-primary cursor-pointer"
                   @click="navigateToFolder(item.name)"
                 >
@@ -125,7 +122,7 @@
 
             <!-- Modified -->
             <td>
-              <span class="text-caption">
+              <span v-if="!item.isParent" class="text-caption">
                 {{ formatDate(item.modifiedAt) }}
               </span>
             </td>
@@ -133,6 +130,7 @@
             <!-- Type -->
             <td>
               <VChip
+                v-if="!item.isParent"
                 size="small"
                 :color="item.isDirectory ? 'warning' : 'info'"
                 variant="tonal"
@@ -143,19 +141,21 @@
 
             <!-- Size -->
             <td>
-              <span v-if="item.size > 0" class="text-caption">
+              <span v-if="!item.isParent && item.size > 0" class="text-caption">
                 {{ formatFileSize(item.size) }}
               </span>
-              <span v-else class="text-caption text-medium-emphasis">-</span>
+              <span v-else-if="!item.isParent" class="text-caption text-medium-emphasis">-</span>
             </td>
 
             <!-- Actions -->
-            <td class="text-center">
-              <VBtnGroup density="compact" variant="text">
+            <td class="text-right">
+              <div v-if="!item.isParent" class="d-flex justify-end align-center ga-1">
                 <!-- Download -->
                 <VBtn
                   icon
+                  variant="flat"
                   size="small"
+                  color="grey"
                   :title="item.isDirectory ? t('pages.administration.fluxShare.downloadZip') : t('pages.administration.fluxShare.download')"
                   @click="confirmDownload(item)"
                 >
@@ -165,7 +165,9 @@
                 <!-- Rename -->
                 <VBtn
                   icon
+                  variant="flat"
                   size="small"
+                  color="grey"
                   :title="t('pages.administration.fluxShare.rename')"
                   @click="openRenameDialog(item)"
                 >
@@ -176,8 +178,9 @@
                 <VBtn
                   v-if="item.isFile"
                   icon
+                  variant="flat"
                   size="small"
-                  :color="item.shareToken ? 'primary' : undefined"
+                  :color="item.shareToken ? 'primary' : 'grey'"
                   :title="item.shareToken ? t('pages.administration.fluxShare.unshare') : t('pages.administration.fluxShare.share')"
                   @click="toggleShare(item)"
                 >
@@ -188,7 +191,9 @@
                 <VBtn
                   v-if="item.shareToken"
                   icon
+                  variant="flat"
                   size="small"
+                  color="grey"
                   :title="t('pages.administration.fluxShare.copyLink')"
                   @click="copyShareLink(item)"
                 >
@@ -198,14 +203,15 @@
                 <!-- Delete -->
                 <VBtn
                   icon
+                  variant="flat"
                   size="small"
-                  color="error"
+                  color="grey"
                   :title="t('pages.administration.fluxShare.delete')"
                   @click="confirmDelete(item)"
                 >
                   <VIcon icon="mdi-delete" size="18" />
                 </VBtn>
-              </VBtnGroup>
+              </div>
             </td>
           </tr>
         </tbody>
@@ -244,9 +250,9 @@
     <!-- Create Folder Dialog -->
     <VDialog v-model="showCreateFolderDialog" max-width="400">
       <VCard>
-        <VCardTitle class="pa-4">
-          <VIcon icon="mdi-folder-plus" class="mr-2" />
-          {{ t('pages.administration.fluxShare.createFolder') }}
+        <VCardTitle class="px-4 py-2 bg-primary">
+          <VIcon icon="mdi-folder-plus" class="mr-2" color="white" />
+          <span class="text-white">{{ t('pages.administration.fluxShare.createFolder') }}</span>
         </VCardTitle>
         <VDivider />
         <VCardText class="pa-4">
@@ -262,11 +268,13 @@
         <VDivider />
         <VCardActions class="pa-4">
           <VSpacer />
-          <VBtn variant="text" @click="showCreateFolderDialog = false">
+          <VBtn variant="flat" color="grey" size="small" @click="showCreateFolderDialog = false">
             {{ t('common.buttons.cancel') }}
           </VBtn>
           <VBtn
+            variant="flat"
             color="primary"
+            size="small"
             :loading="loading"
             :disabled="!newFolderName.trim()"
             @click="doCreateFolder"
@@ -280,9 +288,9 @@
     <!-- Rename Dialog -->
     <VDialog v-model="showRenameDialog" max-width="400">
       <VCard>
-        <VCardTitle class="pa-4">
-          <VIcon icon="mdi-pencil" class="mr-2" />
-          {{ t('pages.administration.fluxShare.renameItem') }}
+        <VCardTitle class="px-4 py-2 bg-primary">
+          <VIcon icon="mdi-pencil" class="mr-2" color="white" />
+          <span class="text-white">{{ t('pages.administration.fluxShare.renameItem') }}</span>
         </VCardTitle>
         <VDivider />
         <VCardText class="pa-4">
@@ -298,11 +306,13 @@
         <VDivider />
         <VCardActions class="pa-4">
           <VSpacer />
-          <VBtn variant="text" @click="showRenameDialog = false">
+          <VBtn variant="flat" color="grey" size="small" @click="showRenameDialog = false">
             {{ t('common.buttons.cancel') }}
           </VBtn>
           <VBtn
+            variant="flat"
             color="primary"
+            size="small"
             :loading="loading"
             :disabled="!renameNewName.trim()"
             @click="doRename"
@@ -316,9 +326,9 @@
     <!-- Delete Confirmation Dialog -->
     <VDialog v-model="showDeleteDialog" max-width="400">
       <VCard>
-        <VCardTitle class="pa-4">
-          <VIcon icon="mdi-delete" color="error" class="mr-2" />
-          {{ t('pages.administration.fluxShare.confirmDelete') }}
+        <VCardTitle class="px-4 py-2 bg-primary">
+          <VIcon icon="mdi-delete" color="white" class="mr-2" />
+          <span class="text-white">{{ t('pages.administration.fluxShare.confirmDelete') }}</span>
         </VCardTitle>
         <VDivider />
         <VCardText class="pa-4">
@@ -329,11 +339,13 @@
         <VDivider />
         <VCardActions class="pa-4">
           <VSpacer />
-          <VBtn variant="text" @click="showDeleteDialog = false">
+          <VBtn variant="flat" color="grey" size="small" @click="showDeleteDialog = false">
             {{ t('common.buttons.cancel') }}
           </VBtn>
           <VBtn
+            variant="flat"
             color="error"
+            size="small"
             :loading="loading"
             @click="doDelete"
           >
@@ -346,9 +358,9 @@
     <!-- Download Confirmation Dialog -->
     <VDialog v-model="showDownloadDialog" max-width="400">
       <VCard>
-        <VCardTitle class="pa-4">
-          <VIcon icon="mdi-download" class="mr-2" />
-          {{ t('pages.administration.fluxShare.confirmDownload') }}
+        <VCardTitle class="px-4 py-2 bg-primary">
+          <VIcon icon="mdi-download" class="mr-2" color="white" />
+          <span class="text-white">{{ t('pages.administration.fluxShare.confirmDownload') }}</span>
         </VCardTitle>
         <VDivider />
         <VCardText class="pa-4">
@@ -362,11 +374,13 @@
         <VDivider />
         <VCardActions class="pa-4">
           <VSpacer />
-          <VBtn variant="text" @click="showDownloadDialog = false">
+          <VBtn variant="flat" color="grey" size="small" @click="showDownloadDialog = false">
             {{ t('common.buttons.cancel') }}
           </VBtn>
           <VBtn
+            variant="flat"
             color="primary"
+            size="small"
             :loading="downloading"
             @click="doDownload"
           >
@@ -382,6 +396,13 @@
 import { ref, computed, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useFluxShare } from '@/composables/useFluxShare'
+
+const props = defineProps({
+  availableStorage: {
+    type: Number,
+    default: 0,
+  },
+})
 
 const emit = defineEmits(['uploadRequested'])
 
@@ -483,7 +504,23 @@ const paginatedFiles = computed(() => {
   const start = (currentPage.value - 1) * itemsPerPage.value
   const end = start + itemsPerPage.value
 
-  return filteredFiles.value.slice(start, end)
+  // Add ".." entry at the beginning if in a subfolder
+  const filesList = filteredFiles.value.slice(start, end)
+
+  if (currentFolder.value && start === 0) {
+    return [
+      {
+        name: '..',
+        isDirectory: true,
+        isParent: true,
+        size: 0,
+        modified: '',
+      },
+      ...filesList,
+    ]
+  }
+
+  return filesList
 })
 
 // Total pages
@@ -501,8 +538,14 @@ const breadcrumbItems = computed(() => {
   return breadcrumbs.value.map((crumb, index) => ({
     title: crumb.title,
     path: crumb.path,
+    isHome: crumb.isHome || false,
     disabled: index === breadcrumbs.value.length - 1,
   }))
+})
+
+// Check if storage is full
+const isStorageFull = computed(() => {
+  return props.availableStorage <= 0
 })
 
 // Navigate to breadcrumb path

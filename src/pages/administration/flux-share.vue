@@ -42,24 +42,34 @@
         </VCardTitle>
         <VDivider />
         <VCardText class="pa-3">
-          <div class="d-flex align-center justify-space-between mb-2">
-            <span class="text-body-2">
-              {{ storage.used.toFixed(2) }} GB / {{ storage.total.toFixed(2) }} GB
-            </span>
-            <span class="text-body-2 text-medium-emphasis">
-              {{ storagePercentage.toFixed(1) }}% {{ t('pages.administration.fluxShare.used') }}
-            </span>
+          <div class="position-relative mb-2">
+            <VProgressLinear
+              :model-value="storagePercentage"
+              height="20"
+              rounded
+              :color="storagePercentage > 90 ? 'error' : storagePercentage > 75 ? 'warning' : 'primary'"
+            />
+            <div class="progress-label">
+              {{ storagePercentage.toFixed(1) }}%
+            </div>
           </div>
-          <VProgressLinear
-            :model-value="storagePercentage"
-            height="8"
-            rounded
-            :color="storagePercentage > 90 ? 'error' : storagePercentage > 75 ? 'warning' : 'primary'"
-          />
-          <div class="d-flex justify-space-between mt-2">
-            <span class="text-caption text-medium-emphasis">
+          <div class="d-flex align-center justify-start ga-2">
+            <VChip
+              size="small"
+              color="grey"
+              variant="tonal"
+            >
+              <VIcon icon="mdi-database" size="16" class="mr-1" />
               {{ t('pages.administration.fluxShare.available') }}: {{ storage.available.toFixed(2) }} GB
-            </span>
+            </VChip>
+            <VChip
+              size="small"
+              color="grey"
+              variant="tonal"
+            >
+              <VIcon icon="mdi-harddisk" size="16" class="mr-1" />
+              {{ storage.used.toFixed(2) }} GB / {{ storage.total.toFixed(2) }} GB
+            </VChip>
           </div>
         </VCardText>
       </VCard>
@@ -67,6 +77,7 @@
       <!-- File Manager -->
       <FluxShareFileManager
         ref="fileManagerRef"
+        :available-storage="storage.available"
         @upload-requested="showUploadDialog = true"
       />
 
@@ -77,14 +88,15 @@
         persistent
       >
         <VCard>
-          <VCardTitle class="d-flex align-center pa-4">
-            <VIcon icon="mdi-cloud-upload" class="mr-2" />
-            {{ t('pages.administration.fluxShare.uploadFiles') }}
+          <VCardTitle class="d-flex align-center px-4 py-2 bg-primary">
+            <VIcon icon="mdi-cloud-upload" class="mr-2" color="white" />
+            <span class="text-white">{{ t('pages.administration.fluxShare.uploadFiles') }}</span>
             <VSpacer />
             <VBtn
               icon
               variant="text"
               size="small"
+              color="white"
               @click="closeUploadDialog"
             >
               <VIcon icon="mdi-close" />
@@ -95,6 +107,7 @@
             <FluxShareFileUpload
               :upload-url="getUploadUrl()"
               :headers="{ zelidauth: getZelidAuth() }"
+              :available-storage="storage.available"
               @complete="onUploadComplete"
               @error="onUploadError"
             />
@@ -200,6 +213,26 @@ onUnmounted(() => {
   resetState()
 })
 </script>
+
+<style scoped>
+.progress-label {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 12px;
+  font-weight: 700;
+  color: rgb(var(--v-theme-on-surface));
+  text-shadow:
+    -1px -1px 0 rgba(var(--v-theme-surface), 0.8),
+    1px -1px 0 rgba(var(--v-theme-surface), 0.8),
+    -1px 1px 0 rgba(var(--v-theme-surface), 0.8),
+    1px 1px 0 rgba(var(--v-theme-surface), 0.8),
+    0 0 3px rgba(var(--v-theme-surface), 0.9);
+  pointer-events: none;
+  z-index: 1;
+}
+</style>
 
 <route lang="yaml">
 meta:

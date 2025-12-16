@@ -3,22 +3,31 @@
     <!-- Drop Zone -->
     <div
       class="drop-zone"
-      :class="{ 'drop-zone--active': isDragging }"
+      :class="{ 'drop-zone--active': isDragging && !isStorageFull, 'drop-zone--disabled': isStorageFull }"
       @drop.prevent="handleDrop"
-      @dragover.prevent="isDragging = true"
+      @dragover.prevent="!isStorageFull && (isDragging = true)"
       @dragleave="isDragging = false"
       @click="openFileSelector"
     >
-      <VIcon icon="mdi-cloud-upload" size="64" color="primary" />
-      <p class="text-body-1 mt-2">
-        {{ t('pages.administration.fluxShare.dropFilesHere') }}
+      <VIcon
+        :icon="isStorageFull ? 'mdi-close-circle' : 'mdi-cloud-upload'"
+        size="64"
+        :color="isStorageFull ? 'error' : 'primary'"
+      />
+      <p v-if="isStorageFull" class="text-body-1 mt-2 text-error">
+        {{ t('pages.administration.fluxShare.errors.storageFull') }}
       </p>
-      <p class="text-body-2 text-medium-emphasis">
-        {{ t('pages.administration.fluxShare.clickToUpload') }}
-      </p>
-      <p class="text-caption text-medium-emphasis mt-2">
-        {{ t('pages.administration.fluxShare.maxFileSize') }}
-      </p>
+      <template v-else>
+        <p class="text-body-1 mt-2">
+          {{ t('pages.administration.fluxShare.dropFilesHere') }}
+        </p>
+        <p class="text-body-2 text-medium-emphasis">
+          {{ t('pages.administration.fluxShare.clickToUpload') }}
+        </p>
+        <p class="text-caption text-medium-emphasis mt-2">
+          {{ t('pages.administration.fluxShare.maxFileSize') }}
+        </p>
+      </template>
     </div>
 
     <!-- Hidden File Input -->
@@ -131,6 +140,10 @@ const props = defineProps({
     type: Object,
     default: () => ({}),
   },
+  availableStorage: {
+    type: Number,
+    default: 0,
+  },
 })
 
 const emit = defineEmits(['complete', 'error'])
@@ -153,8 +166,16 @@ const pendingCount = computed(() => {
   return uploadQueue.value.filter(f => f.status === 'pending').length
 })
 
+const isStorageFull = computed(() => {
+  return props.availableStorage <= 0
+})
+
 // Open file selector
 const openFileSelector = () => {
+  if (isStorageFull.value) {
+    showSnackbar(t('pages.administration.fluxShare.errors.storageFull'), 'error')
+    return
+  }
   fileInputRef.value?.click()
 }
 
@@ -172,6 +193,12 @@ const handleFileSelect = event => {
 // Handle drop
 const handleDrop = event => {
   isDragging.value = false
+
+  if (isStorageFull.value) {
+    showSnackbar(t('pages.administration.fluxShare.errors.storageFull'), 'error')
+    return
+  }
+
   const files = event.dataTransfer?.files
   if (files) {
     addFilesToQueue([...files])
@@ -192,6 +219,22 @@ const addFilesToQueue = files => {
     const maxSize = 5 * 1024 * 1024 * 1024
     if (file.size > maxSize) {
       showSnackbar(t('pages.administration.fluxShare.errors.fileTooLarge', { name: file.name }), 'error')
+      continue
+    }
+
+    // Check available storage (convert available GB to bytes)
+    const availableBytes = props.availableStorage * 1024 * 1024 * 1024
+    if (file.size > availableBytes) {
+      const availableMB = (availableBytes / 1024 / 1024).toFixed(2)
+      const fileMB = (file.size / 1024 / 1024).toFixed(2)
+      showSnackbar(
+        t('pages.administration.fluxShare.errors.insufficientStorage', {
+          name: file.name,
+          fileSize: fileMB,
+          available: availableMB,
+        }),
+        'error'
+      )
       continue
     }
 
@@ -340,6 +383,18 @@ const formatFileSize = bytes => {
 .drop-zone--active {
   border-color: rgb(var(--v-theme-primary));
   background-color: rgba(var(--v-theme-primary), 0.05);
+}
+
+.drop-zone--disabled {
+  border-color: rgba(var(--v-theme-error), 0.5);
+  background-color: rgba(var(--v-theme-error), 0.05);
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.drop-zone--disabled:hover {
+  border-color: rgba(var(--v-theme-error), 0.5);
+  background-color: rgba(var(--v-theme-error), 0.05);
 }
 
 .file-queue {

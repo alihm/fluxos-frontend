@@ -2162,7 +2162,9 @@
           "downloadFailed": "Nie udało się pobrać",
           "duplicateFile": "Plik \"{name}\" jest już w kolejce przesyłania",
           "fileTooLarge": "Plik \"{name}\" przekracza limit 5GB",
-          "uploadFailed": "Przesyłanie nie powiodło się"
+          "uploadFailed": "Przesyłanie nie powiodło się",
+          "storageFull": "Pamięć jest pełna - przesyłanie niedozwolone",
+          "insufficientStorage": "Plik \"{name}\" ({fileSize} MB) przekracza dostępną pamięć ({available} MB)"
         }
       },
       "manageUsers": {

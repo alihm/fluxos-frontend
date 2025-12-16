@@ -2185,7 +2185,9 @@
           "downloadFailed": "Failed to download",
           "duplicateFile": "File \"{name}\" is already in the upload queue",
           "fileTooLarge": "File \"{name}\" exceeds the 5GB limit",
-          "uploadFailed": "Upload failed"
+          "uploadFailed": "Upload failed",
+          "storageFull": "Storage is full - no uploads allowed",
+          "insufficientStorage": "File \"{name}\" ({fileSize} MB) exceeds available storage ({available} MB)"
         }
       },
       "manageUsers": {

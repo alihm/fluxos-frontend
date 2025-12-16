@@ -11,11 +11,11 @@ const sharedState = {
   loading: ref(false),
   loadingStorage: ref(false),
   currentFolder: ref(''),
-  breadcrumbs: ref([{ title: 'Root', path: '' }]),
+  breadcrumbs: ref([{ title: 'home', path: '', isHome: true }]),
   storage: ref({
     used: 0,
-    total: 2,
-    available: 2,
+    total: 20,
+    available: 20,
   }),
   storageChecked: ref(false),
 
@@ -169,10 +169,20 @@ export function useFluxShare() {
       const response = await AppsService.storageStats(zelidauth)
 
       if (response?.data?.status === 'success') {
+        const MAX_STORAGE = 20 // 20 GB limit
+        const apiTotal = response.data.data.total || 20
+        const apiUsed = response.data.data.used || 0
+        const apiAvailable = response.data.data.available || 20
+
+        // Cap storage at 20 GB
+        const total = Math.min(apiTotal, MAX_STORAGE)
+        const used = Math.min(apiUsed, MAX_STORAGE)
+        const available = Math.min(apiAvailable, MAX_STORAGE - used)
+
         storage.value = {
-          total: response.data.data.total || 2,
-          used: response.data.data.used || 0,
-          available: response.data.data.available || 2,
+          total,
+          used,
+          available,
         }
         storageChecked.value = true
       } else {
@@ -234,7 +244,7 @@ export function useFluxShare() {
 
   // Update breadcrumbs based on current path
   const updateBreadcrumbs = path => {
-    const crumbs = [{ title: 'Root', path: '' }]
+    const crumbs = [{ title: 'home', path: '', isHome: true }]
 
     if (path) {
       const parts = path.split('/')
@@ -242,7 +252,7 @@ export function useFluxShare() {
 
       for (const part of parts) {
         currentPath = currentPath ? `${currentPath}/${part}` : part
-        crumbs.push({ title: part, path: currentPath })
+        crumbs.push({ title: part, path: currentPath, isHome: false })
       }
     }
 
@@ -571,8 +581,8 @@ export function useFluxShare() {
 
     files.value = []
     currentFolder.value = ''
-    breadcrumbs.value = [{ title: 'Root', path: '' }]
-    storage.value = { used: 0, total: 2, available: 2 }
+    breadcrumbs.value = [{ title: 'home', path: '', isHome: true }]
+    storage.value = { used: 0, total: 20, available: 20 }
     storageChecked.value = false
     loading.value = false
     loadingStorage.value = false
