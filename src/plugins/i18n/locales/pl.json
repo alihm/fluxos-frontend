@@ -302,7 +302,8 @@
       "manageBenchmark": "Benchmark",
       "manageUsers": "Użytkownicy",
       "loggedSessions": "Sesje Użytkowników",
-      "myFluxShare": "Mój FluxShare"
+      "myFluxShare": "Mój FluxShare",
+      "fluxShare": "FluxShare"
     },
     "fluxXdao": {
       "title": "Flux XDAO"
@@ -2094,6 +2095,73 @@
         "recentEvents": "Ostatnie zdarzenia",
         "noEventsAvailable": "Brak dostępnych zdarzeń Docker",
         "errorLoadingEvents": "Nie udało się załadować zdarzeń Docker"
+      },
+      "fluxShare": {
+        "loadingTitle": "Ładowanie FluxShare...",
+        "title": "FluxShare",
+        "subtitle": "Zarządzaj plikami i udostępniaj je innym",
+        "storageUsage": "Wykorzystanie pamięci",
+        "used": "użyte",
+        "available": "Dostępne",
+        "fileManager": "Menedżer plików",
+        "upload": "Prześlij",
+        "newFolder": "Nowy folder",
+        "emptyFolder": "Ten folder jest pusty",
+        "folder": "Folder",
+        "file": "Plik",
+        "columns": {
+          "name": "Nazwa",
+          "modified": "Zmodyfikowano",
+          "type": "Typ",
+          "size": "Rozmiar",
+          "actions": "Akcje"
+        },
+        "download": "Pobierz",
+        "downloadZip": "Pobierz jako ZIP",
+        "rename": "Zmień nazwę",
+        "share": "Udostępnij",
+        "unshare": "Cofnij udostępnienie",
+        "copyLink": "Kopiuj link",
+        "delete": "Usuń",
+        "createFolder": "Utwórz folder",
+        "folderName": "Nazwa folderu",
+        "renameItem": "Zmień nazwę",
+        "newName": "Nowa nazwa",
+        "confirmDelete": "Potwierdź usunięcie",
+        "deleteConfirmMessage": "Czy na pewno chcesz usunąć \"{name}\"?",
+        "confirmDownload": "Potwierdź pobieranie",
+        "downloadFileConfirm": "Pobrać plik \"{name}\"?",
+        "downloadFolderConfirm": "Pobrać folder \"{name}\" jako ZIP?",
+        "uploadFiles": "Prześlij pliki",
+        "dropFilesHere": "Upuść pliki tutaj",
+        "clickToUpload": "lub kliknij, aby przesłać",
+        "maxFileSize": "Maksymalny rozmiar pliku: 5GB",
+        "messages": {
+          "folderCreated": "Folder utworzony pomyślnie",
+          "fileDeleted": "\"{name}\" usunięto pomyślnie",
+          "folderDeleted": "\"{name}\" usunięto pomyślnie",
+          "renamed": "Zmieniono nazwę z \"{old}\" na \"{new}\"",
+          "fileShared": "\"{name}\" jest teraz udostępniony",
+          "fileUnshared": "\"{name}\" nie jest już udostępniony",
+          "fileUploaded": "\"{name}\" przesłano pomyślnie"
+        },
+        "errors": {
+          "storageStatsFailed": "Nie udało się załadować statystyk pamięci",
+          "loadFolderFailed": "Nie udało się załadować folderu",
+          "folderExists": "Folder \"{name}\" już istnieje",
+          "createFolderFailed": "Nie udało się utworzyć folderu",
+          "deleteFileFailed": "Nie udało się usunąć pliku",
+          "folderNotEmpty": "Folder \"{name}\" nie jest pusty",
+          "deleteFolderFailed": "Nie udało się usunąć folderu",
+          "invalidName": "Nazwa nie może zawierać \"/\"",
+          "renameFailed": "Nie udało się zmienić nazwy",
+          "shareFailed": "Nie udało się udostępnić pliku",
+          "unshareFailed": "Nie udało się cofnąć udostępnienia",
+          "downloadFailed": "Nie udało się pobrać",
+          "duplicateFile": "Plik \"{name}\" jest już w kolejce przesyłania",
+          "fileTooLarge": "Plik \"{name}\" przekracza limit 5GB",
+          "uploadFailed": "Przesyłanie nie powiodło się"
+        }
       },
       "manageUsers": {
         "title": "Zarządzaj Użytkownikami",
