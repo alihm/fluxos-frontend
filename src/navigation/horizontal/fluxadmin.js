@@ -42,6 +42,12 @@ export default [
         privilege: ['admin', 'fluxteam'],
       },
       {
+        title: 'menu.administration.benchmarks',
+        to: 'administration-benchmarks',
+        icon: { icon: 'mdi-speedometer', size: 20 },
+        privilege: ['admin', 'fluxteam'],
+      },
+      {
         title: 'menu.application.globalApps',
         icon: { icon: 'tabler-world-search', size: 20 },
         to: 'apps-global',

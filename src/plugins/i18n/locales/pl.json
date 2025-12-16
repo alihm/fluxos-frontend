@@ -304,7 +304,8 @@
       "loggedSessions": "Sesje Użytkowników",
       "myFluxShare": "Mój FluxShare",
       "fluxShare": "FluxShare",
-      "daemon": "Daemon"
+      "daemon": "Daemon",
+      "benchmarks": "Benchmarki"
     },
     "fluxXdao": {
       "title": "Flux XDAO"
@@ -2112,6 +2113,38 @@
         "rawData": "Surowe dane JSON",
         "copy": "Kopiuj",
         "copiedToClipboard": "Informacje o blockchainie skopiowane do schowka",
+        "copyFailed": "Nie udało się skopiować do schowka"
+      },
+      "benchmarks": {
+        "loadingTitle": "Ładowanie informacji o benchmarkach...",
+        "errorTitle": "Informacje o benchmarkach niedostępne",
+        "errorSubtitle": "Nie można załadować informacji o benchmarkach w tej chwili.",
+        "errorDescription": "Usługa benchmark jest obecnie niedostępna lub występują problemy z połączeniem. Sprawdź swoje połączenie i spróbuj ponownie za chwilę.",
+        "title": "Benchmarki węzła",
+        "subtitle": "Zobacz metryki wydajności sprzętu i sieci dla tego węzła",
+        "statusOverview": "Przegląd statusu",
+        "status": "Status",
+        "arcaneOS": "ArcaneOS",
+        "thunder": "Thunder",
+        "architecture": "Architektura",
+        "hardwareInfo": "Informacje o sprzęcie",
+        "cpuThreads": "Wątki CPU",
+        "ram": "RAM",
+        "cpuSpeed": "Prędkość CPU",
+        "networkInfo": "Informacje o sieci",
+        "ipAddress": "Adres IP",
+        "downloadSpeed": "Prędkość pobierania",
+        "uploadSpeed": "Prędkość wysyłania",
+        "ping": "Ping",
+        "diskInfo": "Informacje o dyskach",
+        "size": "Rozmiar",
+        "writeSpeed": "Prędkość zapisu",
+        "additionalDetails": "Dodatkowe szczegóły",
+        "time": "Czas benchmarku",
+        "error": "Błąd",
+        "rawData": "Surowe dane JSON",
+        "copy": "Kopiuj",
+        "copiedToClipboard": "Informacje o benchmarkach skopiowane do schowka",
         "copyFailed": "Nie udało się skopiować do schowka"
       },
       "dockerEvents": {

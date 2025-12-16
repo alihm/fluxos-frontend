@@ -304,7 +304,8 @@
       "loggedSessions": "Logged Sessions",
       "myFluxShare": "My FluxShare",
       "fluxShare": "FluxShare",
-      "daemon": "Daemon"
+      "daemon": "Daemon",
+      "benchmarks": "Benchmarks"
     },
     "fluxXdao": {
       "title": "Flux XDAO"
@@ -2135,6 +2136,38 @@
         "rawData": "Raw JSON Data",
         "copy": "Copy",
         "copiedToClipboard": "Blockchain info copied to clipboard",
+        "copyFailed": "Failed to copy to clipboard"
+      },
+      "benchmarks": {
+        "loadingTitle": "Loading Benchmark Information...",
+        "errorTitle": "Benchmark Information Unavailable",
+        "errorSubtitle": "Unable to load benchmark information at this time.",
+        "errorDescription": "The benchmark service is currently unavailable or experiencing connectivity issues. Please check your connection and try again in a few moments.",
+        "title": "Node Benchmarks",
+        "subtitle": "View hardware and network performance metrics for this node",
+        "statusOverview": "Status Overview",
+        "status": "Status",
+        "arcaneOS": "ArcaneOS",
+        "thunder": "Thunder",
+        "architecture": "Architecture",
+        "hardwareInfo": "Hardware Information",
+        "cpuThreads": "CPU Threads",
+        "ram": "RAM",
+        "cpuSpeed": "CPU Speed",
+        "networkInfo": "Network Information",
+        "ipAddress": "IP Address",
+        "downloadSpeed": "Download Speed",
+        "uploadSpeed": "Upload Speed",
+        "ping": "Ping",
+        "diskInfo": "Disk Information",
+        "size": "Size",
+        "writeSpeed": "Write Speed",
+        "additionalDetails": "Additional Details",
+        "time": "Benchmark Time",
+        "error": "Error",
+        "rawData": "Raw JSON Data",
+        "copy": "Copy",
+        "copiedToClipboard": "Benchmark info copied to clipboard",
         "copyFailed": "Failed to copy to clipboard"
       },
       "dockerEvents": {
