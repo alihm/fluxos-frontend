@@ -127,6 +127,8 @@
       "loginRequired": "Login Required",
       "loggedOutSuccessfully": "Logged out successfully"
     },
+    "itemsPerPage": "Items per page",
+    "of": "of",
     "selectServerConfiguration": "Select Server Configuration",
     "groups": {
       "smallServers": "Small Servers",

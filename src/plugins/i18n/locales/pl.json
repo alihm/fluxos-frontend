@@ -127,6 +127,8 @@
       "loginRequired": "Wymagane Logowanie",
       "loggedOutSuccessfully": "Wylogowano pomyślnie"
     },
+    "itemsPerPage": "Pozycji na stronie",
+    "of": "z",
     "selectServerConfiguration": "Wybierz Konfigurację Serwera",
     "groups": {
       "smallServers": "Małe Serwery",

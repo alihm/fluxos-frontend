@@ -26,6 +26,9 @@ const sharedState = {
     type: 'error',
     timestamp: null,
   }),
+
+  // AbortController for cancelling pending requests
+  folderAbortController: null,
 }
 
 export function useFluxShare() {
@@ -63,6 +66,17 @@ export function useFluxShare() {
     return fluxStore.config?.apiPort || 16127
   }
 
+  // Parse backend URL and return protocol, hostname, and port - helper to avoid duplication
+  const parseBackendUrl = () => {
+    const baseUrl = getBackendURL()
+    const port = getApiPort()
+    const urlParts = baseUrl.split(':')
+    const protocol = urlParts[0]
+    const hostname = urlParts[1]?.replace('//', '') || window.location.hostname
+
+    return { protocol, hostname, port }
+  }
+
   // Authentication check
   const isLoggedIn = computed(() => {
     const zelidauth = getZelidAuth()
@@ -84,13 +98,7 @@ export function useFluxShare() {
 
   // Get upload URL
   const getUploadUrl = () => {
-    const baseUrl = getBackendURL()
-    const port = getApiPort()
-
-    // Extract protocol and hostname
-    const urlParts = baseUrl.split(':')
-    const protocol = urlParts[0]
-    const hostname = urlParts[1]?.replace('//', '') || window.location.hostname
+    const { protocol, hostname, port } = parseBackendUrl()
 
     if (currentFolder.value) {
       const folder = encodeURIComponent(currentFolder.value)
@@ -103,11 +111,7 @@ export function useFluxShare() {
 
   // Get download URL for a file
   const getDownloadUrl = (fileName, isFolder = false) => {
-    const baseUrl = getBackendURL()
-    const port = getApiPort()
-    const urlParts = baseUrl.split(':')
-    const protocol = urlParts[0]
-    const hostname = urlParts[1]?.replace('//', '') || window.location.hostname
+    const { protocol, hostname, port } = parseBackendUrl()
 
     const fullPath = currentFolder.value ? `${currentFolder.value}/${fileName}` : fileName
     const encodedPath = encodeURIComponent(fullPath)
@@ -121,11 +125,7 @@ export function useFluxShare() {
 
   // Create share link
   const createShareLink = (fileName, shareToken) => {
-    const baseUrl = getBackendURL()
-    const port = getApiPort()
-    const urlParts = baseUrl.split(':')
-    const protocol = urlParts[0]
-    const hostname = urlParts[1]?.replace('//', '') || window.location.hostname
+    const { protocol, hostname, port } = parseBackendUrl()
 
     return `${protocol}://${hostname}:${port}/apps/fluxshare/getfile/${fileName}?token=${shareToken}`
   }
@@ -191,6 +191,14 @@ export function useFluxShare() {
   const loadFolder = async (path = '', soft = false) => {
     if (!isLoggedIn.value || !isAdmin.value) return
 
+    // Cancel any pending request before starting a new one
+    if (sharedState.folderAbortController) {
+      sharedState.folderAbortController.abort()
+    }
+
+    // Create new AbortController for this request
+    sharedState.folderAbortController = new AbortController()
+
     try {
       if (!soft) {
         files.value = []
@@ -200,7 +208,9 @@ export function useFluxShare() {
 
       const zelidauth = getZelidAuth()
       const encodedPath = encodeURIComponent(path)
-      const response = await AppsService.getFolder(zelidauth, encodedPath)
+      const response = await AppsService.getFolder(zelidauth, encodedPath, {
+        signal: sharedState.folderAbortController.signal,
+      })
 
       if (response?.data?.status === 'success') {
         files.value = response.data.data || []
@@ -211,6 +221,10 @@ export function useFluxShare() {
         setError(errorMsg, 'error')
       }
     } catch (error) {
+      // Ignore abort errors - they are expected when navigating quickly
+      if (error.name === 'AbortError' || error.name === 'CanceledError') {
+        return
+      }
       console.error('Failed to load folder:', error)
       setError(error.message || t('pages.administration.fluxShare.errors.loadFolderFailed'), 'error')
     } finally {
@@ -542,13 +556,26 @@ export function useFluxShare() {
     ])
   }
 
+  // Cancel any pending requests
+  const cancelPendingRequests = () => {
+    if (sharedState.folderAbortController) {
+      sharedState.folderAbortController.abort()
+      sharedState.folderAbortController = null
+    }
+  }
+
   // Reset state
   const resetState = () => {
+    // Cancel any pending requests first
+    cancelPendingRequests()
+
     files.value = []
     currentFolder.value = ''
     breadcrumbs.value = [{ title: 'Root', path: '' }]
     storage.value = { used: 0, total: 2, available: 2 }
     storageChecked.value = false
+    loading.value = false
+    loadingStorage.value = false
     clearError()
   }
 
@@ -589,6 +616,7 @@ export function useFluxShare() {
     formatFileSize,
     refresh,
     resetState,
+    cancelPendingRequests,
     setError,
     clearError,
   }

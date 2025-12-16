@@ -196,7 +196,8 @@ onMounted(() => {
 })
 
 onUnmounted(() => {
-  // Clean up if needed
+  // Clean up state and cancel pending requests when leaving the page
+  resetState()
 })
 </script>
 

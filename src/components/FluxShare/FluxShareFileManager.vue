@@ -103,7 +103,7 @@
           </tr>
         </thead>
         <tbody>
-          <tr v-for="item in filteredFiles" :key="item.name">
+          <tr v-for="item in paginatedFiles" :key="item.name">
             <!-- Name -->
             <td>
               <div class="d-flex align-center">
@@ -210,6 +210,35 @@
           </tr>
         </tbody>
       </VTable>
+
+      <!-- Pagination Controls -->
+      <div v-if="filteredFiles.length > itemsPerPage" class="d-flex align-center justify-space-between pa-3 border-t">
+        <div class="d-flex align-center">
+          <span class="text-body-2 text-medium-emphasis mr-2">{{ t('common.itemsPerPage') }}:</span>
+          <VSelect
+            v-model="itemsPerPage"
+            :items="itemsPerPageOptions"
+            variant="outlined"
+            density="compact"
+            hide-details
+            style="max-width: 80px;"
+            @update:model-value="currentPage = 1"
+          />
+        </div>
+        <div class="d-flex align-center">
+          <span class="text-body-2 text-medium-emphasis mr-3">
+            {{ (currentPage - 1) * itemsPerPage + 1 }}-{{ Math.min(currentPage * itemsPerPage, filteredFiles.length) }}
+            {{ t('common.of') }} {{ filteredFiles.length }}
+          </span>
+          <VPagination
+            v-model="currentPage"
+            :length="totalPages"
+            :total-visible="5"
+            density="compact"
+            size="small"
+          />
+        </div>
+      </div>
     </VCardText>
 
     <!-- Create Folder Dialog -->
@@ -350,11 +379,59 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useFluxShare } from '@/composables/useFluxShare'
 
 const emit = defineEmits(['uploadRequested'])
+
+// File icon map - defined at module level to avoid recreation on each call
+const FILE_ICON_MAP = {
+  pdf: 'mdi-file-pdf-box',
+  doc: 'mdi-file-word',
+  docx: 'mdi-file-word',
+  xls: 'mdi-file-excel',
+  xlsx: 'mdi-file-excel',
+  ppt: 'mdi-file-powerpoint',
+  pptx: 'mdi-file-powerpoint',
+  txt: 'mdi-file-document',
+  md: 'mdi-language-markdown',
+  json: 'mdi-code-json',
+  xml: 'mdi-file-xml-box',
+  html: 'mdi-language-html5',
+  css: 'mdi-language-css3',
+  js: 'mdi-language-javascript',
+  ts: 'mdi-language-typescript',
+  py: 'mdi-language-python',
+  java: 'mdi-language-java',
+  c: 'mdi-language-c',
+  cpp: 'mdi-language-cpp',
+  go: 'mdi-language-go',
+  rs: 'mdi-language-rust',
+  php: 'mdi-language-php',
+  rb: 'mdi-language-ruby',
+  zip: 'mdi-folder-zip',
+  rar: 'mdi-folder-zip',
+  '7z': 'mdi-folder-zip',
+  tar: 'mdi-folder-zip',
+  gz: 'mdi-folder-zip',
+  jpg: 'mdi-file-image',
+  jpeg: 'mdi-file-image',
+  png: 'mdi-file-image',
+  gif: 'mdi-file-image',
+  svg: 'mdi-file-image',
+  webp: 'mdi-file-image',
+  ico: 'mdi-file-image',
+  mp3: 'mdi-file-music',
+  wav: 'mdi-file-music',
+  flac: 'mdi-file-music',
+  ogg: 'mdi-file-music',
+  mp4: 'mdi-file-video',
+  mkv: 'mdi-file-video',
+  avi: 'mdi-file-video',
+  mov: 'mdi-file-video',
+  webm: 'mdi-file-video',
+}
 
 const { t } = useI18n()
 
@@ -391,9 +468,32 @@ const showDownloadDialog = ref(false)
 const itemToDownload = ref(null)
 const downloading = ref(false)
 
+// Pagination state
+const currentPage = ref(1)
+const itemsPerPage = ref(50)
+const itemsPerPageOptions = [25, 50, 100]
+
 // Filter out .gitkeep files
 const filteredFiles = computed(() => {
   return files.value.filter(file => file.name !== '.gitkeep')
+})
+
+// Paginated files for rendering
+const paginatedFiles = computed(() => {
+  const start = (currentPage.value - 1) * itemsPerPage.value
+  const end = start + itemsPerPage.value
+
+  return filteredFiles.value.slice(start, end)
+})
+
+// Total pages
+const totalPages = computed(() => {
+  return Math.ceil(filteredFiles.value.length / itemsPerPage.value)
+})
+
+// Reset page when folder changes
+watch(currentFolder, () => {
+  currentPage.value = 1
 })
 
 // Convert breadcrumbs for VBreadcrumbs component
@@ -413,54 +513,8 @@ const navigateToBreadcrumb = path => {
 // Get file icon based on extension
 const getFileIcon = fileName => {
   const ext = fileName.split('.').pop()?.toLowerCase()
-  const iconMap = {
-    pdf: 'mdi-file-pdf-box',
-    doc: 'mdi-file-word',
-    docx: 'mdi-file-word',
-    xls: 'mdi-file-excel',
-    xlsx: 'mdi-file-excel',
-    ppt: 'mdi-file-powerpoint',
-    pptx: 'mdi-file-powerpoint',
-    txt: 'mdi-file-document',
-    md: 'mdi-language-markdown',
-    json: 'mdi-code-json',
-    xml: 'mdi-file-xml-box',
-    html: 'mdi-language-html5',
-    css: 'mdi-language-css3',
-    js: 'mdi-language-javascript',
-    ts: 'mdi-language-typescript',
-    py: 'mdi-language-python',
-    java: 'mdi-language-java',
-    c: 'mdi-language-c',
-    cpp: 'mdi-language-cpp',
-    go: 'mdi-language-go',
-    rs: 'mdi-language-rust',
-    php: 'mdi-language-php',
-    rb: 'mdi-language-ruby',
-    zip: 'mdi-folder-zip',
-    rar: 'mdi-folder-zip',
-    '7z': 'mdi-folder-zip',
-    tar: 'mdi-folder-zip',
-    gz: 'mdi-folder-zip',
-    jpg: 'mdi-file-image',
-    jpeg: 'mdi-file-image',
-    png: 'mdi-file-image',
-    gif: 'mdi-file-image',
-    svg: 'mdi-file-image',
-    webp: 'mdi-file-image',
-    ico: 'mdi-file-image',
-    mp3: 'mdi-file-music',
-    wav: 'mdi-file-music',
-    flac: 'mdi-file-music',
-    ogg: 'mdi-file-music',
-    mp4: 'mdi-file-video',
-    mkv: 'mdi-file-video',
-    avi: 'mdi-file-video',
-    mov: 'mdi-file-video',
-    webm: 'mdi-file-video',
-  }
 
-  return iconMap[ext] || 'mdi-file'
+  return FILE_ICON_MAP[ext] || 'mdi-file'
 }
 
 // Format date
