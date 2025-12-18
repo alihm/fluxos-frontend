@@ -6829,33 +6829,35 @@ async function verifyAppSpec() {
       if (!appSpecTemp.geolocation) appSpecTemp.geolocation = []
     }
 
-    // Validate contacts field - at least one contact is required for both registration and updates
-    const contacts = appSpecTemp.contacts || []
-    const validContacts = contacts.filter(c => c && c.trim())
-    if (validContacts.length === 0) {
-      throw new Error(t('core.subscriptionManager.contactRequired'))
-    }
+    // Validate contacts field - required for V5+ specs (registration and updates), but not for cancel or old specs
+    if (appSpecTemp.version >= 5 && managementAction.value !== 'cancel') {
+      const contacts = appSpecTemp.contacts || []
+      const validContacts = contacts.filter(c => c && c.trim())
+      if (validContacts.length === 0) {
+        throw new Error(t('core.subscriptionManager.contactRequired'))
+      }
 
-    // Auto-upload contacts to Flux Storage if they are email addresses (not already storage references)
-    // This matches the behavior in InstallDialog for marketplace/games
-    const hasStorageReference = validContacts.some(c => c.startsWith('F_S_CONTACTS='))
-    if (!hasStorageReference && validContacts.length > 0) {
-      try {
-        console.log('📧 Auto-uploading contacts to Flux Storage:', validContacts)
-        const contactsId = StorageService.generateContactsId()
-        const contactsData = {
-          contactsid: contactsId,
-          contacts: validContacts,
+      // Auto-upload contacts to Flux Storage if they are email addresses (not already storage references)
+      // This matches the behavior in InstallDialog for marketplace/games
+      const hasStorageReference = validContacts.some(c => c.startsWith('F_S_CONTACTS='))
+      if (!hasStorageReference && validContacts.length > 0) {
+        try {
+          console.log('📧 Auto-uploading contacts to Flux Storage:', validContacts)
+          const contactsId = StorageService.generateContactsId()
+          const contactsData = {
+            contactsid: contactsId,
+            contacts: validContacts,
+          }
+          await StorageService.uploadContacts(contactsData)
+          const storageReference = StorageService.getContactsStorageReference(contactsId)
+
+          // Replace contacts with storage reference
+          appSpecTemp.contacts = [storageReference]
+          console.log('✅ Contacts uploaded to storage:', storageReference)
+        } catch (error) {
+          console.error('❌ Failed to upload contacts to Flux Storage:', error)
+          throw new Error(`Uploading contacts to Flux Storage failed: ${error.message}`)
         }
-        await StorageService.uploadContacts(contactsData)
-        const storageReference = StorageService.getContactsStorageReference(contactsId)
-
-        // Replace contacts with storage reference
-        appSpecTemp.contacts = [storageReference]
-        console.log('✅ Contacts uploaded to storage:', storageReference)
-      } catch (error) {
-        console.error('❌ Failed to upload contacts to Flux Storage:', error)
-        throw new Error(`Uploading contacts to Flux Storage failed: ${error.message}`)
       }
     }
 
