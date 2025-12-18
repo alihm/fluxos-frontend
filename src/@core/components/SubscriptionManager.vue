@@ -2324,7 +2324,7 @@
           </VAlert>
 
           <!-- Payment Section -->
-          <div v-if="(testFinished && !testError) || (!props.newApp && registrationHash && !testableFieldsHaveChanged) || (!props.newApp && registrationHash && appSpecPrice?.flux === 0) || paymentProcessing || paymentConfirmed">
+          <div v-if="(testFinished && !testError) || (!props.newApp && registrationHash && !testableFieldsHaveChanged) || (!props.newApp && registrationHash && appSpecPrice?.flux === 0) || (!props.newApp && registrationHash && managementAction === 'cancel') || paymentProcessing || paymentConfirmed">
             <!-- Warning Alert if test had warnings -->
             <VAlert 
               v-if="hasTestWarnings" 
@@ -3755,6 +3755,7 @@ const NON_TESTABLE_FIELDS = [
   'staticip',    // Deployment: static IP flag
   'enterprise',  // Deployment: enterprise tier flag
   'nodes',       // Deployment: preferred node list
+  'contacts',    // Contact information: doesn't affect app deployment
 ]
 
 const applicationPrice = ref(null)
@@ -4261,8 +4262,8 @@ const shouldShowTestSection = computed(() => {
                  (props.newApp || appSpecPrice.value?.flux !== 0) &&
                  !paymentProcessing.value &&
                  !paymentConfirmed.value &&
-                 (props.newApp || managementAction.value !== 'cancel') &&
-                 (props.newApp || managementAction.value !== 'renewal')
+                 (props.newApp || managementAction.value !== 'cancel')
+                 // Renewal mode removed: testableFieldsHaveChanged now controls test visibility for renewals
 
   console.log('🧪 Test Section Visibility Check:', {
     shouldShow: result,
