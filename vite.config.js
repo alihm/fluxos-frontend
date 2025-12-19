@@ -20,6 +20,7 @@ export default defineConfig(({ mode }) => {
   const isDev = mode === 'development';
 
   return {
+    base: process.env.BASE_URL || '/',
     plugins: [
       VueRouter({
         getRouteName: routeNode => {
