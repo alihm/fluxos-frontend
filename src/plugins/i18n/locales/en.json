@@ -1,5 +1,6 @@
 {
   "common": {
+    "off": "off",
     "buttons": {
       "cancel": "Cancel",
       "close": "Close",
@@ -78,11 +79,13 @@
       "billing": "Billing",
       "monthly": "Monthly",
       "scrollLeft": "Scroll left",
-      "scrollRight": "Scroll right"
+      "scrollRight": "Scroll right",
+      "optional": "Optional"
     },
     "theme": {
       "light": "Light",
-      "dark": "Dark"
+      "dark": "Dark",
+      "switchTheme": "Switch theme"
     },
     "status": {
       "loading": "Loading...",
@@ -127,6 +130,8 @@
       "loginRequired": "Login Required",
       "loggedOutSuccessfully": "Logged out successfully"
     },
+    "itemsPerPage": "Items per page",
+    "of": "of",
     "selectServerConfiguration": "Select Server Configuration",
     "groups": {
       "smallServers": "Small Servers",
@@ -209,8 +214,10 @@
       "title": "We value your privacy",
       "description": "We use cookies to enhance your browsing experience and analyze our traffic. By clicking Accept All, you consent to our use of cookies.",
       "learnMore": "Learn more",
+      "accept": "Accept",
       "acceptAll": "Accept All",
       "onlyNecessary": "Only Necessary",
+      "close": "Close",
       "customize": "Customize",
       "manageCookies": "Manage Cookies",
       "settingsTitle": "Cookie Preferences",
@@ -300,7 +307,8 @@
       "manageBenchmark": "Manage Benchmark",
       "manageUsers": "Manage Users",
       "loggedSessions": "Logged Sessions",
-      "myFluxShare": "My FluxShare"
+      "myFluxShare": "My FluxShare",
+      "fluxShare": "FluxShare"
     },
     "fluxXdao": {
       "title": "Flux XDAO"
@@ -312,11 +320,11 @@
       "title": "Help"
     },
     "fluxDrive": {
-      "title": "Flux Drive"
+      "title": "FluxDrive"
     }
   },
   "myApps": {
-    "fluxCloudTitle": "Flux Cloud",
+    "fluxCloudTitle": "FluxCloud",
     "fluxCloudSubtitle": "Decentralized Application Management",
     "fluxCloudDescription": "Monitor and manage all your Docker containerized applications running on the Flux decentralized cloud network. View real-time status, resource usage, and performance metrics of your distributed apps deployed across our global blockchain-powered infrastructure. Click on any application to access detailed management controls and analytics."
   },
@@ -342,6 +350,9 @@
     "appDetailsCard": {
       "general": "General",
       "copySpecification": "Copy Specification",
+      "updateSubscription": "Update",
+      "renewSubscription": "Renew",
+      "cancelSubscription": "Cancel",
       "name": "Name",
       "description": "Description",
       "owner": "Owner",
@@ -413,11 +424,19 @@
     "fileUpload": {
       "dropFilesHere": "Drop files here or",
       "clickToUpload": "click to upload",
+      "dropFilesOrFolders": "Drop files or folders here",
+      "selectFiles": "Select Files",
+      "selectFolder": "Select Folder",
       "fileSizeLimit": "(File size is limited to 5 GB)",
       "uploadFiles": "Upload Files",
       "alreadyInQueue": "'{fileName}' is already in the upload queue",
       "uploadSuccess": "'{fileName}' has been uploaded",
       "uploadError": "Error uploading '{fileName}': status {status}",
+      "uploadQueue": "Upload Queue",
+      "total": "Total",
+      "files": "file | files",
+      "clearAll": "Clear All",
+      "removeFile": "Remove File",
       "uploadFailed": "Upload failed for '{fileName}'"
     },
     "dropZone": {
@@ -495,6 +514,134 @@
       "deleted": "{name} deleted",
       "files": {
         "emptyDirectory": "Empty Directory"
+      }
+    },
+    "auditViewer": {
+      "title": "Audit Log",
+      "live": "LIVE",
+      "offline": "OFFLINE",
+      "refresh": "Refresh",
+      "search": "Search",
+      "retry": "Retry",
+      "noEvents": "No events found for the selected filters.",
+      "showing": "Showing {from}-{to} of {total}",
+      "filters": {
+        "zelid": "FluxID",
+        "category": "Category",
+        "eventType": "Event Type",
+        "eventTypePlaceholder": "e.g. app.start",
+        "nodeIp": "Node IP",
+        "status": "Status",
+        "period": "Time Period",
+        "search": "Search",
+        "searchPlaceholder": "Free text search..."
+      },
+      "columns": {
+        "time": "Time",
+        "user": "User",
+        "event": "Event",
+        "app": "App",
+        "node": "Node",
+        "status": "Status",
+        "time_ms": "Duration"
+      },
+      "detail": {
+        "request": "Request Body",
+        "response": "Response Body",
+        "error": "Error",
+        "endpoint": "Endpoint",
+        "method": "Method",
+        "session": "Session",
+        "ip": "IP",
+        "page": "Page"
+      }
+    },
+    "auditStats": {
+      "title": "Audit Statistics",
+      "refresh": "Refresh",
+      "totalEvents": "Total Events",
+      "uniqueUsers": "Unique Users",
+      "errorRate": "Error Rate",
+      "avgResponse": "Avg Response",
+      "topEvents": "Events",
+      "topNodes": "Accessed IPs",
+      "topUsers": "User Activity",
+      "byCategory": "By Category",
+      "noData": "No analytics data for this period",
+      "eventsOverTime": "Events Over Time",
+      "errors": "Errors",
+      "dbSize": "DB Size",
+      "periods": {
+        "1h": "1 Hour",
+        "6h": "6 Hours",
+        "24h": "24 Hours",
+        "7d": "7 Days",
+        "30d": "30 Days",
+        "60d": "60 Days",
+        "90d": "90 Days",
+        "180d": "6 Months",
+        "365d": "1 Year",
+        "all": "All Time"
+      },
+      "categories": {
+        "all": "All",
+        "app_management": "App Management",
+        "administration": "Administration"
+      },
+      "statuses": {
+        "all": "All",
+        "success": "Success",
+        "error": "Error"
+      },
+      "eventSections": {
+        "allEvents": "All Events",
+        "appLifecycle": "App Lifecycle",
+        "appDiagnostics": "App Diagnostics",
+        "appDeployment": "App Deployment",
+        "monitoring": "Monitoring",
+        "volumeBrowser": "Volume Browser",
+        "backupRestore": "Backup & Restore",
+        "administration": "Administration"
+      },
+      "eventLabels": {
+        "app.start": "App Start",
+        "app.stop": "App Stop",
+        "app.pause": "App Pause",
+        "app.unpause": "App Unpause",
+        "app.restart": "App Restart",
+        "app.remove": "App Remove",
+        "app.register": "App Register",
+        "app.update": "App Update",
+        "app.inspect": "Inspect",
+        "app.logs": "Logs",
+        "app.top": "Top",
+        "app.stats": "Stats",
+        "app.changes": "Changes",
+        "app.exec": "Exec",
+        "app.redeploy": "Redeploy",
+        "app.testInstall": "Test Install",
+        "app.monitor.start": "Monitor Start",
+        "app.monitor.stop": "Monitor Stop",
+        "app.monitor.status": "Monitor Status",
+        "app.volume.browse": "Browse",
+        "app.volume.createFolder": "Create Folder",
+        "app.volume.rename": "Rename",
+        "app.volume.remove": "Remove",
+        "app.volume.upload": "Upload",
+        "app.volume.downloadFile": "Download File",
+        "app.volume.downloadFolder": "Download Folder",
+        "backup.create": "Create Backup",
+        "backup.restore": "Restore",
+        "backup.delete": "Delete Backup",
+        "backup.volumeInfo": "Volume Info",
+        "backup.listLocal": "List Local",
+        "flux.update": "Flux Update",
+        "flux.restart": "Flux Restart",
+        "daemon.start": "Daemon Start",
+        "daemon.stop": "Daemon Stop",
+        "daemon.restart": "Daemon Restart",
+        "benchmark.start": "Benchmark Start",
+        "benchmark.restart": "Benchmark Restart"
       }
     },
     "terminal": {
@@ -795,10 +942,21 @@
       "content": "Content",
       "compact": "Compact",
       "wide": "Wide",
+      "direction": "Direction",
+      "directionHint": "Auto-syncs with language",
       "leftToRight": "Left to right",
       "rightToLeft": "Right to left"
     },
     "volumePathBuilder": {
+      "syncTitle": "Data Synchronization Across Instances",
+      "syncDescription": "Enable this if you want your data to stay synchronized across multiple app instances running on different Flux nodes.",
+      "syncEnableLabel": "Synchronize data across instances",
+      "syncEnabledHint": "Your data will be synced across all instances",
+      "syncDisabledHint": "Each instance will have their persistent data",
+      "syncModeLabel": "Synchronization Strategy",
+      "modePhasedMasterMasterDesc": "All instances can read and write, with controlled phased synchronization",
+      "modePrimaryStandbyDesc": "One primary instance handles writes, others are read-only backups",
+      "modeMasterMasterDesc": "All instances can read and write simultaneously",
       "modeNone": "None",
       "modePhasedMasterMaster": "Phased Master-Master (r)",
       "modePrimaryStandby": "Primary-Standby (g)",
@@ -822,28 +980,34 @@
       "validationFilePathShouldHaveExtension": "File mount path should include a filename with extension (e.g., /etc/config.yaml)",
       "validationComponentMountRequiresNumber": "Component mount types require a component number in Mode",
       "validationPathContainsColon": "Remove : from path - use a different path name",
-      "validationPathContainsPipe": "Remove | from path - use a different path name",
+      "validationPathContainsPipe": "Remove {'|'} from path - use a different path name",
       "validationFilenameContainsColon": "Remove : from filename - use a different name",
-      "validationFilenameContainsPipe": "Remove | from filename - use a different name",
+      "validationFilenameContainsPipe": "Remove {'|'} from filename - use a different name",
       "validationSubdirContainsColon": "Remove : from subdirectory name",
-      "validationSubdirContainsPipe": "Remove | from subdirectory name",
+      "validationSubdirContainsPipe": "Remove {'|'} from subdirectory name",
       "validationModeConflictsWithPrefix": "Choose a different Mode - m, f, c, cf are not allowed",
       "labelMode": "Mode",
       "labelMountType": "Type",
       "labelPath": "Path",
       "typePrimary": "Primary",
+      "typePrimaryDesc": "Main persistent storage for your application",
       "typeDirectory": "Directory",
+      "typeDirectoryDesc": "Mount a specific host folder to container path",
       "typeFile": "File",
+      "typeFileDesc": "Mount a specific host file to container path",
       "typeComponentPrimary": "Component Primary",
+      "typeComponentPrimaryDesc": "Reference primary storage from another component",
       "typeComponentDirectory": "Component Directory",
+      "typeComponentDirectoryDesc": "Reference a directory from another component",
       "typeComponentFile": "Component File",
+      "typeComponentFileDesc": "Reference a file from another component",
       "filename": "Filename",
       "subdirLabel": "Subdirectory",
       "filenamePlaceholder": "config.yaml",
       "subdirPlaceholder": "logs",
       "pathPlaceholder": "/data",
       "primaryMountLabel": "PRIMARY MOUNT",
-      "modeTooltip": "Controls data synchronization: None (local only), r/g/s (sync across nodes), or component number to share data",
+      "modeTooltip": "Use component number to mount data from another component (e.g., 0, 1, 2).",
       "typeTooltip": "What to mount: Primary (main folder), Directory/File (additional storage), Component (share with another app)",
       "outputPreviewEmpty": "(empty)",
       "outputPreviewLabel": "Output (what will be saved):",
@@ -860,13 +1024,17 @@
       "validationSubdirRequired": "Subdirectory is required",
       "validationInvalidSubdir": "Subdirectory cannot contain / or ..",
       "validationDuplicateSubdir": "Duplicate subdirectory/filename",
-      "validationReservedSubdir": "Subdirectory name 'appdata' is reserved for primary mount",
+      "validationReservedSubdir": "Subdirectory name is reserved (cannot use: appdata, backup, ., ..)",
+      "validationFilenameTooLong": "Filename exceeds 255 character limit",
+      "validationSubdirTooLong": "Subdirectory name exceeds 255 character limit",
+      "validationContainerDataTooLong": "Total mount configuration is too long ({current} chars, max {max}) - reduce number of mounts or use shorter names/paths",
       "validationOnlyFirstCanBePrimary": "Only the first mount can be Primary type - change Type to Directory, File, or Component",
       "addPath": "Add Path",
       "validationLogs": "Validation Logs",
       "noValidationErrors": "No validation errors",
       "entryLabel": "Entry #{index} (mode: {mode}, path: {path})",
       "detailedInfoTitle": "Detailed Information & Sync Behavior",
+      "generalInfoTitle": "Frequently Asked Questions (FAQ)",
       "mountTypesTitle": "Mount Types",
       "mountTypePrimaryLabel": "Primary:",
       "mountTypePrimaryDesc": "Main volume mount using the component's appdata directory. This is always the first entry. Can optionally use sync modes (r, g, s). Example: /data or r:/data",
@@ -880,6 +1048,7 @@
       "mountTypeComponentDirectoryDesc": "Mounts a specific subdirectory from another component. Select component in Mode, specify the subdirectory name. Example: Mode='0:', Subdir='backups', Path='/restore-from'",
       "mountTypeComponentFileLabel": "Component File:",
       "mountTypeComponentFileDesc": "Mounts a specific file from another component. Select component in Mode, specify the filename. Example: Mode='0:', Filename='cert.pem', Path='/etc/ssl/cert.pem'",
+      "syncModesTitle": "Sync Modes",
       "syncModeDifferencesTitle": "Sync Modes (for Primary mount):",
       "syncModesMasterMasterLabel": "Master-Master [s]:",
       "syncModesMasterMasterDesc": "Full real-time two-way sync between all participants. Changes on any side are propagated to all others immediately.",
@@ -887,23 +1056,24 @@
       "syncModesPhasedMasterMasterDesc": "Two-way sync between all participants where syncing occurs in controlled phases during startup. The r mode prevents overwriting of existing data when a new instance is started.",
       "syncModesPrimaryStandbyLabel": "Primary-Standby [g]:",
       "syncModesPrimaryStandbyDesc": "One-way sync from primary to standby. The base component is the source of truth, and others receive updates but do not modify the data.",
-      "examplesTitle": "Common Examples:",
-      "exampleBasicLabel": "Basic app:",
-      "exampleBasicDesc": "Mode='None', Type='Primary', Path='/data' - Simple persistent storage in appdata/",
-      "exampleDirectoryLabel": "App with logs:",
-      "exampleDirectoryDesc": "Entry 1: Mode='r', Type='Primary', Path='/data' • Entry 2: Mode='None', Type='Directory', Subdir='logs', Path='/var/log' - Data synced + separate log directory",
-      "exampleFileLabel": "App with config file:",
-      "exampleFileDesc": "Entry 1: Type='Primary', Path='/data' • Entry 2: Type='File', Filename='app.yaml', Path='/etc/app.yaml' - Persistent config file",
-      "exampleMixedLabel": "App with mixed mounts:",
-      "exampleMixedDesc": "Primary + multiple directories/files: Path='/data', then add Directory 'cache'→'/tmp/cache', File 'settings.json'→'/etc/settings.json'",
-      "exampleComponentLabel": "Shared database:",
-      "exampleComponentDesc": "Component 0: Database with r:/var/lib/db • Component 1: Backup with Mode='0:', Type='Component Primary', Path='/db-backup' - Backup accesses DB data",
-      "rulesTitle": "Rules & Constraints:",
+      "examplesTitle": "Common Examples",
+      "exampleBasicLabel": "BASIC APP",
+      "exampleBasicDesc": "Simple persistent storage in appdata/",
+      "exampleDirectoryLabel": "APP WITH LOGS",
+      "exampleDirectoryDesc": "Data synced + separate log directory",
+      "exampleFileLabel": "APP WITH CONFIG FILE",
+      "exampleFileDesc": "Persistent config file",
+      "exampleMixedLabel": "APP WITH MIXED MOUNTS",
+      "exampleMixedDesc": "Data synced with additional cache directory and settings file",
+      "exampleComponentLabel": "SHARED DATABASE",
+      "exampleComponentDesc": "Backup accesses DB data",
+      "rulesTitle": "Rules & Constraints",
       "ruleBaseCannotBeMount": "First entry must be Primary type (cannot reference another component)",
       "ruleOnlyOneSyncMode": "Only one sync mode (r/g/s) allowed per component",
       "ruleAllSyncPathsWithinBase": "When using sync modes, all paths must be within the primary path hierarchy",
-      "ruleSameComponentRemounts": "You can remount your own component by selecting your component number in Mode",
-      "ruleOtherMountsReferPrevious": "Component references must point to earlier components (component 2 can reference 0 or 1, but not 3)",
+      "ruleSyncFoldersSharedParent": "All sync folders must share the same parent directory",
+      "ruleSameComponentRemounts": "Component references can point to the same component or earlier components",
+      "ruleOtherMountsReferPrevious": "Component references cannot point to future components (e.g., component 1 cannot reference component 2)",
       "ruleNoDuplicatePaths": "Each container path must be unique (no duplicates)",
       "ruleSubdirsUnique": "Each subdirectory/filename must be unique within the component",
       "ruleAllPathsStartSlash": "All container paths must start with / and cannot contain invalid characters"
@@ -913,6 +1083,7 @@
       "registerNewApplication": "Register New Application",
       "upgradeToLatest": "Upgrade to Latest Specification",
       "importSpec": "Import Specification",
+      "exportSpec": "Export Specification",
       "reviewAndSign": "Review and Sign",
       "component": "Component",
       "review": "Review",
@@ -930,16 +1101,26 @@
       "contact": "Contact",
       "contactTooltip": "Contact email addresses for notifications",
       "uploadContactsTooltip": "Upload contact information",
+      "contactRequired": "At least one contact email is required",
       "instances": "Instances",
       "instancesCount": "{count} instance | {count} instances",
+      "instancesWarningTwo": "The minimum recommended for a decentralized network is 3 instances.",
+      "instancesWarningOne": "The minimum recommended for a decentralized network is 3 instances. With only 1 instance, your app may experience some minutes of downtime if the node running the app is rebooted or shutdown.",
+      "instancesWarningSyncthing": "The minimum instances for apps with decentralized persistent storage is 2. To use fewer instances, disable data synchronization in the volume path settings.",
+      "instancesAutoAdjusted": "Instances automatically adjusted from {from} to {to} because data synchronization requires a minimum of {to} instances.",
+      "instancesWarningLegacy": "Reducing instances below 3 is only available for apps with specification version 8 or higher. Update your app specification to enable this feature.",
       "period": "Period",
       "renewal": "Renewal",
       "subscriptionNotExtended": "Enable Renewal to extend subscription period.",
+      "subscriptionNotExtendedActive": "Your subscription will continue at the current billing period. Enable renewal to change the period.",
       "managementAction": "Management Action",
       "renewalAction": "Renewal",
       "updateAction": "Update",
       "cancelAction": "Cancel",
       "cancelSubscription": "Cancel Subscription",
+      "cancelActiveSubscriptionWarning": "You have an active auto-renewal subscription. Canceling this app will also cancel your Stripe subscription and stop all future billing. If you only want to cancel auto-renewal without removing your app, visit the Billing Portal in your profile.",
+      "cancelActiveSubscriptionBilling": "Your auto-renewal subscription will be canceled. Current billing period:",
+      "cancelAppWillExpire": "Your app will be removed from the network and expire on approximately",
       "cancelWarning": "This will expire your application.",
       "currentlySubscribedUntil": "Currently your application is subscribed until",
       "afterCancellationExpire": "After cancellation, your app will expire on approximately",
@@ -1025,6 +1206,14 @@
       "enterpriseNodes": "Enterprise Nodes",
       "priorityNodes": "Priority Nodes",
       "reviewAndValidate": "Review & Validate",
+      "hardRedeployWarningTitle": "This update will trigger a hard redeploy",
+      "hardRedeployWarningMessage": "The changes you made will require a full removal and reinstallation of the application. All container data will be permanently deleted.",
+      "hardRedeployBackupAdvice": "If your application data is important, please backup your data before proceeding with this update.",
+      "hardRedeployReasonVersionUpgrade": "Application specification version upgrade (requires full reinstallation)",
+      "hardRedeployReasonComponentStructure": "Component structure changed (components added, removed, or renamed)",
+      "hardRedeployReasonHddChange": "Storage (HDD) size changed for: {components}",
+      "resourceIncreaseWarningTitle": "Resource requirements increased",
+      "resourceIncreaseWarningMessage": "You have increased CPU or RAM requirements. If the nodes currently hosting your application do not have enough resources for the new configuration, the application will be removed from those nodes and reinstalled on different nodes that meet the requirements. This would result in data loss. It is advised to backup your data before proceeding if your application data is important.",
       "validateAppSpec": "Validate App Spec",
       "totalCost": "Total Cost",
       "expiry": "Expiry",
@@ -1047,6 +1236,7 @@
       "priorityNodesTabDescription": "Select if needed priority nodes to run your app. The app can still deploy on other nodes on the network.",
       "priorityNodesDescription": "Select if needed priority nodes to run your app. The app can still deploy on other nodes on the network.",
       "subscriptionPeriodDecreaseWarning": "Your selected subscription period will decrease the current subscription time!",
+      "maxSubscriptionInfo": "Maximum subscription duration is 1 year. Renewal options are adjusted based on your current remaining time.",
       "currentSubscriptionUntil": "Current subscription until:",
       "timeLeft": "Time left:",
       "renewalPeriod": "Renewal period",
@@ -1073,7 +1263,7 @@
       "componentNameTooltip": "Component name (must be unique within the app)",
       "componentDescriptionTooltip": "Brief description of this component's purpose",
       "repositoryTagTooltipNew": "Docker image repository and tag (e.g., nginx:latest)",
-      "repositoryTagTooltipUpdate": "Repository tag cannot be changed when updating an existing app",
+      "repositoryTagTooltipUpdate": "Docker image repository and tag (e.g., nginx:latest)",
       "enableEnterpriseHint": "Enable Enterprise mode in General section to use this feature",
       "enterpriseFeatureTooltip": "Enterprise feature - Enable Enterprise mode to use private repository authentication",
       "dockerRegistryCredentialsTooltip": "Docker registry credentials (format: username:password or username:token)",
@@ -1186,11 +1376,26 @@
       "paymentWindowTime": "30 minutes remaining",
       "deploymentTimeEstimate": "Up to 45 min after payment",
       "deploymentSuccessMessage": "Your application is now active and running on the Flux network.",
+      "appAccessDomainAvailable": "Your app domain access should be available in a few minutes:",
       "updateSuccessMessage": "Your application specification has been successfully updated on the Flux network.",
       "autoDetectDeployment": "Payment confirmation and deployment will be detected automatically.",
       "autoDetectUpdate": "Update will be detected automatically.",
       "autoDetectPaymentUpdate": "Payment confirmation and update will be detected automatically.",
-      "detectionTimeEstimate": "This can take up to 45 minutes.",
+      "detectionTimeEstimate": "This can take a few minutes.",
+      "checkingBlockchainConfirmation": "Checking payment confirmation...",
+      "waitingForNodeDeployment": "Waiting for app to finish installing...",
+      "checkingPaymentOnBlockchain": "Checking for payment confirmation on the blockchain.",
+      "blockchainConfirmationTime": "This can take a few minutes.",
+      "paymentConfirmedOnNetwork": "Payment confirmed on the network!",
+      "paymentConfirmedWaitingNodes": "Payment confirmed on the network.",
+      "waitingForNodesPickup": "A node is pulling the Docker image and setting up your app.",
+      "nodeDeploymentTime": "Almost there — this usually takes a couple more minutes.",
+      "waitingForNodeInstalling": "Waiting for a node to pick up your app...",
+      "nodeStartedInstalling": "A node has started installing your app!",
+      "waitingForInstallationStart": "Waiting for an available node to begin installing your application.",
+      "installationStartTime": "This usually takes 1-3 minutes.",
+      "updateConfirmedNodesWillUpdate": "Update confirmed! It will take a few minutes for the nodes running your app to update to the latest specifications.",
+      "freeUpdateSponsoredBy": "Free updates on the network are offered by Influx Technologies",
       "noNodesMatch": "No nodes match your search",
       "popupBlocked": "Popup Blocked",
       "popupBlockedMessage": "Your browser blocked the {type} checkout window.",
@@ -1220,11 +1425,51 @@
       "loadingPayPalCheckout": "Loading PayPal Checkout...",
       "cardPaymentCompletedSuccessfully": "Card payment completed successfully!",
       "deploymentSuccessfulRunning": "Deployment successful! Your application is now running.",
-      "paymentConfirmedActive": "Payment confirmed! Your application is now active and running.",
+      "paymentConfirmedActive": "Payment confirmed! Your application is now active and running on the network.",
       "updateDeployedSuccessfully": "Update deployed successfully!",
       "paymentConfirmedSpecUpdated": "Payment confirmed! Your application spec has been updated.",
       "testPaymentConfirmed": "TEST: Payment confirmed! Your application is now active and running.",
       "sspPaymentInitiated": "SSP payment initiated: {txid}",
+      "enableAutoRenewal": "Enable auto-renewal",
+      "autoRenewalDescription": "Automatically renew your app subscription via Stripe at the selected interval",
+      "existingSubscriptionUpdateInfo": "You have an active subscription for this app. This update will be charged as a one-time payment. Your subscription price will automatically adjust at the next renewal to reflect the updated specs.",
+      "existingSubscriptionRenewalWarning": "You have an active auto-renewal subscription for this app. Making a one-time payment will extend your app beyond your current subscription period, and your subscription will still charge at the next billing cycle.",
+      "existingSubscriptionReplaceInfo": "You have an active auto-renewal subscription for this app. Proceeding will cancel your current subscription and create a new one with the selected period.",
+      "updatePaymentChoiceInfo": "You have an active subscription for this app. Choose how you would like to pay for this update.",
+      "chargeViaSubscription": "Charge via my subscription (update cost only)",
+      "chargeOneTimePayment": "Make a one-time payment",
+      "subscriptionPriceWillChange": "Your subscription price will be updated to {newPrice} per billing period to reflect the new app specs.",
+      "subscriptionNewPrice": "New subscription price:",
+      "updateExtendingCancelWarning": "This update extends your app's subscription period. Your current subscription will be canceled and a new one will be created with the updated specs and selected period.",
+      "alreadyHasAutoRenewal": "Your app has an active auto-renewal subscription for this period. It will automatically renew before expiry. No action needed.",
+      "subscriptionChargeSuccess": "Update charge processed successfully via your subscription.",
+      "autoRenewalOnlyStripe": "Auto-renewal is only available with Stripe payments",
+      "autoRenewalEligiblePeriods": "Auto-renewal is available for 1 week, 2 weeks, 1, 3, 6, or 12 month periods",
+      "loadingSubscriptionCheckout": "Loading Subscription Checkout...",
+      "redirectingToSubscription": "Redirecting to Stripe Subscription",
+      "subscriptionCheckoutFailed": "Failed to create subscription checkout session",
+      "emailRequiredForSubscription": "Email address is required for subscription payments",
+      "autoRenewing": "Auto-renewing",
+      "paymentIssue": "Payment issue",
+      "manageBilling": "Manage Billing",
+      "manageBillingDescription": "Manage your subscriptions and billing via Stripe",
+      "billingPortalFailed": "Failed to open billing portal",
+      "noStripeCustomer": "No active subscription found. Please subscribe first to manage billing.",
+      "billingPlan": "Billing Plan",
+      "activeSubscriptionTitle": "Active Subscription",
+      "activeSubscriptionAutoRenewTitle": "Active Subscription — Auto-Renewing",
+      "billingPeriod": "Billing period",
+      "nextBilling": "Next billing",
+      "changePeriodTo": "Change period to",
+      "changePeriod": "Change period",
+      "subscriptionActiveInfo": "Your subscription is active and will automatically renew. Use the slider to change billing period or the Cancel tab to cancel.",
+      "subscriptionChangePeriodWarning": "Changing the billing period will cancel your current subscription immediately. You will be redirected to Stripe checkout to set up the new billing period.",
+      "period1Week": "1 Week",
+      "period2Weeks": "2 Weeks",
+      "period1Month": "1 Month",
+      "period3Months": "3 Months",
+      "period6Months": "6 Months",
+      "period12Months": "12 Months",
       "tos": {
         "title": "Terms of Service Agreement",
         "dialogTitle": "Flux Terms of Service",
@@ -1234,8 +1479,13 @@
         "agree": "I Agree",
         "disagree": "I Disagree",
         "errorMessage": "Please read and accept the Terms of Service before proceeding to other tabs.",
-        "loadError": "Failed to load Terms of Service. Please visit:"
+        "loadError": "Failed to load Terms of Service. Please visit:",
+        "loading": "Loading Terms of Service...",
+        "acceptFirst": "Accept Terms of Service first to import"
       }
+    },
+    "tosDialog": {
+      "loading": "Loading Terms of Service..."
     },
     "statusBar": {
       "backend": "Backend",
@@ -1381,12 +1631,18 @@
           "startingAt": "Starting at"
         },
         "whyFluxPanel": {
-          "title": "Why Host on Flux Cloud",
+          "title": "Why Host on FluxCloud",
           "subtitle": "Experience the benefits of decentralized cloud infrastructure powered by Web3 technology"
         },
         "genericFAQPanel": {
           "title": "Frequently Asked Questions",
-          "subtitle": "Common questions about hosting on Flux Cloud"
+          "subtitle": "Common questions about hosting on FluxCloud"
+        },
+        "videosPanel": {
+          "title": "Videos",
+          "watchOnYouTube": "Watch on YouTube",
+          "openOnYouTube": "Open on YouTube",
+          "videoLabel": "Video {number}"
         }
       },
       "installDialog": {
@@ -1406,7 +1662,7 @@
         "walletAltSSP": "SSP",
         "walletAltMetaMask": "MetaMask",
         "walletAltWalletConnect": "WalletConnect",
-        "agreeToTerms": "I agree to the <a href=\"https://cdn.runonflux.io/Flux_Terms_of_Service.pdf\" target=\"_blank\" rel=\"noopener noreferrer\" style=\"color: inherit; text-decoration: none; font-weight: bold;\">Terms of Use</a> and <a href=\"https://runonflux.io/privacy\" target=\"_blank\" rel=\"noopener noreferrer\" style=\"color: inherit; text-decoration: none; font-weight: bold;\">Privacy Policy</a>",
+        "agreeToTerms": "I agree to the <a href=\"https://cdn.runonflux.io/Flux_Terms_of_Service.pdf\" target=\"_blank\" rel=\"noopener noreferrer\" style=\"color: inherit; text-decoration: none; font-weight: bold;\">Terms of Use</a>",
         "oneMonth": "1 Month",
         "threeMonths": "3 Months",
         "sixMonths": "6 Months",
@@ -1442,7 +1698,9 @@
         "notificationSettings": "Notification Settings",
         "emailAddress": "Email Address",
         "enterEmailOptional": "Enter your email for notifications (optional)",
+        "enterEmailRequired": "Enter your email for notifications (required)",
         "emailMustBeValid": "Email must be valid",
+        "emailRequired": "Email is required",
         "notificationInfo1": "App notifications will inform you when your application has finished launching on the network",
         "notificationInfo2": "Notifications will also let you know when the primary server for your application has changed",
         "notificationInfo3": "You will also be notified when your app expiration date is approaching",
@@ -1489,6 +1747,9 @@
         "tryAgain": "Try Again",
         "secureCheckout": "Secure checkout powered by {provider}",
         "continueTo": "Continue to {provider}",
+        "enableAutoRenewal": "Enable auto-renewal",
+        "autoRenewalDescription": "Automatically renew your app subscription via Stripe at the selected interval",
+        "autoRenewalEligiblePeriods": "Auto-renewal is available for 1, 3, 6, or 12 month periods",
         "completePaymentInCheckout": "Complete the payment in the {provider} checkout window.<br>Payment will be confirmed automatically.<br><span class=\"text-warning\">This can take up to 45 minutes.</span>",
         "deploymentSummary": "Deployment Summary",
         "paymentConfirmedExclaim": "Payment Confirmed!",
@@ -1518,7 +1779,7 @@
           "usingGlobalDeployment": "Using global deployment - geolocation data unavailable",
           "failedToCopyToClipboard": "Failed to copy to clipboard",
           "paymentMonitoringTimedOut": "Payment monitoring timed out. Please check your application status.",
-          "paymentConfirmedActive": "Payment confirmed! Your application is now active and running.",
+          "paymentConfirmedActive": "Payment confirmed! Your application is now active and running on the network.",
           "openingZelCoreWallet": "Opening ZelCore wallet for payment...",
           "failedToOpenZelCoreWallet": "Failed to open ZelCore wallet",
           "pleaseLoginToMakePayments": "Please login to Flux Gravity to make payments",
@@ -1869,8 +2130,8 @@
         "starter": "Starter",
         "standard": "Standard",
         "pro": "Elite",
-        "enterprise": "Flux Drive Pro",
-        "fluxDrivePro": "Flux Drive Pro"
+        "enterprise": "FluxDrive Pro",
+        "fluxDrivePro": "FluxDrive Pro"
       },
       "messages": {
         "paymentSuccessfulRedirecting": "Payment successful! Redirecting..."
@@ -2032,7 +2293,7 @@
           "starter": "Starter",
           "standard": "Standard",
           "elite": "Elite",
-          "fluxDrivePro": "Flux Drive Pro"
+          "fluxDrivePro": "FluxDrive Pro"
         },
         "badges": {
           "mostPopular": "Most Popular",
@@ -2082,6 +2343,75 @@
         "recentEvents": "Recent Events",
         "noEventsAvailable": "No Docker events available",
         "errorLoadingEvents": "Failed to load Docker events"
+      },
+      "fluxShare": {
+        "loadingTitle": "Loading FluxShare...",
+        "title": "FluxShare",
+        "subtitle": "Manage your files and share them with others",
+        "storageUsage": "Storage Usage",
+        "used": "used",
+        "available": "Available",
+        "fileManager": "File Manager",
+        "upload": "Upload",
+        "newFolder": "New Folder",
+        "emptyFolder": "This folder is empty",
+        "folder": "Folder",
+        "file": "File",
+        "columns": {
+          "name": "Name",
+          "modified": "Modified",
+          "type": "Type",
+          "size": "Size",
+          "actions": "Actions"
+        },
+        "download": "Download",
+        "downloadZip": "Download as ZIP",
+        "rename": "Rename",
+        "share": "Share",
+        "unshare": "Unshare",
+        "copyLink": "Copy Share Link",
+        "delete": "Delete",
+        "createFolder": "Create Folder",
+        "folderName": "Folder Name",
+        "renameItem": "Rename",
+        "newName": "New Name",
+        "confirmDelete": "Confirm Delete",
+        "deleteConfirmMessage": "Are you sure you want to delete \"{name}\"?",
+        "confirmDownload": "Confirm Download",
+        "downloadFileConfirm": "Download file \"{name}\"?",
+        "downloadFolderConfirm": "Download folder \"{name}\" as ZIP?",
+        "uploadFiles": "Upload Files",
+        "dropFilesHere": "Drop files here",
+        "clickToUpload": "or click to upload",
+        "maxFileSize": "Maximum file size: 5GB",
+        "messages": {
+          "folderCreated": "Folder created successfully",
+          "fileDeleted": "\"{name}\" deleted successfully",
+          "folderDeleted": "\"{name}\" deleted successfully",
+          "renamed": "\"{old}\" renamed to \"{new}\"",
+          "fileShared": "\"{name}\" is now shared",
+          "fileUnshared": "\"{name}\" is no longer shared",
+          "fileUploaded": "\"{name}\" uploaded successfully"
+        },
+        "errors": {
+          "storageStatsFailed": "Failed to load storage stats",
+          "loadFolderFailed": "Failed to load folder",
+          "folderExists": "Folder \"{name}\" already exists",
+          "createFolderFailed": "Failed to create folder",
+          "deleteFileFailed": "Failed to delete file",
+          "folderNotEmpty": "Folder \"{name}\" is not empty",
+          "deleteFolderFailed": "Failed to delete folder",
+          "invalidName": "Name cannot contain \"/\"",
+          "renameFailed": "Failed to rename",
+          "shareFailed": "Failed to share file",
+          "unshareFailed": "Failed to unshare file",
+          "downloadFailed": "Failed to download",
+          "duplicateFile": "File \"{name}\" is already in the upload queue",
+          "fileTooLarge": "File \"{name}\" exceeds the 5GB limit",
+          "uploadFailed": "Upload failed",
+          "storageFull": "Storage is full - no uploads allowed",
+          "insufficientStorage": "File \"{name}\" ({fileSize} MB) exceeds available storage ({available} MB)"
+        }
       },
       "manageUsers": {
         "title": "Manage Users",
@@ -2364,7 +2694,9 @@
           "control": "Control",
           "backupRestore": "Backup & Restore",
           "instances": "Instances",
-          "subscription": "Subscription"
+          "subscription": "Subscription",
+          "audit": "Audit",
+          "auditStats": "Audit Stats"
         },
         "tooltips": {
           "manage": "Manage",
@@ -2409,7 +2741,10 @@
           "noInstancesAvailableMessage": "This application has no running instances. The app may be deploying, redeploying, not yet deployed, or all instances are offline.",
           "retry": "Retry",
           "loadingTitle": "Loading...",
-          "loadingMessage": "Retrieving application information..."
+          "loadingMessage": "Retrieving application information...",
+          "noInstancesWarningTitle": "Limited Functionality - No Running Instances",
+          "noInstancesWarningMessage": "This app has no active instances. Some features are unavailable. You can still manage subscriptions and view specifications.",
+          "noInstancesChip": "No Instances"
         },
         "placeholders": {
           "searchProcesses": "Search processes..."
@@ -2569,7 +2904,7 @@
             },
             "scalable": {
               "title": "Instantly Scalable",
-              "description": "Scale from 3 to 100+ instances instantly. Pay only for what you use with flexible resource allocation."
+              "description": "Scale from 1 to 100 instances instantly. Pay only for what you use with flexible resource allocation."
             },
             "noVendor": {
               "title": "No Vendor Lock-in",
@@ -2586,6 +2921,10 @@
             "loadBalancer": {
               "title": "Load Balancer Integrated",
               "description": "Built-in load balancing across all instances. Automatic traffic distribution ensures optimal performance and reliability."
+            },
+            "dedicatedResources": {
+              "title": "Dedicated Resources",
+              "description": "Get guaranteed CPU & RAM & Storage. No shared infrastructure or cold starts."
             }
           },
           "pricing": {
@@ -2596,7 +2935,7 @@
             "ram": "RAM",
             "storage": "Storage",
             "pricePerMonth": "Price/Month",
-            "note": "Prices are approximate and based on publicly available pricing for similar configurations. FluxCloud offers up to 70% savings compared to traditional cloud providers."
+            "note": "Prices are approximate and based on publicly available pricing for similar configurations. *Akash Network uses a bidding marketplace, so actual prices may vary. FluxCloud price is calculated in real-time from our pricing API."
           },
           "serverNetwork": {
             "title": "Global Server Network",
@@ -2679,6 +3018,624 @@
             "calculator": "Cost Calculator",
             "calculatorDesc": "Estimate your hosting costs"
           }
+        },
+        "orbit": {
+          "choice": {
+            "title": "How would you like to deploy?",
+            "subtitle": "Choose the deployment method that best fits your workflow",
+            "newBadge": "NEW",
+            "betaBadge": "BETA",
+            "orbitSubtitle": "Git-based Deployment",
+            "orbitDescription": "Just connect your repository and we handle the rest. No Docker knowledge required.",
+            "orbitFeature1": "No Docker knowledge needed",
+            "orbitFeature2": "Auto-detect 100+ frameworks",
+            "orbitFeature3": "Built-in CI/CD pipeline",
+            "orbitFeature4": "Automatic rollbacks",
+            "orbitFeature5": "GitHub/GitLab/Bitbucket support",
+            "orbitCta": "Deploy with Git",
+            "dockerSubtitle": "Container-based Deployment",
+            "dockerDescription": "Full control with custom Docker containers. Perfect for complex deployments.",
+            "dockerFeature1": "Any Docker image",
+            "dockerFeature2": "Private registries",
+            "dockerFeature3": "Multi-container compose",
+            "dockerFeature4": "Full resource control",
+            "dockerFeature5": "Enterprise features",
+            "dockerCta": "Deploy with Docker",
+            "startingAt": "Starting at",
+            "dockerPriceDetail": "3 instances, 2 vCPU, 4GB RAM",
+            "comparisonHint": "Not sure which to choose? Git is perfect for most web apps. Docker gives you maximum control.",
+            "deployment": "deployment",
+            "deployments": "deployments"
+          },
+          "overview": {
+            "stepTitle": "FluxCloud Git Overview",
+            "stepDescription": "Discover what FluxCloud Git offers and how it compares to other platforms."
+          },
+          "pricing": {
+            "title": "Git Plans",
+            "subtitle": "Simple pricing for Git-based deployments",
+            "stepTitle": "Select Your Plan",
+            "stepDescription": "Choose your plan based on your resource needs.",
+            "allPlansInclude": "Choose Your Resources",
+            "poweredByFluxCloud": "Powered by FluxCloud",
+            "sharedFeatures": {
+              "title": "FluxCloud Git Features",
+              "subtitle": "Your Code. Our Magic. Zero Docker Headaches.",
+              "unlimitedBuilds": "Unlimited Builds",
+              "frameworks": "100+ Frameworks",
+              "frameworksDetail": "Node.js, Python, Rust, Go, Java, .NET, PHP & more",
+              "zeroConfig": "Zero Configuration",
+              "zeroConfigDetail": "Auto-detects project type, installs dependencies, builds automatically",
+              "cicd": "Built-in CI/CD",
+              "cicdDetail": "GitHub, GitLab, Bitbucket webhooks + polling mode",
+              "customDomain": "Custom Domain",
+              "customDomainDetail": "Connect your own domain with SSL",
+              "geolocation": "Geolocation Selection",
+              "geolocationDetail": "Deploy to specific regions worldwide",
+              "branchPreviews": "Deploy Previews",
+              "branchPreviewsDetail": "Preview deployments for branches and PRs",
+              "autoRollback": "Auto Rollback",
+              "autoRollbackDetail": "Failed deployments revert to last working version",
+              "monorepo": "Monorepo Support",
+              "monorepoDetail": "Deploy specific folders using PROJECT_PATH",
+              "healthChecks": "Health Monitoring",
+              "healthChecksDetail": "Built-in health checks and process supervision",
+              "security": "Enhanced Security",
+              "securityDetail": "Non-root execution and automatic log rotation",
+              "unlimitedBuildsDetail": "No limit on build count or build duration",
+              "dedicatedResources": "Dedicated Resources",
+              "dedicatedResourcesDetail": "No shared hardware - your rented resources are exclusively for your app"
+            },
+            "free": "Free",
+            "developer": "Standard",
+            "pro": "Pro",
+            "beta": "Beta",
+            "comingSoon": "Coming Soon",
+            "freeBuilds": "50 builds/month",
+            "developerBuilds": "Unlimited builds",
+            "proBuilds": "Unlimited builds",
+            "freePriceDetail": "Perfect for side projects and learning",
+            "developerPriceDetail": "For growing projects and small apps",
+            "proPriceDetail": "For active development and production apps",
+            "betaPriceDetail": "Full access during beta",
+            "perMonth": "/month",
+            "billingOptions": "Billing Options",
+            "billingPeriod": "Billing Period",
+            "billingMonthly": "Monthly",
+            "billing1Month": "1 Month",
+            "billing3Months": "3 Months",
+            "billing6Months": "6 Months",
+            "billing12Months": "12 Months",
+            "savings": "Save {percent}%",
+            "total": "Total",
+            "customDomain": "Custom Domain",
+            "customDomainPlaceholder": "app.yourdomain.com",
+            "customDomainHint": "Point your domain's CNAME record to your Flux app URL",
+            "preferredGeolocation": "Preferred Geolocation",
+            "geolocationHint": "Select regions where your app should be deployed. Leave as \"Global\" for best availability.",
+            "addLocation": "Add Location",
+            "noLocationsSelected": "No specific locations selected. App will deploy globally.",
+            "freeFeatures": {
+              "deployments": "1 active deployment",
+              "builds": "Unlimited",
+              "cpu": "0.5 Cores",
+              "ram": "1 GB",
+              "storage": "5 GB SSD/NVMe",
+              "support": "Community support",
+              "frameworks": "100+ frameworks supported"
+            },
+            "developerFeatures": {
+              "deployments": "3 active deployments",
+              "builds": "Unlimited",
+              "cpu": "1.5 Cores",
+              "ram": "4 GB",
+              "storage": "15 GB SSD/NVMe",
+              "support": "Priority support",
+              "frameworks": "100+ frameworks supported"
+            },
+            "proFeatures": {
+              "deployments": "5 active deployments",
+              "deploymentsExtra": "+$3/extra",
+              "builds": "Unlimited",
+              "cpu": "2.0 Cores",
+              "ram": "6 GB",
+              "storage": "20 GB SSD/NVMe",
+              "support": "Priority support",
+              "frameworks": "100+ frameworks supported",
+              "branchPreviews": "Deploy previews for branches",
+              "customDomain": "Custom domain support",
+              "geolocation": "Geolocation selection",
+              "cicd": "Full CI/CD pipeline"
+            },
+            "betaFeatures": {
+              "deployments": "Unlimited active deployments",
+              "builds": "Unlimited builds",
+              "cpu": "2.0 Cores",
+              "ram": "6 GB",
+              "storage": "40 GB SSD/NVMe",
+              "support": "Priority support",
+              "frameworks": "100+ frameworks supported",
+              "branchPreviews": "Deploy previews for branches",
+              "customDomain": "Custom domain support",
+              "geolocation": "Geolocation selection",
+              "cicd": "Full CI/CD pipeline"
+            },
+            "custom": "Custom",
+            "customizable": "Customizable",
+            "customPriceDetail": "Configure your own resources and pricing",
+            "startingAt": "Starting at",
+            "priceAfterFirstMonth": "Price after first month",
+            "customFeatures": {
+              "cpu": "0.1 - 15 Cores",
+              "ram": "100 MB - 59 GB",
+              "storage": "1 - 820 GB",
+              "instances": "1 - 3 instances"
+            },
+            "buildLimitWarning": "When free tier limit is reached, the next build will automatically upgrade to Pro",
+            "currentPlan": "Current Plan",
+            "selectPlan": "Select Plan",
+            "recommended": "Recommended",
+            "mostPopular": "Most Popular",
+            "firstMonthFree": "First month free*",
+            "freeForever": "Free forever*",
+            "freePlanExplainer": "Free plan auto-renews with 1 Git app. Adding more apps is billed at $0.99/month.",
+            "startDeploying": "Start Deploying",
+            "startFreeTrial": "Start a free trial",
+            "freeTrialDisclaimer": "Restrictions may apply to prevent abuse.",
+            "beginnerDisclaimer": "The Free plan is free and automatically renewed by InFlux Technologies as long as you have only one Git app running on the network. If you deploy additional Git apps, each Free plan app will be charged $0.99/month.",
+            "beginnerDowntimeNote": "The Free plan runs on a single instance. Since Flux is a decentralized network, brief downtime (typically a few minutes) may occur if the hosting node restarts or goes offline. For high-availability applications, we recommend the Standard or Pro plans which run on multiple instances.",
+            "privateRepoDisclaimer": "Private GitHub repositories are automatically deployed as Enterprise apps, running exclusively on ArcaneOS nodes with full encryption for your source code and data. Enterprise adds $1.33/month for Free plan, or $2.66/month for Standard, Pro, and Custom plans.",
+            "competitive": {
+              "savings": "Up to 85% cheaper than Vercel/Render",
+              "dedicated": "Dedicated resources, not shared",
+              "unlimitedBuilds": "Unlimited builds included"
+            }
+          },
+          "review": {
+            "stepTitle": "Review & Deploy",
+            "stepDescription": "Review your configuration before deploying to the Flux network.",
+            "checkingEligibility": "Checking eligibility for first month free...",
+            "notEligibleTitle": "This FluxCloud Git doesn't qualify for first month free",
+            "notEligibleDescription": "Payment will be required to proceed.",
+            "repository": "Repository",
+            "url": "URL",
+            "branch": "Branch",
+            "projectPath": "Project Path",
+            "accessToken": "Authentication",
+            "configured": "Configured",
+            "appType": "App Type",
+            "enterprisePrivate": "Enterprise (Private Repo)",
+            "configuration": "Configuration",
+            "appName": "App Name",
+            "description": "Description",
+            "appPort": "App Port",
+            "exposedPort": "Exposed Port",
+            "contact": "Contact",
+            "runtime": "Runtime",
+            "envVariables": "Env Variables",
+            "planAndResources": "Plan & Resources",
+            "plan": "Plan",
+            "resources": "Resources",
+            "activeDeployments": "Active Deployments",
+            "builds": "Builds",
+            "branchPreviews": "Branch Previews",
+            "enabled": "Enabled",
+            "billing": "Billing",
+            "geolocation": "Geolocation",
+            "totalPrice": "Total Price",
+            "unlimited": "Unlimited",
+            "generatedSpec": "Generated App Specification",
+            "termsLabel": "I accept the",
+            "termsOfService": "Terms of Service",
+            "termsAnd": "and",
+            "privacyPolicy": "Privacy Policy",
+            "deployNow": "Deploy Now",
+            "proceedToPayment": "Proceed to Payment"
+          },
+          "deploy": {
+            "stepTitle": "Deploy",
+            "registering": "Registering Your Application",
+            "waitingSignature": "Waiting for signature...",
+            "signMessage": "Signing and registering your application on the Flux network...",
+            "propagating": "Propagating to network...",
+            "registrationFailed": "Registration Failed",
+            "retry": "Retry",
+            "testingInstallation": "Testing Installation",
+            "verifyingDeployment": "Verifying your application can be deployed on the Flux network...",
+            "runningTest": "Running installation test...",
+            "startTest": "Start Test",
+            "testOutput": "Test Output",
+            "testFailed": "Installation Test Failed",
+            "retryTest": "Retry Test",
+            "editConfiguration": "Edit Configuration",
+            "paymentTitle": "Complete Payment",
+            "paymentDescription": "Choose your preferred payment method to activate your Pro plan.",
+            "processingPayment": "Processing payment...",
+            "waitingConfirmation": "Waiting for payment confirmation...",
+            "cancel": "Cancel",
+            "paymentSummary": "Payment Summary",
+            "discountApplied": "{percent}% discount applied",
+            "fiatPayment": "Fiat Payment",
+            "fiatDescription": "Credit Card, PayPal",
+            "cryptoPayment": "Crypto Payment",
+            "cryptoDescription": "FLUX, BTC, ETH & more",
+            "payWithStripe": "Pay with Stripe",
+            "payWithPaypal": "Pay with PayPal",
+            "stripeNote": "Secure payment via Stripe",
+            "payWithFlux": "Pay with FLUX",
+            "payWithZelcore": "Pay with Zelcore",
+            "payWithSSP": "Pay with SSP Wallet",
+            "scanQR": "Scan QR code or copy address",
+            "sendExactAmount": "Send exactly",
+            "toAddress": "to address",
+            "copyAddress": "Copy Address",
+            "copiedAddress": "Address Copied!",
+            "successTitle": "Deployment Successful!",
+            "successDescription": "Your application is now being deployed to the Flux network.",
+            "appAvailableSoon": "Your app will be available shortly at the assigned Flux URL.",
+            "appName": "App Name",
+            "appUrl": "App URL",
+            "openApp": "Open App",
+            "manageApplication": "Manage Application",
+            "deployAnother": "Deploy Another",
+            "freeMonthTitle": "First Month Free!",
+            "freeMonthDescription": "Your first month of hosting is completely free, sponsored by InFlux Technologies.",
+            "sponsoredBy": "Sponsored by InFlux Technologies",
+            "paymentSubmissionInfo": "The payment for your application will be submitted to the network in the next few minutes.",
+            "checkingRegistration": "Checking payment confirmation...",
+            "waitingForInstance": "Waiting for app to finish installing...",
+            "firstMonthSponsoredBy": "First month of hosting is offered by InFlux Technologies.",
+            "freePlanSponsoredBy": "Free plan is offered by InFlux Technologies.",
+            "checkingPaymentOnBlockchain": "Checking for payment confirmation on the blockchain.",
+            "blockchainConfirmationTime": "This can take a few minutes.",
+            "paymentConfirmedWaitingNodes": "Payment confirmed on the network.",
+            "waitingForNodesPickup": "A node is pulling the Docker image and setting up your app.",
+            "nodeDeploymentTime": "Almost there — this usually takes a couple more minutes.",
+            "waitingForNodeInstalling": "Waiting for a node to pick up your app...",
+            "nodeStartedInstalling": "A node has started installing your app!",
+            "waitingForInstallationStart": "Waiting for an available node to begin installing your application.",
+            "installationStartTime": "This usually takes 1-3 minutes.",
+            "registrationCompleteTitle": "Registration/Payment Complete!",
+            "registrationCompleteDescription": "Your application has been successfully paid/registered on the Flux network.",
+            "appAccessDomainAvailable": "Your app domain access should be available in a few minutes:",
+            "nodesSpawning": "Network nodes are now spawning your application. It will be available shortly.",
+            "cancelPayment": "Cancel and go back"
+          },
+          "navigation": {
+            "back": "Back",
+            "continue": "Continue",
+            "next": "Next",
+            "previous": "Previous"
+          },
+          "payment": {
+            "payWithCard": "Pay with Card",
+            "securePayment": "Secure & instant payment",
+            "payWithFlux": "Pay with FLUX",
+            "cryptoPayment": "Cryptocurrency payment",
+            "notEligibleInfo": "This registration requires payment. Select a payment method to continue.",
+            "selectPaymentMethod": "Select a payment method",
+            "secureProcessing": "Secure payment processing",
+            "instantConfirmation": "Instant payment confirmation",
+            "multipleCurrency": "Multiple currency support",
+            "enableAutoRenewal": "Enable auto-renewal",
+            "autoRenewalDescription": "Automatically renew your app subscription via Stripe at the selected interval",
+            "autoRenewalAfterTrial": "Your first billing period is free. Auto-renewal will start charging after the trial ends.",
+            "setupAutoRenewal": "Set up auto-renewal",
+            "autoRenewalSetup": "Auto-renewal configured! You will be charged automatically after your free period ends.",
+            "sendTo": "Send to",
+            "message": "Message"
+          },
+          "features": {
+            "title": "Deploy from Git in Minutes",
+            "subtitle": "Push your code, we handle the rest",
+            "howItWorks": {
+              "title": "How Git Deployment Works",
+              "step1": {
+                "title": "Connect Repository",
+                "description": "Link your GitHub, GitLab, or Bitbucket repository"
+              },
+              "step2": {
+                "title": "Auto-Detect",
+                "description": "Git deployment automatically detects your framework and dependencies"
+              },
+              "step3": {
+                "title": "Build & Deploy",
+                "description": "Your app is built and deployed across the Flux network"
+              },
+              "step4": {
+                "title": "Stay Synced",
+                "description": "Push commits trigger automatic rebuilds via webhooks"
+              }
+            },
+            "supported": {
+              "title": "100+ Frameworks Supported",
+              "javascript": "Node.js / JavaScript",
+              "javascriptFrameworks": "Next.js, Nuxt, Remix, Astro, Express, NestJS, Vite",
+              "python": "Python",
+              "pythonFrameworks": "Django, FastAPI, Flask, Streamlit",
+              "rust": "Rust",
+              "rustFrameworks": "Actix, Axum, Rocket",
+              "go": "Go",
+              "goFrameworks": "Gin, Echo, Fiber",
+              "java": "Java",
+              "javaFrameworks": "Spring Boot, Quarkus",
+              "dotnet": ".NET",
+              "dotnetFrameworks": "ASP.NET Core, Blazor",
+              "ruby": "Ruby",
+              "rubyFrameworks": "Rails, Sinatra",
+              "php": "PHP",
+              "phpFrameworks": "Laravel, Symfony",
+              "static": "Static Sites",
+              "staticFrameworks": "HTML/CSS/JS, Hugo, Jekyll, Gatsby"
+            },
+            "benefits": {
+              "zeroDockertitle": "Zero Docker Headaches",
+              "zeroDockerDesc": "No Dockerfile needed. Git deployment handles containerization automatically.",
+              "autoRollbackTitle": "Automatic Rollbacks",
+              "autoRollbackDesc": "Failed deployments automatically revert to the last working version.",
+              "monorepoTitle": "Monorepo Support",
+              "monorepoDesc": "Deploy specific folders from monorepos using PROJECT_PATH.",
+              "productionTitle": "Production Ready",
+              "productionDesc": "Health checks, supervisor management, log rotation, non-root execution."
+            }
+          },
+          "faq": {
+            "title": "Git Deployment FAQ",
+            "whatIsOrbit": {
+              "question": "What is Git Deployment?",
+              "answer": "Git Deployment is Flux's Git-based deployment platform that automatically builds and deploys your applications without requiring Docker knowledge. Just connect your repository and Git deployment handles everything else—framework detection, dependency installation, building, and deployment across the Flux network."
+            },
+            "whatFrameworks": {
+              "question": "Which frameworks are supported?",
+              "answer": "Git deployment supports 100+ frameworks including Next.js, Django, FastAPI, Rails, Spring Boot, ASP.NET Core, and many more. It auto-detects Node.js, Python, Rust, Go, Java, .NET, Ruby, PHP projects and static sites."
+            },
+            "howBuildsWork": {
+              "question": "How do builds work?",
+              "answer": "A build is triggered every time you push new commits to your repository. Git deployment detects the changes via webhooks, pulls your code, builds it using the detected framework, and deploys it across the network. Free tier includes 50 builds per month."
+            },
+            "exceedLimit": {
+              "question": "What happens when I exceed the build limit?",
+              "answer": "When you reach the free tier limit (50 builds/month), you'll receive an email notification. The next build will automatically upgrade your app to Pro tier ($15/month), and your credit card will be charged."
+            },
+            "switchPlans": {
+              "question": "Can I switch from Free to Pro?",
+              "answer": "Yes! You can upgrade to Pro anytime from your app dashboard. You can also prepay for 3, 6, or 12 months when registering a new app."
+            },
+            "privateRepos": {
+              "question": "Are private repositories supported?",
+              "answer": "Yes, Git deployment supports private repositories. You'll need to authorize Git deployment to access your repository during the setup process."
+            }
+          },
+          "landing": {
+            "badge": "NEW:Deploy with Git",
+            "heroTitle": "Your Code. Our Magic.",
+            "heroSubtitle": "Zero Docker Headaches.",
+            "heroDescription": "Deploy any web application directly from GitHub, GitLab, or Bitbucket. Git deployment auto-detects your framework and handles everything else.",
+            "getStartedFree": "Start Free",
+            "viewPricing": "View Pricing"
+          },
+          "comparison": {
+            "title": "How Git Deployment Compares",
+            "subtitle": "See how Git deployment stacks up against other Git deployment platforms",
+            "provider": "Provider",
+            "plan": "Plan",
+            "price": "Price",
+            "cpu": "CPU",
+            "ram": "RAM",
+            "builds": "Builds",
+            "best": "Best Value",
+            "cores": "Cores",
+            "core": "Core",
+            "unlimited": "Unlimited",
+            "shared": "Shared",
+            "limited": "Limited",
+            "creditBased": "Credit-based",
+            "usageBased": "Usage-based",
+            "minutes": "min/mo"
+          },
+          "signIn": {
+            "description": "Sign in to deploy your application from Git.",
+            "noDockerNeeded": "No Docker knowledge needed",
+            "frameworksSupported": "100+ frameworks supported",
+            "builtInCicd": "Built-in CI/CD",
+            "freeTierAvailable": "Free tier available",
+            "backToOptions": "Back to Options"
+          },
+          "header": {
+            "backToDeploymentOptions": "Back to deployment options",
+            "deployWithOrbit": "Deploy with Git",
+            "connectAndDeploy": "Connect your Git repository and deploy in minutes"
+          },
+          "stepper": {
+            "overview": "Overview",
+            "plan": "Plan",
+            "repository": "Repository",
+            "configure": "Configure",
+            "review": "Review",
+            "register": "Register",
+            "payment": "Payment"
+          },
+          "repository": {
+            "stepTitle": "Connect Your Repository",
+            "stepDescription": "Enter your Git repository URL. We support GitHub, GitLab, and Bitbucket.",
+            "repoUrlLabel": "Repository URL *",
+            "repoUrlPlaceholder": "https://github.com/username/repo",
+            "repoUrlHint": "Public or private repository URL",
+            "checkingRepository": "Checking repository...",
+            "publicRepository": "Public Repository",
+            "privateRepoAuth": "Private Repository - Authentication Required",
+            "errorCheckingRepo": "Error checking repository",
+            "detected": "detected",
+            "privateRepoDetected": "Private Repository Detected",
+            "privateRepoMessage": "This repository requires authentication. Your app will be automatically registered as an enterprise application.",
+            "enterpriseFeatures": "Enterprise Application Benefits",
+            "enterpriseFeature1": "Runs exclusively on ArcaneOS nodes with hardware-level encryption",
+            "enterpriseFeature2": "Your source code and data are fully encrypted and protected",
+            "enterpriseFeature3": "Enhanced security for proprietary and sensitive applications",
+            "enterprisePricing": "Enterprise adds $1.33/month for Free plan, or $2.66/month for Standard, Pro, and Custom plans.",
+            "usernameLabel": "Username / Token Name",
+            "usernamePlaceholder": "github-username or token",
+            "usernameHint": "For GitHub, use your username or 'token'",
+            "tokenLabel": "Personal Access Token *",
+            "tokenPlaceholder": "ghp_xxxxxxxxxxxx",
+            "tokenHint": "Generate a token with repo access from your Git provider settings.",
+            "createToken": "Create {provider} token →",
+            "testConnection": "Test Connection",
+            "connectionSuccess": "Connection successful!",
+            "connectionVerified": "Repository access verified.",
+            "branchLabel": "Branch",
+            "branchPlaceholder": "Select a branch",
+            "loadingBranches": "Loading branches...",
+            "noBranchesFound": "No branches found",
+            "default": "Default",
+            "branchesAvailable": "branches available",
+            "defaultMain": "Default: main",
+            "detectingMonorepo": "Detecting monorepo structure...",
+            "monorepoDetected": "Monorepo detected!",
+            "projectsFound": "projects found",
+            "selectProject": "Select the project to deploy:",
+            "projectPathLabel": "Project Path (Monorepo)",
+            "projectPathPlaceholder": "/",
+            "projectPathHint": "For monorepos, specify the folder containing your app (e.g., /apps/frontend)",
+            "enterCredentialsHint": "Enter your username and access token above to continue",
+            "enterTokenHint": "Enter your access token above to continue",
+            "testConnectionHint": "Click 'Test Connection' above to verify access before continuing",
+            "testingConnectionHint": "Verifying repository access...",
+            "compatibilityChecking": "Analyzing project compatibility...",
+            "compatibilityIncompatible": "This repository doesn't appear to contain a supported project.",
+            "compatibilityWarning": "We couldn't detect a web framework in this repository. FluxCloud Git is designed for web applications and APIs. CLI tools and shell-based installers are not supported.",
+            "compatibilityLearnMore": "Learn more about supported projects"
+          },
+          "config": {
+            "stepTitle": "Application Configuration",
+            "stepDescription": "Configure your application settings. Git deployment will auto-detect your framework.",
+            "appNameLabel": "Application Name *",
+            "appNamePlaceholder": "my-awesome-app",
+            "appNameHint": "Lowercase letters, numbers, and hyphens only (3-32 chars)",
+            "appPortLabel": "Application Port *",
+            "appPortPlaceholder": "3000",
+            "portListensOn": "The port your application listens on",
+            "autoDetected": "Auto-detected",
+            "autoDetectedFrom": "Auto-detected from {framework}",
+            "contactEmailLabel": "Contact Email *",
+            "contactEmailPlaceholder": "you{'@'}example.com",
+            "contactEmailHint": "For deployment notifications and alerts",
+            "showAdvancedOptions": "Advanced options",
+            "enterpriseAppLabel": "Enterprise App",
+            "enterpriseAppDescription": "Encrypt app specifications and run exclusively on ArcaneOS nodes for enhanced security and privacy.",
+            "enterpriseAutoDetected": "Enterprise mode is automatically enabled because your configuration includes a private repository, webhook secret, or API key.",
+            "runCommandRequired": "Custom run command required",
+            "runCommandRequiredDescription": "We couldn't detect a standard framework in your repository. Please specify the command to start your application (e.g., python app.py, go run main.go, cargo run).",
+            "runCommandMissing": "Please provide a run command before continuing",
+            "pollingIntervalLabel": "Auto-Update Polling Interval",
+            "pollingIntervalHint": "How often Git deployment checks your repository for new commits. For instant polling, add the WEBHOOK_SECRET environment variable",
+            "runtimeVersionTitle": "Runtime Version (Optional)",
+            "runtimeAutoDetect": "Git deployment auto-detects your runtime. Only specify if you need a specific version.",
+            "runtimeLabel": "Runtime",
+            "envVariablesTitle": "Environment Variables",
+            "envVariablesInfo": "Configure environment variables for your application. Click on any Git variable below to add it.",
+            "availableOrbitVars": "Available Git Variables",
+            "added": "Added",
+            "add": "Add",
+            "ifNotSet": "If not set:",
+            "example": "Example:",
+            "yourEnvVariables": "Your Environment Variables",
+            "noneAddedYet": "(none added yet)",
+            "keyLabel": "Key",
+            "valueLabel": "Value",
+            "addCustomVariable": "Add Custom Variable",
+            "deploymentLocationTitle": "Deployment Location",
+            "deploymentLocationInfo": "Choose where your application will be deployed.",
+            "serverLocation": "Server Location",
+            "continentLabel": "Continent",
+            "countryLabel": "Country",
+            "regionLabel": "Region",
+            "selectRegionInfo": "Add allowed locations where your app CAN run, or forbidden locations where it CANNOT run. Leave empty for global deployment.",
+            "allowedLocations": "Allowed Locations",
+            "forbiddenLocations": "Forbidden Locations",
+            "addAllowed": "Add Allowed",
+            "addForbidden": "Add Forbidden",
+            "currentRules": "Current Geolocation Rules",
+            "allowedLocationsColon": "Allowed:",
+            "forbiddenLocationsColon": "Forbidden:",
+            "customDomainTitle": "Custom Domain",
+            "customDomainLabel": "Custom Domain",
+            "customDomainPlaceholder": "myapp.example.com",
+            "customDomainHint": "Enter your custom domain (you'll need to configure DNS separately)",
+            "autoDetectionEnabled": "Auto-Detection Enabled",
+            "autoDetectionDescription": "Git deployment automatically detects your framework (Next.js, Django, Rails, Spring Boot, etc.) and configures the build process. No Dockerfile needed!",
+            "customResourcesTitle": "Custom Resources",
+            "customResourcesInfo": "Configure the CPU, RAM, and storage for your custom plan. The price will be calculated based on your selections.",
+            "cpuLabel": "CPU",
+            "ramLabel": "RAM",
+            "storageLabel": "Storage",
+            "instancesLabel": "Instances",
+            "selected": "Selected",
+            "selectPlan": "Select Plan",
+            "registerApplication": "Register Application",
+            "envVars": {
+              "buildCommand": {
+                "description": "Custom build command if auto-detection fails or you need a specific build script",
+                "autoValue": "Auto-detected from package.json scripts (build, build:prod) or framework conventions"
+              },
+              "runCommand": {
+                "description": "Custom startup command to run your application",
+                "autoValue": "Auto-detected from package.json scripts (start, serve) or framework conventions"
+              },
+              "installCommand": {
+                "description": "Custom dependency installation command",
+                "autoValue": "Auto-detected: npm install, yarn install, or pnpm install based on lockfile"
+              },
+              "webhookSecret": {
+                "description": "Secret for GitHub webhook deployments (enables Enterprise features)",
+                "autoValue": "Disabled. Set to enable webhook-triggered deployments"
+              },
+              "nodeVersion": {
+                "description": "Specify Node.js runtime version (overrides auto-detection)",
+                "autoValue": "Auto-detected from .nvmrc, .node-version, or package.json engines field. Falls back to latest LTS"
+              },
+              "pythonVersion": {
+                "description": "Specify Python runtime version",
+                "autoValue": "Auto-detected from runtime.txt, .python-version, or Pipfile. Falls back to latest stable"
+              },
+              "rubyVersion": {
+                "description": "Specify Ruby runtime version",
+                "autoValue": "Auto-detected from .ruby-version or Gemfile. Falls back to latest stable"
+              },
+              "goVersion": {
+                "description": "Specify Go runtime version",
+                "autoValue": "Auto-detected from go.mod. Falls back to latest stable"
+              },
+              "javaVersion": {
+                "description": "Specify Java runtime version",
+                "autoValue": "Auto-detected from pom.xml or build.gradle. Falls back to latest LTS (21)"
+              },
+              "apiKey": {
+                "description": "API key to protect status, logs, and preview endpoints (enables Enterprise features)",
+                "autoValue": "Disabled. Set to enable API authentication for protected endpoints"
+              },
+              "prPreviewEnabled": {
+                "description": "Enable preview deployments for pull requests on static sites",
+                "autoValue": "Disabled. Set to \"true\" to enable PR preview deployments"
+              }
+            }
+          },
+          "register": {
+            "registrationComplete": "Registration Complete",
+            "registrationCompleteMessage": "Your application has been successfully registered on the Flux network.",
+            "proceedingToPayment": "Proceeding to payment...",
+            "firstInstallInfo": "First installation can take a while depending on your project as need to download and install all dependencies. You can check that on the logs section of applications management. Once your app is installed on a node, you can access it at:",
+            "appUrl": "App URL:",
+            "orbitApi": "GIT API:",
+            "orbitDocumentation": "GIT Documentation:"
+          }
+        },
+        "docker": {
+          "header": {
+            "backToDeploymentOptions": "Back to deployment options",
+            "deployWithDocker": "Deploy with Docker",
+            "fullControlDeployment": "Full control with custom Docker containers"
+          }
         }
       }
     },
@@ -2689,7 +3646,7 @@
       "learnMore": "Learn More",
       "configuration": "Configuration",
       "instancesQuestion": "How many instances will you be running?",
-      "instancesHint": "(min 3 / max 100) 1 Instance = 1 Node",
+      "instancesHint": "(min 1 / max 100) 1 Instance = 1 Node",
       "instancesPlaceholder": "3",
       "renewalPeriod": "Renewal period",
       "renewalHint": "(Manual renewal required)",
@@ -2718,6 +3675,8 @@
       "staticIpDescription": "Assign a dedicated static IP address to your application",
       "syncData": "Synchronize data across instances",
       "syncDataDescription": "Enable data sync using Phased Master-Master (r) or Master-Slave (g) modes with shared storage. When disabled, each instance uses its own isolated persistent storage",
+      "calculatePrice": "Calculate Price",
+      "settingsChanged": "Settings have changed. Click Calculate Price to update.",
       "estimatedCost": "Estimated Deployment Cost",
       "calculating": "Calculating...",
       "withDiscount": "with {discount}% discount",
@@ -2734,7 +3693,12 @@
       "gotIt": "Got it",
       "validation": {
         "instancesRequired": "Instances is required",
-        "instancesMin": "Minimum 3 instances required",
+        "instancesMin": "Minimum 1 instance required",
+        "instancesMinSync": "Minimum 2 instances required when data synchronization is enabled",
+        "instancesMinSyncInfo": "The minimum instances for apps with decentralized persistent storage is 2. To use fewer instances, disable data synchronization.",
+        "instancesAutoAdjusted": "Instances automatically adjusted from {from} to {to} because data synchronization requires a minimum of {to} instances.",
+        "instancesWarningOne": "The minimum recommended for a decentralized network is 3 instances. With only 1 instance, your app may experience some minutes of downtime if the node running the app is rebooted or shutdown.",
+        "instancesWarningTwo": "The minimum recommended for a decentralized network is 3 instances.",
         "instancesMax": "Maximum 100 instances allowed"
       },
       "renewalOptions": {
@@ -2794,6 +3758,12 @@
             "answer": "Your application will be throttled to prevent it from using more resources than allocated. This protects other users on the network. If you need more resources, you can easily upgrade your plan through the Flux dashboard. We recommend monitoring your app usage and adjusting resources proactively."
           }
         }
+      },
+      "enterpriseBanner": {
+        "title": "Need Enterprise-Grade Hosting?",
+        "description": "The prices on this page reflect consumer-grade CPU and home-hosted infrastructure on the Flux network. For enterprise solutions — data-center-grade CPUs, guaranteed high uptime, dedicated customer support, a fully managed service dashboard, APIs for instant horizontal scaling, and much more — reach out to learn about FluxCloud Enterprise.",
+        "cta": "Contact Us",
+        "email": "info{'@'}runonflux.com"
       },
       "relatedResources": {
         "title": "Ready to Deploy?",
@@ -3001,6 +3971,11 @@
         "title": "Flux Application Marketplace",
         "subtitle": "Deploy decentralized pre-configured applications on Flux's Web3 cloud. Docker containers, web apps, and APIs on {nodeCount}+ FluxNodes worldwide."
       },
+      "revenueBanner": {
+        "title": "List Your App on the FluxCloud Marketplace",
+        "description": "Have a great application? Publish it on the FluxCloud Marketplace and earn up to 25% in shared revenue from every deployment. Reach out to us at",
+        "cta": "to get started."
+      },
       "detail": {
         "loadingTitle": "Loading Application...",
         "errorMessage": "Failed to load application details: {error}",
@@ -3028,7 +4003,7 @@
       },
       "common": {
         "whyFlux": {
-          "title": "Why Host on Flux Cloud",
+          "title": "Why Host on FluxCloud",
           "subtitle": "Experience the power of decentralized cloud infrastructure built on Web3 technology",
           "benefits": [
             {
@@ -3075,11 +4050,11 @@
         },
         "genericFAQ": {
           "title": "Frequently Asked Questions",
-          "subtitle": "Everything you need to know about hosting on Flux Cloud",
+          "subtitle": "Everything you need to know about hosting on FluxCloud",
           "questions": [
             {
-              "q": "What is Flux Cloud?",
-              "a": "Flux Cloud is a decentralized cloud computing platform powered by Web3 technology. It provides secure, scalable, and cost-effective hosting for applications, games, and services across a global network of nodes."
+              "q": "What is FluxCloud?",
+              "a": "FluxCloud is a decentralized cloud computing platform powered by Web3 technology. It provides secure, scalable, and cost-effective hosting for applications, games, and services across a global network of nodes."
             },
             {
               "q": "How do I get started?",
@@ -3116,9 +4091,9 @@
           ]
         },
         "appSpecificFAQ": {
-          "pricingQuestion": "How much does it cost to host {appName} on Flux Cloud?",
-          "pricingAnswerPaid": "Hosting <strong>{appName}</strong> on Flux Cloud starts at <strong>{priceText}/month</strong>. This includes decentralized infrastructure across a global network of nodes, automatic backups, built-in DDoS protection, 99.9% uptime guarantee, and 24/7 support. You can scale resources up or down anytime with our flexible pricing options. No hidden fees or long-term contracts required.",
-          "pricingAnswerFree": "Hosting <strong>{appName}</strong> on Flux Cloud is <strong>free</strong>. This includes decentralized infrastructure across a global network of nodes, automatic backups, built-in DDoS protection, 99.9% uptime guarantee, and 24/7 support. You can scale resources up or down anytime with our flexible pricing options. No hidden fees or long-term contracts required."
+          "pricingQuestion": "How much does it cost to host {appName} on FluxCloud?",
+          "pricingAnswerPaid": "Hosting <strong>{appName}</strong> on FluxCloud starts at <strong>{priceText}/month</strong>. This includes decentralized infrastructure across a global network of nodes, automatic backups, built-in DDoS protection, 99.9% uptime guarantee, and 24/7 support. You can scale resources up or down anytime with our flexible pricing options. No hidden fees or long-term contracts required.",
+          "pricingAnswerFree": "Hosting <strong>{appName}</strong> on FluxCloud is <strong>free</strong>. This includes decentralized infrastructure across a global network of nodes, automatic backups, built-in DDoS protection, 99.9% uptime guarantee, and 24/7 support. You can scale resources up or down anytime with our flexible pricing options. No hidden fees or long-term contracts required."
         }
       },
       "games": {
@@ -3128,6 +4103,11 @@
           "loading": "Loading available games...",
           "maintenanceTitle": "Games Marketplace Temporarily Unavailable",
           "maintenanceSubtitle": "We're experiencing temporary issues",
+          "revenueBanner": {
+            "title": "List Your Game on FluxCloud",
+            "description": "Have an amazing game? Publish it on FluxCloud and earn up to 25% in shared revenue from every deployment. Reach out to us at",
+            "cta": "to get started."
+          },
           "hero": {
             "title": "Premium Game Server Hosting on FluxCloud",
             "subtitle": "Deploy your favorite game servers in seconds with global distribution, DDoS protection, and pay-as-you-go pricing powered by blockchain technology.",
@@ -3934,7 +4914,7 @@
           "instance": "instance",
           "perMonth": "/month",
           "planDescriptions": {
-            "Basic": "Suitable for Individuals and Small Businesses, Perfect for a simple Website or Blog",
+            "Free": "Suitable for Individuals and Small Businesses, Perfect for a simple Website or Blog",
             "Standard": "Ideal for growing businesses, good for a site with more content",
             "Pro": "Great for a larger site with higher traffic demands",
             "Ultra": "The ultimate powerhouse for resource-intensive projects that can't afford to slow down",
@@ -3965,6 +4945,7 @@
           "subscriptionPeriod": "Subscription Period",
           "month": "month",
           "months": "months",
+          "subscription": "subscription",
           "pricing": "Pricing",
           "subtotal": "Subtotal",
           "discount": "Discount",
@@ -4021,6 +5002,8 @@
           "title": "Terms of Service",
           "agreement": "I have read and agree to the",
           "link": "Terms of Service",
+          "agree": "I Agree",
+          "disagree": "I Disagree",
           "loadError": "Failed to load Terms of Service. Please visit <a href=\"https://cdn.runonflux.io/Flux_Terms_of_Service.pdf\" target=\"_blank\">https://cdn.runonflux.io/Flux_Terms_of_Service.pdf</a>"
         },
         "games": {
@@ -4343,7 +5326,7 @@
       "price": "Price",
       "perMonth": "per month",
       "header": {
-        "title": "Flux Drive",
+        "title": "FluxDrive",
         "subtitle": "Complete your subscription to unlock decentralized storage"
       },
       "fluxPay": {
@@ -4381,7 +5364,7 @@
         "cryptoComInitFailed": "Crypto.com payment initialization failed. Please try again.",
         "cryptoComPaymentFailed": "Failed to initialize Crypto.com payment",
         "paymentFailedRetry": "Payment failed. Please try again.",
-        "paymentSuccessfulRedirecting": "Payment successful! Redirecting to Flux Drive...",
+        "paymentSuccessfulRedirecting": "Payment successful! Redirecting to FluxDrive...",
         "pleaseLoginToContinue": "Please login to continue with your purchase",
         "sessionExpired": "Session expired. Please login again."
       }
@@ -4480,22 +5463,22 @@
     "explore": "Explore",
     "services": {
       "fluxCloud": {
-        "name": "Flux Cloud",
+        "name": "FluxCloud",
         "description": "Deploy and scale your applications on a decentralized cloud infrastructure",
         "category": "Infrastructure"
       },
       "fluxAI": {
-        "name": "Flux AI",
+        "name": "FluxAI",
         "description": "Harness the power of distributed AI computing for your machine learning needs",
         "category": "AI & ML"
       },
       "fluxDrive": {
-        "name": "Flux Drive",
+        "name": "FluxDrive",
         "description": "Secure, decentralized storage solution for your data",
         "category": "Storage"
       },
       "fluxEdge": {
-        "name": "Flux Edge",
+        "name": "FluxEdge",
         "description": "Edge computing at scale with Flux network",
         "category": "Network"
       },

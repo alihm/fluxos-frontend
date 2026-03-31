@@ -2,7 +2,25 @@ User-agent: *
 Allow: /
 Disallow: /administration/
 Disallow: /apps/manage/
+Disallow: /apps/management
+Disallow: /apps/register/configure
 Disallow: /checkout/
+Disallow: /successcheckout
 Disallow: /unauthorized
+Disallow: /marketplace/wordpress/configure
 
-Sitemap: https://home.runonflux.io/sitemap.xml
+# Block non-existent paths that were causing Soft 404 errors
+# These URLs were discovered by Google but don't exist in the app
+Disallow: /login
+Disallow: /login.html
+Disallow: /hello
+Disallow: /hello.html
+Disallow: /launch
+Disallow: /zelid
+Disallow: /zelid.html
+Disallow: /200
+
+# Block .html extensions (SPA doesn't use them)
+Disallow: /*.html
+
+Sitemap: https://cloud.runonflux.com/sitemap.xml

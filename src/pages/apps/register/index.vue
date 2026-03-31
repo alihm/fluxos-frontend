@@ -7,15 +7,15 @@
         :title="t('pages.apps.register.landing.title')"
         :subtitle="heroSubtitle"
         background-image="/banner/FluxDeploy.webp"
-        overlay-gradient="linear-gradient(135deg, rgba(var(--v-theme-primary), 0.5) 0%, rgba(var(--v-theme-secondary), 0.5) 100%)"
+        overlay-gradient="linear-gradient(180deg, rgba(0, 0, 0, 0.6) 0%, rgba(0, 0, 0, 0.4) 100%)"
         icon="mdi-cloud-upload"
         icon-aria-label="Flux Cloud Logo"
-        show-cta
-        :cta-text="t('pages.apps.register.landing.getStarted')"
-        cta-icon="mdi-rocket-launch"
-        cta-color="primary"
-        :cta-to="{ name: 'apps-register-configure' }"
+        :badge-text="t('pages.apps.register.orbit.landing.badge')"
+        badge-color="success"
       />
+
+      <!-- Deployment Method Choice Section -->
+      <OrbitDeploymentChoice />
 
       <!-- App Types Section -->
       <VCard class="section-card app-types-section">
@@ -95,8 +95,14 @@
         </VCardText>
       </VCard>
 
+      <!-- Git Deployment Features Section -->
+      <GitDeploymentFeatures />
+
       <!-- Trustpilot Reviews Section -->
       <TrustpilotPanel :star-size="32" show-rating-label use-live-data />
+
+      <!-- Videos Section -->
+      <VideosPanel :title="t('components.marketplace.panels.videosPanel.title')" />
 
       <!-- Global Server Network Section -->
       <ServerLocationsPanel
@@ -125,8 +131,8 @@
         card-variant="flat"
         button-icon="mdi-plus-circle"
         button-icon-position="start"
-        :button-to="{ name: 'apps-register-configure' }"
         padding-class="text-center"
+        @button-click="scrollToDeploymentChoice"
       />
 
       <!-- Related Links Section -->
@@ -141,19 +147,30 @@
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { useHead } from '@vueuse/head'
+import { useHead } from '@unhead/vue'
 import Api from '@/services/ApiClient'
 import { useFluxStore } from '@/stores/flux'
 import ServerLocationsPanel from '@/components/Marketplace/Panels/ServerLocationsPanel.vue'
 import TrustpilotPanel from '@/components/Marketplace/Panels/TrustpilotPanel.vue'
+import VideosPanel from '@/components/Marketplace/Panels/VideosPanel.vue'
 import FAQPanel from '@/components/Marketplace/Panels/FAQPanel.vue'
 import FeatureShowcase from '@/components/FeatureShowcase.vue'
 import RelatedLinksGrid from '@/components/RelatedLinksGrid.vue'
 import HeroSection from '@/components/HeroSection.vue'
 import BreadcrumbNav from '@/components/BreadcrumbNav.vue'
 import CtaSection from '@/components/CtaSection.vue'
+import OrbitDeploymentChoice from '@/components/OrbitDeploymentChoice.vue'
+import GitDeploymentFeatures from '@/components/GitDeploymentFeatures.vue'
 
 const { t } = useI18n()
+
+// Scroll to deployment choice section
+const scrollToDeploymentChoice = () => {
+  const element = document.getElementById('deployment-choice')
+  if (element) {
+    element.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  }
+}
 
 // Server Locations Panel Configuration
 const serverLocationsPanel = {
@@ -285,18 +302,33 @@ const benefits = computed(() => [
     title: t('pages.apps.register.landing.benefits.loadBalancer.title'),
     description: t('pages.apps.register.landing.benefits.loadBalancer.description'),
   },
+  {
+    icon: 'mdi-memory',
+    color: 'warning',
+    title: t('pages.apps.register.landing.benefits.dedicatedResources.title'),
+    description: t('pages.apps.register.landing.benefits.dedicatedResources.description'),
+  },
 ])
 
 // Pricing comparison data
 const pricingComparison = computed(() => [
   {
     name: 'FluxCloud',
-    instances: '3',
+    instances: '1',
     cpu: '2 vCPU',
     ram: '4 GB',
     storage: '20 GB SSD',
     price: fluxCloudPriceLoading.value ? t('pages.costCalculator.calculating') : fluxCloudPrice.value,
     highlighted: true,
+  },
+  {
+    name: 'Akash Network',
+    instances: '1',
+    cpu: '2 vCPU',
+    ram: '4 GB',
+    storage: '20 GB SSD',
+    price: '~$8.00*',
+    highlighted: false,
   },
   {
     name: 'AWS EC2',
@@ -448,19 +480,19 @@ const breadcrumbSchema = computed(() => ({
       '@type': 'ListItem',
       'position': 1,
       'name': 'Home',
-      'item': 'https://home.runonflux.io/',
+      'item': 'https://cloud.runonflux.com/',
     },
     {
       '@type': 'ListItem',
       'position': 2,
       'name': 'Applications',
-      'item': 'https://home.runonflux.io/apps/management',
+      'item': 'https://cloud.runonflux.com/apps/management',
     },
     {
       '@type': 'ListItem',
       'position': 3,
       'name': 'Deploy New App',
-      'item': 'https://home.runonflux.io/apps/register',
+      'item': 'https://cloud.runonflux.com/apps/register',
     },
   ],
 }))
@@ -483,12 +515,12 @@ const webPageSchema = computed(() => ({
   '@type': 'WebPage',
   'name': 'Deploy Your App on FluxCloud - Decentralized Cloud Computing',
   'description': 'Deploy your applications on FluxCloud\'s decentralized network. Affordable, secure, and globally distributed cloud computing with no vendor lock-in.',
-  'url': 'https://home.runonflux.io/apps/register',
-  'image': 'https://home.runonflux.io/banner/FluxDeploy.webp',
+  'url': 'https://cloud.runonflux.com/apps/register',
+  'image': 'https://cloud.runonflux.com/banner/FluxDeploy.webp',
   'publisher': {
     '@type': 'Organization',
     'name': 'FluxCloud',
-    'url': 'https://home.runonflux.io',
+    'url': 'https://cloud.runonflux.com',
   },
 }))
 
@@ -500,7 +532,7 @@ const offerSchema = computed(() => ({
   'price': '8.99',
   'priceCurrency': 'USD',
   'availability': 'https://schema.org/InStock',
-  'url': 'https://home.runonflux.io/apps/register',
+  'url': 'https://cloud.runonflux.com/apps/register',
   'seller': {
     '@type': 'Organization',
     'name': 'FluxCloud',
@@ -513,7 +545,7 @@ const calculateFluxCloudPrice = async () => {
     fluxCloudPriceLoading.value = true
 
     // Specifications matching the pricing comparison table
-    // 2 vCPU, 4 GB RAM, 20 GB SSD, 3 instances (minimum), 1 month
+    // 2 vCPU, 4 GB RAM, 20 GB SSD, 1 instance, 1 month
     // Post-fork: 88000 blocks = 1 month (30 days)
     const expire = 88000
 
@@ -537,7 +569,7 @@ const calculateFluxCloudPrice = async () => {
         hdd: "20",
         tiered: false,
       }],
-      instances: 3,
+      instances: 1,
       nodes: [],
       contacts: [""],
       geolocation: [""],
@@ -606,6 +638,7 @@ const fetchNetworkData = async () => {
         })
       } catch (error) {
         console.warn('Failed to load server locations:', error.message)
+
         // Continue anyway - page will use fallback values
       }
     }
@@ -674,11 +707,11 @@ useHead({
     },
     {
       property: 'og:url',
-      content: 'https://home.runonflux.io/apps/register',
+      content: 'https://cloud.runonflux.com/apps/register',
     },
     {
       property: 'og:image',
-      content: 'https://home.runonflux.io/banner/FluxDeploy.webp',
+      content: 'https://cloud.runonflux.com/banner/FluxDeploy.webp',
     },
     {
       property: 'og:image:width',
@@ -702,13 +735,13 @@ useHead({
     },
     {
       name: 'twitter:image',
-      content: 'https://home.runonflux.io/banner/FluxDeploy.webp',
+      content: 'https://cloud.runonflux.com/banner/FluxDeploy.webp',
     },
   ],
   link: [
     {
       rel: 'canonical',
-      href: 'https://home.runonflux.io/apps/register',
+      href: 'https://cloud.runonflux.com/apps/register',
     },
   ],
   script: [
@@ -732,6 +765,13 @@ useHead({
 })
 
 onMounted(async () => {
+  // Twitter conversion tracking event
+  if (typeof window.twq === 'function') {
+    window.twq('event', 'tw-pfazs-r2n2v', {
+      email_address: null,
+    })
+  }
+
   // Load pricing and network data in parallel
   try {
     await Promise.all([
@@ -1120,7 +1160,18 @@ onMounted(async () => {
 }
 
 /* Responsive adjustments */
+@media (max-width: 1200px) {
+  .advantages-grid.four-cards {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
 @media (max-width: 960px) {
+  .advantages-grid,
+  .advantages-grid.four-cards {
+    grid-template-columns: 1fr;
+  }
+
   .comparison-row {
     grid-template-columns: 1fr;
     gap: 0.5rem;

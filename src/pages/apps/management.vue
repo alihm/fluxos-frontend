@@ -1,6 +1,6 @@
 <template>
   <div>
-    <!-- Flux Cloud Info Card -->
+    <!-- FluxCloud Info Card -->
     <VCard class="mb-4 management-intro-card">
       <VCardText>
         <div class="d-flex align-center mb-3">
@@ -78,6 +78,7 @@
               manage
               :api-error="apiError"
               :privilege="privilege"
+              :subscriptions="userSubscriptions"
             />
           </div>
         </VWindowItem>
@@ -94,6 +95,7 @@
               manage
               :api-error="apiError"
               :privilege="privilege"
+              :subscriptions="userSubscriptions"
             />
           </div>
         </VWindowItem>
@@ -122,11 +124,13 @@
 import { ref, computed, onMounted, watch } from "vue"
 import { useI18n } from 'vue-i18n'
 import qs from "qs"
+import axios from "axios"
 import Management from "@/views/apps/management/manage.vue"
 import MyAppsTab from "@/views/apps/management/tabView.vue"
 import AppsService from "@/services/AppsService"
 import DaemonService from "@/services/DaemonService"
 import { decryptEnterpriseWithAes, encryptAesKeyWithRsaKey, importRsaPublicKey, isWebCryptoAvailable } from "@/utils/enterpriseCrypto"
+import { paymentBridge } from "@/utils/fiatGateways"
 
 import { storeToRefs } from "pinia"
 import { useFluxStore } from "@/stores/flux"
@@ -140,13 +144,13 @@ const { t } = useI18n()
 useSEO({
   title: 'My Applications - Manage FluxCloud Apps | FluxCloud',
   description: 'Manage your deployed applications on Flux decentralized cloud. View app status, monitor performance, update configurations, and manage your FluxCloud deployments from a unified dashboard.',
-  url: 'https://home.runonflux.io/apps/management',
+  url: 'https://cloud.runonflux.com/apps/management',
   keywords: 'manage apps, FluxCloud dashboard, app management, deployed apps, monitor apps, app status, flux applications, container management, cloud dashboard',
   structuredData: [
     generateOrganizationSchema(),
     generateBreadcrumbSchema([
-      { name: 'Home', url: 'https://home.runonflux.io' },
-      { name: 'My Applications', url: 'https://home.runonflux.io/apps/management' },
+      { name: 'Home', url: 'https://cloud.runonflux.com' },
+      { name: 'My Applications', url: 'https://cloud.runonflux.com/apps/management' },
     ]),
   ],
 })
@@ -165,9 +169,30 @@ const snackbar = ref({ show: false, message: "", color: "error" })
 const tabIndex = ref(0)
 const activeAppsRef = ref(null)
 const expiredAppsRef = ref(null)
+const userSubscriptions = ref([])
 
 function showSnackbar(message, color = "error") {
   snackbar.value = { show: true, message, color }
+}
+
+async function fetchUserSubscriptions() {
+  try {
+    const zelidauth = localStorage.getItem("zelidauth")
+    if (!zelidauth) return
+    const auth = qs.parse(zelidauth)
+    if (!auth?.zelid) return
+
+    const response = await axios.post(`${paymentBridge}/api/v1/stripe/subscription/list`, {
+      zelid: auth.zelid,
+      signature: auth.signature,
+      loginPhrase: auth.loginPhrase,
+    })
+    if (response.data.status === 'success' && Array.isArray(response.data.data)) {
+      userSubscriptions.value = response.data.data
+    }
+  } catch (error) {
+    console.warn('Failed to fetch subscriptions:', error.message)
+  }
 }
 
 
@@ -402,7 +427,9 @@ async function getApps() {
   if (privilege.value === 'fluxteam') {
     await getAllApps()
   } else {
-    await Promise.all([getActiveApps(), getExpiredApps()])
+    // Must run sequentially: getExpiredApps filters based on activeApps.value
+    await getActiveApps()
+    await getExpiredApps()
   }
 }
 
@@ -414,8 +441,8 @@ watch(loggedIn, newValue => {
 onMounted(async () => {
   await getDaemonBlockCount()
 
-  // Load apps on mount to ensure loading states are properly set
-  await getApps()
+  // Load apps and subscriptions on mount
+  await Promise.all([getApps(), fetchUserSubscriptions()])
 })
 </script>
 

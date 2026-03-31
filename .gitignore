@@ -37,15 +37,22 @@ package-lock.json
 
 # iconify dist files
 src/plugins/iconify/icons.css
+src/plugins/vuetify/icons-optimized.js
 
 # Ignore MSW script
 public/mockServiceWorker.js
 
 # Auto-generated sitemap
 public/sitemap.xml
+
+# Auto-generated prerender routes (generated at build time from API)
+scripts/prerender-routes.json
+scripts/prerender-routes-list.json
+
 CLAUDE.md
 
 # Claude Code documentation
 docs/claude-notes/
 .claude/
 
+src/plugins/vuetify/icons-optimized.js

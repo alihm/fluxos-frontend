@@ -77,6 +77,7 @@ declare global {
   const firebaseApp: typeof import('./utils/firebase.js')['firebaseApp']
   const formatDate: typeof import('./@core/utils/formatters.js')['formatDate']
   const formatDateToMonthShort: typeof import('./@core/utils/formatters.js')['formatDateToMonthShort']
+  const generateArticleSchema: typeof import('./composables/useSEO.js')['generateArticleSchema']
   const generateBreadcrumbSchema: typeof import('./composables/useSEO.js')['generateBreadcrumbSchema']
   const generateFAQSchema: typeof import('./composables/useSEO.js')['generateFAQSchema']
   const generateItemListSchema: typeof import('./composables/useSEO.js')['generateItemListSchema']
@@ -100,6 +101,7 @@ declare global {
   const getSpecFromPermanentMessages: typeof import('./utils/specConverter.js')['getSpecFromPermanentMessages']
   const getStickyBackendDNS: typeof import('./utils/stickyBackend.js')['getStickyBackendDNS']
   const getUser: typeof import('./utils/firebase.js')['getUser']
+  const getWagmiAdapterAsync: typeof import('./utils/walletService.js')['getWagmiAdapterAsync']
   const h: typeof import('vue')['h']
   const hasAnalyticsConsent: typeof import('./composables/useCookieConsent.js')['hasAnalyticsConsent']
   const hasConsent: typeof import('./composables/useCookieConsent.js')['hasConsent']
@@ -107,6 +109,7 @@ declare global {
   const hexToRgb: typeof import('./@core/utils/colorConverter.js')['hexToRgb']
   const ignorableWatch: typeof import('@vueuse/core')['ignorableWatch']
   const importRsaPublicKey: typeof import('./utils/enterpriseCrypto.js')['importRsaPublicKey']
+  const initializeWalletSDKs: typeof import('./utils/walletService.js')['initializeWalletSDKs']
   const inject: typeof import('vue')['inject']
   const injectLocal: typeof import('@vueuse/core')['injectLocal']
   const integerValidator: typeof import('./@core/utils/validators.js')['integerValidator']
@@ -197,6 +200,7 @@ declare global {
   const resolveVuetifyTheme: typeof import('./@core/utils/vuetify.js')['resolveVuetifyTheme']
   const rgbaToHex: typeof import('./@core/utils/colorConverter.js')['rgbaToHex']
   const sanitizeHtml: typeof import('./utils/sanitizeHtml.js')['default']
+  const sanitizeUnicodeForSigning: typeof import('./utils/walletService.js')['sanitizeUnicodeForSigning']
   const saveConsent: typeof import('./composables/useCookieConsent.js')['saveConsent']
   const setActivePinia: typeof import('pinia')['setActivePinia']
   const setMapStoreSuffix: typeof import('pinia')['setMapStoreSuffix']
@@ -302,6 +306,7 @@ declare global {
   const useFileSystemAccess: typeof import('@vueuse/core')['useFileSystemAccess']
   const useFloor: typeof import('@vueuse/math')['useFloor']
   const useFluxDrive: typeof import('./composables/useFluxDrive.js')['useFluxDrive']
+  const useFluxShare: typeof import('./composables/useFluxShare.js')['useFluxShare']
   const useFocus: typeof import('@vueuse/core')['useFocus']
   const useFocusWithin: typeof import('@vueuse/core')['useFocusWithin']
   const useFps: typeof import('@vueuse/core')['useFps']
@@ -528,6 +533,7 @@ declare module 'vue' {
     readonly firebaseApp: UnwrapRef<typeof import('./utils/firebase.js')['firebaseApp']>
     readonly formatDate: UnwrapRef<typeof import('./@core/utils/formatters.js')['formatDate']>
     readonly formatDateToMonthShort: UnwrapRef<typeof import('./@core/utils/formatters.js')['formatDateToMonthShort']>
+    readonly generateArticleSchema: UnwrapRef<typeof import('./composables/useSEO.js')['generateArticleSchema']>
     readonly generateBreadcrumbSchema: UnwrapRef<typeof import('./composables/useSEO.js')['generateBreadcrumbSchema']>
     readonly generateFAQSchema: UnwrapRef<typeof import('./composables/useSEO.js')['generateFAQSchema']>
     readonly generateItemListSchema: UnwrapRef<typeof import('./composables/useSEO.js')['generateItemListSchema']>
@@ -550,6 +556,7 @@ declare module 'vue' {
     readonly getSpecFromPermanentMessages: UnwrapRef<typeof import('./utils/specConverter.js')['getSpecFromPermanentMessages']>
     readonly getStickyBackendDNS: UnwrapRef<typeof import('./utils/stickyBackend.js')['getStickyBackendDNS']>
     readonly getUser: UnwrapRef<typeof import('./utils/firebase.js')['getUser']>
+    readonly getWagmiAdapterAsync: UnwrapRef<typeof import('./utils/walletService.js')['getWagmiAdapterAsync']>
     readonly h: UnwrapRef<typeof import('vue')['h']>
     readonly hasAnalyticsConsent: UnwrapRef<typeof import('./composables/useCookieConsent.js')['hasAnalyticsConsent']>
     readonly hasConsent: UnwrapRef<typeof import('./composables/useCookieConsent.js')['hasConsent']>
@@ -557,6 +564,7 @@ declare module 'vue' {
     readonly hexToRgb: UnwrapRef<typeof import('./@core/utils/colorConverter.js')['hexToRgb']>
     readonly ignorableWatch: UnwrapRef<typeof import('@vueuse/core')['ignorableWatch']>
     readonly importRsaPublicKey: UnwrapRef<typeof import('./utils/enterpriseCrypto.js')['importRsaPublicKey']>
+    readonly initializeWalletSDKs: UnwrapRef<typeof import('./utils/walletService.js')['initializeWalletSDKs']>
     readonly inject: UnwrapRef<typeof import('vue')['inject']>
     readonly injectLocal: UnwrapRef<typeof import('@vueuse/core')['injectLocal']>
     readonly integerValidator: UnwrapRef<typeof import('./@core/utils/validators.js')['integerValidator']>
@@ -646,6 +654,7 @@ declare module 'vue' {
     readonly resolveVuetifyTheme: UnwrapRef<typeof import('./@core/utils/vuetify.js')['resolveVuetifyTheme']>
     readonly rgbaToHex: UnwrapRef<typeof import('./@core/utils/colorConverter.js')['rgbaToHex']>
     readonly sanitizeHtml: UnwrapRef<typeof import('./utils/sanitizeHtml.js')['default']>
+    readonly sanitizeUnicodeForSigning: UnwrapRef<typeof import('./utils/walletService.js')['sanitizeUnicodeForSigning']>
     readonly saveConsent: UnwrapRef<typeof import('./composables/useCookieConsent.js')['saveConsent']>
     readonly setActivePinia: UnwrapRef<typeof import('pinia')['setActivePinia']>
     readonly setMapStoreSuffix: UnwrapRef<typeof import('pinia')['setMapStoreSuffix']>
@@ -751,6 +760,7 @@ declare module 'vue' {
     readonly useFileSystemAccess: UnwrapRef<typeof import('@vueuse/core')['useFileSystemAccess']>
     readonly useFloor: UnwrapRef<typeof import('@vueuse/math')['useFloor']>
     readonly useFluxDrive: UnwrapRef<typeof import('./composables/useFluxDrive.js')['useFluxDrive']>
+    readonly useFluxShare: UnwrapRef<typeof import('./composables/useFluxShare.js')['useFluxShare']>
     readonly useFocus: UnwrapRef<typeof import('@vueuse/core')['useFocus']>
     readonly useFocusWithin: UnwrapRef<typeof import('@vueuse/core')['useFocusWithin']>
     readonly useFps: UnwrapRef<typeof import('@vueuse/core')['useFps']>

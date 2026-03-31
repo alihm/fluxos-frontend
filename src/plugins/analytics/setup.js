@@ -36,24 +36,8 @@ export function detectDeviceType() {
 }
 
 /**
- * Get device category for analytics (mobile or desktop)
- * Tablets are grouped as mobile for simpler analytics
- * @returns {string} Device category
- */
-export function getDeviceCategory() {
-  try {
-    const deviceType = detectDeviceType()
-    
-    return deviceType === 'mobile' || deviceType === 'tablet' ? 'mobile' : 'desktop'
-  } catch (error) {
-    console.error('Error getting device category:', error)
-    
-    return 'desktop' // Safe fallback
-  }
-}
-
-/**
  * Get browser information
+ * Detects major browsers including privacy-focused and alternative browsers
  * @returns {object} Browser name and version
  */
 export function getBrowserInfo() {
@@ -62,16 +46,49 @@ export function getBrowserInfo() {
     let browserName = 'Unknown'
     let browserVersion = 'Unknown'
 
-    // Chrome (check before Safari)
-    if (userAgent.includes('Chrome') && !userAgent.includes('Edg')) {
-      browserName = 'Chrome'
+    // Brave (check first - uses Chrome UA but has Brave property)
+    // Note: Brave may block this detection in some configurations
+    if (navigator.brave?.isBrave) {
+      browserName = 'Brave'
       browserVersion = userAgent.match(/Chrome\/(\d+)/)?.[1] || 'Unknown'
     }
 
-    // Edge
+    // Samsung Internet (check before Chrome - uses Chrome engine)
+    else if (userAgent.includes('SamsungBrowser')) {
+      browserName = 'Samsung Internet'
+      browserVersion = userAgent.match(/SamsungBrowser\/(\d+)/)?.[1] || 'Unknown'
+    }
+
+    // Opera GX and Opera (check before Chrome - uses Chrome engine)
+    else if (userAgent.includes('OPR') || userAgent.includes('Opera')) {
+      // Opera GX includes "OPR" but we can't reliably distinguish from regular Opera
+      browserName = 'Opera'
+      browserVersion = userAgent.match(/OPR\/(\d+)/)?.[1] || userAgent.match(/Opera\/(\d+)/)?.[1] || 'Unknown'
+    }
+
+    // Vivaldi (check before Chrome - uses Chrome engine)
+    else if (userAgent.includes('Vivaldi')) {
+      browserName = 'Vivaldi'
+      browserVersion = userAgent.match(/Vivaldi\/(\d+)/)?.[1] || 'Unknown'
+    }
+
+    // Arc (check before Chrome - uses Chrome engine, identified by presence of Arc in UA)
+    // Note: Arc browser detection is limited as it may not always identify itself
+    else if (userAgent.includes('Arc')) {
+      browserName = 'Arc'
+      browserVersion = userAgent.match(/Chrome\/(\d+)/)?.[1] || 'Unknown'
+    }
+
+    // Edge (check before Chrome - uses Chromium)
     else if (userAgent.includes('Edg')) {
       browserName = 'Edge'
       browserVersion = userAgent.match(/Edg\/(\d+)/)?.[1] || 'Unknown'
+    }
+
+    // Chrome (check before Safari)
+    else if (userAgent.includes('Chrome') && !userAgent.includes('Edg')) {
+      browserName = 'Chrome'
+      browserVersion = userAgent.match(/Chrome\/(\d+)/)?.[1] || 'Unknown'
     }
 
     // Firefox
@@ -80,22 +97,16 @@ export function getBrowserInfo() {
       browserVersion = userAgent.match(/Firefox\/(\d+)/)?.[1] || 'Unknown'
     }
 
-    // Safari
+    // Safari (must be last Chrome-based check)
     else if (userAgent.includes('Safari') && !userAgent.includes('Chrome')) {
       browserName = 'Safari'
       browserVersion = userAgent.match(/Version\/(\d+)/)?.[1] || 'Unknown'
     }
 
-    // Opera
-    else if (userAgent.includes('OPR')) {
-      browserName = 'Opera'
-      browserVersion = userAgent.match(/OPR\/(\d+)/)?.[1] || 'Unknown'
-    }
-
     return { browserName, browserVersion }
   } catch (error) {
     console.error('Error getting browser info:', error)
-    
+
     return { browserName: 'Unknown', browserVersion: 'Unknown' }
   }
 }
@@ -120,6 +131,90 @@ export function getResolutionCategory() {
   }
 }
 
+// Track if analytics script has been loaded
+let analyticsScriptLoaded = false
+
+/**
+ * Load the gtag.js script (called only when consent is granted)
+ */
+function loadGtagScript() {
+  if (analyticsScriptLoaded) return Promise.resolve()
+
+  const measurementId = import.meta.env.VITE_GA_MEASUREMENT_ID
+  if (!measurementId) return Promise.resolve()
+
+  return new Promise((resolve, reject) => {
+    try {
+      const script = document.createElement('script')
+      script.async = true
+      script.src = `https://www.googletagmanager.com/gtag/js?id=${measurementId}`
+
+      const loadTimeout = 10000
+      let timeoutId = null
+
+      const handleScriptLoad = () => {
+        if (timeoutId) {
+          clearTimeout(timeoutId)
+          timeoutId = null
+        }
+        analyticsScriptLoaded = true
+
+        // Configure Google Analytics after script loads
+        window.gtag('js', new Date())
+        window.gtag('config', measurementId, {
+          send_page_view: false, // We handle page views manually
+          anonymize_ip: true, // GDPR: Anonymize IP addresses
+          cookie_flags: 'SameSite=None;Secure', // Modern cookie settings
+          app_version: import.meta.env.VITE_APP_VERSION || 'unknown',
+        })
+
+        // Get device info for custom dimensions (single call)
+        const deviceType = detectDeviceType()
+        const deviceCategory = deviceType === 'desktop' ? 'desktop' : 'mobile'
+        const { browserName, browserVersion } = getBrowserInfo()
+        const resolutionCategory = getResolutionCategory()
+
+        // Set custom user properties (these persist across events)
+        window.gtag('set', 'user_properties', {
+          device_category: deviceCategory,
+          device_type: deviceType,
+          browser_name: browserName,
+          browser_version: browserVersion,
+          resolution_category: resolutionCategory,
+        })
+
+        // Grant consent now that script is loaded
+        window.gtag('consent', 'update', {
+          analytics_storage: 'granted',
+        })
+
+        resolve()
+      }
+
+      const handleScriptError = () => {
+        if (timeoutId) {
+          clearTimeout(timeoutId)
+          timeoutId = null
+        }
+        console.warn('⚠️ Google Analytics: Failed to load gtag.js script')
+        reject(new Error('Failed to load gtag.js'))
+      }
+
+      script.onload = handleScriptLoad
+      script.onerror = handleScriptError
+
+      timeoutId = setTimeout(() => {
+        console.warn('⚠️ Google Analytics: Script load timed out')
+        reject(new Error('Script load timeout'))
+      }, loadTimeout)
+
+      document.head.appendChild(script)
+    } catch (error) {
+      reject(error)
+    }
+  })
+}
+
 /**
  * Initialize Google Analytics 4
  * @param {object} app - Vue app instance
@@ -127,7 +222,6 @@ export function getResolutionCategory() {
 export function setupAnalytics(app) {
   const measurementId = import.meta.env.VITE_GA_MEASUREMENT_ID
   const analyticsEnabled = import.meta.env.VITE_ENABLE_ANALYTICS === 'true'
-  const isProduction = import.meta.env.PROD
   const isDevelopment = import.meta.env.DEV
 
   // Don't initialize if no measurement ID
@@ -135,82 +229,60 @@ export function setupAnalytics(app) {
     if (isDevelopment) {
       console.warn('⚠️ Google Analytics: VITE_GA_MEASUREMENT_ID not configured')
     }
-
+    
     return
   }
 
   // Don't send analytics in development to avoid polluting production data
   if (isDevelopment) {
-    console.log('📊 Google Analytics: Development mode - tracking disabled')
-
-    // Create mock gtag for development
-    window.gtag = function(...args) {
-      console.log('📊 [DEV] Analytics Event:', ...args)
-    }
-
+    console.log('📊 Analytics: Development mode - tracking disabled')
+    window.gtag = function() {}
+    
     return
   }
 
   // Check if analytics is explicitly enabled (production safety check)
   if (!analyticsEnabled) {
-    console.log('📊 Google Analytics: Disabled (VITE_ENABLE_ANALYTICS=false)')
-
-    // Create mock gtag for disabled state
-    window.gtag = function(...args) {
-      console.log('📊 [DISABLED] Analytics Event:', ...args)
-    }
-
+    console.log('📊 Analytics: Disabled (VITE_ENABLE_ANALYTICS=false)')
+    window.gtag = function() {}
+    
     return
   }
 
-  try {
-    // Load gtag.js script
-    const script = document.createElement('script')
-    script.async = true
-    script.src = `https://www.googletagmanager.com/gtag/js?id=${measurementId}`
-    document.head.appendChild(script)
-
-    // Initialize gtag function
-    window.dataLayer = window.dataLayer || []
-    window.gtag = function() {
-      window.dataLayer.push(arguments)
-    }
-
-    // Set default consent to denied (GDPR compliance)
-    window.gtag('consent', 'default', {
-      analytics_storage: 'denied',
-      ad_storage: 'denied',
-      wait_for_update: 500,
-    })
-
-    // Configure Google Analytics
-    window.gtag('js', new Date())
-    window.gtag('config', measurementId, {
-      send_page_view: false, // We handle page views manually
-      anonymize_ip: true, // GDPR: Anonymize IP addresses
-      cookie_flags: 'SameSite=None;Secure', // Modern cookie settings
-      app_version: import.meta.env.VITE_APP_VERSION || 'unknown',
-    })
-
-    // Get device info for custom dimensions
-    const deviceCategory = getDeviceCategory()
-    const deviceType = detectDeviceType()
-    const { browserName, browserVersion } = getBrowserInfo()
-    const resolutionCategory = getResolutionCategory()
-
-    // Set custom user properties (these persist across events)
-    window.gtag('set', 'user_properties', {
-      device_category: deviceCategory,
-      device_type: deviceType,
-      browser_name: browserName,
-      browser_version: browserVersion,
-      resolution_category: resolutionCategory,
-    })
-
-    if (isProduction) {
-      console.log('✅ Google Analytics initialized (consent required)')
-    }
-  } catch (error) {
-    console.error('Error initializing Google Analytics:', error)
+  // Initialize gtag function as no-op until consent is granted
+  // This prevents errors if tracking calls are made before consent
+  window.dataLayer = window.dataLayer || []
+  window.gtag = function() {
+    window.dataLayer.push(arguments)
   }
+
+  // Set default consent to denied (GDPR compliance)
+  // Script is NOT loaded yet - saves ~143KB until consent is granted
+  window.gtag('consent', 'default', {
+    analytics_storage: 'denied',
+    ad_storage: 'denied',
+  })
+
+  // Check if user has already consented (from previous session)
+  // Import dynamically to avoid circular dependency
+  import('@/composables/useCookieConsent').then(({ hasAnalyticsConsent }) => {
+    if (hasAnalyticsConsent()) {
+      // User already consented - load the script now
+      loadGtagScript().catch(err => {
+        console.warn('Failed to load analytics:', err.message)
+      })
+    }
+  })
+
+  // Listen for consent updates to load script when consent is granted
+  window.addEventListener('consentUpdate', async event => {
+    if (event.detail?.analytics && !analyticsScriptLoaded) {
+      try {
+        await loadGtagScript()
+        console.log('📊 Analytics: Script loaded after consent')
+      } catch (err) {
+        console.warn('Failed to load analytics after consent:', err.message)
+      }
+    }
+  })
 }

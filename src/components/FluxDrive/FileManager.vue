@@ -1878,9 +1878,9 @@ const hasContentChanged = computed(() => {
 })
 
 
-// Local upload progress tracking
-const currentUploadIndex = ref(0)
-const totalFilesToUpload = ref(0)
+// Local upload progress tracking (for individual file uploads in FileManager)
+const localCurrentUploadIndex = ref(0)
+const localTotalFilesToUpload = ref(0)
 const currentFileName = ref('')
 const currentFileSize = ref(0)
 const localUploadProgress = ref(0)
@@ -2151,8 +2151,8 @@ const uploadFileWithProgress = async file => {
     const folderPath = currentFolder.value === '/' ? '' : currentFolder.value.replace(/^\//, '')
     if (currentFolder.value === '/') {
       formData.append('currentFolder', '/')
-    } else if (sharedState.currentFolderUuid.value) {
-      formData.append('currentFolder', sharedState.currentFolderUuid.value)
+    } else if (currentFolderUuid.value) {
+      formData.append('currentFolder', currentFolderUuid.value)
     } else if (folderPath) {
       formData.append('currentFolder', folderPath)
     }
@@ -2213,14 +2213,14 @@ const handleLocalFileSelect = async e => {
 
   // Start batch upload - set uploading state for entire operation
   uploading.value = true
-  totalFilesToUpload.value = files.length
-  currentUploadIndex.value = 0
+  localTotalFilesToUpload.value = files.length
+  localCurrentUploadIndex.value = 0
   const uploadResults = []
 
   try {
     for (let i = 0; i < files.length; i++) {
       const file = files[i]
-      currentUploadIndex.value = i
+      localCurrentUploadIndex.value = i
       currentFileName.value = file.name
       currentFileSize.value = file.size
       localUploadProgress.value = 0
@@ -2312,14 +2312,14 @@ const handleLocalDrop = async e => {
 
   // Start batch upload - set uploading state for entire operation
   uploading.value = true
-  totalFilesToUpload.value = files.length
-  currentUploadIndex.value = 0
+  localTotalFilesToUpload.value = files.length
+  localCurrentUploadIndex.value = 0
   const uploadResults = []
 
   try {
     for (let i = 0; i < files.length; i++) {
       const file = files[i]
-      currentUploadIndex.value = i
+      localCurrentUploadIndex.value = i
       currentFileName.value = file.name
       currentFileSize.value = file.size
       localUploadProgress.value = 0
@@ -2533,6 +2533,7 @@ const {
   filesPerPage,
   totalFiles,
   currentFolder,
+  currentFolderUuid,
   breadcrumbs,
   hasActiveSubscription,
   subscriptionChecked,
@@ -2542,6 +2543,9 @@ const {
   isDragOver,
   uploading,
   uploadProgress,
+  currentUploadFileName,
+  totalFilesToUpload: sharedTotalFilesToUpload,
+  currentUploadIndex: sharedCurrentUploadIndex,
   showFileModal,
   previewingFile,
   resultMessage,
@@ -2585,6 +2589,30 @@ const {
   // Active XHR tracking for cleanup
   activeXHRs,
 } = useFluxDrive()
+
+// Watch uploadProgress from useFluxDrive and sync to localUploadProgress
+watch(uploadProgress, newValue => {
+  if (sharedTotalFilesToUpload.value > 0) {
+    // Folder upload in progress - sync the progress
+    localUploadProgress.value = newValue
+  }
+})
+
+// Watch currentUploadFileName and sync to currentFileName for display
+watch(currentUploadFileName, newValue => {
+  if (newValue && sharedTotalFilesToUpload.value > 0) {
+    currentFileName.value = newValue
+  }
+})
+
+// Computed properties that combine local and shared upload tracking
+// Use shared values from folder uploads (useFluxDrive) or local values from file uploads (FileManager)
+const currentUploadIndex = computed(() =>
+  sharedTotalFilesToUpload.value > 0 ? sharedCurrentUploadIndex.value : localCurrentUploadIndex.value,
+)
+const totalFilesToUpload = computed(() =>
+  sharedTotalFilesToUpload.value > 0 ? sharedTotalFilesToUpload.value : localTotalFilesToUpload.value,
+)
 
 // Calculate days left until subscription expires
 const subscriptionDaysLeft = computed(() => {
@@ -2769,7 +2797,7 @@ const generateVideoThumbnail = async item => {
     video.src = `${ipfsHost}/ipfs/${item.hash}`
     video.currentTime = 1 // Capture frame at 1 second
 
-    video.addEventListener('loadeddata', () => {
+    const handleLoadedData = () => {
       const canvas = document.createElement('canvas')
       canvas.width = 48
       canvas.height = 48
@@ -2785,13 +2813,23 @@ const generateVideoThumbnail = async item => {
       videoThumbnails.value[item.hash] = thumbnail
       resolve(thumbnail)
 
+      // Clean up event listeners before removing element
+      video.removeEventListener('loadeddata', handleLoadedData)
+      video.removeEventListener('error', handleError)
       video.remove()
-    })
+    }
 
-    video.addEventListener('error', () => {
+    const handleError = () => {
       resolve(null)
+
+      // Clean up event listeners before removing element
+      video.removeEventListener('loadeddata', handleLoadedData)
+      video.removeEventListener('error', handleError)
       video.remove()
-    })
+    }
+
+    video.addEventListener('loadeddata', handleLoadedData)
+    video.addEventListener('error', handleError)
   })
 }
 
@@ -3189,11 +3227,11 @@ const confirmRename = async () => {
     } else {
       const errorMessage = result.error || result.message || 'Failed to rename item'
       console.error('❌ Rename failed:', errorMessage)
-      showLocalMessage(`Failed to rename: ${errorMessage}`, 'error', 'mdi-rename-box-off')
+      showLocalMessage(`Failed to rename: ${errorMessage}`, 'error', 'mdi-alert-circle')
     }
   } catch (error) {
     console.error('❌ Rename error:', error)
-    showLocalMessage(`Failed to rename: ${error.message}`, 'error', 'mdi-rename-box-off')
+    showLocalMessage(`Failed to rename: ${error.message}`, 'error', 'mdi-alert-circle')
   }
 }
 

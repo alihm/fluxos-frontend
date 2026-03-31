@@ -3,17 +3,18 @@
     v-if="!isHidden"
     icon="mdi-server"
     class="rounded elevation-4 mb-0 pa-2 statusbar-card"
-    style="width: 100%; position: relative;"
+    style="width: 100%; position: relative; overflow: visible;"
   >
     <VTooltip location="left">
       <template #activator="{ props }">
         <VBtn
           icon="mdi-close"
           size="x-small"
-          variant="text"
-          color="secondary"
-          class="position-absolute mr-3 close-btn-hover"
-          style="top: 50%; right: 0; transform: translateY(-50%);"
+          variant="flat"
+          color="error"
+          class="position-absolute close-btn-hover" :class="[windowWidth < 745 ? 'mobile-small' : 'desktop-small']"
+          style="top: -4px; right: -4px;"
+          :aria-label="t('core.statusBar.hideStatusBar')"
           @click="toggleVisibility"
           v-bind="props"
         />
@@ -21,169 +22,186 @@
       <span>{{ t('core.statusBar.hideStatusBar') }}</span>
     </VTooltip>
     <div
-      class="d-flex align-center justify-center px-2"
+      class="d-flex align-center px-2"
       :style="{
-        gap: windowWidth >= 600 ? '48px' : '24px',
-        whiteSpace: 'nowrap',
         fontSize: 'clamp(9.2px, 2vw, 14px)',
         overflow: 'visible',
         width: '100%',
+        justifyContent: 'flex-start',
+        paddingRight: windowWidth < 850 ? '64px' : '0',
       }"
     >
-      <!-- Backend -->
-      <div class="d-inline-flex align-center">
-        <VTooltip location="top">
-          <template #activator="{ props }">
-            <span
-              class="d-inline-flex align-center"
-              style="position: relative"
-              v-bind="props"
-            >
-              <VBadge
-                dot
-                bordered
-                :color="backendVersionError ? 'error' : (isNewBackendVersion ? 'warning' : 'success')"
-                location="top start"
-                offset-x="-1"
-                offset-y="2"
+      <div class="d-flex align-center" :style="{ gap: windowWidth < 640 ? '12px' : (windowWidth < 800 ? '18px' : '25px'), flexWrap: 'nowrap', justifyContent: 'flex-start' }">
+        <!-- Backend -->
+        <div class="d-inline-flex align-center" style="white-space: nowrap">
+          <VTooltip location="top">
+            <template #activator="{ props }">
+              <span
+                class="d-inline-flex align-center"
+                style="position: relative"
+                v-bind="props"
               >
-                <template #badge>
-                  <span
-                    class="v-badge__dot"
-                    style="background-color: #ff7043"
-                  />
-                </template>
-                <VIcon
-                  size="20"
-                  class="me-2"
-                >tabler-settings</VIcon>
-              </VBadge>
+                <VBadge
+                  dot
+                  bordered
+                  :color="backendVersionError ? 'error' : (isNewBackendVersion ? 'warning' : 'success')"
+                  location="top start"
+                  offset-x="-1"
+                  offset-y="2"
+                >
+                  <template #badge>
+                    <span
+                      class="v-badge__dot"
+                      style="background-color: #ff7043"
+                    />
+                  </template>
+                  <VIcon
+                    :size="windowWidth < 640 ? 14 : (windowWidth < 800 ? 16 : 20)"
+                    class="me-2"
+                  >tabler-settings</VIcon>
+                </VBadge>
+              </span>
+            </template>
+            <span>{{
+              backendVersionError ? t("core.statusBar.backendError") : (isNewBackendVersion ? t("core.statusBar.updateAvailable") : t("core.statusBar.upToDate"))
+            }}</span>
+          </VTooltip>
+          <span>
+            {{ t("core.statusBar.backend") }}:
+            <span :class="backendVersionError ? 'text-error' : ''">
+              {{ backendVersionError ? t("core.statusBar.error") : fluxVersion }}
             </span>
-          </template>
-          <span>{{
-            backendVersionError ? t("core.statusBar.backendError") : (isNewBackendVersion ? t("core.statusBar.updateAvailable") : t("core.statusBar.upToDate"))
-          }}</span>
-        </VTooltip>
-        <span>
-          {{ t("core.statusBar.backend") }}:
-          <span :class="backendVersionError ? 'text-error' : ''">
-            {{ backendVersionError ? t("core.statusBar.error") : fluxVersion }}
           </span>
-        </span>
-      </div>
+        </div>
 
-      <!-- Frontend -->
-      <div class="d-inline-flex align-center">
-        <VTooltip location="top">
-          <template #activator="{ props }">
-            <span
-              class="d-inline-flex align-center"
-              style="position: relative"
-              v-bind="props"
-            >
-              <VBadge
-                dot
-                bordered
-                location="top start"
-                :color="isNewFrontendVersion ? 'warning' : 'success'"
-                offset-x="-1"
-                offset-y="1"
+        <!-- Frontend -->
+        <div class="d-inline-flex align-center" style="white-space: nowrap">
+          <VTooltip location="top">
+            <template #activator="{ props }">
+              <span
+                class="d-inline-flex align-center"
+                style="position: relative"
+                v-bind="props"
               >
-                <template #badge>
-                  <span
-                    class="v-badge__dot"
-                    style="background-color: #ff7043"
-                  />
-                </template>
-                <VIcon
-                  size="20"
-                  class="me-2"
-                >mdi-view-dashboard-outline</VIcon>
-              </VBadge>
-            </span>
-          </template>
-          <span>{{
-            isNewFrontendVersion ? t("core.statusBar.updateAvailable") : t("core.statusBar.upToDate")
-          }}</span>
-        </VTooltip>
-        <span>{{ t("core.statusBar.frontend") }}: {{ frontendVersion }}</span>
-      </div>
+                <VBadge
+                  dot
+                  bordered
+                  location="top start"
+                  :color="isNewFrontendVersion ? 'warning' : 'success'"
+                  offset-x="-1"
+                  offset-y="1"
+                >
+                  <template #badge>
+                    <span
+                      class="v-badge__dot"
+                      style="background-color: #ff7043"
+                    />
+                  </template>
+                  <VIcon
+                    :size="windowWidth < 640 ? 14 : (windowWidth < 800 ? 16 : 20)"
+                    class="me-2"
+                  >mdi-view-dashboard-outline</VIcon>
+                </VBadge>
+              </span>
+            </template>
+            <span>{{
+              isNewFrontendVersion ? t("core.statusBar.updateAvailable") : t("core.statusBar.upToDate")
+            }}</span>
+          </VTooltip>
+          <span>{{ t("core.statusBar.frontend") }}: {{ frontendVersion }}</span>
+        </div>
 
-      <!-- Node Status -->
-      <div class="d-inline-flex align-center">
-        <VTooltip location="top">
-          <template #activator="{ props }">
-            <span
-              class="d-inline-flex align-center"
-              style="position: relative"
-              v-bind="props"
-            >
-              <VBadge
-                dot
-                bordered
-                location="top start"
-                :color="getNodeStatusResponse.class"
-                offset-x="-1"
-                offset-y="1"
+        <!-- Node Status -->
+        <div class="d-inline-flex align-center" style="white-space: nowrap">
+          <VTooltip location="top">
+            <template #activator="{ props }">
+              <span
+                class="d-inline-flex align-center"
+                style="position: relative"
+                v-bind="props"
               >
-                <template #badge>
-                  <span
-                    class="v-badge__dot"
-                    style="background-color: #ff7043"
-                  />
-                </template>
-                <VIcon
-                  size="20"
-                  class="me-2"
-                >tabler-heartbeat</VIcon>
-              </VBadge>
+                <VBadge
+                  dot
+                  bordered
+                  location="top start"
+                  :color="getNodeStatusResponse.class"
+                  offset-x="-1"
+                  offset-y="1"
+                >
+                  <template #badge>
+                    <span
+                      class="v-badge__dot"
+                      style="background-color: #ff7043"
+                    />
+                  </template>
+                  <VIcon
+                    :size="windowWidth < 640 ? 14 : (windowWidth < 800 ? 16 : 20)"
+                    class="me-2"
+                  >tabler-heartbeat</VIcon>
+                </VBadge>
+              </span>
+            </template>
+            <span>{{ getNodeStatusResponse.message }}</span>
+          </VTooltip>
+          <span class="d-inline-flex align-center">
+            {{ t("core.statusBar.statusMessage") }}:
+            <VProgressCircular
+              v-if="getNodeStatusResponse.nodeStatus === t('core.statusBar.checkingStatus')"
+              color="primary"
+              :size="14"
+              :width="2"
+              indeterminate
+              class="ml-1"
+            />
+            <span :class="`ml-1 text-${getNodeStatusResponse.class}`">
+              {{ getNodeStatusResponse.nodeStatus }}
             </span>
-          </template>
-          <span>{{ getNodeStatusResponse.message }}</span>
-        </VTooltip>
-        <span class="d-inline-flex align-center">
-          {{ t("core.statusBar.statusMessage") }}:
-          <VProgressCircular
-            v-if="getNodeStatusResponse.nodeStatus === t('core.statusBar.checkingStatus')"
-            color="primary"
-            :size="14"
-            :width="2"
-            indeterminate
-            class="ml-1"
-          />
-          <span :class="`ml-1 text-${getNodeStatusResponse.class}`">
-            {{ getNodeStatusResponse.nodeStatus }}
           </span>
-        </span>
+        </div>
       </div>
 
-      <!-- Manage Cookies -->
-      <div
-        v-if="windowWidth >= 768"
-        class="d-inline-flex align-center"
-      >
-        <VTooltip location="top">
-          <template #activator="{ props }">
-            <span
-              class="d-inline-flex align-center cursor-pointer"
-              style="position: relative"
-              v-bind="props"
-              @click="openCookieSettings"
-            >
-              <VIcon
-                size="20"
-                class="me-2"
-              >mdi-cookie-settings</VIcon>
-            </span>
-          </template>
-          <span>{{ t("core.statusBar.manageCookiesTooltip") }}</span>
-        </VTooltip>
-        <span
-          class="cursor-pointer"
-          @click="openCookieSettings"
-        >{{ t("common.cookieConsent.manageCookies") }}</span>
-      </div>
+      <!-- Manage Cookies - Desktop (full button with text) -->
+      <VTooltip v-if="windowWidth >= 640" location="top">
+        <template #activator="{ props }">
+          <VBtn
+            v-bind="props"
+            color="success"
+            variant="tonal"
+            :size="windowWidth < 745 ? 'x-small' : (windowWidth < 800 ? 'x-small' : 'small')"
+            rounded="pill"
+            class="d-flex align-center"
+            :style="{
+              marginLeft: 'auto',
+              marginRight: '20px',
+              fontSize: windowWidth < 745 ? '0.65rem' : (windowWidth < 800 ? '0.7rem' : '0.875rem'),
+              padding: windowWidth < 745 ? '4px 8px' : undefined
+            }"
+            @click="openCookieSettings"
+          >
+            <VIcon :size="windowWidth < 745 ? 12 : (windowWidth < 800 ? 14 : (windowWidth < 1100 ? 18 : 20))">mdi-cookie-settings</VIcon>
+            <span class="ms-1 d-flex align-center">{{ t("common.cookieConsent.manageCookies") }}</span>
+          </VBtn>
+        </template>
+        <span>{{ t("core.statusBar.manageCookiesTooltip") }}</span>
+      </VTooltip>
     </div>
+
+    <!-- Manage Cookies - Mobile (icon only) -->
+    <VTooltip v-if="windowWidth < 640" location="top">
+      <template #activator="{ props }">
+        <VBtn
+          v-bind="props"
+          color="success"
+          variant="tonal"
+          size="x-small"
+          icon="mdi-cookie-settings"
+          class="position-absolute"
+          style="top: 50%; right: 24px; transform: translateY(-50%);"
+          @click="openCookieSettings"
+        />
+      </template>
+      <span>{{ t("core.statusBar.manageCookiesTooltip") }}</span>
+    </VTooltip>
   </VCard>
 </template>
 
@@ -374,7 +392,39 @@ onBeforeUnmount(() => {
 </script>
 
 <style scoped>
-.close-btn-hover:hover {
-  color: rgb(var(--v-theme-error)) !important;
+.statusbar-card {
+  border-radius: 6px !important;
+}
+</style>
+
+<style>
+.mobile-small.v-btn {
+  width: 16px !important;
+  height: 16px !important;
+  min-width: 16px !important;
+  min-height: 16px !important;
+  padding: 0 !important;
+}
+
+.mobile-small .v-btn__content {
+  font-size: 10px !important;
+}
+
+.mobile-small .v-icon {
+  font-size: 16px !important;
+  width: 10px !important;
+  height: 10px !important;
+}
+
+.desktop-small.v-btn {
+  width: 20px !important;
+  height: 20px !important;
+  min-width: 20px !important;
+  min-height: 20px !important;
+  padding: 0 !important;
+}
+
+.desktop-small .v-icon {
+  font-size: 14px !important;
 }
 </style>

@@ -44,6 +44,49 @@
       </VCard>
     </a>
 
+    <!-- Enterprise Banner -->
+    <VCard
+      flat
+      class="mb-6 enterprise-banner"
+    >
+      <VCardText class="pa-6 pa-sm-8">
+        <div class="d-flex align-center flex-column flex-sm-row text-center text-sm-start">
+          <VAvatar
+            size="64"
+            color="warning"
+            variant="tonal"
+            class="mb-4 mb-sm-0 me-sm-5"
+          >
+            <VIcon
+              icon="mdi-office-building-cog"
+              size="36"
+            />
+          </VAvatar>
+          <div class="flex-grow-1">
+            <h3 class="text-h5 font-weight-bold mb-2">
+              {{ t('pages.costCalculator.enterpriseBanner.title') }}
+            </h3>
+            <p class="text-body-1 text-medium-emphasis mb-3" style="max-width: 780px;">
+              {{ t('pages.costCalculator.enterpriseBanner.description') }}
+            </p>
+            <VBtn
+              color="warning"
+              variant="elevated"
+              rounded
+              href="mailto:info@runonflux.com"
+            >
+              <VIcon
+                icon="mdi-email-outline"
+                size="18"
+                class="me-2"
+              />
+              {{ t('pages.costCalculator.enterpriseBanner.cta') }} — {{ t('pages.costCalculator.enterpriseBanner.email') }}
+            </VBtn>
+          </div>
+        </div>
+      </VCardText>
+    </VCard>
+
     <VRow>
       <!-- Calculator Form -->
       <VCol 
@@ -69,16 +112,46 @@
               <VTextField
                 v-model.number="formData.instances"
                 type="number"
-                :min="3"
+                :min="minInstances"
                 :max="100"
                 :rules="[
                   v => !!v || t('pages.costCalculator.validation.instancesRequired'),
-                  v => v >= 3 || t('pages.costCalculator.validation.instancesMin'),
+                  v => v >= minInstances || (syncEnabled ? t('pages.costCalculator.validation.instancesMinSync') : t('pages.costCalculator.validation.instancesMin')),
                   v => v <= 100 || t('pages.costCalculator.validation.instancesMax')
                 ]"
                 :placeholder="t('pages.costCalculator.instancesPlaceholder')"
-                @input="calculateCost"
+                @input="markDirty"
               />
+
+              <!-- Warning for syncthing minimum instances -->
+              <VAlert
+                v-if="syncEnabled"
+                type="info"
+                variant="tonal"
+                density="compact"
+                class="mt-2"
+              >
+                {{ t('pages.costCalculator.validation.instancesMinSyncInfo') }}
+              </VAlert>
+              <!-- Warning for low instance count (only when sync is not enabled) -->
+              <VAlert
+                v-else-if="formData.instances === 1"
+                type="warning"
+                variant="tonal"
+                density="compact"
+                class="mt-2"
+              >
+                {{ t('pages.costCalculator.validation.instancesWarningOne') }}
+              </VAlert>
+              <VAlert
+                v-else-if="formData.instances === 2"
+                type="warning"
+                variant="tonal"
+                density="compact"
+                class="mt-2"
+              >
+                {{ t('pages.costCalculator.validation.instancesWarningTwo') }}
+              </VAlert>
             </div>
 
             <!-- Renewal Period -->
@@ -97,7 +170,7 @@
               <VSelect
                 v-model="formData.expire"
                 :items="renewalOptions"
-                @update:model-value="calculateCost"
+                @update:model-value="markDirty"
               />
             </div>
 
@@ -140,7 +213,7 @@
                     color="primary"
                     :thumb-label="false"
                     class="flex-grow-1"
-                    @update:model-value="calculateCost"
+                    @update:model-value="markDirty"
                   />
                   <VTextField
                     v-model.number="formData.cpu"
@@ -151,7 +224,7 @@
                     density="compact"
                     hide-details
                     style="max-width: 85px;"
-                    @update:model-value="calculateCost"
+                    @update:model-value="markDirty"
                   />
                 </div>
               </div>
@@ -184,7 +257,7 @@
                     color="primary"
                     :thumb-label="false"
                     class="flex-grow-1"
-                    @update:model-value="calculateCost"
+                    @update:model-value="markDirty"
                   />
                   <VTextField
                     v-model.number="formData.memory"
@@ -195,7 +268,8 @@
                     density="compact"
                     hide-details
                     style="max-width: 85px;"
-                    @update:model-value="calculateCost"
+                    @update:model-value="markDirty"
+                    @blur="formData.memory = Math.max(100, Math.min(59000, Math.round(formData.memory / 100) * 100)); markDirty()"
                   />
                 </div>
               </div>
@@ -228,7 +302,7 @@
                     color="primary"
                     :thumb-label="false"
                     class="flex-grow-1"
-                    @update:model-value="calculateCost"
+                    @update:model-value="markDirty"
                   />
                   <VTextField
                     v-model.number="formData.storage"
@@ -239,7 +313,7 @@
                     density="compact"
                     hide-details
                     style="max-width: 85px;"
-                    @update:model-value="calculateCost"
+                    @update:model-value="markDirty"
                   />
                 </div>
               </div>
@@ -323,7 +397,7 @@
                   :model-value="formData.enterprise === 'enterprise'"
                   :disabled="!isEnterpriseAvailable"
                   :label="t('pages.costCalculator.enterpriseApplication')"
-                  @update:model-value="(val) => { formData.enterprise = val ? 'enterprise' : ''; console.log('Enterprise changed:', val, 'to:', formData.enterprise); calculateCost(); }"
+                  @update:model-value="(val) => { formData.enterprise = val ? 'enterprise' : ''; markDirty(); }"
                 />
                 <p class="text-body-2 ml-8" :class="isEnterpriseAvailable ? 'text-medium-emphasis' : 'text-error'">
                   <template v-if="isEnterpriseAvailable">
@@ -343,7 +417,7 @@
                 <VCheckbox
                   v-model="formData.staticip"
                   :label="t('pages.costCalculator.staticIp')"
-                  @change="() => { console.log('Static IP changed:', formData.staticip); calculateCost(); }"
+                  @change="markDirty"
                 />
                 <p class="text-body-2 text-medium-emphasis ml-8">
                   {{ t('pages.costCalculator.staticIpDescription') }}
@@ -355,13 +429,37 @@
                 <VCheckbox
                   v-model="syncEnabled"
                   :label="t('pages.costCalculator.syncData')"
-                  @change="calculateCost"
+                  @change="markDirty"
                 />
                 <p class="text-body-2 text-medium-emphasis ml-8">
                   {{ t('pages.costCalculator.syncDataDescription') }}
                 </p>
               </div>
             </div>
+
+            <!-- Calculate Price Button -->
+            <VBtn
+              color="primary"
+              size="large"
+              block
+              :loading="calculating"
+              class="mb-6"
+              @click="calculateCost(0)"
+            >
+              <VIcon icon="tabler-calculator" class="me-2" />
+              {{ t('pages.costCalculator.calculatePrice') }}
+            </VBtn>
+
+            <!-- Settings changed hint -->
+            <VAlert
+              v-if="isDirty"
+              type="info"
+              variant="tonal"
+              density="compact"
+              class="mb-4"
+            >
+              {{ t('pages.costCalculator.settingsChanged') }}
+            </VAlert>
 
             <!-- Cost Display -->
             <VCard
@@ -607,7 +705,7 @@
 <script setup>
 import { ref, onMounted, reactive, computed } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { useHead } from '@vueuse/head'
+import { useHead } from '@unhead/vue'
 import Api from '@/services/ApiClient'
 import axios from 'axios'
 import { encryptEnterpriseWithAes, encryptAesKeyWithRsaKey, importRsaPublicKey, isWebCryptoAvailable } from '@/utils/enterpriseCrypto'
@@ -617,10 +715,10 @@ import { generateFAQSchema } from '@/composables/useSEO'
 const { t } = useI18n()
 
 // SEO meta tags and structured data
-const pageUrl = 'https://home.runonflux.io/cost-calculator'
+const pageUrl = 'https://cloud.runonflux.com/cost-calculator'
 const title = 'Cost Calculator - App Hosting from $0.99 | FluxCloud'
 const description = 'Calculate app hosting costs on Flux decentralized cloud. Transparent pricing from $0.99/month for Docker, web apps, APIs, databases. Pay-as-you-go pricing.'
-const imageUrl = 'https://home.runonflux.io/banner/FluxHostingBanner.png'
+const imageUrl = 'https://cloud.runonflux.com/banner/FluxHostingBanner.png'
 
 // WebApplication structured data
 const webApplicationStructuredData = {
@@ -685,8 +783,8 @@ const organizationStructuredData = {
   '@context': 'https://schema.org',
   '@type': 'Organization',
   'name': 'Flux Network',
-  'url': 'https://home.runonflux.io',
-  'logo': 'https://home.runonflux.io/logo.png',
+  'url': 'https://cloud.runonflux.com',
+  'logo': 'https://cloud.runonflux.com/images/logo.png',
   'description': 'Decentralized Web3 cloud infrastructure powered by FluxNodes worldwide',
   'sameAs': [
     'https://twitter.com/RunOnFlux',
@@ -703,7 +801,7 @@ const breadcrumbStructuredData = {
       '@type': 'ListItem',
       'position': 1,
       'name': 'Home',
-      'item': 'https://home.runonflux.io',
+      'item': 'https://cloud.runonflux.com',
     },
     {
       '@type': 'ListItem',
@@ -798,6 +896,22 @@ const formData = reactive({
 
 // Synchronization switch
 const syncEnabled = ref(false)
+
+// Track whether settings have changed since last calculation
+const isDirty = ref(false)
+const markDirty = () => { isDirty.value = true }
+
+// Minimum instances: 2 if sync is enabled, 1 otherwise
+const minInstances = computed(() => syncEnabled.value ? 2 : 1)
+
+// Watch sync status - auto-adjust instances to minimum 2 when sync is enabled
+watch(syncEnabled, newValue => {
+  if (newValue && formData.instances < 2) {
+    const oldInstances = formData.instances
+    formData.instances = 2
+    showToast('info', t('pages.costCalculator.validation.instancesAutoAdjusted', { from: oldInstances, to: 2 }))
+  }
+})
 
 // Port input for adding new ports
 const newPortInput = ref('')
@@ -903,14 +1017,14 @@ const addPort = () => {
   formData.ports.push(port)
   formData.ports.sort((a, b) => a - b) // Keep ports sorted
   newPortInput.value = ''
-  calculateCost()
+  markDirty()
 }
 
 const removePort = port => {
   const index = formData.ports.indexOf(port)
   if (index > -1) {
     formData.ports.splice(index, 1)
-    calculateCost()
+    markDirty()
   }
 }
 
@@ -924,14 +1038,14 @@ const handlePortInputKeypress = event => {
   }
 }
 
-// Renewal period options
+// Renewal period options with discount info
 const renewalOptions = computed(() => [
   { title: t('pages.costCalculator.renewalOptions.oneWeek'), value: 7 },
   { title: t('pages.costCalculator.renewalOptions.twoWeeks'), value: 14 },
   { title: t('pages.costCalculator.renewalOptions.oneMonth'), value: 30 },
-  { title: t('pages.costCalculator.renewalOptions.threeMonths'), value: 90 },
-  { title: t('pages.costCalculator.renewalOptions.sixMonths'), value: 180 },
-  { title: t('pages.costCalculator.renewalOptions.twelveMonths'), value: 360 },
+  { title: `${t('pages.costCalculator.renewalOptions.threeMonths')} (3% ${t('common.off')})`, value: 90 },
+  { title: `${t('pages.costCalculator.renewalOptions.sixMonths')} (6% ${t('common.off')})`, value: 180 },
+  { title: `${t('pages.costCalculator.renewalOptions.twelveMonths')} (12% ${t('common.off')})`, value: 360 },
 ])
 
 // Preset configurations
@@ -1175,6 +1289,7 @@ const calculateCost = async (retryCount = 0) => {
       costResult.flux = response.data.data.flux
       costResult.usd = response.data.data.usd
       costResult.discount = response.data.data.fluxDiscount
+      isDirty.value = false
     } else {
       throw new Error(response.data.message || 'Failed to calculate cost')
     }
@@ -1218,7 +1333,7 @@ function showToast(type, message) {
   const iconMap = {
     success: 'mdi-check-circle',
     error: 'mdi-alert-circle',
-    warning: 'mdi-alert-triangle',
+    warning: 'mdi-alert',
     info: 'mdi-information',
     danger: 'mdi-alert-circle',
   }
@@ -1400,6 +1515,13 @@ definePage({
 
 .info-link:hover .learn-more {
   color: rgba(var(--v-theme-on-surface), 0.8);
+}
+
+.enterprise-banner {
+  border-radius: 16px;
+  border: 2px solid rgba(var(--v-theme-warning), 0.35) !important;
+  background: linear-gradient(135deg, rgba(var(--v-theme-warning), 0.06) 0%, rgba(var(--v-theme-warning), 0.02) 100%) !important;
+  box-shadow: none !important;
 }
 
 .calculator-card {

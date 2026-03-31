@@ -396,12 +396,36 @@
                 />
                 {{ item.name }}
               </VChip>
+              <VChip
+                v-if="subscriptionMap.get(item.name) === 'active'"
+                color="success"
+                size="x-small"
+                rounded="pill"
+                variant="tonal"
+                class="mr-1 mb-1"
+                style="margin-top: 5px"
+              >
+                <VIcon start icon="mdi-autorenew" size="12" />
+                {{ t('core.subscriptionManager.autoRenewing') }}
+              </VChip>
+              <VChip
+                v-else-if="subscriptionMap.get(item.name) === 'past_due'"
+                color="error"
+                size="x-small"
+                rounded="pill"
+                variant="tonal"
+                class="mr-1 mb-1"
+                style="margin-top: 5px"
+              >
+                <VIcon start icon="mdi-alert" size="12" />
+                {{ t('core.subscriptionManager.paymentIssue') }}
+              </VChip>
               <UsageChips
                 :items="[
                   { icon: 'mdi-speedometer', value: getServiceUsageValue(1, item.name, item), color: 'success' },
                   { icon: 'mdi-memory', value: getServiceUsageValue(0, item.name, item), color: 'success' },
                   { icon: 'mdi-harddisk', value: getServiceUsageValue(2, item.name, item), color: 'success' },
-                  { icon: 'mdi-map-marker', value: item.instances | 3, color: 'warning' }
+                  { icon: 'mdi-map-marker', value: item.instances || 3, color: 'warning' }
                 ].filter(chip => chip.value > 0)"
               />
               <small style="font-size: 12px">
@@ -548,6 +572,7 @@
                       :app-locations="appLocationsMap[item.name] || []"
                       :expanded="expanded.includes(item.name)"
                       :app-spec="item"
+                      show-location
                     />
                   </div>
                 </div>
@@ -630,10 +655,26 @@ const props = defineProps({
     type: String,
     default: '',
   },
+  subscriptions: {
+    type: Array,
+    default: () => [],
+  },
 })
 const emit = defineEmits(["openAppManagement"])
 const { t } = useI18n()
 const { openLoginBottomSheet, closeLoginBottomSheet } = useLoginSheet()
+
+// Build a map of appName -> subscription status for quick lookup
+const subscriptionMap = computed(() => {
+  const map = new Map()
+  if (props.subscriptions && props.subscriptions.length) {
+    props.subscriptions.forEach(sub => {
+      map.set(sub.appName, sub.status)
+    })
+  }
+  
+  return map
+})
 
 const activeTabLocalIndexSpec = ref(0)
 
@@ -1497,11 +1538,33 @@ onUnmounted(() => {
   }
 
   .myapps-table td:not(.expanded-row td),
-  .myapps-table th {
+  .myapps-table th:not(.expanded-row th) {
     white-space: nowrap !important;
     overflow: hidden !important;
     text-overflow: ellipsis !important;
   }
+
+  /* Allow locations table cells to wrap and display full content */
+  .myapps-table .expanded-row .locations-table td,
+  .myapps-table .expanded-row .locations-table th,
+  .myapps-table .locations-table td,
+  .myapps-table .locations-table th {
+    white-space: normal !important;
+    overflow: visible !important;
+    text-overflow: clip !important;
+  }
+}
+
+/* Override for locations table with deep selector */
+::v-deep(.myapps-table .locations-table td),
+::v-deep(.myapps-table .locations-table th) {
+  white-space: nowrap !important;
+  overflow: visible !important;
+  text-overflow: clip !important;
+  max-width: none !important;
+  min-width: auto !important;
+  width: auto !important;
+  padding: 8px 16px !important;
 }
 
 ::v-deep(.small-checkbox .v-label) {

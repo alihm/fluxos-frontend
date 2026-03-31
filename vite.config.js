@@ -13,10 +13,23 @@ import vuetify from 'vite-plugin-vuetify';
 import svgLoader from 'vite-svg-loader';
 import { visualizer } from 'rollup-plugin-visualizer';
 import { ViteImageOptimizer } from 'vite-plugin-image-optimizer';
+import monacoEditorPlugin from 'vite-plugin-monaco-editor';
+import compression from 'vite-plugin-compression';
+import purgecss from 'vite-plugin-purgecss';
+import { VitePWA } from 'vite-plugin-pwa';
+import { beasties } from 'vite-plugin-beasties';
 import { aliases } from './aliases.mjs';
 
 export default defineConfig(({ mode }) => {
   const isDev = mode === 'development';
+  // Phased build mode: disable heavy post-processing plugins to reduce memory
+  // Post-processing runs as separate scripts after the main build
+  // Usage: PHASED_BUILD=1 vite build
+  const phasedBuild = process.env.PHASED_BUILD === '1';
+
+  if (phasedBuild) {
+    console.log('\n⚡ Phased build: compression & image optimization will run as separate processes\n');
+  }
 
   return {
     base: process.env.BASE_URL || '/',
@@ -27,15 +40,9 @@ export default defineConfig(({ mode }) => {
             .replace(/([a-z\d])([A-Z])/g, '$1-$2')
             .toLowerCase();
         },
-        importMode: 'sync',
+        importMode: 'async',
       }),
-      vue({
-        template: {
-          compilerOptions: {
-            isCustomElement: (tag) => tag === 'swiper-container' || tag === 'swiper-slide',
-          },
-        },
-      }),
+      vue(),
       isDev && VueDevTools(),
       vueJsx(),
       vuetify({
@@ -45,7 +52,7 @@ export default defineConfig(({ mode }) => {
       }),
       ClientSideLayout({
         layoutsDir: 'src/layouts',
-        importMode: 'sync',
+        importMode: 'async',
       }),
       Components({
         dirs: ['src/@core/components', 'src/views/demos', 'src/components'],
@@ -84,23 +91,47 @@ export default defineConfig(({ mode }) => {
         ],
       }),
       svgLoader(),
-      // Image optimization for production builds
-      ViteImageOptimizer({
-        // PNG optimization
-        png: {
-          quality: 80,
+      // Monaco Editor - bundle editor files locally instead of loading from CDN
+      monacoEditorPlugin.default({}),
+      // Image optimization for production builds (skip in phased build - runs separately)
+      !phasedBuild && ViteImageOptimizer({
+        // Test patterns for which images to include
+        test: /\.(jpe?g|png|gif|tiff|webp|svg|avif)$/i,
+        // Exclude patterns - exclude PWA manifest icons to avoid cache conflicts
+        exclude: /images\/(logo\.png|logo\.svg|favicon\.ico)/,
+        // Include patterns
+        include: undefined,
+        // Include assets from public folder
+        includePublic: true,
+        // Log stats
+        logStats: true,
+        // AVIF - best compression for modern browsers
+        avif: {
+          quality: 70,
         },
-        // JPEG optimization
+        // PNG optimization - more aggressive compression
+        png: {
+          quality: 75,
+          compressionLevel: 9,
+        },
+        // JPEG optimization - more aggressive
         jpeg: {
-          quality: 80,
+          quality: 75,
+          progressive: true,
         },
         // JPG optimization
         jpg: {
-          quality: 80,
+          quality: 75,
+          progressive: true,
         },
-        // WebP conversion
+        // WebP conversion - excellent compression
         webp: {
-          quality: 80,
+          quality: 75,
+          alphaQuality: 80,
+        },
+        // GIF optimization
+        gif: {
+          interlaced: true,
         },
         // SVG optimization
         svg: {
@@ -111,29 +142,300 @@ export default defineConfig(({ mode }) => {
               params: {
                 overrides: {
                   cleanupNumericValues: false,
-                  // Removed removeViewBox from overrides - moved to separate plugin below
                 },
               },
             },
             {
               name: 'removeViewBox',
-              active: false, // Disable removeViewBox to preserve viewBox attributes
+              active: false, // Preserve viewBox attributes
+            },
+            {
+              name: 'removeDimensions',
+              active: true, // Remove width/height, use viewBox instead
             },
           ],
         },
       }),
-      // Bundle analyzer - generates stats.html
+      // Bundle analyzer - generates stats.html (skip gzip/brotli size calc in phased build)
       visualizer({
         filename: 'dist/stats.html',
         open: false, // Set to true to auto-open in browser
-        gzipSize: true,
-        brotliSize: true,
+        gzipSize: !phasedBuild,
+        brotliSize: !phasedBuild,
         template: 'treemap', // 'sunburst', 'treemap', 'network'
+      }),
+      // Gzip compression for production builds (skip in phased build - runs separately)
+      !isDev && !phasedBuild && compression({
+        algorithm: 'gzip',
+        ext: '.gz',
+        threshold: 1024, // Only compress files > 1KB
+        deleteOriginFile: false, // Keep original files for fallback
+      }),
+      // Brotli compression for production builds (skip in phased build - runs separately)
+      !isDev && !phasedBuild && compression({
+        algorithm: 'brotliCompress',
+        ext: '.br',
+        threshold: 1024,
+        deleteOriginFile: false,
+      }),
+      // PurgeCSS to remove unused CSS (production only)
+      !isDev && purgecss({
+        content: [
+          './index.html',
+          './src/**/*.vue',
+          './src/**/*.js',
+          './src/**/*.ts',
+          './src/**/*.jsx',
+          './src/**/*.tsx',
+        ],
+        safelist: {
+          // Vuetify uses dynamic classes extensively
+          standard: [
+            /^v-/, // All Vuetify classes
+            /^mdi-/, // MDI icons
+            /^tabler-/, // Tabler icons
+            // Leaflet MarkerCluster classes (dynamically generated by JS)
+            /marker-cluster/,
+            /leaflet/,
+            'marker-cluster-small',
+            'marker-cluster-medium',
+            'marker-cluster-large',
+            /^theme--/, // Theme classes
+            /^elevation-/, // Elevation utilities
+            /^rounded-/, // Border radius utilities
+            /^text-/, // Text utilities
+            /^bg-/, // Background utilities
+            /^d-/, // Display utilities
+            /^flex-/, // Flex utilities
+            /^justify-/, // Justify utilities
+            /^align-/, // Align utilities
+            /^ma-/, /^mt-/, /^mb-/, /^ml-/, /^mr-/, /^mx-/, /^my-/, // Margin utilities
+            /^pa-/, /^pt-/, /^pb-/, /^pl-/, /^pr-/, /^px-/, /^py-/, // Padding utilities
+            /^ga-/, /^gt-/, /^gb-/, /^gl-/, /^gr-/, /^gx-/, /^gy-/, // Gap utilities
+            /^w-/, /^h-/, // Width/height utilities
+            /^font-/, // Font utilities
+            /^opacity-/, // Opacity utilities
+            /^overflow-/, // Overflow utilities
+            /^position-/, // Position utilities
+            /^cursor-/, // Cursor utilities
+            /^el-/, // Element Plus classes
+            /^leaflet-/, // Leaflet map classes
+            /^apexcharts/, // ApexCharts classes
+            /^xterm/, // xterm classes
+            /^monaco/, // Monaco editor classes
+            /^shepherd/, // Shepherd.js tour classes
+            /^vjs-/, // vue-json-pretty classes
+            /^drv-/, // draggable-resizable-vue3 classes
+            /data-v-/, // Vue scoped styles
+            /^ps/, // PerfectScrollbar classes
+            /^ps__/, // PerfectScrollbar internal classes
+            /^ps--/, // PerfectScrollbar state classes
+            /\.ps/, // PerfectScrollbar with dot prefix
+            /\.ps__/, // PerfectScrollbar rails/thumbs
+            /\.ps--/, // PerfectScrollbar states (active, focus, scrolling, clicking)
+          ],
+          deep: [
+            /v-application/,
+            /v-theme/,
+            /v-locale/,
+            /v-overlay/,
+            /v-menu/,
+            /v-dialog/,
+            /v-snackbar/,
+            /v-tooltip/,
+            /v-card/,
+            /v-btn/,
+            /v-chip/,
+            /v-alert/,
+            /v-table/,
+            /v-data-table/,
+            /v-select/,
+            /v-autocomplete/,
+            /v-text-field/,
+            /v-textarea/,
+            /v-checkbox/,
+            /v-radio/,
+            /v-switch/,
+            /v-slider/,
+            /v-tabs/,
+            /v-expansion/,
+            /v-list/,
+            /v-navigation/,
+            /v-app-bar/,
+            /v-footer/,
+            /v-img/,
+            /v-avatar/,
+            /v-icon/,
+            /v-badge/,
+            /v-progress/,
+            /v-skeleton/,
+            /v-divider/,
+            /v-timeline/,
+            /v-stepper/,
+            /v-form/,
+            /v-file/,
+            /v-color/,
+            /v-date/,
+            /v-time/,
+            /v-pagination/,
+            /v-breadcrumbs/,
+            /v-rating/,
+            /v-carousel/,
+            /v-window/,
+            /v-sheet/,
+            /v-responsive/,
+            /v-container/,
+            /v-row/,
+            /v-col/,
+            /v-spacer/,
+          ],
+          greedy: [
+            /transition/,
+            /animate/,
+            /fade/,
+            /slide/,
+            /scale/,
+            /scroll/,
+          ],
+        },
+        // Don't remove CSS variables
+        variables: false,
+      }),
+      // PWA for offline caching and performance (production only)
+      !isDev && VitePWA({
+        registerType: 'autoUpdate',
+        includeAssets: ['images/logo.png', 'images/logo.svg', 'favicon.ico'],
+        workbox: {
+          clientsClaim: true,  // Take control of all clients immediately
+          skipWaiting: true,   // Activate new service worker immediately
+          // Only precache small static assets (icons, fonts) — NOT JS/CSS chunks
+          // JS/CSS chunks have content hashes in filenames (immutable) so browser
+          // and CDN caching is sufficient. Precaching them causes stale chunk errors
+          // after deployments when the old SW serves outdated hashed filenames.
+          globPatterns: ['**/*.{ico,png,svg,woff,woff2}'],
+          // Don't serve index.html from SW cache for navigation requests
+          navigateFallback: null,
+          // Exclude large files from precaching
+          globIgnores: [
+            'stats.html', // Bundle analyzer (4MB+)
+            '**/monacoeditorwork/**', // Monaco workers (12MB+)
+          ],
+          // Runtime caching for API requests and images
+          runtimeCaching: [
+            {
+              // Cache Google Fonts
+              urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
+              handler: 'CacheFirst',
+              options: {
+                cacheName: 'google-fonts-cache',
+                expiration: {
+                  maxEntries: 20,
+                  maxAgeSeconds: 60 * 60 * 24 * 365, // 1 year
+                },
+                cacheableResponse: {
+                  statuses: [0, 200],
+                },
+              },
+            },
+            {
+              // Cache Google Font files
+              urlPattern: /^https:\/\/fonts\.gstatic\.com\/.*/i,
+              handler: 'CacheFirst',
+              options: {
+                cacheName: 'gstatic-fonts-cache',
+                expiration: {
+                  maxEntries: 20,
+                  maxAgeSeconds: 60 * 60 * 24 * 365, // 1 year
+                },
+                cacheableResponse: {
+                  statuses: [0, 200],
+                },
+              },
+            },
+            {
+              // Cache images with stale-while-revalidate
+              urlPattern: /\.(?:png|gif|jpg|jpeg|webp|avif|svg)$/i,
+              handler: 'StaleWhileRevalidate',
+              options: {
+                cacheName: 'images-cache',
+                expiration: {
+                  maxEntries: 100,
+                  maxAgeSeconds: 60 * 60 * 24 * 30, // 30 days
+                },
+              },
+            },
+            {
+              // Cache stats API responses
+              urlPattern: /^https:\/\/stats\.runonflux\.io\/.*/i,
+              handler: 'NetworkFirst',
+              options: {
+                cacheName: 'stats-api-cache',
+                expiration: {
+                  maxEntries: 50,
+                  maxAgeSeconds: 60 * 5, // 5 minutes
+                },
+                networkTimeoutSeconds: 15,
+              },
+            },
+          ],
+        },
+        manifest: {
+          name: 'FluxCloud - Decentralized Web3 Cloud',
+          short_name: 'FluxCloud',
+          description: 'Deploy applications on FluxCloud\'s decentralized Web3 infrastructure',
+          theme_color: '#7367F0',
+          background_color: '#FFFFFF',
+          display: 'standalone',
+          orientation: 'portrait-primary',
+          start_url: '/',
+          scope: '/',
+          icons: [
+            {
+              src: '/images/logo.png',
+              sizes: '192x192',
+              type: 'image/png',
+            },
+            {
+              src: '/images/logo.png',
+              sizes: '512x512',
+              type: 'image/png',
+            },
+            {
+              src: '/images/logo.png',
+              sizes: '512x512',
+              type: 'image/png',
+              purpose: 'maskable',
+            },
+          ],
+        },
+        devOptions: {
+          enabled: false, // Disable in development
+        },
+      }),
+      // Critical CSS extraction (production only) using Beasties
+      !isDev && beasties({
+        options: {
+          // Inline critical CSS
+          inlineFonts: false,
+          // Preload external stylesheets with swap strategy
+          preload: 'swap',
+          // Don't remove original stylesheets (let browser load them async)
+          pruneSource: false,
+          // Reduce unused CSS rules in inlined styles
+          reduceInlineStyles: true,
+          // Use media="print" trick for async loading
+          noscriptFallback: true,
+          // Merge inlined styles
+          mergeStylesheets: true,
+        },
       }),
     ],
     define: {
       'process.env': {},
       global: 'globalThis', // ✅ important for some node packages
+      // Map buffer/process to window globals (loaded from index.html)
+      'Buffer': 'window.Buffer',
+      'process': 'window.process',
       // Disable Lit dev mode in production
       ...(mode === 'production' && {
         'globalThis.litIssuedWarnings': 'false',
@@ -143,6 +445,9 @@ export default defineConfig(({ mode }) => {
     resolve: {
       alias: {
         ...aliases,
+        // Point buffer and process to stub modules - actual polyfills loaded from index.html
+        'buffer': fileURLToPath(new URL('./src/polyfills/buffer-stub.js', import.meta.url)),
+        'process': fileURLToPath(new URL('./src/polyfills/process-stub.js', import.meta.url)),
       },
     },
     server: {
@@ -177,45 +482,353 @@ export default defineConfig(({ mode }) => {
       },
     },
     build: {
+      // Target modern browsers to avoid legacy polyfills (~11KB savings)
+      // Supports: Chrome 87+, Firefox 78+, Safari 14+, Edge 88+
+      target: 'esnext',
       chunkSizeWarningLimit: 1800, // Warn about chunks larger than 1800KB
       reportCompressedSize: true, // Report gzip sizes
       minify: 'esbuild', // Use esbuild for fast builds
+      cssMinify: 'esbuild', // Also minify CSS with esbuild
+      // Limit parallelization to reduce memory usage on servers with limited RAM
+      // This is especially important for 4GB servers
+      maxParallelFileOps: 2, // Reduce from default (depends on CPU cores)
       commonjsOptions: {
         include: [/node_modules/, /@metamask\/.*/,/eventemitter2/],
       },
       rollupOptions: {
+        // Limit worker threads to reduce memory consumption
+        maxParallelFileOps: 2,
         output: {
-          manualChunks: {
-            // UI Framework
-            'vuetify': ['vuetify'],
+          manualChunks: (id) => {
+            // Polyfills strategy: Bundle buffer, process, eventemitter2 into main entry
+            // This ensures they load BEFORE any async chunks
+            // NO chunking for polyfills - let them inline in entry
+            if (id.includes('node_modules/buffer') || id.includes('node_modules\\buffer') ||
+                id.includes('node_modules/process') || id.includes('node_modules\\process') ||
+                id.includes('node_modules/eventemitter2') || id.includes('node_modules\\eventemitter2')) {
+              // Don't chunk - stay with entry chunk
+              return undefined
+            }
+
+            // Skip non-node_modules
+            if (!id.includes('node_modules')) {
+              return undefined
+            }
+
+            // PRIORITY 1: Crypto libraries FIRST (before any other rules)
+            // These are large and need to be chunked to keep main bundle small
+
+            // Crypto - MetaMask SDK (separate to reduce initial load)
+            if (id.includes('@metamask')) {
+              return 'crypto-metamask'
+            }
+
+            // Crypto - WalletConnect/Reown + wallet dependencies + shared crypto primitives + viem
+            // Bundle @noble/@scure AND viem WITH walletconnect to avoid circular deps
+            // viem and WalletConnect have circular imports, must be in same chunk
+            if (id.includes('@reown') || id.includes('@walletconnect') ||
+                id.includes('@solana') || id.includes('porto') || id.includes('@coinbase') ||
+                id.includes('@base-org') || id.includes('coinbase') ||
+                id.includes('@gemini-wallet') || id.includes('@safe-global') || id.includes('@msgpack') ||
+                id.includes('@noble') || id.includes('@scure') ||
+                id.includes('viem')) {
+              return 'crypto-walletconnect'
+            }
+
+            // Crypto - Wagmi only (viem moved to crypto-walletconnect to fix circular dependency)
+            if (id.includes('wagmi') || id.includes('@wagmi')) {
+              return 'crypto-wagmi'
+            }
+
+            // Crypto - React Query (wagmi dependency) - separate from crypto
+            if (id.includes('@tanstack')) {
+              return 'react-query'
+            }
+
+            // OX library (crypto related)
+            if (id.includes('/ox/')) {
+              return 'crypto-ox'
+            }
+
+            // Encryption - OpenPGP
+            if (id.includes('openpgp')) {
+              return 'pgp'
+            }
+
+            // Firebase (large, lazy loadable)
+            if (id.includes('firebase') || id.includes('@firebase')) {
+              return 'firebase'
+            }
+
+            // Code Editor - Monaco (huge, lazy load)
+            if (id.includes('monaco-editor') || id.includes('vue-monaco-editor')) {
+              return 'monaco'
+            }
+
+            // PRIORITY 2: UI Frameworks and Components
+
+            // UI Framework - Vuetify
+            if (id.includes('vuetify')) {
+              return 'vuetify'
+            }
+
+            // Element Plus (if used)
+            if (id.includes('element-plus')) {
+              return 'element-plus'
+            }
 
             // Charts & Visualization
-            'apexcharts': ['vue3-apexcharts'],
+            if (id.includes('apexcharts') || id.includes('vue3-apexcharts')) {
+              return 'apexcharts'
+            }
+            if (id.includes('chart.js') || id.includes('vue-chartjs')) {
+              return 'chartjs'
+            }
 
-            // Code Editor
-            'monaco': ['@guolao/vue-monaco-editor', 'monaco-editor'],
+            // Maps - Leaflet
+            if (id.includes('leaflet.markercluster')) {
+              return 'leaflet-cluster'
+            }
+            if (id.includes('leaflet') || id.includes('vue-leaflet')) {
+              return 'leaflet-core'
+            }
 
-            // Maps
-            'leaflet-core': ['leaflet', '@vue-leaflet/vue-leaflet'],
-            'leaflet-cluster': ['leaflet.markercluster'],
+            // Terminal - xterm
+            if (id.includes('@xterm') || id.includes('xterm')) {
+              return 'xterm'
+            }
 
-            // Crypto - MetaMask
-            'crypto-metamask': ['@metamask/sdk', '@metamask/providers'],
+            // Rich Text Editor - Tiptap
+            if (id.includes('@tiptap') || id.includes('prosemirror')) {
+              return 'tiptap'
+            }
 
-            // Crypto - WalletConnect
-            'crypto-walletconnect': [
-              '@reown/appkit',
-              '@reown/appkit-adapter-wagmi',
-              '@walletconnect/universal-provider',
-              '@walletconnect/ethereum-provider',
-              '@walletconnect/utils'
-            ],
+            // Code Highlighting
+            if (id.includes('highlight.js') || id.includes('prismjs') || id.includes('shiki')) {
+              return 'syntax-highlight'
+            }
 
-            // Crypto - Core Libraries (let wagmi/viem bundle naturally with their dependencies)
-            'crypto-query': ['@tanstack/react-query'],
+            // Internationalization
+            if (id.includes('vue-i18n') || id.includes('@intlify')) {
+              return 'i18n'
+            }
 
-            // Encryption
-            'pgp': ['openpgp'],
+            // VueUse utilities
+            if (id.includes('@vueuse')) {
+              return 'vueuse'
+            }
+
+            // Lodash utilities
+            if (id.includes('lodash')) {
+              return 'lodash'
+            }
+
+
+            // JSON viewer
+            if (id.includes('vue-json-pretty')) {
+              return 'json-viewer'
+            }
+
+            // Date picker
+            if (id.includes('flatpickr')) {
+              return 'datepicker'
+            }
+
+            // Drag and drop
+            if (id.includes('draggable') || id.includes('@formkit/drag-and-drop')) {
+              return 'drag-drop'
+            }
+
+            // Shepherd.js (guided tours)
+            if (id.includes('shepherd')) {
+              return 'shepherd'
+            }
+
+            // YAML parser
+            if (id.includes('js-yaml')) {
+              return 'yaml'
+            }
+
+            // Core Vue ecosystem - keep together
+            if (id.includes('vue-router') || id.includes('pinia')) {
+              return 'vue-core'
+            }
+
+            // Axios and HTTP
+            if (id.includes('axios')) {
+              return 'http'
+            }
+
+            // DOMPurify
+            if (id.includes('dompurify')) {
+              return 'sanitizer'
+            }
+
+            // Date utilities
+            if (id.includes('date-fns') || id.includes('dayjs') || id.includes('moment')) {
+              return 'date-utils'
+            }
+
+            // Geospatial utilities (used with leaflet)
+            if (id.includes('@turf')) {
+              return 'geo-utils'
+            }
+
+            // 3D rendering (if used)
+            if (id.includes('three')) {
+              return 'three'
+            }
+
+            // Vue core - keep all @vue packages in main bundle (small, essential)
+            // @vue/compiler-* and @vue/devtools-* are build-time only, not in runtime
+
+            // QR code - keep in vendor-misc to avoid CommonJS module.exports issues
+            // (qrcode uses process which is bundled in vendor-misc)
+
+            // Perfect scrollbar - separate chunk for lazy loading
+            if (id.includes('perfect-scrollbar')) {
+              return 'scrollbar'
+            }
+
+            // Clipboard
+            if (id.includes('clipboard')) {
+              return 'clipboard'
+            }
+
+            // LZ-String compression
+            if (id.includes('lz-string')) {
+              return 'compression'
+            }
+
+            // CASL authorization
+            if (id.includes('@casl')) {
+              return 'casl'
+            }
+
+            // Eventemitter and eventemitter2 - DO NOT CHUNK
+            // main.js imports eventemitter2 and sets window.EventEmitter2
+            // vendor-scoped and other chunks need this available immediately
+            // Let it stay in main bundle for guaranteed availability
+
+            // UUID library
+            if (id.includes('uuid')) {
+              return 'uuid'
+            }
+
+            // Socket.io and related
+            if (id.includes('socket.io') || id.includes('engine.io')) {
+              return 'socketio'
+            }
+
+            // Floating UI
+            if (id.includes('@floating-ui')) {
+              return 'floating-ui'
+            }
+
+            // Phosphor icons (large icon library used by wallets)
+            if (id.includes('@phosphor-icons')) {
+              return 'phosphor-icons'
+            }
+
+            // Iconify and MDI icons
+            if (id.includes('@iconify') || id.includes('@mdi') || id.includes('mdi')) {
+              return 'icons-mdi'
+            }
+
+            // Lit web components (used by wallets)
+            if (id.includes('@lit')) {
+              return 'lit'
+            }
+
+            // @ctrl packages - only @ctrl/tinycolor exists (small, stays in main bundle)
+
+            // @unhead packages (SEO/head management)
+            if (id.includes('@unhead')) {
+              return 'unhead'
+            }
+
+            // @ucast packages (CASL dependencies)
+            if (id.includes('@ucast')) {
+              return 'casl'
+            }
+
+            // QR code library - keep in vendor-misc to avoid module.exports issues
+            // (qrcode uses CommonJS and needs to load with other vendor code)
+            // if (id.includes('qr') || id.includes('qrcode')) {
+            //   return 'qrcode'
+            // }
+
+            // Query string parsers
+            if (id.includes('/qs/') || id.includes('\\qs\\') || id.includes('query-string')) {
+              return 'query-parser'
+            }
+
+            // Mitt event emitter
+            if (id.includes('mitt')) {
+              return 'event-utils'
+            }
+
+            // ANSI to HTML converter
+            if (id.includes('ansi-to-html')) {
+              return 'ansi-utils'
+            }
+
+            // JWT decode
+            if (id.includes('jwt-decode')) {
+              return 'jwt'
+            }
+
+            // @vueuse/head (SEO)
+            if (id.includes('@vueuse/head')) {
+              return 'unhead'
+            }
+
+            // Cookie handling
+            if (id.includes('cookie-es')) {
+              return 'cookie'
+            }
+
+            // destr, ufo, ofetch (unjs ecosystem - keep together)
+            if (id.includes('destr') || id.includes('ufo') || id.includes('ofetch')) {
+              return 'unjs-utils'
+            }
+
+            // Axios retry
+            if (id.includes('axios-retry')) {
+              return 'http'
+            }
+
+            // Keep Vue core in main bundle (essential for app)
+            // Don't split these to vendor chunks
+            if (id.includes('@vue/') || id.includes('/vue/')) {
+              return undefined  // Stay in main bundle
+            }
+
+            // DISABLED: Vendor catch-all strategy
+            // This was causing circular dependency with crypto-walletconnect
+            // Let remaining packages stay in main bundle instead
+            //
+            // const excludeFromVendor = [
+            //   'eventemitter2', 'buffer', 'process',
+            //   '@vue/', '/vue/', 'pinia', 'vue-router',
+            //   '@metamask', '@reown', '@walletconnect', '@solana', 'porto', '@coinbase',
+            //   '@base-org', '@gemini-wallet', '@safe-global', '@msgpack',
+            //   '@noble', '@scure', 'wagmi', 'viem', '@wagmi', '@tanstack', '/ox/',
+            // ]
+            //
+            // const shouldExclude = excludeFromVendor.some(pattern => id.includes(pattern))
+            // if (!shouldExclude) {
+            //   if (id.includes('node_modules/@')) {
+            //     const match = id.match(/node_modules\/@([^/]+)/)
+            //     if (match) {
+            //       const scope = match[1]
+            //       return `vendor-${scope}`
+            //     }
+            //   }
+            //   return 'vendor-misc'
+            // }
+
+            return undefined
           },
         },
       },
@@ -226,11 +839,10 @@ export default defineConfig(({ mode }) => {
         'leaflet.markercluster',
         '@metamask/sdk',
         '@metamask/providers',
-        'buffer',
-        'process',
         'events',
         'util',
-        'eventemitter2',
+        // NOTE: buffer, process, eventemitter2 removed from here
+        // They need to stay in main bundle (not pre-bundled)
       ],
       exclude: [
         'vuetify',

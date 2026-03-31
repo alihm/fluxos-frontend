@@ -113,6 +113,7 @@ import { useSEO, generateSoftwareApplicationSchema, generateBreadcrumbSchema } f
 import { useMarketplace } from '@/composables/useMarketplace'
 import { useGameUtils } from '@/composables/useGameUtils'
 import { useFluxStore } from '@/stores/flux'
+import { useAnalytics } from '@/plugins/analytics/composables/useAnalytics'
 import LoadingSpinner from '@/components/Marketplace/LoadingSpinner.vue'
 import PanelRenderer from '@/components/Marketplace/PanelRenderer.vue'
 import AppConfigCard from '@/components/Marketplace/AppConfigCard.vue'
@@ -120,6 +121,7 @@ import InstallDialog from '@/components/Marketplace/InstallDialog.vue'
 import TrustpilotPanel from '@/components/Marketplace/Panels/TrustpilotPanel.vue'
 
 const { t, tm, te } = useI18n()
+const analytics = useAnalytics()
 
 const route = useRoute()
 const router = useRouter()
@@ -146,12 +148,24 @@ const minPrice = computed(() => {
   return getMinimumPrice(game.value)
 })
 
-// Reorder panels: Header > Groups > Description > Features > ServerLocations > Screenshots > FAQ > RelatedGames
+// Reorder panels: Header > Groups > Videos > Description > Features > ServerLocations > Screenshots > FAQ > RelatedGames
 const orderedPanels = computed(() => {
   if (!game.value?.panels) return []
 
-  const panels = [...game.value.panels]
-  const panelOrder = ['Header', 'Groups', 'Description', 'Features', 'ServerLocations', 'Screenshots', 'FAQ', 'RelatedGames', 'NodeMap', 'Subscription']
+  let panels = [...game.value.panels]
+
+  // Add Videos panel if the game has videos
+  if (game.value.videos && game.value.videos.length > 0) {
+    const hasVideosPanel = panels.some(p => p.type === 'Videos')
+    if (!hasVideosPanel) {
+      panels.push({
+        type: 'Videos',
+        enabled: true,
+      })
+    }
+  }
+
+  const panelOrder = ['Header', 'Groups', 'Videos', 'Description', 'Features', 'ServerLocations', 'Screenshots', 'FAQ', 'RelatedGames', 'NodeMap', 'Subscription']
 
   return panels.sort((a, b) => {
     const aIndex = panelOrder.indexOf(a.type)
@@ -183,12 +197,12 @@ const seoDescription = computed(() => {
 })
 
 const seoImage = computed(() => {
-  if (!game.value) return 'https://home.runonflux.io/images/games/FluxPlay_white.svg'
+  if (!game.value) return 'https://cloud.runonflux.com/images/games/FluxPlay_white.svg'
   
-  return gameIcon.value || 'https://home.runonflux.io/images/games/FluxPlay_white.svg'
+  return gameIcon.value || 'https://cloud.runonflux.com/images/games/FluxPlay_white.svg'
 })
 
-const seoUrl = computed(() => `https://home.runonflux.io/marketplace/games/${route.params.name}`)
+const seoUrl = computed(() => `https://cloud.runonflux.com/marketplace/games/${route.params.name}`)
 
 const seoKeywords = computed(() => {
   if (!game.value) return 'game server hosting, decentralized hosting, flux network, affordable game hosting'
@@ -284,8 +298,8 @@ const structuredData = computed(() => {
 
   // Breadcrumb structured data
   const breadcrumbStructuredData = generateBreadcrumbSchema([
-    { name: 'Home', url: 'https://home.runonflux.io' },
-    { name: 'Games', url: 'https://home.runonflux.io/marketplace/games' },
+    { name: 'Home', url: 'https://cloud.runonflux.com' },
+    { name: 'Games', url: 'https://cloud.runonflux.com/marketplace/games' },
     { name: gameName, url: pageUrl },
   ])
 
@@ -437,6 +451,13 @@ const loadGameDetails = async () => {
     }
 
     game.value = foundGame
+
+    // Track game detail view with game name
+    analytics.trackMarketplace('game_view', {
+      page: 'game_detail',
+      game_name: foundGame.displayName || foundGame.name,
+      game_id: foundGame.name,
+    })
   } catch (err) {
     console.error('Failed to load game details:', err)
     error.value = err.message || t('pages.marketplace.games.detail.failedToLoad')
@@ -573,6 +594,11 @@ onMounted(async () => {
   flex-direction: column;
   gap: 24px;
   padding-top: 20px;
+}
+
+/* Override VideosPanel margin to prevent double spacing */
+.panels-container :deep(.videos-panel) {
+  margin-top: 0 !important;
 }
 
 /* Fallback Basic Info Styling */

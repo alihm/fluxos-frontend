@@ -20,6 +20,7 @@ declare module 'vue-router/auto-routes' {
   export interface RouteNamedMap {
     '$error': RouteRecordInfo<'$error', '/:error(.*)', { error: ParamValue<true> }, { error: ParamValue<false> }>,
     'administration-docker-events': RouteRecordInfo<'administration-docker-events', '/administration/docker-events', Record<never, never>, Record<never, never>>,
+    'administration-flux-share': RouteRecordInfo<'administration-flux-share', '/administration/flux-share', Record<never, never>, Record<never, never>>,
     'administration-manage-flux': RouteRecordInfo<'administration-manage-flux', '/administration/manage-flux', Record<never, never>, Record<never, never>>,
     'administration-manage-users': RouteRecordInfo<'administration-manage-users', '/administration/manage-users', Record<never, never>, Record<never, never>>,
     'administration-system-info': RouteRecordInfo<'administration-system-info', '/administration/system-info', Record<never, never>, Record<never, never>>,
@@ -29,6 +30,7 @@ declare module 'vue-router/auto-routes' {
     'apps-management': RouteRecordInfo<'apps-management', '/apps/management', Record<never, never>, Record<never, never>>,
     'apps-register': RouteRecordInfo<'apps-register', '/apps/register', Record<never, never>, Record<never, never>>,
     'apps-register-configure': RouteRecordInfo<'apps-register-configure', '/apps/register/configure', Record<never, never>, Record<never, never>>,
+    'apps-register-orbit': RouteRecordInfo<'apps-register-orbit', '/apps/register/orbit', Record<never, never>, Record<never, never>>,
     'checkout-gateway-plan': RouteRecordInfo<'checkout-gateway-plan', '/checkout/:gateway/:plan', { gateway: ParamValue<true>, plan: ParamValue<true> }, { gateway: ParamValue<false>, plan: ParamValue<false> }>,
     'cost-calculator': RouteRecordInfo<'cost-calculator', '/cost-calculator', Record<never, never>, Record<never, never>>,
     'dashboards-home': RouteRecordInfo<'dashboards-home', '/dashboards/home', Record<never, never>, Record<never, never>>,

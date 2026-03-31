@@ -28,6 +28,28 @@
             {{ appName }}
           </span>
         </VChip>
+        <VChip
+          v-if="subscriptionStatus === 'active'"
+          color="success"
+          variant="tonal"
+          size="x-small"
+          rounded="pill"
+          class="ml-1"
+          prepend-icon="mdi-autorenew"
+        >
+          {{ t('core.subscriptionManager.autoRenewing') }}
+        </VChip>
+        <VChip
+          v-else-if="subscriptionStatus === 'past_due'"
+          color="error"
+          variant="tonal"
+          size="x-small"
+          rounded="pill"
+          class="ml-1"
+          prepend-icon="mdi-alert"
+        >
+          {{ t('core.subscriptionManager.paymentIssue') }}
+        </VChip>
       </div>
       <VRow
         class="d-flex align-center my-1"
@@ -199,9 +221,9 @@
     :message="t('pages.apps.manage.messages.loadingMessage')"
   />
 
-  <!-- No instances available error -->
+  <!-- No instances AND no app specification - critical error -->
   <VCard
-    v-else-if="!selectedIp"
+    v-else-if="!selectedIp && !appSpecification && !isInitialLoading && callBResponse.data === null"
     class="mt-4 mb-1"
   >
     <VCardText>
@@ -262,8 +284,39 @@
     </VCardText>
   </VCard>
 
-  <!-- Tabs and content - only shown after loading complete AND instances available -->
+  <!-- Tabs and content - shown after loading complete AND (instances available OR appSpecification exists) -->
   <template v-else>
+    <!-- Warning banner for no-instances mode -->
+    <VAlert
+      v-if="!selectedIp && appSpecification"
+      color="warning"
+      variant="tonal"
+      class="mt-3 mb-3"
+      border="start"
+      border-color="warning"
+    >
+      <template #prepend>
+        <VIcon>mdi-alert-circle</VIcon>
+      </template>
+      <div class="d-flex align-center justify-space-between w-100">
+        <div class="d-flex flex-column">
+          <div class="font-weight-bold mb-1">
+            {{ t('pages.apps.manage.messages.noInstancesWarningTitle') }}
+          </div>
+          <div class="text-body-2">
+            {{ t('pages.apps.manage.messages.noInstancesWarningMessage') }}
+          </div>
+        </div>
+        <VBtn
+          icon="mdi-refresh"
+          size="small"
+          variant="text"
+          color="warning"
+          @click="refreshInfo()"
+        />
+      </div>
+    </VAlert>
+
     <VTabs
       v-model="currentTab"
       show-arrows
@@ -282,7 +335,7 @@
       <VCardText>
         <VWindow v-model="currentTab">
           <VWindowItem
-            v-for="tab in tabs"
+            v-for="tab in allTabs"
             :key="tab.value"
             :value="tab.value"
           >
@@ -301,11 +354,73 @@
                 variant="tonal"
                 rounded="md"
                 :icon-state="isSynced"
+                :disabled="!selectedIp"
+                class-name="mb-0"
               />
+              <!-- Update/Renew Subscription Buttons -->
+              <div
+                v-if="canManageSubscription"
+                :style="{
+                  display: 'grid',
+                  gridTemplateColumns: appSpecification?.version >= 6 ? '1fr 1fr 1fr' : '1fr 1fr',
+                  gap: '8px'
+                }"
+                class="mt-3 mb-2"
+              >
+                <VBtn
+                  variant="flat"
+                  color="primary"
+                  size="small"
+                  @click="() => { subscriptionAction = 'update'; currentTab = '10' }"
+                >
+                  <VIcon size="16" class="mr-2">mdi-update</VIcon>
+                  {{ $t('core.appDetailsCard.updateSubscription') }}
+                </VBtn>
+                <VBtn
+                  variant="flat"
+                  color="success"
+                  size="small"
+                  @click="() => { subscriptionAction = 'renewal'; currentTab = '10' }"
+                >
+                  <VIcon size="16" class="mr-2">mdi-refresh</VIcon>
+                  {{ $t('core.appDetailsCard.renewSubscription') }}
+                </VBtn>
+                <VBtn
+                  v-if="appSpecification?.version >= 6"
+                  variant="flat"
+                  color="error"
+                  size="small"
+                  @click="() => { subscriptionAction = 'cancel'; currentTab = '10' }"
+                >
+                  <VIcon size="16" class="mr-2">mdi-cancel</VIcon>
+                  {{ $t('core.appDetailsCard.cancelSubscription') }}
+                </VBtn>
+              </div>
+
+              <!-- General Section Header -->
+              <div>
+                <div class="d-flex align-center justify-start my-3">
+                  <VChip
+                    color="info"
+                    variant="tonal"
+                    class="w-100"
+                    style="padding: 8px 16px; border-radius: 6px; font-family: monospace; font-size: 18px;"
+                  >
+                    <VIcon
+                      size="22"
+                      class="ml-1"
+                    >
+                      mdi-information-outline
+                    </VIcon>
+                    <span class="ml-1">{{ $t('core.appDetailsCard.general') }}</span>
+                  </VChip>
+                </div>
+              </div>
               <AppDetailsCard
                 :app="appSpecification"
                 :get-new-expire-label="labelForExpire(appSpecification.expire, appSpecification.height)"
-                class="mt-2 px-4"
+                :show-general-section="false"
+                class="px-4"
               />
               <div>
                 <div class="d-flex align-center justify-start my-3">
@@ -870,7 +985,7 @@
               />
             </div>
 
-            <div v-else-if="appSpecification?.compose && tab.value === '8' && privilege !== 'fluxteam'">
+            <div v-else-if="appSpecification?.compose && tab.value === '8'">
               <BackupAndRestore
                 :key="currentTab" 
                 :app-spec="appSpecification"
@@ -893,12 +1008,16 @@
             </div>
 
             <div v-else-if="appSpecificationGlobal && tab.value === '10'">
-              <SubscriptionManager :app-spec="appSpecForSubscription" :new-app="false" :execute-local-command="executeLocalCommand" :reset-trigger="subscriptionResetTrigger" :instance-ready="!!selectedIp" @spec-converted="handleSpecConverted" />
+              <SubscriptionManager :app-spec="appSpecForSubscription" :new-app="false" :execute-local-command="selectedIp ? executeLocalCommand : undefined" :reset-trigger="subscriptionResetTrigger" :instance-ready="!!appSpecificationGlobal" :initial-action="subscriptionAction" @spec-converted="handleSpecConverted" />
             </div>
 
-          
-          
+            <div v-else-if="tab.value === '11' && auditUrl">
+              <AuditViewer :audit-url="auditUrl" :app-name="appName" @open-stats="currentTab = '12'" />
+            </div>
 
+            <div v-else-if="tab.value === '12' && auditUrl">
+              <AuditStats :audit-url="auditUrl" :app-name="appName" :active="currentTab === '12'" @back="currentTab = '11'" />
+            </div>
 
             <div v-else-if="InstalledLoading">
               <VProgressLinear
@@ -996,7 +1115,12 @@ import { useConfigStore } from "@core/stores/config"
 import { useI18n } from 'vue-i18n'
 import { useSEONoIndex } from '@/composables/useSEO'
 import { clearStickyBackendDNS } from "@/utils/stickyBackend"
+import { paymentBridge } from "@/utils/fiatGateways"
 import LoadingSpinner from "@/components/Marketplace/LoadingSpinner.vue"
+import AuditViewer from "@core/components/AuditViewer.vue"
+import AuditStats from "@core/components/AuditStats.vue"
+
+const auditUrl = import.meta.env.VITE_AUDIT_URL || ''
 
 // Prevent indexing of app management page (authenticated private data)
 useSEONoIndex()
@@ -1027,8 +1151,9 @@ const inspectResult = ref([])
 const changesResult = ref([])
 const route = useRoute()
 const fluxStore = useFluxStore()
-const currentTab = ref("0")
+const currentTab = ref("1")
 const subscriptionResetTrigger = ref(Date.now())
+const subscriptionAction = ref('renewal')
 const router = useRouter()
 const appName = ref(useRoute().params.appName)
 const selectedIp = ref('')
@@ -1044,6 +1169,30 @@ const snackbarMessage = ref("")
 const snackbarColor = ref("success")
 const appSpecification = ref(null)
 const appSpecificationGlobal = ref(null)
+const subscriptionStatus = ref(null)
+
+async function fetchSubscriptionStatus() {
+  try {
+    const zelidauth = localStorage.getItem("zelidauth")
+    if (!zelidauth) return
+
+    const auth = qs.parse(zelidauth)
+    if (!auth?.zelid) return
+
+    const response = await axios.post(`${paymentBridge}/api/v1/stripe/subscription/status`, {
+      zelid: auth.zelid,
+      signature: auth.signature,
+      loginPhrase: auth.loginPhrase,
+      appName: appName.value,
+    })
+
+    if (response.data.status === "success" && response.data.data) {
+      subscriptionStatus.value = response.data.data.status
+    }
+  } catch (error) {
+    console.warn("Failed to fetch subscription status:", error.message)
+  }
+}
 
 // Spec adapter for SubscriptionManager - creates a mutable reactive copy
 // For V3: converts flat format to compose format for UI compatibility
@@ -1118,7 +1267,6 @@ const InstalledLoading = ref(false)
 const InstalledApiError = ref(false)
 const apiError = ref(false)
 const runningInstancesKey = ref(0)
-const { privilege } = storeToRefs(fluxStore)
 const alertMessageText = ref(t('pages.apps.manage.messages.dataRetrievalError'))
 
 const zelidauthOwner = ref([])
@@ -1201,21 +1349,66 @@ const isComposeApp = computed(() =>
 
 const isOwnerZelidauth = computed(() => zelidauthOwner.value.includes(appSpecificationGlobal.value?.owner))
 
-const tabs = computed(() => [
+// Get current user's zelid from the stored zelidauth
+const currentUserZelid = computed(() => {
+  try {
+    const zelidauth = localStorage.getItem('zelidauth')
+    if (zelidauth) {
+      const auth = qs.parse(zelidauth)
+
+      return auth?.zelid || ''
+    }
+  } catch (error) {
+    console.error('Error parsing zelidauth:', error)
+  }
+
+  return ''
+})
+
+// Check if current user is a flux support team member
+const isFluxSupportTeam = computed(() => {
+  const supportTeamIds = fluxStore.config.fluxSupportTeamFluxID || ''
+  const userZelid = currentUserZelid.value
+
+  return userZelid && supportTeamIds.includes(userZelid)
+})
+
+// Check if user can manage subscription (owner OR support team member)
+const canManageSubscription = computed(() => isOwnerZelidauth.value || isFluxSupportTeam.value)
+
+// Tabs that require running instances to function
+const instanceDependentTabs = ['2', '3', '4', '5', '6', '7', '8']
+
+const allTabs = computed(() => [
   { label: t('pages.apps.manage.tabs.specifications'), value: "1" },
-  { label: t('pages.apps.manage.tabs.information'), value: "2" },
-  { label: t('pages.apps.manage.tabs.fileChanges'), value: "3" },
-  { label: t('pages.apps.manage.tabs.monitoring'), value: "4" },
-  { label: t('pages.apps.manage.tabs.logs'), value: "5" },
-  { label: t('pages.apps.manage.tabs.terminal'), value: "6" },
-  { label: t('pages.apps.manage.tabs.control'), value: "7" },
-  (privilege.value !== 'fluxteam' && isComposeApp.value) && {
+  { label: t('pages.apps.manage.tabs.information'), value: "2", requiresInstance: true },
+  { label: t('pages.apps.manage.tabs.fileChanges'), value: "3", requiresInstance: true },
+  { label: t('pages.apps.manage.tabs.monitoring'), value: "4", requiresInstance: true },
+  { label: t('pages.apps.manage.tabs.logs'), value: "5", requiresInstance: true },
+  { label: t('pages.apps.manage.tabs.terminal'), value: "6", requiresInstance: true },
+  { label: t('pages.apps.manage.tabs.control'), value: "7", requiresInstance: true },
+  isComposeApp.value && {
     label: t('pages.apps.manage.tabs.backupRestore'),
     value: "8",
+    requiresInstance: true,
   },
-  { label: t('pages.apps.manage.tabs.instances'), value: "9" },
-  isOwnerZelidauth.value && { label: t('pages.apps.manage.tabs.subscription'), value: "10" },
+  { label: t('pages.apps.manage.tabs.instances'), value: "9", requiresInstance: true },
+  canManageSubscription.value && { label: t('pages.apps.manage.tabs.subscription'), value: "10" },
+  auditUrl && (isOwnerZelidauth.value || isFluxSupportTeam.value) && { label: t('pages.apps.manage.tabs.audit'), value: "11" },
+  auditUrl && (isOwnerZelidauth.value || isFluxSupportTeam.value) && { label: t('pages.apps.manage.tabs.auditStats'), value: "12", hidden: true },
 ].filter(Boolean)) // removes `false` if condition fails
+
+// Filter tabs based on instance availability
+const tabs = computed(() => {
+  const visible = allTabs.value.filter(tab => !tab.hidden)
+  if (!selectedIp.value) {
+    // No instance selected - only show tabs that don't require instances
+    return visible.filter(tab => !tab.requiresInstance)
+  }
+
+  // Instance selected - show all tabs
+  return visible
+})
 
 const callResponse = ref({ status: null, data: null })
 const callBResponse = ref({ status: null, data: null })
@@ -1372,6 +1565,14 @@ watch(status, () => {
   }
 })
 
+// Auto-switch to global spec when no instances available
+watch(selectedIp, newIp => {
+  if (!newIp) {
+    // No instance selected - force global spec
+    status.value = false
+  }
+})
+
 //Tab Control
 watch(currentTab, async newVal => {
   // Check authorization and potentially trigger logout
@@ -1388,6 +1589,9 @@ watch(currentTab, async newVal => {
       if (selectedIp.value) {
         await getInstalledApplicationSpecifics()
         await getGlobalApplicationSpecifics()
+      } else if (callBResponse.value.data) {
+        // No instance - use global spec as fallback
+        appSpecification.value = { ...callBResponse.value.data }
       }
     } else if (newVal === '2') {
       inspectResult.value = []
@@ -1419,6 +1623,15 @@ watch(currentTab, async newVal => {
 //Helper Section
 function delay(ms) {
   return new Promise(resolve => setTimeout(resolve, ms))
+}
+
+function getFdmIndex(appName) {
+  const firstLetter = appName.charAt(0).toLowerCase()
+  if (firstLetter >= 'a' && firstLetter <= 'g') return 1
+  if (firstLetter >= 'h' && firstLetter <= 'n') return 2
+  if (firstLetter >= 'o' && firstLetter <= 'u') return 3
+  
+  return 4 // v-z and any other characters
 }
 
 function getAlertColor(state, status) {
@@ -1610,40 +1823,33 @@ async function getInstancesForDropDown() {
   if (masterSlaveApp.value) {
     masterIP.value = null
 
-    const url = `https://${appName.value}.app.runonflux.io/fluxstatistics?scope=${appName.value}apprunonfluxio;json;norefresh`
+    const fdmIndex = getFdmIndex(appName.value)
+    const url = `https://fdm-fn-1-${fdmIndex}.runonflux.io/api/appips/${appName.value}`
     let errorFdm = false
 
-    let fdmData = await axios.get(url).catch(error => {
+    let fdmData = await axios.get(url, { timeout: 20000 }).catch(error => {
       errorFdm = true
       masterIP.value = t('pages.apps.manage.messages.failedToCheck')
       console.error(`UImasterSlave: Failed to reach FDM:`, error)
     })
 
-    if (!errorFdm && fdmData?.data?.length) {
-      for (const fdmServer of fdmData.data) {
-        const serviceName = fdmServer.find(
-          el =>
-            el.id === 1 &&
-            el.objType === "Server" &&
-            el.field.name === "pxname" &&
-            el.value.value
-              .toLowerCase()
-              .startsWith(`${appName.value.toLowerCase()}apprunonfluxio`),
-        )
+    if (!errorFdm && fdmData?.data?.status === 'success' && fdmData?.data?.data?.ips?.length) {
+      const primaryIpWithPort = fdmData.data.data.ips[0]
+      const [primaryIp] = primaryIpWithPort.split(':')
 
-        if (serviceName) {
-          const ipElement = fdmServer.find(
-            el => el.id === 1 && el.objType === "Server" && el.field.name === "svname",
-          )
+      masterIP.value = primaryIp
 
-          if (ipElement) {
-            const [ip, port] = ipElement.value.value.split(":")
+      // Find the matching instance in the dropdown by comparing IPs without port
+      const matchingInstance = instances.value.data.find(inst => {
+        const [instIp] = inst.ip.split(':')
+        
+        return instIp === primaryIp
+      })
 
-            masterIP.value = ip
-            selectedIp.value = port === "16127" ? ip : ipElement.value.value
-            break
-          }
-        }
+      if (matchingInstance) {
+        selectedIp.value = matchingInstance.ip
+      } else {
+        selectedIp.value = primaryIp
       }
     }
 
@@ -1674,18 +1880,24 @@ async function refreshInfo() {
   if (!globalZelidAuthorized.value || logoutTrigger.value) return
 
   isDisabled.value = true
-  await new Promise(resolve => setTimeout(resolve, 3000))
+  isInitialLoading.value = true
 
-  // Check again after delay
-  if (!globalZelidAuthorized.value || logoutTrigger.value) {
+  try {
+    await new Promise(resolve => setTimeout(resolve, 3000))
+
+    // Check again after delay
+    if (!globalZelidAuthorized.value || logoutTrigger.value) {
+      return
+    }
+
+    await getInstancesForDropDown()
+    await getApplicationManagementAndStatus(false)
+  } catch (error) {
+    console.error('Error refreshing info:', error)
+  } finally {
     isDisabled.value = false
-    
-    return
+    isInitialLoading.value = false
   }
-
-  await getInstancesForDropDown()
-  await getApplicationManagementAndStatus(false)
-  isDisabled.value = false
 }
 
 //Auth Sectiom
@@ -1749,7 +1961,11 @@ async function logout() {
   if (route.path === "/") {
     window.location.reload()
   } else {
-    await router.push("/")
+    try {
+      await router.push("/")
+    } catch {
+      window.location.href = "/"
+    }
   }
 }
 
@@ -1923,6 +2139,16 @@ async function getInstalledApplicationSpecifics(silent = false) {
 
   // If we get here, all backends failed
   console.error(`All ${attemptCount} backends failed. Last error: ${lastError}`)
+
+  // If all backends failed but we have global spec, use that as fallback
+  if (callBResponse.value.data && callBResponse.value.data.name) {
+    console.log('No local spec available, using global spec as fallback')
+    appSpecification.value = { ...callBResponse.value.data }
+    InstalledLoading.value = false
+
+    // Don't set InstalledApiError since we have valid spec data
+    return
+  }
 
   // Don't show snackbar - the persistent error UI will be shown instead
   InstalledApiError.value = true
@@ -3092,6 +3318,12 @@ function clearCharts() {
   processes.value = []
 }
 
+// Periodic session expiry check (runs on all tabs including audit)
+const authCheckTimer = setInterval(async () => {
+  if (logoutTrigger.value) return
+  await getZelidAuthority()
+}, 300000)
+
 onMounted(async () => {
   try {
     const stored = localStorage.getItem('zelidauth')
@@ -3107,6 +3339,7 @@ onMounted(async () => {
       ipAccess.value = true
     }
     await getZelidAuthority()
+    fetchSubscriptionStatus()
     await getDaemonBlockCount()
     await getGlobalApplicationSpecifics()
     await getInstancesForDropDown()
@@ -3121,6 +3354,7 @@ onMounted(async () => {
 })
 
 onUnmounted(() => {
+  clearInterval(authCheckTimer)
   stopPollingStats()
   eventBus.off("updateAppStatus", appsGetListAllApps)
   eventBus.off("updateInstanceList", refreshInfo)

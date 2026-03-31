@@ -19,8 +19,8 @@
 
           <!-- Right side buttons -->
           <div class="d-flex align-center gap-4">
-            <!-- Upgrade to Latest Application Specification Button (only for V3-V7 apps, shown for redeploy) -->
-            <VTooltip v-if="props.isRedeploy && specVersion >= 3 && specVersion < LATEST_SPEC_VERSION" location="top">
+            <!-- Upgrade to Latest Application Specification Button (only for V3-V7 apps, shown for redeploy or update) -->
+            <VTooltip v-if="(props.isRedeploy || managementAction === 'update') && specVersion >= 3 && specVersion < LATEST_SPEC_VERSION" location="top">
               <template #activator="{ props: tooltipProps }">
                 <VBtn
                   v-bind="tooltipProps"
@@ -39,7 +39,25 @@
               <span>{{ t('core.subscriptionManager.upgradeToLatest') }}</span>
             </VTooltip>
 
-            <!-- Import Spec Button (only for new apps) -->
+            <!-- Export Spec Button (only for update mode) -->
+            <VTooltip v-if="!props.newApp && managementAction === 'update'" location="top">
+              <template #activator="{ props: tooltipProps }">
+                <VBtn
+                  v-bind="tooltipProps"
+                  icon
+                  color="info"
+                  variant="tonal"
+                  density="comfortable"
+                  class="import-glow-btn border-frame-btn"
+                  @click="exportSpecification"
+                >
+                  <VIcon size="22">mdi-file-export</VIcon>
+                </VBtn>
+              </template>
+              <span>{{ t('core.subscriptionManager.exportSpec') }}</span>
+            </VTooltip>
+
+            <!-- Import Spec Button (only for new apps, disabled until ToS accepted) -->
             <VTooltip v-if="props.newApp" location="top">
               <template #activator="{ props: tooltipProps }">
                 <VBtn
@@ -49,12 +67,13 @@
                   variant="tonal"
                   density="comfortable"
                   class="import-glow-btn border-frame-btn"
+                  :disabled="!acceptedTerms"
                   @click="showSpecImportDialog = true"
                 >
                   <VIcon size="22">mdi-file-import</VIcon>
                 </VBtn>
               </template>
-              <span>{{ t('core.subscriptionManager.importSpec') }}</span>
+              <span>{{ acceptedTerms ? t('core.subscriptionManager.importSpec') : t('core.subscriptionManager.tos.acceptFirst') }}</span>
             </VTooltip>
           </div>
         </div>
@@ -133,7 +152,7 @@
                 class="mobile-circle-tab review-glow-btn mx-1"
                 style="width: 44px !important; height: 44px !important;"
                 @click="tab = 99"
-                :disabled="tab !== 2"
+                :disabled="tab !== 3"
               >
                 <VIcon
                   :style="{
@@ -190,31 +209,50 @@
 
         <!-- Renewal Period Section -->
         <div v-else class="pa-3">
-          <!-- For V6+: Show period slider -->
-          <div v-if="versionFlags.supportsExpire" class="px-3">
-            <div class="d-flex flex-column gap-2 mt-2">
-              <VChip color="default" variant="tonal" label style="font-size: 14px;">
-                <VIcon size="22" class="mr-2">mdi-calendar-check</VIcon>
-                <span class="mr-2">{{ t('core.subscriptionManager.currentSubscriptionUntil') }}</span>
-                <strong>{{ new Date(appRunningTill.current).toLocaleString('en-GB', timeOptions.shortDate) }}</strong>
+
+          <!-- Active Subscription Management UI -->
+          <div v-if="existingSubscription" class="px-3">
+            <!-- Active Subscription Info -->
+            <div class="d-flex flex-column gap-2">
+              <VChip color="success" variant="tonal" label style="font-size: 14px;">
+                <VIcon size="20" class="mr-2">mdi-credit-card-check</VIcon>
+                <strong>{{ t('core.subscriptionManager.activeSubscriptionAutoRenewTitle') }}</strong>
               </VChip>
-              <VChip :color="timeRemainingColor" variant="tonal" label style="font-size: 14px;">
-                <VIcon size="22" class="mr-2">mdi-clock-outline</VIcon>
-                <span class="mr-2">{{ t('core.subscriptionManager.timeLeft') }}</span>
-                <strong>{{ timeRemaining }}</strong>
+              <VChip color="success" variant="tonal" label style="font-size: 14px;">
+                <VIcon size="20" class="mr-2">mdi-sync</VIcon>
+                <span class="mr-2">{{ t('core.subscriptionManager.billingPeriod') }}:</span>
+                <strong>{{ subscriptionPeriodInfo(existingSubscription.period).label }}</strong>
+              </VChip>
+              <VChip v-if="existingSubscription.nextChargeTimestamp" color="success" variant="tonal" label style="font-size: 14px;">
+                <VIcon size="20" class="mr-2">mdi-calendar-clock</VIcon>
+                <span class="mr-2">{{ t('core.subscriptionManager.nextBilling') }}:</span>
+                <strong>{{ new Date(existingSubscription.nextChargeTimestamp * 1000).toLocaleString('en-GB', timeOptions.shortDate) }}</strong>
               </VChip>
             </div>
-            <div class="d-flex flex-column gap-2 mt-2">
-              <VChip color="info" variant="tonal" label style="font-size: 14px;">
-                <VIcon size="22" class="mr-2">mdi-update</VIcon>
-                <span class="mr-2">{{ t('core.subscriptionManager.renewalPeriod') }}</span>
-                <strong>{{ renewalLabels[appDetails.renewalIndex] }}</strong>
-              </VChip>
+
+            <!-- Change Period Slider -->
+            <div v-if="versionFlags.supportsExpire" class="d-flex flex-column gap-2 mt-4">
+              <div class="d-flex align-center gap-2">
+                <VChip color="info" variant="tonal" label style="font-size: 14px;">
+                  <VIcon size="20" class="mr-2">mdi-swap-horizontal</VIcon>
+                  <span class="mr-2">{{ t('core.subscriptionManager.changePeriodTo') }}:</span>
+                  <strong>{{ subscriptionPeriodInfo(selectedSubscriptionPeriod).label }}</strong>
+                </VChip>
+                <VChip
+                  v-if="subscriptionPeriodInfo(selectedSubscriptionPeriod).discount > 0"
+                  color="success"
+                  variant="tonal"
+                  label
+                  style="font-size: 14px;"
+                >
+                  {{ subscriptionPeriodInfo(selectedSubscriptionPeriod).discount }}% {{ t('common.off') }}
+                </VChip>
+              </div>
               <div style="height: 32px; display: flex; align-items: center;">
                 <VSlider
                   v-model="appDetails.renewalIndex"
                   :min="0"
-                  :max="(renewalOptions.value?.length ?? 6) - 1"
+                  :max="subscriptionPeriodMax"
                   step="1"
                   hide-details
                   :thumb-label="false"
@@ -222,69 +260,153 @@
                   track-size="4"
                 />
               </div>
-              <VChip color="success" variant="tonal" label style="font-size: 14px;">
-                <VIcon size="22" class="mr-2">mdi-calendar-arrow-right</VIcon>
-                <span class="mr-2">{{ t('core.subscriptionManager.afterRenewalSubscriptionUntil') }}</span>
-                <strong>{{ new Date(appRunningTill.new).toLocaleString('en-GB', timeOptions.shortDate) }}</strong>
-              </VChip>
             </div>
-            <div v-if="appRunningTill.new < appRunningTill.current">
+
+            <!-- Same period: info alert -->
+            <VAlert
+              v-if="!subscriptionPeriodChanged"
+              type="info"
+              variant="tonal"
+              density="compact"
+              class="mt-4"
+            >
+              {{ t('core.subscriptionManager.subscriptionActiveInfo') }}
+            </VAlert>
+
+            <!-- Different period: warning alert -->
+            <VAlert
+              v-else
+              type="warning"
+              variant="tonal"
+              density="compact"
+              class="mt-4"
+            >
+              {{ t('core.subscriptionManager.subscriptionChangePeriodWarning') }}
+            </VAlert>
+
+            <!-- Change period button (only when different period selected) -->
+            <div v-if="subscriptionPeriodChanged" class="mt-4">
+              <VBtn
+                color="primary"
+                variant="flat"
+                size="large"
+                density="compact"
+                block
+                class="renewal-action-btn"
+                @click="tab = 99"
+              >
+                <VIcon size="22" class="mr-2">mdi-swap-horizontal</VIcon>
+                <span>{{ t('core.subscriptionManager.changePeriod') }}</span>
+              </VBtn>
+            </div>
+          </div>
+
+          <!-- No active subscription: Standard Renewal UI -->
+          <template v-else>
+            <!-- For V6+: Show period slider -->
+            <div v-if="versionFlags.supportsExpire" class="px-3">
+              <div class="d-flex flex-column gap-2 mt-2">
+                <VChip color="default" variant="tonal" label style="font-size: 14px;">
+                  <VIcon size="22" class="mr-2">mdi-calendar-check</VIcon>
+                  <span class="mr-2">{{ t('core.subscriptionManager.currentSubscriptionUntil') }}</span>
+                  <strong>{{ new Date(appRunningTill.current).toLocaleString('en-GB', timeOptions.shortDate) }}</strong>
+                </VChip>
+                <VChip :color="timeRemainingColor" variant="tonal" label style="font-size: 14px;">
+                  <VIcon size="22" class="mr-2">mdi-clock-outline</VIcon>
+                  <span class="mr-2">{{ t('core.subscriptionManager.timeLeft') }}</span>
+                  <strong>{{ timeRemaining }}</strong>
+                </VChip>
+              </div>
+              <div class="d-flex flex-column gap-2 mt-2">
+                <VChip color="info" variant="tonal" label style="font-size: 14px;">
+                  <VIcon size="22" class="mr-2">mdi-update</VIcon>
+                  <span class="mr-2">{{ t('core.subscriptionManager.renewalPeriod') }}</span>
+                  <strong>{{ renewalLabels[appDetails.renewalIndex] }}</strong>
+                </VChip>
+                <div style="height: 32px; display: flex; align-items: center;">
+                  <VSlider
+                    v-model="appDetails.renewalIndex"
+                    :min="0"
+                    :max="renewalOptions.length - 1"
+                    step="1"
+                    hide-details
+                    :thumb-label="false"
+                    :thumb-size="18"
+                    track-size="4"
+                  />
+                </div>
+                <VChip color="success" variant="tonal" label style="font-size: 14px;">
+                  <VIcon size="22" class="mr-2">mdi-calendar-arrow-right</VIcon>
+                  <span class="mr-2">{{ t('core.subscriptionManager.afterRenewalSubscriptionUntil') }}</span>
+                  <strong>{{ new Date(appRunningTill.new).toLocaleString('en-GB', timeOptions.shortDate) }}</strong>
+                </VChip>
+              </div>
+              <div v-if="appRunningTill.new < appRunningTill.current">
+                <VAlert
+                  type="warning"
+                  color="error"
+                  variant="tonal"
+                  density="compact"
+                  size="small"
+                  class="mt-3"
+                >
+                  {{ t('core.subscriptionManager.subscriptionPeriodDecreaseWarning') }}
+                </VAlert>
+              </div>
               <VAlert
-                type="warning"
-                color="error"
+                type="info"
                 variant="tonal"
                 density="compact"
-                size="small"
                 class="mt-3"
               >
-                {{ t('core.subscriptionManager.subscriptionPeriodDecreaseWarning') }}
+                {{ t('core.subscriptionManager.maxSubscriptionInfo') }}
               </VAlert>
             </div>
-          </div>
 
-          <!-- For < V6: Fixed 1 month renewal -->
-          <div v-else class="px-3">
-            <div class="d-flex flex-column gap-2 mt-2">
-              <VChip color="default" variant="tonal" label style="font-size: 14px;">
-                <VIcon size="22" class="mr-2">mdi-calendar-check</VIcon>
-                <span class="mr-2">{{ t('core.subscriptionManager.currentSubscriptionUntil') }}</span>
-                <strong>{{ new Date(appRunningTill.current).toLocaleString('en-GB', timeOptions.shortDate) }}</strong>
-              </VChip>
-              <VChip :color="timeRemainingColor" variant="tonal" label style="font-size: 14px;">
-                <VIcon size="22" class="mr-2">mdi-clock-outline</VIcon>
-                <span class="mr-2">{{ t('core.subscriptionManager.timeLeft') }}</span>
-                <strong>{{ timeRemaining }}</strong>
-              </VChip>
+            <!-- For < V6: Fixed 1 month renewal -->
+            <div v-else class="px-3">
+              <div class="d-flex flex-column gap-2 mt-2">
+                <VChip color="default" variant="tonal" label style="font-size: 14px;">
+                  <VIcon size="22" class="mr-2">mdi-calendar-check</VIcon>
+                  <span class="mr-2">{{ t('core.subscriptionManager.currentSubscriptionUntil') }}</span>
+                  <strong>{{ new Date(appRunningTill.current).toLocaleString('en-GB', timeOptions.shortDate) }}</strong>
+                </VChip>
+                <VChip :color="timeRemainingColor" variant="tonal" label style="font-size: 14px;">
+                  <VIcon size="22" class="mr-2">mdi-clock-outline</VIcon>
+                  <span class="mr-2">{{ t('core.subscriptionManager.timeLeft') }}</span>
+                  <strong>{{ timeRemaining }}</strong>
+                </VChip>
+              </div>
+              <div class="d-flex flex-column gap-2 mt-2">
+                <VChip color="info" variant="tonal" label style="font-size: 14px;">
+                  <VIcon size="22" class="mr-2">mdi-update</VIcon>
+                  <span class="mr-2">{{ t('core.subscriptionManager.renewalPeriod') }}</span>
+                  <strong>{{ t('core.subscriptionManager.renewal1Month') }}</strong>
+                </VChip>
+                <VChip color="success" variant="tonal" label style="font-size: 14px;">
+                  <VIcon size="22" class="mr-2">mdi-calendar-arrow-right</VIcon>
+                  <span class="mr-2">{{ t('core.subscriptionManager.afterRenewalSubscriptionUntil') }}</span>
+                  <strong>{{ new Date(Date.now() + 88000 * 0.5 * 60 * 1000).toLocaleString('en-GB', timeOptions.shortDate) }}</strong>
+                </VChip>
+              </div>
             </div>
-            <div class="d-flex flex-column gap-2 mt-2">
-              <VChip color="info" variant="tonal" label style="font-size: 14px;">
-                <VIcon size="22" class="mr-2">mdi-update</VIcon>
-                <span class="mr-2">{{ t('core.subscriptionManager.renewalPeriod') }}</span>
-                <strong>{{ t('core.subscriptionManager.renewal1Month') }}</strong>
-              </VChip>
-              <VChip color="success" variant="tonal" label style="font-size: 14px;">
-                <VIcon size="22" class="mr-2">mdi-calendar-arrow-right</VIcon>
-                <span class="mr-2">{{ t('core.subscriptionManager.afterRenewalSubscriptionUntil') }}</span>
-                <strong>{{ new Date(Date.now() + 88000 * 0.5 * 60 * 1000).toLocaleString('en-GB', timeOptions.shortDate) }}</strong>
-              </VChip>
-            </div>
-          </div>
 
-          <!-- Renewal Action Button -->
-          <div class="mt-4 px-3">
-            <VBtn
-              color="primary"
-              variant="flat"
-              size="large"
-              density="compact"
-              block
-              class="renewal-action-btn"
-              @click="tab = 99"
-            >
-              <VIcon size="22" class="mr-2">mdi-refresh</VIcon>
-              <span>{{ t('core.subscriptionManager.renewalAction') }}</span>
-            </VBtn>
-          </div>
+            <!-- Renewal Action Button -->
+            <div class="mt-4 px-3">
+              <VBtn
+                color="primary"
+                variant="flat"
+                size="large"
+                density="compact"
+                block
+                class="renewal-action-btn"
+                @click="tab = 99"
+              >
+                <VIcon size="22" class="mr-2">mdi-refresh</VIcon>
+                <span>{{ t('core.subscriptionManager.renewalAction') }}</span>
+              </VBtn>
+            </div>
+          </template>
         </div>
       </VCard>
     </div>
@@ -292,24 +414,49 @@
     <!-- Cancel Subscription UI (only for existing apps in cancel mode) -->
     <div v-if="!props.newApp && managementAction === 'cancel' && tab !== 99 && tab !== 100" class="mt-4">
       <VCard elevation="2" class="pa-4" border>
-        <VAlert type="warning" variant="tonal" class="mb-4">
-          {{ t('core.subscriptionManager.cancelWarning') }}
-        </VAlert>
+        <!-- Active subscription cancel info -->
+        <template v-if="existingSubscription">
+          <VAlert type="error" variant="tonal" class="mb-4">
+            {{ t('core.subscriptionManager.cancelActiveSubscriptionWarning') }}
+          </VAlert>
 
-        <ul style="list-style: none; padding: 0; padding-left: 16px;">
-          <li class="d-flex align-start mb-3">
-            <VIcon size="20" class="mr-2 mt-1" color="default">mdi-calendar-check</VIcon>
-            <span>{{ t('core.subscriptionManager.currentlySubscribedUntil') }} <b>{{ new Date(appRunningTill.current).toLocaleString('en-GB', timeOptions.shortDate) }}</b></span>
-          </li>
-          <li class="d-flex align-start mb-3">
-            <VIcon size="20" class="mr-2 mt-1" color="warning">mdi-clock-alert</VIcon>
-            <span>{{ t('core.subscriptionManager.afterCancellationExpire') }} <b>{{ new Date(Date.now() + 100 * (currentBlockHeight >= 2020000 ? 0.5 : 2) * 60 * 1000).toLocaleString('en-GB', timeOptions.shortDate) }}</b> (100 {{ t('core.subscriptionManager.blocksFromNow') }}).</span>
-          </li>
-          <li class="d-flex align-start mb-4">
-            <VIcon size="20" class="mr-2 mt-1" color="error">mdi-alert-circle</VIcon>
-            <span>{{ t('core.subscriptionManager.afterExpirationNotAccessible') }}</span>
-          </li>
-        </ul>
+          <ul style="list-style: none; padding: 0; padding-left: 16px;">
+            <li class="d-flex align-start mb-3">
+              <VIcon size="20" class="mr-2 mt-1" style="flex-shrink: 0;" color="error">mdi-credit-card-off</VIcon>
+              <span>{{ t('core.subscriptionManager.cancelActiveSubscriptionBilling') }} <b>{{ subscriptionPeriodInfo(existingSubscription.period).label }}</b></span>
+            </li>
+            <li class="d-flex align-start mb-3">
+              <VIcon size="20" class="mr-2 mt-1" style="flex-shrink: 0;" color="warning">mdi-server-remove</VIcon>
+              <span>{{ t('core.subscriptionManager.cancelAppWillExpire') }} <b>{{ new Date(Date.now() + 100 * (currentBlockHeight >= 2020000 ? 0.5 : 2) * 60 * 1000).toLocaleString('en-GB', timeOptions.shortDate) }}</b> (100 {{ t('core.subscriptionManager.blocksFromNow') }}).</span>
+            </li>
+            <li class="d-flex align-start mb-4">
+              <VIcon size="20" class="mr-2 mt-1" style="flex-shrink: 0;" color="error">mdi-alert-circle</VIcon>
+              <span>{{ t('core.subscriptionManager.afterExpirationNotAccessible') }}</span>
+            </li>
+          </ul>
+        </template>
+
+        <!-- One-time payment cancel info -->
+        <template v-else>
+          <VAlert type="warning" variant="tonal" class="mb-4">
+            {{ t('core.subscriptionManager.cancelWarning') }}
+          </VAlert>
+
+          <ul style="list-style: none; padding: 0; padding-left: 16px;">
+            <li class="d-flex align-start mb-3">
+              <VIcon size="20" class="mr-2 mt-1" color="default">mdi-calendar-check</VIcon>
+              <span>{{ t('core.subscriptionManager.currentlySubscribedUntil') }} <b>{{ new Date(appRunningTill.current).toLocaleString('en-GB', timeOptions.shortDate) }}</b></span>
+            </li>
+            <li class="d-flex align-start mb-3">
+              <VIcon size="20" class="mr-2 mt-1" color="warning">mdi-clock-alert</VIcon>
+              <span>{{ t('core.subscriptionManager.afterCancellationExpire') }} <b>{{ new Date(Date.now() + 100 * (currentBlockHeight >= 2020000 ? 0.5 : 2) * 60 * 1000).toLocaleString('en-GB', timeOptions.shortDate) }}</b> (100 {{ t('core.subscriptionManager.blocksFromNow') }}).</span>
+            </li>
+            <li class="d-flex align-start mb-4">
+              <VIcon size="20" class="mr-2 mt-1" color="error">mdi-alert-circle</VIcon>
+              <span>{{ t('core.subscriptionManager.afterExpirationNotAccessible') }}</span>
+            </li>
+          </ul>
+        </template>
 
         <VBtn color="error" variant="flat" size="large" density="compact" block class="mt-4" @click="cancelSubscription">
           <VIcon size="22" class="mr-2">mdi-cancel</VIcon>
@@ -324,355 +471,415 @@
         <div class="pa-2">
           <VForm>
             <!-- Terms of Service Agreement (only for new apps) -->
-            <VCard v-if="props.newApp" variant="tonal" color="info" class="mb-4">
-              <VCardText class="pa-4">
-                <div class="d-flex align-center mb-3">
-                  <VIcon icon="mdi-shield-check-outline" size="28" color="info" class="mr-3" />
-                  <span class="text-h6 font-weight-semibold">{{ t('core.subscriptionManager.tos.title') }}</span>
-                </div>
-
-                <VAlert type="info" variant="tonal" density="compact" class="mb-3">
-                  {{ t('core.subscriptionManager.tos.description') }}
-                </VAlert>
-
-                <VCheckbox
-                  v-model="acceptedTerms"
-                  density="comfortable"
-                  color="primary"
-                  hide-details
-                >
-                  <template #label>
-                    <span class="text-body-1">
-                      {{ t('core.subscriptionManager.tos.agreement') }}
-                      <a
-                        href="#"
-                        class="text-primary font-weight-medium"
-                        style="text-decoration: underline;"
-                        @click.prevent="showTermsDialog = true"
+            <VExpansionPanels v-if="props.newApp" v-model="tosPanel" class="mb-4 tos-panel-bordered">
+              <VExpansionPanel value="0">
+                <VExpansionPanelTitle class="text-h6 font-weight-semibold">
+                  <template #default>
+                    <div class="d-flex align-center">
+                      <VAvatar
+                        size="36"
+                        class="mr-2"
+                        :color="acceptedTerms ? 'success' : 'warning'"
                       >
-                        {{ t('core.subscriptionManager.tos.link') }}
-                      </a>
-                    </span>
+                        <VIcon
+                          icon="mdi-shield-check-outline"
+                          size="20"
+                          color="white"
+                        />
+                      </VAvatar>
+                      <span>{{ t('core.subscriptionManager.tos.title') }}</span>
+                    </div>
                   </template>
-                </VCheckbox>
-              </VCardText>
-            </VCard>
+                </VExpansionPanelTitle>
+                <VExpansionPanelText>
+                  <VAlert type="info" variant="tonal" density="compact" class="mt-4 mb-3">
+                    {{ t('core.subscriptionManager.tos.description') }}
+                  </VAlert>
 
-            <VTextField
-              v-model="appDetails.name"
-              :label="t('core.subscriptionManager.name')"
-              prepend-inner-icon="mdi-rename-box"
-              variant="outlined"
-              density="comfortable"
-              :disabled="isNameLocked || (props.newApp && !acceptedTerms)"
-              class="mb-3"
-            >
-              <template #append-inner>
-                <VTooltip location="top">
-                  <template #activator="{ props }">
-                    <VIcon v-bind="props" size="20" color="grey">mdi-information-outline</VIcon>
-                  </template>
-                  <span>{{ t('core.subscriptionManager.nameTooltip') }}</span>
-                </VTooltip>
-              </template>
-            </VTextField>
-
-            <VTextarea
-              v-model="appDetails.description"
-              :label="t('core.subscriptionManager.description')"
-              prepend-inner-icon="mdi-text"
-              auto-grow
-              rows="1"
-              variant="outlined"
-              density="comfortable"
-              class="mb-3"
-            >
-              <template #append-inner>
-                <VTooltip location="top">
-                  <template #activator="{ props }">
-                    <VIcon v-bind="props" size="20" color="grey">mdi-information-outline</VIcon>
-                  </template>
-                  <span>{{ t('core.subscriptionManager.descriptionTooltip') }}</span>
-                </VTooltip>
-              </template>
-            </VTextarea>
-
-            <VTextField
-              v-model="appDetails.owner"
-              :label="t('core.subscriptionManager.owner')"
-              prepend-inner-icon="mdi-account"
-              variant="outlined"
-              density="comfortable"
-              class="mb-3"
-            >
-              <template #append-inner>
-                <VTooltip location="top">
-                  <template #activator="{ props }">
-                    <VIcon v-bind="props" size="20" color="grey">mdi-information-outline</VIcon>
-                  </template>
-                  <span>{{ t('core.subscriptionManager.ownerTooltip') }}</span>
-                </VTooltip>
-              </template>
-            </VTextField>
-
-            <!-- Specification Version (shown for update and redeploy, not for new registration) -->
-            <VTextField
-              v-if="!props.newApp"
-              :model-value="specVersion"
-              :label="t('core.subscriptionManager.specVersion')"
-              prepend-inner-icon="mdi-tag"
-              variant="outlined"
-              density="comfortable"
-              readonly
-              class="mb-3"
-            >
-              <template #append-inner>
-                <VTooltip location="top" max-width="300">
-                  <template #activator="{ props: tooltipProps }">
-                    <VIcon
-                      v-bind="tooltipProps"
-                      size="20"
-                      :color="specVersion >= LATEST_SPEC_VERSION ? 'success' : 'warning'"
-                      class="mr-2"
-                    >
-                      {{ specVersion >= LATEST_SPEC_VERSION ? 'mdi-check-circle' : 'mdi-alert-circle' }}
-                    </VIcon>
-                  </template>
-                  <span v-if="specVersion >= LATEST_SPEC_VERSION">{{ t('core.subscriptionManager.usingLatestSpec') }}</span>
-                  <span v-else>{{ t('core.subscriptionManager.olderSpecWarning') }}</span>
-                </VTooltip>
-                <VTooltip location="top">
-                  <template #activator="{ props: tooltipProps }">
-                    <VIcon v-bind="tooltipProps" size="20" color="grey">mdi-information-outline</VIcon>
-                  </template>
-                  <span>{{ t('core.subscriptionManager.currentSpecVersion') }}</span>
-                </VTooltip>
-              </template>
-            </VTextField>
-
-            <!--
-              <VCombobox
-              v-model="appDetails.contacts"
-              label="Contact"
-              prepend-inner-icon="mdi-email"
-              multiple
-              outlined
-              dense
-              class="mb-3"
-              :items="[]"
-              hide-no-data
-              hide-details
-              menu-icon=""
-              @change="removeDuplicates"
-              >
-              <template #selection="{ item, index }">
-              <VChip
-              class="ma-1"
-              closable
-              @click:close="appDetails.contacts.splice(index, 1)"
-              >
-              {{ item.value }}
-              </VChip>
-              </template>
-              </VCombobox> 
-            -->
-          
-          
-            <div v-if="versionFlags.supportsContacts" class="d-flex align-center mb-3">
-              <VCombobox
-                v-model="appDetails.contacts"
-                :label="t('core.subscriptionManager.contact')"
-                prepend-inner-icon="mdi-email"
-                multiple
-                variant="outlined"
-                density="comfortable"
-                :items="[]"
-                hide-no-data
-                hide-details
-                menu-icon=""
-                class="flex-grow-1"
-                @change="removeDuplicates"
-              >
-                <template #selection="{ item, index }">
-                  <VChip
-                    v-if="item.value && item.value.trim()"
-                    class="ma-1"
-                    closable
-                    @click:close="appDetails.contacts.splice(index, 1)"
-                  >
-                    {{ item.value }}
-                  </VChip>
-                </template>
-                <template #append-inner>
-                  <VTooltip location="top">
-                    <template #activator="{ props }">
-                      <VIcon v-bind="props" size="20" color="grey">mdi-information-outline</VIcon>
-                    </template>
-                    <span>{{ t('core.subscriptionManager.contactTooltip') }}</span>
-                  </VTooltip>
-                </template>
-              </VCombobox>
-
-              <VTooltip :text="t('core.subscriptionManager.uploadContactsTooltip')" location="top">
-                <template #activator="{ props }">
-                  <VBtn
-                    v-bind="props"
-                    icon
-                    variant="flat"
+                  <VCheckbox
+                    v-model="acceptedTerms"
+                    density="comfortable"
                     color="primary"
-                    class="ml-2"
-                    :disabled="appDetails?.contacts?.length === 0 || isUploadingContacts"
-                    @click="uploadContactsToFluxStorage"
+                    hide-details
                   >
-                    <VIcon size="24">mdi-cloud-upload</VIcon>
-                  </VBtn>
-                </template>
-              </VTooltip>
+                    <template #label>
+                      <span class="text-body-1">
+                        {{ t('core.subscriptionManager.tos.agreement') }}
+                        <a
+                          href="#"
+                          class="font-weight-bold text-high-emphasis"
+                          style="text-decoration: underline;"
+                          @click.prevent="showTermsDialog = true"
+                        >
+                          {{ t('core.subscriptionManager.tos.link') }}
+                        </a>
+                      </span>
+                    </template>
+                  </VCheckbox>
+                </VExpansionPanelText>
+              </VExpansionPanel>
+            </VExpansionPanels>
+
+            <div :class="{ 'disabled-fieldset': props.newApp && !acceptedTerms }">
+              <fieldset :disabled="props.newApp && !acceptedTerms">
+                <VTextField
+                  v-model="appDetails.name"
+                  :label="t('core.subscriptionManager.name')"
+                  prepend-inner-icon="mdi-rename-box"
+                  variant="outlined"
+                  density="comfortable"
+                  :disabled="isNameLocked"
+                  class="mb-3"
+                  @input="props.newApp && (appDetails.name = appDetails.name.toLowerCase())"
+                >
+                  <template #append-inner>
+                    <VTooltip location="top">
+                      <template #activator="{ props }">
+                        <VIcon v-bind="props" size="20" color="grey">mdi-information-outline</VIcon>
+                      </template>
+                      <span>{{ t('core.subscriptionManager.nameTooltip') }}</span>
+                    </VTooltip>
+                  </template>
+                </VTextField>
+
+                <VTextarea
+                  v-model="appDetails.description"
+                  :label="t('core.subscriptionManager.description')"
+                  prepend-inner-icon="mdi-text"
+                  auto-grow
+                  rows="1"
+                  variant="outlined"
+                  density="comfortable"
+                  class="mb-3"
+                >
+                  <template #append-inner>
+                    <VTooltip location="top">
+                      <template #activator="{ props }">
+                        <VIcon v-bind="props" size="20" color="grey">mdi-information-outline</VIcon>
+                      </template>
+                      <span>{{ t('core.subscriptionManager.descriptionTooltip') }}</span>
+                    </VTooltip>
+                  </template>
+                </VTextarea>
+
+                <VTextField
+                  v-model="appDetails.owner"
+                  :label="t('core.subscriptionManager.owner')"
+                  prepend-inner-icon="mdi-account"
+                  variant="outlined"
+                  density="comfortable"
+                  class="mb-3"
+                >
+                  <template #append-inner>
+                    <VTooltip location="top">
+                      <template #activator="{ props }">
+                        <VIcon v-bind="props" size="20" color="grey">mdi-information-outline</VIcon>
+                      </template>
+                      <span>{{ t('core.subscriptionManager.ownerTooltip') }}</span>
+                    </VTooltip>
+                  </template>
+                </VTextField>
+
+                <!-- Specification Version (shown for update and redeploy, not for new registration) -->
+                <VTextField
+                  v-if="!props.newApp"
+                  :model-value="specVersion"
+                  :label="t('core.subscriptionManager.specVersion')"
+                  prepend-inner-icon="mdi-tag"
+                  variant="outlined"
+                  density="comfortable"
+                  readonly
+                  class="mb-3"
+                >
+                  <template #append-inner>
+                    <VTooltip location="top" max-width="300">
+                      <template #activator="{ props: tooltipProps }">
+                        <VIcon
+                          v-bind="tooltipProps"
+                          size="20"
+                          :color="specVersion >= LATEST_SPEC_VERSION ? 'success' : 'warning'"
+                          class="mr-2"
+                        >
+                          {{ specVersion >= LATEST_SPEC_VERSION ? 'mdi-check-circle' : 'mdi-alert-circle' }}
+                        </VIcon>
+                      </template>
+                      <span v-if="specVersion >= LATEST_SPEC_VERSION">{{ t('core.subscriptionManager.usingLatestSpec') }}</span>
+                      <span v-else>{{ t('core.subscriptionManager.olderSpecWarning') }}</span>
+                    </VTooltip>
+                    <VTooltip location="top">
+                      <template #activator="{ props: tooltipProps }">
+                        <VIcon v-bind="tooltipProps" size="20" color="grey">mdi-information-outline</VIcon>
+                      </template>
+                      <span>{{ t('core.subscriptionManager.currentSpecVersion') }}</span>
+                    </VTooltip>
+                  </template>
+                </VTextField>
+
+                <!--
+                  <VCombobox
+                  v-model="appDetails.contacts"
+                  label="Contact"
+                  prepend-inner-icon="mdi-email"
+                  multiple
+                  outlined
+                  dense
+                  class="mb-3"
+                  :items="[]"
+                  hide-no-data
+                  hide-details
+                  menu-icon=""
+                  @change="removeDuplicates"
+                  >
+                  <template #selection="{ item, index }">
+                  <VChip
+                  class="ma-1"
+                  closable
+                  @click:close="appDetails.contacts.splice(index, 1)"
+                  >
+                  {{ item.value }}
+                  </VChip>
+                  </template>
+                  </VCombobox> 
+                -->
+          
+          
+                <div v-if="versionFlags.supportsContacts" class="d-flex align-center mb-3">
+                  <VCombobox
+                    v-model="appDetails.contacts"
+                    :label="t('core.subscriptionManager.contact') + ' *'"
+                    prepend-inner-icon="mdi-email"
+                    multiple
+                    variant="outlined"
+                    density="comfortable"
+                    :items="[]"
+                    hide-no-data
+                    hide-details
+                    menu-icon=""
+                    class="flex-grow-1"
+                    @change="removeDuplicates"
+                  >
+                    <template #selection="{ item, index }">
+                      <VChip
+                        v-if="item.value && item.value.trim()"
+                        class="ma-1"
+                        closable
+                        @click:close="appDetails.contacts.splice(index, 1)"
+                      >
+                        {{ item.value }}
+                      </VChip>
+                    </template>
+                    <template #append-inner>
+                      <VTooltip location="top">
+                        <template #activator="{ props }">
+                          <VIcon v-bind="props" size="20" color="grey">mdi-information-outline</VIcon>
+                        </template>
+                        <span>{{ t('core.subscriptionManager.contactTooltip') }}</span>
+                      </VTooltip>
+                    </template>
+                  </VCombobox>
+
+                  <VTooltip :text="t('core.subscriptionManager.uploadContactsTooltip')" location="top">
+                    <template #activator="{ props }">
+                      <VBtn
+                        v-bind="props"
+                        icon
+                        variant="flat"
+                        color="primary"
+                        class="ml-2"
+                        :disabled="appDetails?.contacts?.length === 0 || isUploadingContacts"
+                        @click="uploadContactsToFluxStorage"
+                      >
+                        <VIcon size="24">mdi-cloud-upload</VIcon>
+                      </VBtn>
+                    </template>
+                  </VTooltip>
+                </div>
+              </fieldset>
             </div>
           </VForm>
-          <!-- Instances Section -->
-          <div class="border rounded pa-3">
-            <div>
-              <div class="d-flex align-center justify-space-between mb-2">
-                <VChip color="default" variant="tonal" class="mr-2" style="width: 110px" label>
-                  <VIcon class="mr-1">mdi-laptop</VIcon>
-                  {{ t('core.subscriptionManager.instances') }}
-                </VChip>
-                <VChip color="success" variant="tonal" size="small">
-                  {{ t('core.subscriptionManager.instancesCount', appDetails.instances, { count: appDetails.instances }) }}
-                </VChip>
-              </div>
-              <VSlider
-                v-model="appDetails.instances"
-                :min="3"
-                :max="100"
-                step="1"
-                hide-details
-                :thumb-label="false"
-                :thumb-size="18"
-                track-size="4"
-              />
-            </div>
 
-            <!-- Renewal Period Section (Only for V6+ apps) -->
-            <div v-if="versionFlags.supportsExpire" class="mb-2 mt-2">
-              <div class="d-flex align-center justify-space-between mb-1">
-                <div class="d-flex align-center">
+          <div :class="{ 'disabled-fieldset': props.newApp && !acceptedTerms }">
+            <!-- Instances Section -->
+            <div class="border rounded pa-3">
+              <div>
+                <div class="d-flex align-center justify-space-between mb-2">
                   <VChip color="default" variant="tonal" class="mr-2" style="width: 110px" label>
-                    <VIcon class="mr-1">mdi-calendar-clock</VIcon>
-                    {{ t('core.subscriptionManager.period') }}
+                    <VIcon class="mr-1">mdi-laptop</VIcon>
+                    {{ t('core.subscriptionManager.instances') }}
+                  </VChip>
+                  <VChip color="success" variant="tonal" size="small">
+                    {{ t('core.subscriptionManager.instancesCount', { count: appDetails.instances }) }}
                   </VChip>
                 </div>
-                <VSwitch
-                  v-if="!newApp"
-                  v-model="renewalEnabled"
-                  inset
+                <VSlider
+                  v-model="appDetails.instances"
+                  :min="minInstances"
+                  :max="100"
+                  step="1"
                   hide-details
-                  class="ma-0"
-                  :label="t('core.subscriptionManager.renewal')"
+                  :thumb-label="false"
+                  :thumb-size="18"
+                  track-size="4"
                 />
+
+                <!-- Info for legacy app updates (version < 8) - cannot reduce below 3 -->
+                <VAlert
+                  v-if="isLegacyAppUpdate"
+                  type="info"
+                  variant="tonal"
+                  density="compact"
+                  class="mt-2"
+                >
+                  {{ t('core.subscriptionManager.instancesWarningLegacy') }}
+                </VAlert>
+                <!-- Warning for syncthing minimum instances (new apps or version >= 8) -->
+                <VAlert
+                  v-else-if="shouldEnforceSyncthingMinimum"
+                  type="info"
+                  variant="tonal"
+                  density="compact"
+                  class="mt-2"
+                >
+                  {{ t('core.subscriptionManager.instancesWarningSyncthing') }}
+                </VAlert>
+                <!-- Warning for low instance count (only when syncthing minimum is not enforced) -->
+                <VAlert
+                  v-else-if="appDetails.instances === 1"
+                  type="warning"
+                  variant="tonal"
+                  density="compact"
+                  class="mt-2"
+                >
+                  {{ t('core.subscriptionManager.instancesWarningOne') }}
+                </VAlert>
+                <VAlert
+                  v-else-if="appDetails.instances === 2"
+                  type="warning"
+                  variant="tonal"
+                  density="compact"
+                  class="mt-2"
+                >
+                  {{ t('core.subscriptionManager.instancesWarningTwo') }}
+                </VAlert>
               </div>
 
-              <VSlider
-                v-model="appDetails.renewalIndex"
-                :min="0"
-                :max="(renewalOptions.value?.length ?? 6) - 1"
-                step="1"
-                class="flex-grow-1"
-                hide-details
-                :thumb-label="false"
-                :thumb-size="18"
-                track-size="4"
-                :disabled="!renewalEnabled && !newApp"
-              />
-              <span class="mb-5">
-                <div class="d-flex justify-space-between align-center px-3">
-                  <!-- left -->
-                  <span style="line-height: 1.25; font-size: 0.875rem;">
-                    <template v-if="newApp">
-                      {{ t('core.subscriptionManager.yourApplicationWillBeSubscribedUntil') }}
-                      <b>{{ new Date(appRunningTill.new).toLocaleString('en-GB', timeOptions.shortDate) }}</b>.
-                    </template>
-                    <template v-else>
-                      {{ t('core.subscriptionManager.currentlyYourApplicationIsSubscribedUntil') }}
-                      <b>{{ new Date(appRunningTill.current).toLocaleString('en-GB', timeOptions.shortDate) }}</b>.
-                    </template>
-                  </span>
-                  <!-- right -->
-                  <span class="text-caption grey--text" style="line-height: 1.25; white-space: nowrap;">
-                    {{ renewalLabels[appDetails.renewalIndex] }}
-                  </span>
+              <!-- Renewal Period Section (Only for V6+ apps) -->
+              <div v-if="versionFlags.supportsExpire && !existingSubscription" class="mb-2 mt-2">
+                <div class="d-flex align-center justify-space-between mb-1">
+                  <div class="d-flex align-center">
+                    <VChip color="default" variant="tonal" class="mr-2" style="width: 110px" label>
+                      <VIcon class="mr-1">mdi-calendar-clock</VIcon>
+                      {{ t('core.subscriptionManager.period') }}
+                    </VChip>
+                  </div>
+                  <VSwitch
+                    v-if="!newApp"
+                    v-model="renewalEnabled"
+                    inset
+                    hide-details
+                    class="ma-0"
+                    :label="t('core.subscriptionManager.renewal')"
+                  />
                 </div>
-                <span v-if="renewalEnabled && !newApp" class="px-3" style="font-size: 0.8125rem;">
-                  {{ t('core.subscriptionManager.yourNewAdjustedSubscriptionEndsOn') }}
-                  <b>{{ new Date(appRunningTill.new).toLocaleString('en-GB', timeOptions.shortDate) }}</b>.
+
+                <VSlider
+                  v-model="appDetails.renewalIndex"
+                  :min="0"
+                  :max="renewalOptions.length - 1"
+                  step="1"
+                  class="flex-grow-1"
+                  hide-details
+                  :thumb-label="false"
+                  :thumb-size="18"
+                  track-size="4"
+                  :disabled="!renewalEnabled && !newApp"
+                />
+                <span class="mb-5">
+                  <div class="d-flex justify-space-between align-center px-3">
+                    <!-- left -->
+                    <span style="line-height: 1.25; font-size: 0.875rem;">
+                      <template v-if="newApp">
+                        {{ t('core.subscriptionManager.yourApplicationWillBeSubscribedUntil') }}
+                        <b>{{ new Date(appRunningTill.new).toLocaleString('en-GB', timeOptions.shortDate) }}</b>.
+                      </template>
+                      <template v-else>
+                        {{ t('core.subscriptionManager.currentlyYourApplicationIsSubscribedUntil') }}
+                        <b>{{ new Date(appRunningTill.current).toLocaleString('en-GB', timeOptions.shortDate) }}</b>.
+                      </template>
+                    </span>
+                    <!-- right -->
+                    <span class="text-caption grey--text" style="line-height: 1.25; white-space: nowrap;">
+                      {{ renewalLabels[appDetails.renewalIndex] }}
+                    </span>
+                  </div>
+                  <span v-if="renewalEnabled && !newApp" class="px-3" style="font-size: 0.8125rem;">
+                    {{ t('core.subscriptionManager.yourNewAdjustedSubscriptionEndsOn') }}
+                    <b>{{ new Date(appRunningTill.new).toLocaleString('en-GB', timeOptions.shortDate) }}</b>.
+                  </span>
+                  <div v-if="!renewalEnabled && !newApp" class="d-flex align-center px-3" style="font-size: 0.875rem; color: #ff9800;">
+                    <VIcon size="18" color="warning" class="mr-2">mdi-information</VIcon>
+                    <span>{{ t('core.subscriptionManager.subscriptionNotExtended') }}</span>
+                  </div>
+                  <span v-if="appRunningTill.new < appRunningTill.current && renewalEnabled" style="color: red">
+                    <VAlert
+                      type="warning"
+                      color="error"
+                      variant="tonal"
+                      density="compact"
+                      size="small"
+                      class="mt-1 mx-3"
+                    >
+                      {{ t('core.subscriptionManager.subscriptionPeriodDecreaseWarning') }}
+                    </VAlert>
+                  </span>
                 </span>
-                <div v-if="!renewalEnabled && !newApp" class="d-flex align-center px-3" style="font-size: 0.875rem; color: #ff9800;">
-                  <VIcon size="18" color="warning" class="mr-2">mdi-information</VIcon>
-                  <span>{{ t('core.subscriptionManager.subscriptionNotExtended') }}</span>
-                </div>
-                <span v-if="appRunningTill.new < appRunningTill.current && renewalEnabled" style="color: red">
-                  <VAlert
-                    type="warning"
-                    color="error"
-                    variant="tonal"
+              </div>
+              <!-- Additional Options Section (V7+) -->
+              <div v-if="versionFlags.supportsStaticIp" class="d-flex align-center mb-1 mt-4">
+                <VChip color="default" variant="tonal" class="mr-2"  label>
+                  <VIcon class="mr-1">mdi-cog-box</VIcon>
+                  {{ t('core.subscriptionManager.additionalOptions') }}
+                </VChip>
+              </div>
+              <div v-if="versionFlags.supportsStaticIp" class="d-flex flex-wrap gap-4 mt-1 pa-2">
+                <!-- Static IP Switch -->
+                <div class="d-flex align-center pa-2 switch-container">
+                  <VSwitch
+                    v-model="appDetails.staticip"
+                    inset
+                    hide-details
+                    class="ma-0"
                     density="compact"
-                    size="small"
-                    class="mt-1 mx-3"
-                  >
-                    {{ t('core.subscriptionManager.subscriptionPeriodDecreaseWarning') }}
-                  </VAlert>
-                </span>
-              </span>
-            </div>
-            <!-- Additional Options Section (V7+) -->
-            <div v-if="versionFlags.supportsStaticIp" class="d-flex align-center mb-1 mt-4">
-              <VChip color="default" variant="tonal" class="mr-2"  label>
-                <VIcon class="mr-1">mdi-cog-box</VIcon>
-                {{ t('core.subscriptionManager.additionalOptions') }}
-              </VChip>
-            </div>
-            <div v-if="versionFlags.supportsStaticIp" class="d-flex flex-wrap gap-4 mt-1 pa-2">
-              <!-- Static IP Switch -->
-              <div class="d-flex align-center pa-2 switch-container">
-                <VSwitch
-                  v-model="appDetails.staticip"
-                  inset
-                  hide-details
-                  class="ma-0"
-                  density="compact"
-                  :label="t('core.subscriptionManager.staticIp')"
-                />
-                <VTooltip location="top" max-width="300">
-                  <template #activator="{ props }">
-                    <VIcon v-bind="props" size="20" color="grey" class="ml-2" style="vertical-align: middle;">mdi-information-outline</VIcon>
-                  </template>
-                  <span>{{ t('core.subscriptionManager.staticIpTooltip') }}</span>
-                </VTooltip>
-              </div>
+                    :label="t('core.subscriptionManager.staticIp')"
+                  />
+                  <VTooltip location="top" max-width="300">
+                    <template #activator="{ props }">
+                      <VIcon v-bind="props" size="20" color="grey" class="ml-2" style="vertical-align: middle;">mdi-information-outline</VIcon>
+                    </template>
+                    <span>{{ t('core.subscriptionManager.staticIpTooltip') }}</span>
+                  </VTooltip>
+                </div>
 
-              <!-- Enterprise Switch -->
-              <div class="d-flex align-center pa-2 switch-container">
-                <VSwitch
-                  v-model="isPrivateApp"
-                  inset
-                  hide-details
-                  class="ma-0"
-                  density="compact"
-                  :label="t('core.subscriptionManager.enterprise')"
-                />
-                <VTooltip location="top" max-width="300">
-                  <template #activator="{ props }">
-                    <VIcon v-bind="props" size="20" color="grey" class="ml-2" style="vertical-align: middle;">mdi-information-outline</VIcon>
-                  </template>
-                  <span>{{ t('core.subscriptionManager.enterpriseTooltip') }}</span>
-                </VTooltip>
+                <!-- Enterprise Switch -->
+                <div class="d-flex align-center pa-2 switch-container">
+                  <VSwitch
+                    v-model="isPrivateApp"
+                    inset
+                    hide-details
+                    class="ma-0"
+                    density="compact"
+                    :label="t('core.subscriptionManager.enterprise')"
+                  />
+                  <VTooltip location="top" max-width="300">
+                    <template #activator="{ props }">
+                      <VIcon v-bind="props" size="20" color="grey" class="ml-2" style="vertical-align: middle;">mdi-information-outline</VIcon>
+                    </template>
+                    <span>{{ t('core.subscriptionManager.enterpriseTooltip') }}</span>
+                  </VTooltip>
+                </div>
               </div>
             </div>
-
           </div>
-
-
         </div>
       </VWindowItem>
 
@@ -699,7 +906,17 @@
                 outlined
                 dense
                 class="mb-4 mt-4"
-              />
+              >
+                <template #item="{ props, item }">
+                  <VListItem v-bind="props">
+                    <template v-if="item.raw.instances" #append>
+                      <VChip size="x-small" color="success" variant="tonal">
+                        {{ item.raw.instances }}
+                      </VChip>
+                    </template>
+                  </VListItem>
+                </template>
+              </VSelect>
               <!-- Country Selector -->
               <VSelect
                 v-model="selectedAllowed.country"
@@ -707,11 +924,21 @@
                 :label="t('core.subscriptionManager.country')"
                 item-title="text"
                 item-value="value"
-                outlined 
-                dense 
+                outlined
+                dense
                 class="mb-4"
                 :disabled="!selectedAllowed.continent || selectedAllowed.continent === 'ALL'"
-              />
+              >
+                <template #item="{ props, item }">
+                  <VListItem v-bind="props">
+                    <template v-if="item.raw.instances" #append>
+                      <VChip size="x-small" color="success" variant="tonal">
+                        {{ item.raw.instances }}
+                      </VChip>
+                    </template>
+                  </VListItem>
+                </template>
+              </VSelect>
               <!-- Region Selector -->
               <VSelect
                 v-model="selectedAllowed.region"
@@ -723,7 +950,17 @@
                 dense
                 class="mb-4"
                 :disabled="!selectedAllowed.country || selectedAllowed.country === 'ALL'"
-              />
+              >
+                <template #item="{ props, item }">
+                  <VListItem v-bind="props">
+                    <template v-if="item.raw.instances" #append>
+                      <VChip size="x-small" color="success" variant="tonal">
+                        {{ item.raw.instances }}
+                      </VChip>
+                    </template>
+                  </VListItem>
+                </template>
+              </VSelect>
 
               <!-- Add Button -->
               <div class="d-flex justify-center mt-2 mb-2">
@@ -777,7 +1014,17 @@
                 outlined
                 dense
                 class="mb-4 mt-4"
-              />
+              >
+                <template #item="{ props, item }">
+                  <VListItem v-bind="props">
+                    <template v-if="item.raw.instances" #append>
+                      <VChip size="x-small" color="error" variant="tonal">
+                        {{ item.raw.instances }}
+                      </VChip>
+                    </template>
+                  </VListItem>
+                </template>
+              </VSelect>
 
               <!-- Country Selector -->
               <VSelect
@@ -787,10 +1034,20 @@
                 item-title="text"
                 item-value="value"
                 outlined
-                dense 
+                dense
                 class="mb-4"
                 :disabled="!selectedForbidden.continent || selectedForbidden.continent === 'NONE'"
-              />
+              >
+                <template #item="{ props, item }">
+                  <VListItem v-bind="props">
+                    <template v-if="item.raw.instances" #append>
+                      <VChip size="x-small" color="error" variant="tonal">
+                        {{ item.raw.instances }}
+                      </VChip>
+                    </template>
+                  </VListItem>
+                </template>
+              </VSelect>
 
               <!-- Region Selector -->
               <VSelect
@@ -803,7 +1060,17 @@
                 dense
                 class="mb-4"
                 :disabled="!selectedForbidden.country || selectedForbidden.country === 'ALL'"
-              />
+              >
+                <template #item="{ props, item }">
+                  <VListItem v-bind="props">
+                    <template v-if="item.raw.instances" #append>
+                      <VChip size="x-small" color="error" variant="tonal">
+                        {{ item.raw.instances }}
+                      </VChip>
+                    </template>
+                  </VListItem>
+                </template>
+              </VSelect>
 
               <!-- Add Button -->
               <div class="d-flex justify-center mt-2 mb-2">
@@ -865,7 +1132,7 @@
                   </VIcon>
                   <span class="d-none d-sm-inline">{{ component.name || `${t('core.subscriptionManager.component')} ${componentIndex + 1}` }}</span>
                   <VBtn
-                    v-if="props.newApp"
+                    v-if="canModifyComponents"
                     icon
                     variant="flat"
                     color="error"
@@ -880,7 +1147,7 @@
             </VTabs>
 
             <!-- Add Component Button -->
-            <VBtn v-if="props.newApp" icon color="primary" @click="addComposeComponent">
+            <VBtn v-if="canModifyComponents" icon color="primary" @click="addComposeComponent">
               <VIcon>mdi-plus</VIcon>
             </VBtn>
           </div>
@@ -906,7 +1173,8 @@
                   density="comfortable"
                   variant="outlined"
                   class="mb-3"
-                  :disabled="!props.newApp"
+                  :disabled="!canModifyComponents"
+                  @input="canModifyComponents && (component.name = component.name.toLowerCase())"
                 >
                   <template #append-inner>
                     <VTooltip location="top">
@@ -943,7 +1211,6 @@
                   density="comfortable"
                   variant="outlined"
                   class="mb-3"
-                  :readonly="!props.newApp"
                 >
                   <template #append-inner>
                     <VTooltip location="top">
@@ -1454,6 +1721,7 @@
                           dense
                           hide-details
                           class="flex-grow-1"
+                          @paste="handleCommandPaste"
                         />
                         <VBtn
                           icon
@@ -1598,11 +1866,14 @@
                           v-model.number="component.ram"
                           type="number"
                           min="100"
+                          step="100"
                           dense
                           hide-details
                           density="compact"
                           variant="outlined"
                           class="text-field-fixed"
+                          @blur="component.ram = Math.max(100, Math.round(component.ram / 100) * 100)"
+                          @keydown="enforceStep100"
                         />
                       </div>
                     </VCol>
@@ -1672,11 +1943,14 @@
                         v-model.number="component.ram"
                         type="number"
                         min="100"
+                        step="100"
                         dense
                         hide-details
                         density="compact"
                         variant="outlined"
                         class="hardware-input"
+                        @blur="component.ram = Math.max(100, Math.round(component.ram / 100) * 100)"
+                        @keydown="enforceStep100"
                       />
                     </div>
                     <div class="hardware-box-with-input">
@@ -1963,6 +2237,40 @@
               <VIcon>mdi-arrow-left-circle</VIcon>
             </VBtn>
           </div>
+          <!-- Hard Redeploy Warning -->
+          <VAlert
+            v-if="hardRedeployWarning"
+            type="warning"
+            variant="tonal"
+            prominent
+            density="compact"
+            class="mb-4 text-body-1"
+          >
+            <template #title>
+              <span class="text-subtitle-1 text-warning font-weight-bold">{{ t('core.subscriptionManager.hardRedeployWarningTitle') }}</span>
+            </template>
+            <p class="mb-1">{{ t('core.subscriptionManager.hardRedeployWarningMessage') }}</p>
+            <ul class="ml-4 mb-1">
+              <li v-for="(reason, idx) in hardRedeployWarning.reasons" :key="idx">{{ reason }}</li>
+            </ul>
+            <p class="font-weight-bold mb-0">{{ t('core.subscriptionManager.hardRedeployBackupAdvice') }}</p>
+          </VAlert>
+
+          <!-- Resource Increase Warning -->
+          <VAlert
+            v-if="resourceIncreaseWarning"
+            type="info"
+            variant="tonal"
+            prominent
+            density="compact"
+            class="mb-4 text-body-1"
+          >
+            <template #title>
+              <span class="text-subtitle-1 text-info font-weight-bold">{{ t('core.subscriptionManager.resourceIncreaseWarningTitle') }}</span>
+            </template>
+            <p class="mb-0">{{ t('core.subscriptionManager.resourceIncreaseWarningMessage') }}</p>
+          </VAlert>
+
           <!-- Spec Validation -->
           <div class="spec-row">
             <div class="label-cell">{{ t('core.subscriptionManager.validateAppSpec') }}</div>
@@ -2285,14 +2593,14 @@
           </VAlert>
 
           <!-- Payment Section -->
-          <div v-if="(testFinished && !testError) || (!props.newApp && registrationHash && !testableFieldsHaveChanged) || (!props.newApp && registrationHash && appSpecPrice?.flux === 0) || paymentProcessing || paymentConfirmed">
+          <div v-if="(testFinished && !testError) || (!props.newApp && registrationHash && !testableFieldsHaveChanged) || (!props.newApp && registrationHash && appSpecPrice?.flux === 0) || (!props.newApp && registrationHash && managementAction === 'cancel') || paymentProcessing || paymentConfirmed">
             <!-- Warning Alert if test had warnings -->
             <VAlert 
               v-if="hasTestWarnings" 
               type="warning" 
               variant="tonal" 
               class="mb-4"
-              icon="mdi-alert-triangle"
+              icon="mdi-alert"
             >
               <strong>{{ t('core.subscriptionManager.testWarningsTitle') }}</strong> {{ t('core.subscriptionManager.testWarningsMessage') }}
             </VAlert>
@@ -2388,6 +2696,25 @@
                           : t('core.subscriptionManager.updateSuccessMessage')
                         }}
                       </p>
+                      <VCard v-if="props.newApp" variant="outlined" class="mb-4">
+                        <VCardText class="text-center">
+                          <p class="text-subtitle-2 font-weight-medium mb-2">
+                            {{ t('core.subscriptionManager.appAccessDomainAvailable') }}
+                          </p>
+                          <div class="d-flex align-center justify-center gap-2">
+                            <VIcon size="18" color="primary">mdi-web</VIcon>
+                            <a
+                              :href="`https://${appDetails.name}.app.runonflux.io`"
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              class="text-body-1"
+                            >
+                              https://{{ appDetails.name }}.app.runonflux.io
+                              <VIcon size="12" class="ml-1">mdi-open-in-new</VIcon>
+                            </a>
+                          </div>
+                        </VCardText>
+                      </VCard>
                       <VBtn
                         v-if="props.newApp"
                         color="primary"
@@ -2415,24 +2742,69 @@
                   <VCard elevation="2" class="payment-monitoring-card">
                     <VCardText class="pa-6">
                       <LoadingSpinner
-                        icon="mdi-rocket-launch"
+                        :icon="paymentMonitoringPhase === 'blockchain' ? 'mdi-cube-outline' : paymentMonitoringPhase === 'installing' ? 'mdi-progress-download' : 'mdi-rocket-launch'"
                         :icon-size="48"
-                        :title="t('core.subscriptionManager.waitingForDeployment')"
+                        :title="paymentMonitoringPhase === 'blockchain' ? t('core.subscriptionManager.checkingBlockchainConfirmation') : paymentMonitoringPhase === 'installing' ? t('core.subscriptionManager.waitingForNodeInstalling') : t('core.subscriptionManager.waitingForNodeDeployment')"
                         message=""
                       />
+                      <!-- Free update sponsor message -->
+                      <div v-if="!props.newApp && appSpecPrice?.flux === 0" class="text-center mb-3">
+                        <VChip color="success" variant="tonal" size="small">
+                          <VIcon size="16" class="mr-1">mdi-gift-outline</VIcon>
+                          {{ t('core.subscriptionManager.freeUpdateSponsoredBy') }}
+                        </VChip>
+                      </div>
                       <div class="d-flex justify-center">
                         <div class="deployment-monitoring-wrapper">
                           <div class="deployment-message-box">
-                            <div class="d-flex align-center">
-                              <VIcon color="success" size="20" class="mr-2">mdi-check-circle</VIcon>
-                              <span v-if="props.newApp || props.isRedeploy">{{ t('core.subscriptionManager.autoDetectDeployment') }}</span>
-                              <span v-else-if="appSpecPrice?.flux === 0">{{ t('core.subscriptionManager.autoDetectUpdate') }}</span>
-                              <span v-else>{{ t('core.subscriptionManager.autoDetectPaymentUpdate') }}</span>
-                            </div>
-                            <div class="d-flex align-center">
-                              <VIcon color="warning" size="20" class="mr-2">mdi-clock-alert</VIcon>
-                              <span>{{ t('core.subscriptionManager.detectionTimeEstimate') }}</span>
-                            </div>
+                            <!-- Phase 1: Blockchain confirmation -->
+                            <template v-if="paymentMonitoringPhase === 'blockchain'">
+                              <div class="d-flex align-center">
+                                <VIcon color="info" size="20" class="mr-2">mdi-magnify</VIcon>
+                                <span>{{ t('core.subscriptionManager.checkingPaymentOnBlockchain') }}</span>
+                              </div>
+                              <div class="d-flex align-center">
+                                <VIcon color="warning" size="20" class="mr-2">mdi-clock-alert</VIcon>
+                                <span>{{ t('core.subscriptionManager.blockchainConfirmationTime') }}</span>
+                              </div>
+                            </template>
+                            <!-- Phase 2: Installing -->
+                            <template v-else-if="paymentMonitoringPhase === 'installing'">
+                              <div class="d-flex align-center">
+                                <VIcon color="info" size="20" class="mr-2">mdi-progress-download</VIcon>
+                                <span>{{ t('core.subscriptionManager.waitingForInstallationStart') }}</span>
+                              </div>
+                              <div class="d-flex align-center">
+                                <VIcon color="warning" size="20" class="mr-2">mdi-clock-alert</VIcon>
+                                <span>{{ t('core.subscriptionManager.installationStartTime') }}</span>
+                              </div>
+                            </template>
+                            <!-- Phase 3: Node deployment -->
+                            <template v-else-if="paymentMonitoringPhase === 'deployment'">
+                              <div class="d-flex align-center">
+                                <VIcon color="success" size="20" class="mr-2">mdi-check-circle</VIcon>
+                                <span>{{ t('core.subscriptionManager.paymentConfirmedWaitingNodes') }}</span>
+                              </div>
+                              <div class="d-flex align-center">
+                                <VIcon color="info" size="20" class="mr-2">mdi-server</VIcon>
+                                <span>{{ t('core.subscriptionManager.waitingForNodesPickup') }}</span>
+                              </div>
+                              <div class="d-flex align-center">
+                                <VIcon color="warning" size="20" class="mr-2">mdi-clock-alert</VIcon>
+                                <span>{{ t('core.subscriptionManager.nodeDeploymentTime') }}</span>
+                              </div>
+                            </template>
+                            <!-- For updates (Phase 1 only - blockchain confirmation) -->
+                            <template v-else>
+                              <div class="d-flex align-center">
+                                <VIcon color="info" size="20" class="mr-2">mdi-magnify</VIcon>
+                                <span>{{ t('core.subscriptionManager.checkingPaymentOnBlockchain') }}</span>
+                              </div>
+                              <div class="d-flex align-center">
+                                <VIcon color="warning" size="20" class="mr-2">mdi-clock-alert</VIcon>
+                                <span>{{ t('core.subscriptionManager.blockchainConfirmationTime') }}</span>
+                              </div>
+                            </template>
                           </div>
                           <VBtn
                             variant="outlined"
@@ -2497,7 +2869,22 @@
                             v-if="stripeEnabled"
                             variant="outlined"
                             class="payment-icon-card"
-                            @click="() => initStripePay(registrationHash, appDetails.name, appSpecPrice?.usd, appDetails.description)"
+                            :disabled="(managementAction === 'renewal' && existingSubscription && existingSubscription.period === selectedSubscriptionPeriod && autoRenewalEnabled) || (managementAction === 'update' && existingSubscription && !renewalEnabled && appSpecPrice?.usd > 0 && !updatePaymentChoice)"
+                            @click="() => {
+                              if (managementAction === 'update' && existingSubscription && !renewalEnabled) {
+                                if (updatePaymentChoice === 'subscription') {
+                                  initStripeSubscriptionCharge(registrationHash, appDetails.name, appSpecPrice?.usd, appDetails.description)
+                                } else if (updatePaymentChoice === 'onetime') {
+                                  initStripePay(registrationHash, appDetails.name, appSpecPrice?.usd, appDetails.description)
+                                }
+                              } else if (managementAction === 'renewal' && existingSubscription && subscriptionPeriodChanged) {
+                                initStripeSubscriptionPay(registrationHash, appDetails.name, appSpecPrice?.usd, appDetails.description)
+                              } else if (autoRenewalEnabled) {
+                                initStripeSubscriptionPay(registrationHash, appDetails.name, appSpecPrice?.usd, appDetails.description)
+                              } else {
+                                initStripePay(registrationHash, appDetails.name, appSpecPrice?.usd, appDetails.description)
+                              }
+                            }"
                             hover
                           >
                             <VCardText class="d-flex align-center justify-center pa-6">
@@ -2532,6 +2919,104 @@
                             ${{ appSpecPrice?.usd || 0 }} USD + VAT
                           </VChip>
                         </div>
+
+                        <!-- Auto-Renewal Toggle (hidden when active subscription exists) -->
+                        <div
+                          v-if="stripeEnabled && isAutoRenewalEligible && !existingSubscription"
+                          class="mb-4 rounded border"
+                        >
+                          <div class="px-3 py-2 d-flex align-center rounded-t" style="border-bottom: 1px solid rgba(var(--v-border-color), var(--v-border-opacity)); background: rgba(var(--v-theme-on-surface), 0.04);">
+                            <VIcon icon="mdi-autorenew" size="18" class="me-2" color="success" />
+                            <span class="text-body-2 font-weight-medium">{{ t('core.subscriptionManager.enableAutoRenewal') }}</span>
+                          </div>
+                          <div class="pa-3 d-flex align-center">
+                            <VSwitch
+                              v-model="autoRenewalEnabled"
+                              color="success"
+                              hide-details
+                              density="compact"
+                              class="me-3 flex-shrink-0"
+                            />
+                            <div class="text-caption text-medium-emphasis text-start">{{ t('core.subscriptionManager.autoRenewalDescription') }}</div>
+                          </div>
+                        </div>
+
+                        <!-- UPDATE MODE: Paid update without extending, user has active subscription -->
+                        <template v-if="managementAction === 'update' && existingSubscription && !renewalEnabled && appSpecPrice?.usd > 0">
+                          <div class="text-caption mt-2 mb-4 text-start font-weight-bold text-warning">{{ t('core.subscriptionManager.updatePaymentChoiceInfo') }}</div>
+
+                          <div class="d-flex gap-3 mb-4" style="align-items: stretch;">
+                            <VCard
+                              variant="outlined"
+                              class="cursor-pointer"
+                              :color="updatePaymentChoice === 'subscription' ? 'success' : undefined"
+                              style="flex: 1 1 0; min-width: 0; border-width: 2px;"
+                              hover
+                              @click="updatePaymentChoice = 'subscription'"
+                            >
+                              <VCardText class="d-flex flex-column align-center justify-center text-center pa-3" style="height: 100%;">
+                                <VIcon size="28" :color="updatePaymentChoice === 'subscription' ? 'success' : 'default'" class="mb-1">mdi-credit-card-sync</VIcon>
+                                <div class="text-body-2 font-weight-medium">{{ t('core.subscriptionManager.chargeViaSubscription') }}</div>
+                              </VCardText>
+                            </VCard>
+
+                            <VCard
+                              variant="outlined"
+                              class="cursor-pointer"
+                              :color="updatePaymentChoice === 'onetime' ? 'success' : undefined"
+                              style="flex: 1 1 0; min-width: 0; border-width: 2px;"
+                              hover
+                              @click="updatePaymentChoice = 'onetime'"
+                            >
+                              <VCardText class="d-flex flex-column align-center justify-center text-center pa-3" style="height: 100%;">
+                                <VIcon size="28" :color="updatePaymentChoice === 'onetime' ? 'success' : 'default'" class="mb-1">mdi-credit-card</VIcon>
+                                <div class="text-body-2 font-weight-medium">{{ t('core.subscriptionManager.chargeOneTimePayment') }}</div>
+                              </VCardText>
+                            </VCard>
+                          </div>
+
+                          <!-- Subscription period price change info -->
+                          <VChip v-if="subscriptionPeriodPriceChanged && subscriptionNewPeriodPrice" color="warning" variant="tonal" label class="mb-4" style="font-size: 14px;">
+                            <VIcon size="20" class="mr-2">mdi-information</VIcon>
+                            {{ t('core.subscriptionManager.subscriptionNewPrice') }} <b class="ml-1">${{ subscriptionNewPeriodPrice.toFixed(2) }} USD + VAT</b> <span class="ml-1">/ {{ t('core.subscriptionManager.billingPeriod').toLowerCase() }}</span>
+                          </VChip>
+                        </template>
+
+                        <!-- UPDATE MODE: Update with extension (renewal enabled) + active subscription -->
+                        <VAlert
+                          v-if="managementAction === 'update' && existingSubscription && renewalEnabled"
+                          type="warning"
+                          variant="tonal"
+                          class="mb-4 text-start"
+                          icon="mdi-alert"
+                          density="compact"
+                        >
+                          {{ t('core.subscriptionManager.updateExtendingCancelWarning') }}
+                        </VAlert>
+
+                        <!-- RENEWAL MODE: Same period as existing subscription — no action needed -->
+                        <VAlert
+                          v-if="managementAction === 'renewal' && existingSubscription && !subscriptionPeriodChanged && (autoRenewalEnabled || existingSubscription.status === 'active')"
+                          type="success"
+                          variant="tonal"
+                          class="mb-4 text-start"
+                          icon="mdi-check-circle"
+                          density="compact"
+                        >
+                          {{ t('core.subscriptionManager.alreadyHasAutoRenewal') }}
+                        </VAlert>
+
+                        <!-- RENEWAL MODE: Different period — cancel old + create new subscription -->
+                        <VAlert
+                          v-if="managementAction === 'renewal' && existingSubscription && subscriptionPeriodChanged"
+                          type="info"
+                          variant="tonal"
+                          class="mb-4 text-start"
+                          icon="mdi-information"
+                          density="compact"
+                        >
+                          {{ t('core.subscriptionManager.existingSubscriptionReplaceInfo') }}
+                        </VAlert>
 
                         <!-- Payment Advantages -->
                         <div v-if="stripeEnabled || paypalEnabled" class="mb-4">
@@ -3060,55 +3545,13 @@
   />
 
   <!-- Terms of Service Dialog -->
-  <VDialog v-model="showTermsDialog" max-width="800" scrollable>
-    <VCard style="border-radius: 16px;">
-      <VCardTitle class="d-flex align-center justify-space-between pa-4 bg-primary">
-        <div class="d-flex align-center gap-3">
-          <VIcon icon="mdi-file-document-outline" size="32" color="white" />
-          <span class="text-h5 font-weight-semibold" style="color: white;">{{ t('core.subscriptionManager.tos.dialogTitle') }}</span>
-        </div>
-        <VBtn
-          icon="mdi-close"
-          variant="text"
-          size="small"
-          color="white"
-          @click="showTermsDialog = false"
-        />
-      </VCardTitle>
-
-      <VDivider />
-
-      <VCardText class="pa-6 tos-scroll-area" style="max-height: calc(80vh - 200px); overflow-y: auto;">
-        <div class="tos-content" v-html="tosHtmlContent"></div>
-      </VCardText>
-
-      <VDivider />
-
-      <VCardActions class="pa-4 justify-center">
-        <VBtn
-          color="success"
-          variant="flat"
-          size="large"
-          min-width="140"
-          prepend-icon="mdi-check-circle"
-          @click="acceptTerms"
-        >
-          {{ t('core.subscriptionManager.tos.agree') }}
-        </VBtn>
-        <VBtn
-          color="error"
-          variant="outlined"
-          size="large"
-          min-width="140"
-          prepend-icon="mdi-close-circle"
-          class="ml-4"
-          @click="showTermsDialog = false"
-        >
-          {{ t('core.subscriptionManager.tos.disagree') }}
-        </VBtn>
-      </VCardActions>
-    </VCard>
-  </VDialog>
+  <TosDialog
+    v-model="showTermsDialog"
+    :title="t('core.subscriptionManager.tos.dialogTitle')"
+    :agree-text="t('core.subscriptionManager.tos.agree')"
+    :disagree-text="t('core.subscriptionManager.tos.disagree')"
+    @agree="acceptTerms"
+  />
 
   <!-- TOS Error Snackbar -->
   <VSnackbar
@@ -3137,6 +3580,7 @@ const props = defineProps({
   resetTrigger: Number, // Timestamp to trigger internal tab reset when subscription tab becomes active
   isRedeploy: Boolean, // Flag to indicate if this is a redeploy operation
   instanceReady: Boolean, // Flag to indicate if instance/location is loaded (for existing apps)
+  initialAction: String, // Initial management action: 'renewal', 'update', or 'cancel'
 })
 
 // Define emits
@@ -3150,6 +3594,8 @@ import { getDetectedBackendURL } from "@/utils/backend"
 import { paymentBridge } from '@/utils/fiatGateways'
 import AppsService from "@/services/AppsService"
 import ExplorerService from '@/services/ExplorerService'
+import DaemonService from '@/services/DaemonService'
+import StorageService from '@/services/StorageService'
 import { storeToRefs } from "pinia"
 import ManualSignDialog from '@/@core/components/ManualSignDialog.vue'
 import { useFluxStore } from "@/stores/flux"
@@ -3205,20 +3651,58 @@ const clipboardInstance = ref(null) // ClipboardJS instance for proper cleanup
 const tab = ref(0)
 const previousTab = ref(0) // Track previous tab for TOS validation
 const renewalEnabled = ref(false)
-const managementAction = ref('renewal') // Management action: 'renewal', 'update', 'cancel'
+const managementAction = ref(props.initialAction || 'renewal') // Management action: 'renewal', 'update', 'cancel'
 const isNameLocked = ref(false)
 const isUploadingCmd = ref(false)
 const isUploadingEnv = ref(false)
 const isUploadingContacts = ref(false)
 
-// TOS related
-const acceptedTerms = ref(false)
+// TOS related - restore acceptance state from session storage
+const acceptedTerms = ref(sessionStorage.getItem('flux-tos-accepted') === 'true')
 const showTermsDialog = ref(false)
 const showTosError = ref(false)
-const tosHtmlContent = ref('')
 const fiatCheckoutURL = ref('')
 const checkoutLoading = ref(false)
+const autoRenewalEnabled = ref(false)
+const existingSubscription = ref(null) // Existing active subscription for this app
+const updatePaymentChoice = ref('') // 'subscription' or 'onetime' — user's choice for paid update with active subscription
+const subscriptionPeriodPriceChanged = ref(false) // Whether the subscription period price differs from current
+const subscriptionNewPeriodPrice = ref(null) // The new period price for the subscription after update
 const logsExpanded = ref(true)
+
+// ToS panel state - internal ref that's controlled by computed logic (use string '0' to match VExpansionPanel value)
+const tosPanelInternal = ref(sessionStorage.getItem('flux-tos-accepted') === 'true' ? undefined : '0')
+
+// ToS panel state - computed to control expansion based on acceptedTerms
+const tosPanel = computed({
+  get: () => {
+    // If not accepted, always return '0' (open) to match VExpansionPanel value="0"
+    // If accepted, return internal state (allows manual toggle)
+    const value = acceptedTerms.value ? tosPanelInternal.value : '0'
+    console.log('[ToS] tosPanel.get():', { acceptedTerms: acceptedTerms.value, internal: tosPanelInternal.value, returning: value })
+    
+    return value
+  },
+  set: newValue => {
+    console.log('[ToS] tosPanel.set():', { newValue, acceptedTerms: acceptedTerms.value })
+
+    // Check if trying to close (newValue is undefined/null)
+    const tryingToClose = newValue === undefined || newValue === null
+
+    if (acceptedTerms.value) {
+      // If accepted, allow any state change
+      tosPanelInternal.value = newValue
+      console.log('[ToS] Updated internal state to:', newValue)
+    } else if (tryingToClose) {
+      // If not accepted and trying to close, prevent it
+      console.log('[ToS] Prevented collapse - terms not accepted')
+    } else {
+      // If not accepted but trying to open (newValue is 0 or '0'), update internal state
+      tosPanelInternal.value = newValue
+      console.log('[ToS] Allowed expansion - updating internal state to:', newValue)
+    }
+  },
+})
 const paymentCompleted = ref(false)
 const paymentMethod = ref('')
 const paymentAmount = ref(0)
@@ -3226,6 +3710,9 @@ const paymentMonitoringInterval = ref(null)
 const paymentMonitoringTimeout = ref(null)
 const paymentConfirmed = ref(false)
 const paymentProcessing = ref(false)
+
+// Payment monitoring phase: 'blockchain' = checking if payment confirmed on chain, 'installing' = waiting for node to start installing, 'deployment' = waiting for nodes to pick up app
+const paymentMonitoringPhase = ref('blockchain')
 const popupBlockedDialog = ref(false)
 const blockedPaymentUrl = ref('')
 const blockedPaymentType = ref('')
@@ -3246,21 +3733,6 @@ const acceptTerms = () => {
   showTermsDialog.value = false
 }
 
-// Load TOS HTML content
-const loadTOS = async () => {
-  try {
-    const response = await fetch('/html/wordpress/tos.html')
-    if (!response.ok) {
-      throw new Error('Failed to load TOS')
-    }
-    const html = await response.text()
-    tosHtmlContent.value = html
-  } catch (error) {
-    console.error('Failed to load TOS:', error)
-    tosHtmlContent.value = `<p>${t('core.subscriptionManager.tos.loadError')} <a href="https://cdn.runonflux.io/Flux_Terms_of_Service.pdf" target="_blank">https://cdn.runonflux.io/Flux_Terms_of_Service.pdf</a></p>`
-  }
-}
-
 // Watch tab changes to prevent navigation without TOS acceptance (only for new apps)
 watch(tab, (newTab, oldTab) => {
   // Only enforce TOS for new app registration
@@ -3275,15 +3747,22 @@ watch(tab, (newTab, oldTab) => {
   }
 })
 
+// Save ToS acceptance state to session storage and collapse panel when accepted
+watch(acceptedTerms, newValue => {
+  console.log('[ToS] acceptedTerms changed:', { newValue })
+  sessionStorage.setItem('flux-tos-accepted', newValue.toString())
+
+  // Collapse panel when accepted
+  if (newValue) {
+    tosPanelInternal.value = undefined
+    console.log('[ToS] Collapsed panel because terms accepted')
+  }
+})
+
 // Check for payment success on page load
 onMounted(() => {
   // Initialize i18n labels after component is mounted
   updateRenewalLabels()
-
-  // Load TOS content if this is a new app
-  if (props.newApp) {
-    loadTOS()
-  }
 
   const urlParams = new URLSearchParams(window.location.search)
   const paymentSuccess = urlParams.get('payment_success')
@@ -3365,6 +3844,145 @@ const appDetails = ref({
 })
 
 const isPrivateApp = ref(false)
+
+// Computed property to check if any component has syncthing (decentralized persistent storage) enabled
+// Syncthing is indicated by containerData starting with 'r:', 'g:', or 's:'
+const hasSyncthingEnabled = computed(() => {
+  if (!props.appSpec?.compose) return false
+
+  return props.appSpec.compose.some(component => {
+    const containerData = component.containerData || ''
+
+    return containerData.startsWith('r:') || containerData.startsWith('g:') || containerData.startsWith('s:')
+  })
+})
+
+// Check if component structure changes (add/remove/rename) are allowed
+// New apps can always change components; updates only for v8+ specs
+const canModifyComponents = computed(() => {
+  return props.newApp || (managementAction.value === 'update' && specVersion.value >= 8)
+})
+
+// Detect changes that will trigger a hard redeploy (data loss) during app updates
+// Hard redeploy triggers:
+// 1. Component structure change (v8+): adding, removing, or renaming components
+// 2. HDD size change on any component
+// 3. Version upgrade from v3 or below to v4+
+const hardRedeployWarning = computed(() => {
+  if (props.newApp || managementAction.value !== 'update' || !originalAppSpecSnapshot.value) return null
+
+  const original = originalAppSpecSnapshot.value
+  const current = props.appSpec
+  const reasons = []
+
+  // Check version upgrade from v3- to v4+
+  if (original.version <= 3 && current.version >= 4) {
+    reasons.push(t('core.subscriptionManager.hardRedeployReasonVersionUpgrade'))
+
+    return { reasons, scope: 'full' }
+  }
+
+  // Check component structure changes (v8+)
+  if (current.version >= 8 && original.compose && current.compose) {
+    const oldNames = new Set(original.compose.map(c => c.name).filter(Boolean))
+    const countChanged = original.compose.length !== current.compose.length
+    const namesChanged = !current.compose.map(c => c.name).filter(Boolean).every(name => oldNames.has(name))
+
+    if (countChanged || namesChanged) {
+      reasons.push(t('core.subscriptionManager.hardRedeployReasonComponentStructure'))
+
+      return { reasons, scope: 'full' }
+    }
+  }
+
+  // Check HDD changes per component (v4+)
+  if (current.version >= 4 && original.compose && current.compose) {
+    const affectedComponents = []
+
+    for (const newComp of current.compose) {
+      const oldComp = original.compose.find(c => c.name === newComp.name)
+
+      if (oldComp && newComp.hdd !== oldComp.hdd) {
+        affectedComponents.push(newComp.name)
+      }
+    }
+    if (affectedComponents.length > 0) {
+      reasons.push(t('core.subscriptionManager.hardRedeployReasonHddChange', { components: affectedComponents.join(', ') }))
+
+      return { reasons, scope: 'component', components: affectedComponents }
+    }
+  }
+
+  // Check HDD change for v3 single-component apps
+  if (current.version <= 3 && original.hdd !== current.hdd) {
+    reasons.push(t('core.subscriptionManager.hardRedeployReasonHddChange', { components: current.name }))
+
+    return { reasons, scope: 'full' }
+  }
+
+  return null
+})
+
+// Detect CPU/RAM increases that may cause the app to be relocated to different nodes (data loss)
+// When a node can't meet new resource requirements, the redeploy fails and the app is fully removed,
+// then reinstalled on a different node that has enough resources
+const resourceIncreaseWarning = computed(() => {
+  if (props.newApp || managementAction.value !== 'update' || !originalAppSpecSnapshot.value) return false
+  if (hardRedeployWarning.value) return false // already showing a stronger warning
+
+  const original = originalAppSpecSnapshot.value
+  const current = props.appSpec
+
+  // Check v4+ composed apps
+  if (current.version >= 4 && original.compose && current.compose) {
+    for (const newComp of current.compose) {
+      const oldComp = original.compose.find(c => c.name === newComp.name)
+
+      if (oldComp && (newComp.cpu > oldComp.cpu || newComp.ram > oldComp.ram)) {
+        return true
+      }
+    }
+  }
+
+  // Check v3 single-component apps
+  if (current.version <= 3 && (current.cpu > original.cpu || current.ram > original.ram)) {
+    return true
+  }
+
+  return false
+})
+
+// Check if this is a legacy app update (version < 8) - these cannot reduce instances below 3
+const isLegacyAppUpdate = computed(() => {
+  return !props.newApp && specVersion.value < 8
+})
+
+// Check if syncthing minimum instances rule should apply
+// Only applies to new apps or updates with version >= 8
+const shouldEnforceSyncthingMinimum = computed(() => {
+  if (!hasSyncthingEnabled.value) return false
+
+  // For new apps, always enforce
+  if (props.newApp) return true
+
+  // For updates, only enforce for version >= 8
+  return specVersion.value >= 8
+})
+
+// Minimum instances:
+// - Legacy app updates (version < 8): always 3 (no reduction allowed)
+// - New apps or version >= 8 updates with syncthing: 2
+// - New apps or version >= 8 updates without syncthing: 1
+const minInstances = computed(() => {
+  // Legacy apps cannot reduce below 3
+  if (isLegacyAppUpdate.value) return 3
+
+  // For new apps or v8+ updates, syncthing enforces 2
+  if (shouldEnforceSyncthingMinimum.value) return 2
+
+  // Otherwise allow down to 1
+  return 1
+})
 
 const marketPlaceApps = ref([])
 const generalMultiplier = ref(10)
@@ -3472,6 +4090,51 @@ function handleCommandsImport(commands) {
   showToast('success', `Imported ${commands.length} command(s)`)
 }
 
+function handleCommandPaste(event) {
+  const pastedText = event.clipboardData?.getData('text')
+  if (!pastedText) return
+
+  const trimmedPaste = pastedText.trim()
+
+  // Try to parse as JSON array: ["cmd","--flag","value"]
+  // or bare quoted lines:  "cmd",\n  "--flag",\n  "value"
+  const tryParseArray = str => {
+    try {
+      const parsed = JSON.parse(str)
+      if (Array.isArray(parsed) && parsed.length > 0 && parsed.every(item => typeof item === 'string'))
+        return parsed
+    } catch { /* ignore */ }
+    
+    return null
+  }
+
+  const jsonCandidate = trimmedPaste.startsWith('[')
+    ? trimmedPaste
+    : `[${trimmedPaste.replace(/,\s*$/, '')}]`
+
+  const cmdArray = tryParseArray(jsonCandidate)
+  if (cmdArray && cmdArray.length > 1) {
+    // Only intercept if multiple items — single quoted string falls through to normal paste
+    event.preventDefault()
+    const newCmds = cmdArray.filter(cmd => cmd.trim().length > 0)
+    if (!newCmds.length) return
+    commandsDialog.entries.push(...newCmds)
+    showToast('success', `Imported ${newCmds.length} command(s)`)
+    commandsDialog.newCommand = ''
+    
+    return
+  }
+
+  // Fallback: newline-separated plain strings
+  const lines = trimmedPaste.split('\n').map(l => l.trim()).filter(l => l.length > 0)
+  if (lines.length > 1) {
+    event.preventDefault()
+    commandsDialog.entries.push(...lines)
+    showToast('success', `Imported ${lines.length} command(s)`)
+    commandsDialog.newCommand = ''
+  }
+}
+
 function handleSpecImport(spec) {
   try {
     // Map imported spec to appSpec and appDetails
@@ -3571,7 +4234,7 @@ function saveCommandChanges() {
 
 // Upgrade spec to latest version
 function openConversionDialog() {
-  if (!props.isRedeploy || specVersion.value >= LATEST_SPEC_VERSION) return
+  if ((!props.isRedeploy && managementAction.value !== 'update') || specVersion.value >= LATEST_SPEC_VERSION) return
   showUpgradeDialog.value = true
 }
 
@@ -3605,12 +4268,36 @@ function convertToLatestSpec() {
   }
 }
 
+function exportSpecification() {
+  try {
+    const spec = props.appSpec
+    const specJSON = JSON.stringify(spec, null, 2)
+    const blob = new Blob([specJSON], { type: 'application/json' })
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = `${spec.name || 'app'}-spec-v${spec.version || 'unknown'}.json`
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    URL.revokeObjectURL(url)
+    showToast('success', 'Application specification exported successfully')
+  } catch (error) {
+    console.error('Error exporting specification:', error)
+    showToast('error', `Failed to export specification: ${error.message}`)
+  }
+}
+
 // PON (proof of nodes) Fork configuration - block height where chain speed increases 4x
 const FORK_BLOCK_HEIGHT = 2020000
 
 // Base period: 1 month = 88000 blocks (post-fork, 30-second blocks)
 // All renewal options use post-fork values since renewals happen NOW (post-fork)
 const BLOCKS_PER_MONTH = 88000
+
+// Maximum subscription duration: 1 year = 12 months = 1,056,000 blocks
+// Renewals cannot extend total subscription beyond this limit
+const MAX_SUBSCRIPTION_BLOCKS = BLOCKS_PER_MONTH * 12
 
 const timeOptions = { shortDate: { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' } }
 
@@ -3624,6 +4311,7 @@ const isExpiryValid = ref(false)
 const appSpecFormated = ref(null)
 const blocksToExpire = ref(null)
 const registrationHash = ref(null)
+const signedSpecSnapshot = ref(null) // Snapshot of spec when signed, used to detect changes
 const isPropagating = ref(false)
 const testError = ref(false)
 const testFinished = ref(false)
@@ -3710,12 +4398,13 @@ const NON_TESTABLE_FIELDS = [
   'staticip',    // Deployment: static IP flag
   'enterprise',  // Deployment: enterprise tier flag
   'nodes',       // Deployment: preferred node list
+  'contacts',    // Contact information: doesn't affect app deployment
 ]
 
 const applicationPrice = ref(null)
 const applicationPriceFluxDiscount = ref(0)
 const stripeEnabled = ref(true)
-const paypalEnabled = ref(true)
+const paypalEnabled = ref(false) // PayPal currently not available
 const subscribedTill = computed(() => {
   const now = new Date()
   now.setDate(now.getDate() + 30) // Default 30 days
@@ -3916,7 +4605,7 @@ watch(() => props.appSpec, (newSpec, oldSpec) => {
 onMounted(() => {
   console.log('SubscriptionManager onMounted - props.appSpec:', props.appSpec)
   console.log('SubscriptionManager onMounted - props.appSpec.owner:', props.appSpec?.owner)
-  
+
   // Set default owner from logged-in user's zelid if not already set
   if (!appDetails.value.owner) {
     const zelidauth = localStorage.getItem('zelidauth')
@@ -3932,7 +4621,18 @@ onMounted(() => {
       }
     }
   }
-  
+
+  // Auto-fill contact email for SSO users (only for new apps without existing contacts)
+  if (props.newApp && (!appDetails.value.contacts || appDetails.value.contacts.length === 0)) {
+    const loginTypeValue = loginType.value
+    if (loginTypeValue === 'sso') {
+      const firebaseUser = getUser()
+      if (firebaseUser?.email) {
+        appDetails.value.contacts = [firebaseUser.email]
+      }
+    }
+  }
+
   getGeolocationData()
 
   if (!props.appSpec?.compose) {
@@ -4021,6 +4721,11 @@ async function fetchCurrentBlockHeight() {
 onMounted(async () => {
   Promise.all([getMarketPlace(), getMultiplier()])
   await fetchCurrentBlockHeight()
+
+  // Fetch existing subscription on initial load for existing apps
+  if (!props.newApp) {
+    fetchExistingSubscription()
+  }
 
   // Initialize clipboard.js for copy buttons
   clipboardInstance.value = new ClipboardJS('.copy-btn')
@@ -4164,8 +4869,22 @@ const testableFieldsHaveChanged = computed(() => {
     const currentSpecCopy = cloneDeep(props.appSpec)
     NON_TESTABLE_FIELDS.forEach(field => delete currentSpecCopy[field])
 
+    // Also exclude from compose components
+    if (currentSpecCopy.compose && Array.isArray(currentSpecCopy.compose)) {
+      currentSpecCopy.compose.forEach(component => {
+        NON_TESTABLE_FIELDS.forEach(field => delete component[field])
+      })
+    }
+
     const snapshotCopy = cloneDeep(snapshotToCompare)
     NON_TESTABLE_FIELDS.forEach(field => delete snapshotCopy[field])
+
+    // Also exclude from compose components
+    if (snapshotCopy.compose && Array.isArray(snapshotCopy.compose)) {
+      snapshotCopy.compose.forEach(component => {
+        NON_TESTABLE_FIELDS.forEach(field => delete component[field])
+      })
+    }
 
     const hasChanged = JSON.stringify(currentSpecCopy) !== JSON.stringify(snapshotCopy)
 
@@ -4195,28 +4914,16 @@ const testableFieldsHaveChanged = computed(() => {
   }
 })
 
-// Computed to check if test section should show (with logging)
+// Computed to check if test section should show
 const shouldShowTestSection = computed(() => {
   const result = !testFinished.value &&
                  testableFieldsHaveChanged.value &&
                  (props.newApp || appSpecPrice.value?.flux !== 0) &&
                  !paymentProcessing.value &&
                  !paymentConfirmed.value &&
-                 (props.newApp || managementAction.value !== 'cancel') &&
-                 (props.newApp || managementAction.value !== 'renewal')
+                 (props.newApp || managementAction.value !== 'cancel')
 
-  console.log('🧪 Test Section Visibility Check:', {
-    shouldShow: result,
-    testFinished: testFinished.value,
-    specsHaveChanged: specsHaveChanged.value,
-    testableFieldsHaveChanged: testableFieldsHaveChanged.value,
-    isNewApp: props.newApp,
-    fluxPrice: appSpecPrice.value?.flux,
-    paymentProcessing: paymentProcessing.value,
-    paymentConfirmed: paymentConfirmed.value,
-    managementAction: managementAction.value,
-    renewalEnabled: renewalEnabled.value,
-  })
+  // Renewal mode removed: testableFieldsHaveChanged now controls test visibility for renewals
 
   return result
 })
@@ -4260,6 +4967,18 @@ watch(() => props.appSpec, newSpec => {
         delete signedSpecForTest[field]
       })
 
+      // Also exclude from compose components
+      if (currentSpecForTest.compose && Array.isArray(currentSpecForTest.compose)) {
+        currentSpecForTest.compose.forEach(component => {
+          NON_TESTABLE_FIELDS.forEach(field => delete component[field])
+        })
+      }
+      if (signedSpecForTest.compose && Array.isArray(signedSpecForTest.compose)) {
+        signedSpecForTest.compose.forEach(component => {
+          NON_TESTABLE_FIELDS.forEach(field => delete component[field])
+        })
+      }
+
       const testableFieldsChanged = JSON.stringify(currentSpecForTest) !== JSON.stringify(signedSpecForTest)
 
       console.log('🔍 Spec watcher comparison:', {
@@ -4291,6 +5010,7 @@ watch(() => props.appSpec, newSpec => {
       registrationHash.value = null
       signature.value = null
       signedSpecState.value = null
+      signedSpecSnapshot.value = null
 
       // Only clear test results if testable fields changed (not just instances)
       if (testableFieldsChanged) {
@@ -4362,8 +5082,150 @@ const originalExpireBlocks = computed(() => {
   return adjustedExpiryBlock - currentBlockHeight.value
 })
 
+// Base renewal periods in blocks (before adding currentExpire)
+// These represent the duration being added, not the total
+// Discount: 3% for 3 months, 6% for 6 months, 12% for 12 months
+const BASE_RENEWAL_PERIODS = [
+  { blocks: Math.round(BLOCKS_PER_MONTH * (1 / 4)), labelKey: 'renewal1Week', fallback: '1 Week', discount: 0 },       // ~1 week (22,000 blocks)
+  { blocks: Math.round(BLOCKS_PER_MONTH * (1 / 2)), labelKey: 'renewal2Weeks', fallback: '2 Weeks', discount: 0 },    // ~2 weeks (44,000 blocks)
+  { blocks: BLOCKS_PER_MONTH, labelKey: 'renewal1Month', fallback: '1 Month', discount: 0 },                           // 1 month (88,000 blocks)
+  { blocks: BLOCKS_PER_MONTH * 3, labelKey: 'renewal3Months', fallback: '3 Months', discount: 3 },                    // 3 months (264,000 blocks)
+  { blocks: BLOCKS_PER_MONTH * 6, labelKey: 'renewal6Months', fallback: '6 Months', discount: 6 },                    // 6 months (528,000 blocks)
+  { blocks: BLOCKS_PER_MONTH * 12, labelKey: 'renewal1Year', fallback: '1 Year', discount: 12 },                       // 1 year (1,056,000 blocks)
+]
+
+// Map renewal period blocks to subscription period key (for Stripe subscription checkout)
+const SUBSCRIPTION_PERIOD_MAP = {
+  [Math.round(BLOCKS_PER_MONTH * (1 / 4))]: '1w', // 1 week
+  [Math.round(BLOCKS_PER_MONTH * (1 / 2))]: '2w', // 2 weeks
+  [BLOCKS_PER_MONTH]: 1,       // 1 month
+  [BLOCKS_PER_MONTH * 3]: 3,   // 3 months
+  [BLOCKS_PER_MONTH * 6]: 6,   // 6 months
+  [BLOCKS_PER_MONTH * 12]: 12, // 1 year
+}
+
+// Fetch existing subscription status for this app
+async function fetchExistingSubscription() {
+  try {
+    const zelidauth = localStorage.getItem('zelidauth')
+    if (!zelidauth) return
+    const auth = qs.parse(zelidauth)
+    if (!auth?.zelid) return
+    const appName = props.appSpec?.name || appDetails.value?.name
+    if (!appName) return
+    const response = await axios.post(`${paymentBridge}/api/v1/stripe/subscription/status`, {
+      zelid: auth.zelid,
+      signature: auth.signature,
+      loginPhrase: auth.loginPhrase,
+      appName,
+    })
+    if (response.data.status === 'success' && response.data.data) {
+      const sub = response.data.data
+      if (sub.status === 'active' || sub.status === 'past_due') {
+        existingSubscription.value = sub
+      } else {
+        existingSubscription.value = null
+      }
+    } else {
+      existingSubscription.value = null
+    }
+  } catch (error) {
+    console.warn('Failed to fetch existing subscription:', error.message)
+    existingSubscription.value = null
+  }
+}
+
+// Check if current renewal selection is eligible for auto-renewal
+const isAutoRenewalEligible = computed(() => {
+  if (!stripeEnabled.value) return false
+
+  // If updating an app that already has an active subscription WITHOUT extending (no renewal toggle),
+  // disable auto-renewal — the user chooses between subscription charge or one-time payment
+  if (managementAction.value === 'update' && existingSubscription.value && !renewalEnabled.value) return false
+  const currentRenewal = BASE_RENEWAL_PERIODS[appDetails.value.renewalIndex]
+  if (!currentRenewal) return false
+
+  return currentRenewal.blocks in SUBSCRIPTION_PERIOD_MAP
+})
+
+// Get the subscription period in months for the current selection
+const selectedSubscriptionPeriod = computed(() => {
+  const currentRenewal = BASE_RENEWAL_PERIODS[appDetails.value.renewalIndex]
+  if (!currentRenewal) return null
+  
+  return SUBSCRIPTION_PERIOD_MAP[currentRenewal.blocks] || null
+})
+
+// Map subscription period value to i18n label key
+function subscriptionPeriodInfo(period) {
+  const map = {
+    '1w': { labelKey: 'core.subscriptionManager.period1Week', discount: 0 },
+    '2w': { labelKey: 'core.subscriptionManager.period2Weeks', discount: 0 },
+    1: { labelKey: 'core.subscriptionManager.period1Month', discount: 0 },
+    3: { labelKey: 'core.subscriptionManager.period3Months', discount: 3 },
+    6: { labelKey: 'core.subscriptionManager.period6Months', discount: 6 },
+    12: { labelKey: 'core.subscriptionManager.period12Months', discount: 12 },
+  }
+  const entry = map[period] || map[String(period)] || map[1]
+  return { label: t(entry.labelKey), discount: entry.discount }
+}
+
+// Subscription period slider uses all 6 base periods (not capped by current expire)
+const subscriptionPeriodMax = computed(() => BASE_RENEWAL_PERIODS.length - 1)
+
+// Whether the selected renewal period differs from the existing subscription period
+const subscriptionPeriodChanged = computed(() => {
+  if (!existingSubscription.value) return false
+  return existingSubscription.value.period !== selectedSubscriptionPeriod.value
+})
+
+// Helper to format blocks as human-readable duration with months and days
+function formatBlocksAsDuration(blocks) {
+  if (blocks <= 0) return '0 Days'
+
+  // Calculate blocks per day (assuming 30 days per month)
+  const BLOCKS_PER_DAY = BLOCKS_PER_MONTH / 30
+
+  // Calculate months and remaining days
+  const totalMonths = Math.floor(blocks / BLOCKS_PER_MONTH)
+  const remainingBlocks = blocks % BLOCKS_PER_MONTH
+  const days = Math.round(remainingBlocks / BLOCKS_PER_DAY)
+
+  // Format years if applicable
+  if (totalMonths >= 12) {
+    const years = Math.floor(totalMonths / 12)
+    const monthsRemainder = totalMonths % 12
+    let result = `${years} Year${years > 1 ? 's' : ''}`
+    if (monthsRemainder > 0) result += ` ${monthsRemainder} Month${monthsRemainder > 1 ? 's' : ''}`
+    if (days > 0) result += ` ${days} Day${days > 1 ? 's' : ''}`
+
+    return result
+  }
+
+  // Format months and days
+  if (totalMonths >= 1) {
+    let result = `${totalMonths} Month${totalMonths > 1 ? 's' : ''}`
+    if (days > 0) result += ` ${days} Day${days > 1 ? 's' : ''}`
+
+    return result
+  }
+
+  // Less than a month - show weeks and days or just days
+  const weeks = Math.floor(days / 7)
+  const daysRemainder = days % 7
+  if (weeks >= 1) {
+    let result = `${weeks} Week${weeks > 1 ? 's' : ''}`
+    if (daysRemainder > 0) result += ` ${daysRemainder} Day${daysRemainder > 1 ? 's' : ''}`
+
+    return result
+  }
+
+  return `${days} Day${days !== 1 ? 's' : ''}`
+}
+
 // Renewal block values (reactively computed with currentExpire)
 // MUST be defined AFTER originalExpireBlocks to avoid initialization errors
+// Caps total subscription at MAX_SUBSCRIPTION_BLOCKS (1 year)
 const renewalValues = computed(() => {
   // Safe fallback: use 0 if originalExpireBlocks is null/undefined/NaN
   let currentExpire = originalExpireBlocks.value
@@ -4371,36 +5233,97 @@ const renewalValues = computed(() => {
     currentExpire = 0
   }
 
-  return [
-    Math.round(BLOCKS_PER_MONTH * (1/4) + currentExpire),     // ~1 week (22,000 blocks)
-    Math.round(BLOCKS_PER_MONTH * (1/2) + currentExpire),    // ~2 weeks (44,000 blocks)
-    BLOCKS_PER_MONTH + currentExpire,                         // 1 month (88,000 blocks)
-    BLOCKS_PER_MONTH * 3 + currentExpire,                    // 3 months (264,000 blocks)
-    BLOCKS_PER_MONTH * 6 + currentExpire,                    // 6 months (528,000 blocks)
-    BLOCKS_PER_MONTH * 12 + currentExpire,                   // 1 year (1,056,000 blocks)
-  ]
+  // Calculate how many blocks can still be added before hitting the max
+  const availableBlocks = Math.max(0, MAX_SUBSCRIPTION_BLOCKS - currentExpire)
+
+  // Filter renewal options based on available blocks
+  const values = []
+  const maxPeriodBlocks = BASE_RENEWAL_PERIODS[BASE_RENEWAL_PERIODS.length - 1].blocks // 1 year
+
+  for (const period of BASE_RENEWAL_PERIODS) {
+    if (period.blocks <= availableBlocks) {
+      // This period fits within the limit - add full value
+      values.push(period.blocks + currentExpire)
+    }
+  }
+
+  // If 1 Year option doesn't fit but there's more available than the last added option,
+  // add a "max available" option at the end
+  if (availableBlocks > 0 && availableBlocks < maxPeriodBlocks) {
+    const lastAddedPeriod = values.length > 0
+      ? values[values.length - 1] - currentExpire
+      : 0
+    if (availableBlocks > lastAddedPeriod) {
+      // Add the maximum available as the last option
+      values.push(MAX_SUBSCRIPTION_BLOCKS)
+    }
+  }
+
+  // If no options available (app already at max), provide option to maintain max
+  if (values.length === 0) {
+    values.push(MAX_SUBSCRIPTION_BLOCKS)
+  }
+
+  return values
 })
 
-// Renewal option labels (i18n)
-// Use ref instead of computed to avoid calling t() during component transitions
-const renewalOptionLabels = ref(['1 Week', '2 Weeks', '1 Month', '3 Months', '6 Months', '1 Year'])
-
-// Function to update labels with i18n (called after mount and on locale change)
-function updateRenewalLabels() {
-  try {
-    renewalOptionLabels.value = [
-      t('core.subscriptionManager.renewal1Week'),
-      t('core.subscriptionManager.renewal2Weeks'),
-      t('core.subscriptionManager.renewal1Month'),
-      t('core.subscriptionManager.renewal3Months'),
-      t('core.subscriptionManager.renewal6Months'),
-      t('core.subscriptionManager.renewal1Year'),
-    ]
-  } catch (error) {
-    console.error('Error getting renewal labels:', error)
-
-    // Keep fallback values
+// Computed labels that dynamically show actual extension duration
+// When capped, shows the actual duration being added (e.g., "7 Months 15 Days" instead of "1 Year")
+// Includes discount info for 3, 6, and 12 month periods
+const renewalOptionLabels = computed(() => {
+  let currentExpire = originalExpireBlocks.value
+  if (currentExpire == null || isNaN(currentExpire)) {
+    currentExpire = 0
   }
+
+  const availableBlocks = Math.max(0, MAX_SUBSCRIPTION_BLOCKS - currentExpire)
+  const labels = []
+  const maxPeriodBlocks = BASE_RENEWAL_PERIODS[BASE_RENEWAL_PERIODS.length - 1].blocks // 1 year
+  const offText = t('common.off')
+
+  for (const period of BASE_RENEWAL_PERIODS) {
+    if (period.blocks <= availableBlocks) {
+      // Full period available - use standard label with discount if applicable
+      let label
+      try {
+        label = t(`core.subscriptionManager.${period.labelKey}`)
+      } catch {
+        label = period.fallback
+      }
+
+      // Add discount info for periods with discount
+      if (period.discount > 0) {
+        label = `${label} (${period.discount}% ${offText})`
+      }
+      labels.push(label)
+    }
+  }
+
+  // If 1 Year option doesn't fit but there's more available than the last added option,
+  // add a "max available" label at the end showing exact duration
+  if (availableBlocks > 0 && availableBlocks < maxPeriodBlocks) {
+    const lastAddedPeriodIndex = labels.length - 1
+    const lastAddedPeriodBlocks = lastAddedPeriodIndex >= 0
+      ? BASE_RENEWAL_PERIODS[lastAddedPeriodIndex].blocks
+      : 0
+    if (availableBlocks > lastAddedPeriodBlocks) {
+      // Add formatted duration as the last label (e.g., "7 Months 15 Days")
+      labels.push(formatBlocksAsDuration(availableBlocks))
+    }
+  }
+
+  // Fallback if at max
+  if (labels.length === 0) {
+    labels.push(formatBlocksAsDuration(availableBlocks))
+  }
+
+  return labels
+})
+
+// Legacy function kept for compatibility - now labels are computed dynamically
+function updateRenewalLabels() {
+  // Labels are now computed reactively based on originalExpireBlocks
+  // This function is kept for backward compatibility but does nothing
 }
 
 // Combined renewal options (values + labels)
@@ -4589,6 +5512,25 @@ watch(() => appDetails.value.renewalIndex, newIndex => {
   }
 })
 
+// Watch renewalOptions length - clamp renewalIndex if options reduce
+// This can happen when remaining subscription time increases (fewer extension options available)
+watch(() => renewalOptions.value.length, newLength => {
+  if (appDetails.value.renewalIndex >= newLength) {
+    // Clamp to last available option
+    appDetails.value.renewalIndex = Math.max(0, newLength - 1)
+  }
+})
+
+// Watch syncthing status - auto-adjust instances to minimum 2 when syncthing is enabled
+// Only applies to new apps or updates with version >= 8
+watch(shouldEnforceSyncthingMinimum, newValue => {
+  if (newValue && appDetails.value.instances < 2) {
+    const oldInstances = appDetails.value.instances
+    appDetails.value.instances = 2
+    showToast('info', t('core.subscriptionManager.instancesAutoAdjusted', { from: oldInstances, to: 2 }))
+  }
+})
+
 // Watch signature - auto-register when signature is set
 watch(signature, async newSignature => {
   if (newSignature && isSigning.value && !registrationHash.value) {
@@ -4608,6 +5550,11 @@ watch(hasCalculatedPrice, (newValue, oldValue) => {
 
 // Watch managementAction to restore/apply correct expire when switching modes
 watch(managementAction, (newValue, oldValue) => {
+  // Fetch existing subscription when switching to update or renewal mode
+  if ((newValue === 'update' || newValue === 'renewal') && !props.newApp) {
+    fetchExistingSubscription()
+  }
+
   if (!props.newApp && originalExpireSnapshot.value !== null && props.appSpec) {
     console.log(`Management action changed: ${oldValue} → ${newValue}`)
 
@@ -4819,15 +5766,28 @@ async function getGeolocationData() {
 function getContinents(isForbidden = false) {
   const defaultLabel = isForbidden ? 'NONE' : 'ALL'
   const defaultText = isForbidden ? 'None' : 'Global'
-  const options = [{ value: defaultLabel, text: defaultText }]
+  const options = [{ value: defaultLabel, text: defaultText, instances: null }]
 
-  const seen = new Set()
+  const continentInstances = {}
   possibleLocations.value.forEach(loc => {
-    const cont = loc.value.split('_')[0]
-    if (!seen.has(cont)) {
-      seen.add(cont)
+    const parts = loc.value.split('_')
+
+    // Only use continent-level entries (no underscores) directly, don't sum
+    if (parts.length === 1) {
+      const cont = parts[0]
+
+      // Use the instances directly from the location entry instead of summing
+      if (!continentInstances[cont]) {
+        continentInstances[cont] = loc.instances
+      }
+    }
+  })
+
+  Object.entries(continentInstances).forEach(([cont, instances]) => {
+    // Only include continents with 24+ instances
+    if (instances >= 24) {
       const name = geolocations.continents.find(c => c.code === cont)?.name || cont
-      options.push({ value: cont, text: name })
+      options.push({ value: cont, text: name, instances })
     }
   })
 
@@ -4835,32 +5795,58 @@ function getContinents(isForbidden = false) {
 }
 
 function getCountries(continentCode) {
-  if (!continentCode || continentCode === 'ALL' || continentCode === 'NONE') return [{ value: 'ALL', text: 'All Countries' }]
-  const seen = new Set()
-  const countries = [{ value: 'ALL', text: 'All Countries' }]
+  if (!continentCode || continentCode === 'ALL' || continentCode === 'NONE') return [{ value: 'ALL', text: 'All Countries', instances: null }]
+  const countryInstances = {}
+
   possibleLocations.value.forEach(loc => {
-    const [cont, count] = loc.value.split('_')
-    if (cont === continentCode && count && !seen.has(count)) {
-      seen.add(count)
-      const name = geolocations.countries.find(c => c.code === count)?.name || count
-      countries.push({ value: count, text: name })
+    const parts = loc.value.split('_')
+    if (parts.length === 2 && parts[0] === continentCode) {
+      const count = parts[1]
+
+      // Use instances directly instead of summing to avoid duplication
+      if (!countryInstances[count]) {
+        countryInstances[count] = loc.instances
+      }
     }
   })
-  
+
+  const countries = [{ value: 'ALL', text: 'All Countries', instances: null }]
+  Object.entries(countryInstances).forEach(([count, instances]) => {
+    // Only include countries with 24+ instances
+    if (instances >= 24) {
+      const name = geolocations.countries.find(c => c.code === count)?.name || count
+      countries.push({ value: count, text: name, instances })
+    }
+  })
+
   return countries
 }
 
 function getRegions(continentCode, countryCode) {
-  if (!continentCode || !countryCode || countryCode === 'ALL') return [{ value: 'ALL', text: 'All Regions' }]
-  const regions = new Set()
+  if (!continentCode || !countryCode || countryCode === 'ALL') return [{ value: 'ALL', text: 'All Regions', instances: null }]
+  const regionInstances = {}
+
   possibleLocations.value.forEach(loc => {
-    const [cont, count, region] = loc.value.split('_')
-    if (cont === continentCode && count === countryCode && region) {
-      regions.add(region)
+    const parts = loc.value.split('_')
+    if (parts.length === 3 && parts[0] === continentCode && parts[1] === countryCode) {
+      const region = parts[2]
+
+      // Use instances directly instead of summing to avoid duplication
+      if (!regionInstances[region]) {
+        regionInstances[region] = loc.instances
+      }
     }
   })
-  
-  return [{ value: 'ALL', text: 'All Regions' }, ...[...regions].map(r => ({ value: r, text: r }))]  
+
+  const regions = [{ value: 'ALL', text: 'All Regions', instances: null }]
+  Object.entries(regionInstances).forEach(([region, instances]) => {
+    // Only include regions with 24+ instances
+    if (instances >= 24) {
+      regions.push({ value: region, text: region, instances })
+    }
+  })
+
+  return regions
 }
 
 function getGeolocationLabel(code) {
@@ -5236,6 +6222,25 @@ const allTabs = computed(() => [
   ...composeTabs.value,
 ])
 
+function enforceStep100(event) {
+  const allowed = ['Backspace', 'Delete', 'Tab', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Home', 'End']
+  if (allowed.includes(event.key) || event.ctrlKey || event.metaKey) return
+  if (!/^\d$/.test(event.key)) {
+    event.preventDefault()
+
+    return
+  }
+  const input = event.target
+  const current = input.value
+  const selStart = input.selectionStart
+  const selEnd = input.selectionEnd
+  const newValue = current.substring(0, selStart) + event.key + current.substring(selEnd)
+  const num = parseInt(newValue, 10)
+  if (num > 65536) {
+    event.preventDefault()
+  }
+}
+
 function addComposeComponent() {
   if (!props.appSpec.compose) props.appSpec.compose = []
   const index = props.appSpec.compose.push({
@@ -5564,9 +6569,9 @@ watch(tab, (newTab, oldTab) => {
         startPaymentMonitoring()
       }
 
-      // For paid apps/updates with unchanged specs, skip test and show payment section
-      else if (!props.newApp && !specsHaveChanged.value) {
-        console.log('💰 PAID UPDATE (unchanged specs) - Skipping test, showing payment section')
+      // For paid apps/updates with unchanged testable specs, skip test and show payment section
+      else if (!props.newApp && !testableFieldsHaveChanged.value) {
+        console.log('💰 PAID UPDATE (unchanged testable specs) - Skipping test, showing payment section')
         testFinished.value = true
         testError.value = false
       }
@@ -5611,6 +6616,7 @@ watch(tab, (newTab, oldTab) => {
     // This allows user to register again if they change specs later
     if (wasSuccessful) {
       registrationHash.value = null
+      signedSpecSnapshot.value = null
       signature.value = null
       deploymentAddress.value = null
       console.log('🧹 Cleared registration states after leaving successful deployment screen')
@@ -5720,6 +6726,16 @@ watch(() => props.appSpec?.compose?.length, newLength => {
   }
 }, { immediate: true })
 
+// Watch for initialAction changes to update managementAction
+watch(() => props.initialAction, newAction => {
+  if (newAction && !props.newApp) {
+    managementAction.value = newAction
+    if (newAction === 'update' || newAction === 'renewal') {
+      fetchExistingSubscription()
+    }
+  }
+})
+
 // Reset editIndex and focusState when removing a component
 function removeComposeComponent(index) {
   if (!props.appSpec.compose || index < 0 || index >= props.appSpec.compose.length) return
@@ -5818,6 +6834,54 @@ function handleEnvImport(entries) {
 function handleEnvPaste(event) {
   const pastedText = event.clipboardData?.getData('text')
   if (!pastedText) return
+
+  // Handle JSON array of env strings, with or without outer brackets:
+  //   ["KEY1=val1","KEY2=val2"]
+  //   "KEY1=val1",\n  "KEY2=val2",\n  "KEY3=val3"
+  const trimmedPaste = pastedText.trim()
+
+  const tryParseEnvArray = str => {
+    try {
+      const parsed = JSON.parse(str)
+      if (Array.isArray(parsed) && parsed.length > 0 && parsed.every(item => typeof item === 'string'))
+        return parsed
+    } catch { /* ignore */ }
+    
+    return null
+  }
+
+  // Try as-is (with brackets), then try wrapping bare quoted lines in brackets
+  const jsonCandidate = trimmedPaste.startsWith('[')
+    ? trimmedPaste
+    : `[${trimmedPaste.replace(/,\s*$/, '')}]`
+
+  const envArray = tryParseEnvArray(jsonCandidate)
+  if (envArray) {
+    event.preventDefault()
+    let importedCount = 0
+    let skippedCount = 0
+    let invalidCount = 0
+    for (const item of envArray) {
+      if (!item.includes('=')) { invalidCount++; continue }
+      const [key, ...rest] = item.split('=')
+      const trimmedKey = key.trim()
+      const trimmedValue = rest.join('=').trim()
+      if (!trimmedKey) { invalidCount++; continue }
+      if (envDialog.entries.some(e => e.key === trimmedKey)) { skippedCount++; continue }
+      envDialog.entries.push({ key: trimmedKey, value: trimmedValue })
+      importedCount++
+    }
+    if (importedCount > 0) {
+      let message = `Imported ${importedCount} environment variable(s)`
+      if (skippedCount > 0) message += `, skipped ${skippedCount} duplicate(s)`
+      if (invalidCount > 0) message += `, ignored ${invalidCount} invalid line(s)`
+      showToast('success', message)
+    } else if (skippedCount > 0 || invalidCount > 0) {
+      showToast('warning', `No new variables imported. ${skippedCount} duplicate(s), ${invalidCount} invalid line(s)`)
+    }
+    
+    return
+  }
 
   // Helper function to parse a single line with multiple possible separators
   const parseLine = line => {
@@ -6173,9 +7237,19 @@ watch(tab, async newVal => {
       isNewApp: props.newApp,
     })
 
-    // If already registered, don't reset states - just show what we have
+    // If already registered, check if specs changed since signing
+    // If specs changed, we need to recalculate price and re-sign
+    const specsChangedSinceSignature = signedSpecSnapshot.value &&
+      JSON.stringify(props.appSpec) !== signedSpecSnapshot.value
+
+    if (specsChangedSinceSignature) {
+      console.log('⚠️ Specs changed since signing - clearing registration hash for recalculation')
+      registrationHash.value = null
+      signedSpecSnapshot.value = null
+    }
+
+    // If already registered and specs haven't changed, don't reset states - just show what we have
     // Once you have a registrationHash, it means you signed the current spec state
-    // We preserve it regardless of whether specs changed from the snapshot
     if (registrationHash.value) {
       console.log('✅ Already registered - keeping existing states', {
         hasHash: !!registrationHash.value,
@@ -6240,6 +7314,7 @@ watch(tab, async newVal => {
     appSpecFormated.value = null
     signature.value = null
     registrationHash.value = null
+    signedSpecSnapshot.value = null
     verifyAppSpecResponse.value = null
     verifyAppSpecError.value = null
     appSpecPrice.value = null
@@ -6550,6 +7625,25 @@ async function verifyAppSpec() {
     const appSpecTemp = cloneDeep(props.appSpec)
 
     // ========================================================================
+    // CONVERT APP NAME TO LOWERCASE (only for new app registration)
+    // App name changes are not allowed on updates
+    // ========================================================================
+    if (props.newApp) {
+      if (appSpecTemp.name) {
+        appSpecTemp.name = appSpecTemp.name.toLowerCase()
+      }
+
+      // Also convert component names in compose array
+      if (appSpecTemp.compose && Array.isArray(appSpecTemp.compose)) {
+        appSpecTemp.compose.forEach(component => {
+          if (component.name) {
+            component.name = component.name.toLowerCase()
+          }
+        })
+      }
+    }
+
+    // ========================================================================
     // MARKETPLACE APP REPOTAG CHECK (only for new app registration)
     // ========================================================================
     if (props.newApp && marketPlaceApps.value.length > 0 && appSpecTemp.compose) {
@@ -6731,6 +7825,38 @@ async function verifyAppSpec() {
       if (!appSpecTemp.geolocation) appSpecTemp.geolocation = []
     }
 
+    // Validate contacts field - required for V5+ specs (registration and updates), but not for cancel or old specs
+    if (appSpecTemp.version >= 5 && managementAction.value !== 'cancel') {
+      const contacts = appSpecTemp.contacts || []
+      const validContacts = contacts.filter(c => c && c.trim())
+      if (validContacts.length === 0) {
+        throw new Error(t('core.subscriptionManager.contactRequired'))
+      }
+
+      // Auto-upload contacts to Flux Storage if they are email addresses (not already storage references)
+      // This matches the behavior in InstallDialog for marketplace/games
+      const hasStorageReference = validContacts.some(c => c.startsWith('F_S_CONTACTS='))
+      if (!hasStorageReference && validContacts.length > 0) {
+        try {
+          console.log('📧 Auto-uploading contacts to Flux Storage:', validContacts)
+          const contactsId = StorageService.generateContactsId()
+          const contactsData = {
+            contactsid: contactsId,
+            contacts: validContacts,
+          }
+          await StorageService.uploadContacts(contactsData)
+          const storageReference = StorageService.getContactsStorageReference(contactsId)
+
+          // Replace contacts with storage reference
+          appSpecTemp.contacts = [storageReference]
+          console.log('✅ Contacts uploaded to storage:', storageReference)
+        } catch (error) {
+          console.error('❌ Failed to upload contacts to Flux Storage:', error)
+          throw new Error(`Uploading contacts to Flux Storage failed: ${error.message}`)
+        }
+      }
+    }
+
     // For UPDATE without renewal: Send fork-aware remaining blocks
     // This represents the time remaining on the current subscription
     // Backend should recognize this as maintaining current expiry (not extending)
@@ -6774,18 +7900,10 @@ async function verifyAppSpec() {
     }
 
     if (appSpecTemp.version >= 8) {
-      console.log('Version 8+ app - checking enterprise mode')
-      console.log('UI isPrivateApp state:', isPrivateApp.value)
-      console.log('AppSpec enterprise field:', appSpecTemp.enterprise)
-
       // For v8+: Use UI state (isPrivateApp.value) to determine if encryption should happen
       // The UI state is set based on the enterprise checkbox or existing enterprise data
       if (isPrivateApp.value) {
-        console.log('Enterprise v8+ encryption process starting...')
-        console.log('Original appSpecTemp before encryption:', JSON.stringify(appSpecTemp, null, 2))
-        
         const zelidauth = localStorage.getItem('zelidauth')
-        console.log('Using current owner for encryption:', appSpecTemp.owner)
 
         // call api to get RSA public key
         const appPubKeyData = {
@@ -6793,7 +7911,9 @@ async function verifyAppSpec() {
           owner: appSpecTemp.owner,
         }
         const responseGetPublicKey = await AppsService.getAppPublicKey(zelidauth, appPubKeyData)
-        console.log('getAppPublicKey response:', responseGetPublicKey.data)
+        if (!responseGetPublicKey?.data) {
+          throw new Error('Failed to get app public key: No response from server')
+        }
         if (responseGetPublicKey.data.status === 'error') {
           const errorData = responseGetPublicKey.data.data
           let errorMsg = 'Failed to get app public key'
@@ -6809,46 +7929,49 @@ async function verifyAppSpec() {
           throw new Error(errorMsg)
         }
         const pubkey = responseGetPublicKey.data.data
-        console.log('Retrieved public key length:', pubkey.length)
+        if (!pubkey) {
+          throw new Error('Failed to get app public key: Invalid response data')
+        }
 
         // Check if WebCrypto is available before proceeding
         if (!isWebCryptoAvailable()) {
-          console.warn('WebCrypto not available, cannot use enterprise features')
-          
           // Show user-friendly toast instead of blocking error
-          showToast('warning', 'Enterprise features require HTTPS or localhost. Please access this application using a secure connection.', 'mdi-alert-triangle', 6000)
+          showToast('warning', 'Enterprise features require HTTPS or localhost. Please access this application using a secure connection.', 'mdi-alert', 6000)
           
           // Reset enterprise mode and return gracefully
           appSpec.value.enterprise = ''
-          
+
           return
         }
 
-        const rsaPubKey = await importRsaPublicKey(pubkey)
-        const aesKey = crypto.getRandomValues(new Uint8Array(32))
+        // Wrap encryption operations in try-catch for proper state reset on failure
+        try {
+          const rsaPubKey = await importRsaPublicKey(pubkey)
+          const aesKey = crypto.getRandomValues(new Uint8Array(32))
 
-        const encryptedEnterpriseKey = await encryptAesKeyWithRsaKey(
-          aesKey,
-          rsaPubKey,
-        )
-        const enterpriseSpecs = {
-          contacts: appSpecTemp.contacts,
-          compose: appSpecTemp.compose,
+          const encryptedEnterpriseKey = await encryptAesKeyWithRsaKey(
+            aesKey,
+            rsaPubKey,
+          )
+          const enterpriseSpecs = {
+            contacts: appSpecTemp.contacts,
+            compose: appSpecTemp.compose,
+          }
+
+          const encryptedEnterprise = await encryptEnterpriseWithAes(
+            JSON.stringify(enterpriseSpecs),
+            aesKey,
+            encryptedEnterpriseKey,
+          )
+
+          appSpecTemp.enterprise = encryptedEnterprise
+          appSpecTemp.contacts = []
+          appSpecTemp.compose = []
+        } catch (encryptionError) {
+          // Reset enterprise state on encryption failure
+          appSpecTemp.enterprise = ''
+          throw new Error(`Enterprise encryption failed: ${encryptionError.message || 'Unknown encryption error'}`)
         }
-        console.log('Enterprise specs to encrypt:', JSON.stringify(enterpriseSpecs, null, 2))
-        
-        const encryptedEnterprise = await encryptEnterpriseWithAes(
-          JSON.stringify(enterpriseSpecs),
-          aesKey,
-          encryptedEnterpriseKey,
-        )
-        console.log('Encrypted enterprise data length:', encryptedEnterprise.length)
-        
-        appSpecTemp.enterprise = encryptedEnterprise
-        appSpecTemp.contacts = []
-        appSpecTemp.compose = []
-        
-        console.log('AppSpecTemp after encryption:', JSON.stringify(appSpecTemp, null, 2))
       }
     } else if (appSpecTemp.version === 7) {
       // Handle v7 encryption
@@ -7013,6 +8136,11 @@ async function priceForAppSpec() {
     appSpecPrice.value = response.data.data
     console.log('Calculated price:', appSpecPrice.value)
 
+    // Check if subscription price will change after this update
+    if (managementAction.value === 'update' && existingSubscription.value) {
+      checkSubscriptionPriceChange()
+    }
+
     // Update marketplace app flag for payment tracking
     if (marketPlaceApp) {
       isMarketplaceApp.value = true
@@ -7029,7 +8157,8 @@ async function priceForAppSpec() {
 
 async function fetchBlockHeight() {
   try {
-    const res = await props.executeLocalCommand('/daemon/getblockcount')
+    // Use DaemonService public API globally instead of local command
+    const res = await DaemonService.getBlockCount()
 
     if (res?.data?.status === 'success' && typeof res.data?.data === 'number') {
       blockHeight.value = res.data.data
@@ -7197,7 +8326,34 @@ async function propagateSignedMessage() {
 
     if (response.data?.status === 'success') {
       registrationHash.value = response.data.data
+
+      // Sync appDetails.name with the lowercased name from appSpecFormated
+      // This ensures the "Manage Application" button URL matches the registered app name
+      if (appSpecFormated.value?.name) {
+        appDetails.value.name = appSpecFormated.value.name
+      }
+
+      // Save snapshot of spec at signing time to detect changes if user goes back
+      signedSpecSnapshot.value = JSON.stringify(props.appSpec)
       showToast('success', 'Application registered successfully! Redirecting to Test & Pay...')
+
+      // If this was a cancel action, cancel the Stripe subscription now that the network confirmed it
+      if (managementAction.value === 'cancel') {
+        try {
+          const auth = qs.parse(zelidauth)
+          if (auth.zelid && auth.signature && auth.loginPhrase) {
+            const appName = props.appSpec?.name || appDetails.value.name
+            await axios.post(`${paymentBridge}/api/v1/stripe/subscription/cancel`, {
+              zelid: auth.zelid,
+              signature: auth.signature,
+              loginPhrase: auth.loginPhrase,
+              appName,
+            })
+          }
+        } catch (err) {
+          console.log('Failed to cancel Stripe subscription:', err.message)
+        }
+      }
 
       // Fetch deployment information
       await getDeploymentInfo()
@@ -7435,6 +8591,13 @@ async function testAppInstall() {
     if (props.newApp && props.appSpec && !testError.value) {
       const specCopy = cloneDeep(props.appSpec)
       NON_TESTABLE_FIELDS.forEach(field => delete specCopy[field])
+
+      // Also exclude from compose components
+      if (specCopy.compose && Array.isArray(specCopy.compose)) {
+        specCopy.compose.forEach(component => {
+          NON_TESTABLE_FIELDS.forEach(field => delete component[field])
+        })
+      }
       testedSpecSnapshot.value = specCopy
       console.log('📸 Saved tested spec snapshot for new app (test succeeded, excluding non-testable fields:', NON_TESTABLE_FIELDS, ')')
     } else if (props.newApp && testError.value) {
@@ -7560,7 +8723,7 @@ function getStatusIcon(status) {
   switch (status) {
   case 'success': return 'mdi-check-circle'
   case 'error': return 'mdi-alert-circle'
-  case 'warning': return 'mdi-alert-triangle'
+  case 'warning': return 'mdi-alert'
   case 'info': return 'mdi-information'
   default: return 'mdi-circle-outline'
   }
@@ -7725,6 +8888,22 @@ async function initStripePay(hash = null, name = null, price = null, description
       // Start monitoring
       startPaymentMonitoring()
       showToast('info', 'Stripe checkout opened. Complete payment in the new window.')
+
+      // If this is a one-time update payment with an active subscription, update the subscription price
+      if (managementAction.value === 'update' && existingSubscription.value && subscriptionPeriodPriceChanged.value && subscriptionNewPeriodPrice.value) {
+        try {
+          const authData = qs.parse(localStorage.getItem('zelidauth'))
+          await axios.post(`${paymentBridge}/api/v1/stripe/subscription/update-price`, {
+            zelid: authData.zelid,
+            signature: authData.signature,
+            loginPhrase: authData.loginPhrase,
+            appName: finalName,
+            newPrice: subscriptionNewPeriodPrice.value,
+          })
+        } catch (priceError) {
+          console.warn('Failed to update subscription price:', priceError.message)
+        }
+      }
     } catch (error) {
       console.error('Stripe API error:', error)
       popup.close() // Close the blank popup
@@ -7737,6 +8916,267 @@ async function initStripePay(hash = null, name = null, price = null, description
     const errorMessage = error.response?.data?.message || error.response?.data?.data || error.message || 'Connection failed'
     showToast('error', `Stripe checkout error: ${errorMessage}`)
     checkoutLoading.value = false
+  }
+}
+
+async function initStripeSubscriptionPay(hash = null, name = null, price = null, description = null) {
+  try {
+    fiatCheckoutURL.value = ''
+    checkoutLoading.value = true
+
+    const period = selectedSubscriptionPeriod.value
+    if (!period) {
+      showToast('error', t('core.subscriptionManager.autoRenewalEligiblePeriods'))
+      checkoutLoading.value = false
+      
+      return
+    }
+
+    const zelidauth = localStorage.getItem('zelidauth')
+    if (!zelidauth) {
+      showToast('error', 'Authentication required - please login first')
+      checkoutLoading.value = false
+      
+      return
+    }
+
+    const auth = qs.parse(zelidauth)
+    if (!auth.zelid || !auth.signature || !auth.loginPhrase) {
+      showToast('error', 'Invalid authentication data - please login again')
+      checkoutLoading.value = false
+      
+      return
+    }
+
+    const finalHash = hash || registrationHash.value
+    const finalName = name || appDetails.name
+    const finalPrice = price || appSpecPrice.value?.usd || 0
+
+    if (!finalHash) {
+      showToast('error', 'Registration hash required - please register application first')
+      checkoutLoading.value = false
+      
+      return
+    }
+
+    if (!finalPrice || finalPrice <= 0) {
+      showToast('error', 'Invalid price - please calculate price first')
+      checkoutLoading.value = false
+      
+      return
+    }
+
+    const data = {
+      zelid: auth.zelid,
+      signature: auth.signature,
+      loginPhrase: auth.loginPhrase,
+      details: {
+        name: finalName,
+        description: description || appDetails.description,
+        hash: finalHash,
+        price: finalPrice,
+        productName: finalName,
+        period,
+        success_url: `${window.location.origin}/successcheckout`,
+        cancel_url: window.location.origin,
+        kpi: {
+          origin: 'FluxOS',
+          marketplace: isMarketplaceApp.value,
+          registration: props.newApp || props.isRedeploy,
+        },
+      },
+    }
+
+    // Open popup immediately to avoid blocker
+    const popup = window.open('about:blank', '_blank', 'width=800,height=600,scrollbars=yes,resizable=yes')
+
+    if (!popup || popup.closed || typeof popup.closed === 'undefined') {
+      checkoutLoading.value = false
+      try {
+        const checkoutURL = await axios.post(`${paymentBridge}/api/v1/stripe/subscription/create`, data)
+        if (checkoutURL.data.status === 'success') {
+          popupBlockedDialog.value = true
+          blockedPaymentUrl.value = checkoutURL.data.data
+          blockedPaymentType.value = 'Stripe Subscription'
+        }
+      } catch (error) {
+        console.error('Subscription checkout error:', error)
+      }
+      
+      return
+    }
+
+    // Show loading in popup
+    popup.document.write(`
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <title>${t('core.subscriptionManager.loadingSubscriptionCheckout')}</title>
+          <style>
+            body { margin: 0; padding: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+            .loader-container { text-align: center; color: white; }
+            .spinner { border: 4px solid rgba(255, 255, 255, 0.3); border-top: 4px solid white; border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; margin: 0 auto 20px; }
+            @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+            h2 { margin: 0 0 10px 0; font-weight: 600; }
+            p { margin: 0; opacity: 0.9; font-size: 14px; }
+          </style>
+        </head>
+        <body>
+          <div class="loader-container">
+            <div class="spinner"></div>
+            <h2>${t('core.subscriptionManager.redirectingToSubscription')}</h2>
+            <p>${t('core.subscriptionManager.pleaseWaitCheckout')}</p>
+          </div>
+        </body>
+      </html>
+    `)
+
+    try {
+      const checkoutURL = await axios.post(`${paymentBridge}/api/v1/stripe/subscription/create`, data)
+
+      if (checkoutURL.data.status === 'error') {
+        showToast('error', `Subscription checkout failed: ${checkoutURL.data.message || checkoutURL.data.data || 'Unknown error'}`)
+        popup.close()
+        checkoutLoading.value = false
+        
+        return
+      }
+
+      fiatCheckoutURL.value = checkoutURL.data.data
+      checkoutLoading.value = false
+
+      paymentMethod.value = 'Stripe Subscription'
+      paymentAmount.value = finalPrice
+
+      popup.location.href = checkoutURL.data.data
+      popup.focus()
+
+      startPaymentMonitoring()
+      showToast('info', 'Stripe subscription checkout opened. Complete payment in the new window.')
+    } catch (error) {
+      console.error('Subscription API error:', error)
+      popup.close()
+      showToast('error', t('core.subscriptionManager.subscriptionCheckoutFailed'))
+      checkoutLoading.value = false
+    }
+  } catch (error) {
+    console.error('Subscription checkout network error:', error)
+    const errorMessage = error.response?.data?.message || error.response?.data?.data || error.message || 'Connection failed'
+    showToast('error', `Subscription checkout error: ${errorMessage}`)
+    checkoutLoading.value = false
+  }
+}
+
+/**
+ * Charges the user for an app update using their existing subscription's payment method.
+ * Creates an invoice item for just the update cost and pays it immediately.
+ */
+async function initStripeSubscriptionCharge(hash = null, name = null, price = null, description = null) {
+  try {
+    checkoutLoading.value = true
+    const zelidauth = localStorage.getItem('zelidauth')
+
+    if (!zelidauth) {
+      showToast('error', 'Authentication required - please login first')
+      checkoutLoading.value = false
+
+      return
+    }
+
+    const auth = qs.parse(zelidauth)
+    if (!auth.zelid || !auth.signature || !auth.loginPhrase) {
+      showToast('error', 'Invalid authentication data - please login again')
+      checkoutLoading.value = false
+
+      return
+    }
+
+    const finalHash = hash || registrationHash.value
+    const finalName = name || appDetails.name
+    const finalPrice = price || appSpecPrice.value?.usd || 0
+
+    if (!finalHash || !finalPrice || finalPrice <= 0) {
+      showToast('error', 'Missing update details')
+      checkoutLoading.value = false
+
+      return
+    }
+
+    const data = {
+      zelid: auth.zelid,
+      signature: auth.signature,
+      loginPhrase: auth.loginPhrase,
+      details: {
+        name: finalName,
+        description: description || appDetails.description,
+        hash: finalHash,
+        price: finalPrice,
+        productName: finalName,
+        kpi: {
+          origin: 'FluxOS',
+          marketplace: isMarketplaceApp.value,
+          registration: false,
+        },
+      },
+    }
+
+    const response = await axios.post(`${paymentBridge}/api/v1/stripe/subscription/charge-update`, data)
+
+    if (response.data.status === 'error') {
+      showToast('error', `Charge failed: ${response.data.data || 'Unknown error'}`)
+      checkoutLoading.value = false
+
+      return
+    }
+
+    paymentMethod.value = 'Stripe Subscription'
+    paymentAmount.value = finalPrice
+    checkoutLoading.value = false
+
+    showToast('success', t('core.subscriptionManager.subscriptionChargeSuccess'))
+    startPaymentMonitoring()
+
+    // Update subscription price if it changed
+    if (subscriptionPeriodPriceChanged.value && subscriptionNewPeriodPrice.value) {
+      try {
+        await axios.post(`${paymentBridge}/api/v1/stripe/subscription/update-price`, {
+          zelid: auth.zelid,
+          signature: auth.signature,
+          loginPhrase: auth.loginPhrase,
+          appName: finalName,
+          newPrice: subscriptionNewPeriodPrice.value,
+        })
+      } catch (priceError) {
+        console.warn('Failed to update subscription price:', priceError.message)
+      }
+    }
+  } catch (error) {
+    console.error('Subscription charge error:', error)
+    const errorMessage = error.response?.data?.data || error.response?.data?.message || error.message || 'Connection failed'
+    showToast('error', `Subscription charge error: ${errorMessage}`)
+    checkoutLoading.value = false
+  }
+}
+
+/**
+ * Calculates the subscription period price for the current app specs
+ * and compares it to the existing subscription's price on Stripe.
+ */
+async function checkSubscriptionPriceChange() {
+  subscriptionPeriodPriceChanged.value = false
+  subscriptionNewPeriodPrice.value = null
+  if (!existingSubscription.value || !appSpecPrice.value?.usd) return
+
+  try {
+    const periodPrice = appSpecPrice.value.usd
+    const currentPrice = existingSubscription.value.currentPrice
+
+    if (currentPrice && Math.round(currentPrice * 100) !== Math.round(periodPrice * 100)) {
+      subscriptionPeriodPriceChanged.value = true
+      subscriptionNewPeriodPrice.value = periodPrice
+    }
+  } catch (error) {
+    console.warn('Failed to check subscription price change:', error.message)
   }
 }
 
@@ -7935,11 +9375,15 @@ async function initPaypalPay(hash = null, name = null, price = null, description
   }
 }
 
-// Payment monitoring function
+// Payment monitoring function - Three-phase detection:
+// Phase 1 (blockchain): Check if payment/registration is confirmed on the blockchain via getAppSpecifics()
+// Phase 2 (installing): Check if a node has started installing via getAppInstallingLocation()
+// Phase 3 (deployment): Check if app is running on nodes via getAppLocation()
 const startPaymentMonitoring = async () => {
   console.log('🚀 START PAYMENT MONITORING', {
     registrationHash: registrationHash.value,
     isFreeUpdate: appSpecPrice.value?.flux === 0,
+    isNewApp: props.newApp,
   })
 
   // Clear any existing monitoring
@@ -7952,8 +9396,9 @@ const startPaymentMonitoring = async () => {
 
   paymentProcessing.value = true
   paymentConfirmed.value = false
+  paymentMonitoringPhase.value = 'blockchain' // Start with blockchain confirmation phase
 
-  console.log('✅ paymentProcessing set to true - monitoring UI should now be visible')
+  console.log('✅ paymentProcessing set to true - monitoring UI should now be visible (phase: blockchain)')
 
   // Set a 30-minute timeout (payment validity period)
   paymentMonitoringTimeout.value = setTimeout(() => {
@@ -7972,63 +9417,120 @@ const startPaymentMonitoring = async () => {
     // Get app name from correct source: appDetails for new apps, props.appSpec for updates
     const appName = props.newApp ? appDetails.value.name : props.appSpec?.name
 
-    console.log('⏰ MONITORING CHECK - Polling for deployment status...', {
+    console.log('⏰ MONITORING CHECK - Polling for status...', {
       timestamp: new Date().toLocaleTimeString(),
       appName: appName,
-      'appDetails.value.name': appDetails.value.name,
-      'props.appSpec?.name': props.appSpec?.name,
       isNewApp: props.newApp,
+      phase: paymentMonitoringPhase.value,
       registrationHash: registrationHash.value,
     })
 
     try {
       if (!appName) {
         console.warn('⚠️ No app name available for monitoring')
-        
+
         return
       }
 
       if (props.newApp) {
-        // For new apps: Check if app location exists (app gets deployed)
-        const response = await AppsService.getAppLocation(appName)
+        // For NEW APPS: Two-phase detection
+        if (paymentMonitoringPhase.value === 'blockchain') {
+          // Phase 1: Check if app spec exists on blockchain (payment confirmed)
+          const specResponse = await AppsService.getAppSpecifics(appName)
 
-        if (response.data && response.data.status === 'success') {
-          const appLocation = response.data.data
+          if (specResponse.data && specResponse.data.status === 'success') {
+            const currentAppSpec = specResponse.data.data
 
-          console.log('🔍 Checking new app deployment:', {
-            appLocation: appLocation,
-            hasInstances: appLocation && appLocation.length > 0,
-          })
+            console.log('🔍 Phase 1 - Checking blockchain confirmation:', {
+              appSpecExists: !!currentAppSpec,
+              currentHash: currentAppSpec?.hash,
+              registeredHash: registrationHash.value,
+            })
 
-          // If app location exists and has running instances, deployment was successful!
-          if (appLocation && appLocation.length > 0) {
-            console.log('✅ NEW APP DEPLOYMENT DETECTED - App is running!')
+            // If app spec exists and hash matches, payment is confirmed on blockchain
+            if (currentAppSpec?.hash && registrationHash.value && currentAppSpec.hash === registrationHash.value) {
+              console.log('✅ BLOCKCHAIN CONFIRMED - Moving to installing phase')
+              paymentMonitoringPhase.value = 'installing'
+              showToast('success', t('core.subscriptionManager.paymentConfirmedOnNetwork'))
+            }
+          }
+        } else if (paymentMonitoringPhase.value === 'installing') {
+          // Phase 2: Check if a node has started installing
+          const installingResponse = await AppsService.getAppInstallingLocation(appName)
 
-            // Clear monitoring
-            clearInterval(paymentMonitoringInterval.value)
-            clearTimeout(paymentMonitoringTimeout.value)
-            paymentMonitoringInterval.value = null
-            paymentMonitoringTimeout.value = null
-            paymentConfirmed.value = true
-            paymentProcessing.value = false
-            paymentCompleted.value = true
+          if (installingResponse.data?.status === 'success') {
+            const locations = installingResponse.data.data
 
-            // Note: We don't clear registrationHash here to keep the success message visible
-            // It will be cleared when user navigates away from the tab
-            console.log('✅ Deployment successful - registrationHash kept for UI stability')
+            console.log('🔍 Phase 2 - Checking installing location:', {
+              locations: locations,
+              hasInstances: locations && locations.length > 0,
+            })
 
-            // Show success message
-            showToast('success', appSpecPrice.value?.flux === 0 ? t('core.subscriptionManager.deploymentSuccessfulRunning') : t('core.subscriptionManager.paymentConfirmedActive'))
+            if (locations && locations.length > 0) {
+              console.log('✅ NODE INSTALLING - Moving to deployment phase')
+              paymentMonitoringPhase.value = 'deployment'
+              showToast('success', t('core.subscriptionManager.nodeStartedInstalling'))
+            } else {
+              // No installing locations — app may have already finished installing between polls
+              // Check if it's already running to avoid getting stuck
+              const locationResponse = await AppsService.getAppLocation(appName)
+
+              if (locationResponse.data?.status === 'success') {
+                const appLocation = locationResponse.data.data
+
+                console.log('🔍 Phase 2 fallback - Checking if already running:', {
+                  appLocation: appLocation,
+                  hasInstances: appLocation && appLocation.length > 0,
+                })
+
+                if (appLocation && appLocation.length > 0) {
+                  console.log('✅ APP ALREADY RUNNING - Skipping installing phase')
+                  paymentMonitoringPhase.value = 'deployment'
+                }
+              }
+            }
+          }
+        } else if (paymentMonitoringPhase.value === 'deployment') {
+          // Phase 3: Check if app is running on nodes
+          const response = await AppsService.getAppLocation(appName)
+
+          if (response.data && response.data.status === 'success') {
+            const appLocation = response.data.data
+
+            console.log('🔍 Phase 2 - Checking node deployment:', {
+              appLocation: appLocation,
+              hasInstances: appLocation && appLocation.length > 0,
+            })
+
+            // If app location exists and has running instances, deployment was successful!
+            if (appLocation && appLocation.length > 0) {
+              console.log('✅ NEW APP DEPLOYMENT DETECTED - App is running!')
+
+              // Clear monitoring
+              clearInterval(paymentMonitoringInterval.value)
+              clearTimeout(paymentMonitoringTimeout.value)
+              paymentMonitoringInterval.value = null
+              paymentMonitoringTimeout.value = null
+              paymentConfirmed.value = true
+              paymentProcessing.value = false
+              paymentCompleted.value = true
+
+              console.log('✅ Deployment successful - registrationHash kept for UI stability')
+
+              // Show success message
+              showToast('success', appSpecPrice.value?.flux === 0 ? t('core.subscriptionManager.deploymentSuccessfulRunning') : t('core.subscriptionManager.paymentConfirmedActive'))
+            }
           }
         }
       } else {
-        // For updating existing app: Check if app spec hash matches registered hash
+        // For UPDATING existing app: Only Phase 1 - Check if app spec hash matches registered hash on blockchain
+        // No Phase 2 needed - nodes will pick up the update automatically
         const specResponse = await AppsService.getAppSpecifics(appName)
 
         if (specResponse.data && specResponse.data.status === 'success') {
           const currentAppSpec = specResponse.data.data
 
-          console.log('🔍 Checking update deployment:', {
+          console.log('🔍 Phase 1 (Update) - Checking blockchain confirmation:', {
             currentHash: currentAppSpec?.hash,
             registeredHash: registrationHash.value,
             hashesMatch: currentAppSpec?.hash === registrationHash.value,
@@ -8036,7 +9538,7 @@ const startPaymentMonitoring = async () => {
 
           // Check if the current spec hash matches our registered hash
           if (currentAppSpec?.hash && registrationHash.value && currentAppSpec.hash === registrationHash.value) {
-            console.log('✅ UPDATE DETECTED - Hash matches!')
+            console.log('✅ UPDATE CONFIRMED ON BLOCKCHAIN - Hash matches!')
 
             // Clear monitoring
             clearInterval(paymentMonitoringInterval.value)
@@ -8048,7 +9550,6 @@ const startPaymentMonitoring = async () => {
             paymentCompleted.value = true
 
             // Update the original spec snapshot to the deployed spec (so future changes can be detected)
-            // Using cloneDeep for better performance
             if (props.appSpec) {
               const specCopy = cloneDeep(props.appSpec)
               delete specCopy.expire
@@ -8056,12 +9557,10 @@ const startPaymentMonitoring = async () => {
               console.log('📸 Updated originalAppSpecSnapshot after successful deployment')
             }
 
-            // Note: We don't clear registrationHash here to keep the success message visible
-            // It will be cleared when user changes specs or navigates away from the tab
-            console.log('✅ Deployment successful - registrationHash kept for UI stability')
+            console.log('✅ Update confirmed on blockchain - registrationHash kept for UI stability')
 
-            // Show success message
-            showToast('success', appSpecPrice.value?.flux === 0 ? t('core.subscriptionManager.updateDeployedSuccessfully') : t('core.subscriptionManager.paymentConfirmedSpecUpdated'))
+            // Show success message - nodes will pick up the update automatically
+            showToast('success', t('core.subscriptionManager.updateConfirmedNodesWillUpdate'))
           }
         }
       }
@@ -8220,7 +9719,7 @@ async function initSSPPay() {
 
 async function initWalletConnect() {
   try {
-    const account = getConnectedAccount()
+    const account = await getConnectedAccount()
     if (!account) {
       showToast('error', 'WalletConnect not connected. Please log into FluxOS first.')
 
@@ -8309,9 +9808,15 @@ async function initiateSignWSUpdate() {
     let wsURL = localStorage.getItem("backendURL") || getDetectedBackendURL()
     wsURL = wsURL.replace('https://', 'wss://').replace('http://', 'ws://')
 
-    const sigMsg = `${props.appSpec.owner}${timestamp.value}`
+    // For updates, use ORIGINAL owner (from snapshot) for signing, not the potentially changed owner
+    // This is critical for ownership transfers: old owner signs spec containing new owner
+    const ownerForSigning = props.newApp
+      ? props.appSpec.owner
+      : (originalAppSpecSnapshot.value?.owner || props.appSpec.owner)
+
+    const sigMsg = `${ownerForSigning}${timestamp.value}`
     const uri = `${wsURL}/ws/sign/${sigMsg}`
-    console.log('Creating WebSocket:', uri)
+    console.log('Creating WebSocket:', uri, 'using owner:', ownerForSigning)
 
     websocket.value = new WebSocket(uri)
 
@@ -8357,12 +9862,12 @@ function onError(evt) { console.error('WS error', evt) }
 // === WalletConnect ===
 async function initSignWalletConnect() {
   try {
-    const account = getConnectedAccount()
+    const account = await getConnectedAccount()
     if (!account) {
       showToast('error', 'WalletConnect not connected. Please log into FluxOS first.')
       isSigning.value = false
       signingFailed.value = true
-      
+
       return
     }
 
@@ -9096,7 +10601,7 @@ async function signMethod() {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
-  margin-top: -1.5rem;
+  margin-top: 0.5rem;
   padding: 0.75rem 1rem;
   border: 2px solid rgba(var(--v-theme-warning), 0.5);
   border-radius: 8px;
@@ -9843,5 +11348,33 @@ async function signMethod() {
 
 .tos-scroll-area::-webkit-scrollbar-thumb:hover {
   background: rgba(var(--v-theme-on-surface), 0.4);
+}
+
+/* Remove default fieldset styling */
+fieldset {
+  border: none;
+  margin: 0;
+  padding: 0;
+  min-width: 0;
+}
+
+/* Make disabled fieldset look disabled */
+.disabled-fieldset {
+  opacity: 0.5;
+  pointer-events: none;
+  cursor: not-allowed;
+  user-select: none;
+}
+
+.disabled-fieldset * {
+  pointer-events: none !important;
+  cursor: not-allowed !important;
+}
+
+/* ToS Panel Border */
+.tos-panel-bordered {
+  border: 1px solid rgba(var(--v-border-color), var(--v-border-opacity));
+  border-radius: 6px;
+  overflow: hidden;
 }
 </style>

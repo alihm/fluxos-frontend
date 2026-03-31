@@ -3,7 +3,6 @@ import { ref, onMounted, onBeforeUnmount, nextTick, reactive } from "vue"
 import { storeToRefs } from "pinia"
 import ClipboardJS from "clipboard"
 import VueJsonPretty from "vue-json-pretty"
-import "vue-json-pretty/lib/styles.css"
 import { useConfigStore } from "@core/stores/config"
 
 const props = defineProps({
@@ -22,6 +21,22 @@ const props = defineProps({
   icon: {
     type: String,
     default: 'mdi-folder-information-outline',
+  },
+  hideHeader: {
+    type: Boolean,
+    default: false,
+  },
+  hideTabs: {
+    type: Boolean,
+    default: false,
+  },
+  deep: {
+    type: Number,
+    default: 2,
+  },
+  hideCopyButton: {
+    type: Boolean,
+    default: false,
   },
 })
 
@@ -58,7 +73,7 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <VRow class="align-center justify-space-between mb-1">
+  <VRow v-if="!hideHeader" class="align-center justify-space-between mb-1">
     <VCol
       cols="12"
       class="d-flex align-center"
@@ -99,6 +114,7 @@ onBeforeUnmount(() => {
 
 
   <VTabs
+    v-if="!hideTabs"
     v-model="activeTab"
     class="tabs-no-slide-v v-tabs-pill"
     hide-slider
@@ -132,6 +148,7 @@ onBeforeUnmount(() => {
     >
       <div class="json-container">
         <VBtn
+          v-if="!hideCopyButton"
           icon
           size="small"
           class="copy-json-btn transparent-btn"
@@ -152,7 +169,7 @@ onBeforeUnmount(() => {
         <div class="json-pretty-wrapper">
           <VueJsonPretty
             :data="component.callData"
-            :deep="2"
+            :deep="deep"
             show-icon
             :show-line="false"
             virtual

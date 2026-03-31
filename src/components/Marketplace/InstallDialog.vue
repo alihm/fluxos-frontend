@@ -178,10 +178,12 @@
                         <div class="hardware-value-display">
                           <input
                             v-model="config.ram"
-                            type="text"
+                            type="number"
                             class="hardware-custom-input"
                             :disabled="isRamLocked"
-                            @input="config.ram = $event.target.value"
+                            min="100"
+                            step="100"
+                            @blur="config.ram = Math.max(100, Math.round(config.ram / 100) * 100)"
                           />
                         </div>
                         <VBtn
@@ -305,9 +307,12 @@
                             <div class="hardware-value-display">
                               <input
                                 v-model="entry.ram"
-                                type="text"
+                                type="number"
                                 class="hardware-custom-input"
+                                min="100"
+                                step="100"
                                 @input="updateComposeTotal"
+                                @blur="entry.ram = Math.max(100, Math.round(entry.ram / 100) * 100); updateComposeTotal()"
                               />
                             </div>
                             <VBtn
@@ -417,7 +422,7 @@
                   <div class="slider-wrapper">
                     <VSlider
                       v-model="config.instances"
-                      :min="3"
+                      :min="props.app?.instances || 3"
                       :max="100"
                       :step="1"
                       :thumb-label="false"
@@ -866,11 +871,11 @@
                           <VTextField
                             v-model="emailNotifications.email"
                             :label="t('components.marketplace.installDialog.emailAddress')"
-                            :placeholder="t('components.marketplace.installDialog.enterEmailOptional')"
+                            :placeholder="t('components.marketplace.installDialog.enterEmailRequired')"
                             variant="outlined"
                             density="comfortable"
                             type="email"
-                            :rules="emailRules"
+                            :rules="emailRulesRequired"
                             class="email-input"
                             @input="validateEmail"
                           >
@@ -1222,14 +1227,80 @@
                           class="mb-4"
                         />
                         <VIcon v-else icon="mdi-check-circle" size="64" color="success" class="mb-4" />
-                        <div class="text-h6 mb-2">{{ paymentConfirmed ? t('components.marketplace.installDialog.paymentConfirmed') : t('components.marketplace.installDialog.waitingForPayment') }}</div>
-                        <div class="text-body-2 text-center mb-4 text-medium-emphasis">
-                          <span v-if="!paymentConfirmed" v-html="t('components.marketplace.installDialog.completePaymentInWallet', { wallet: paymentMethod === 'flux' ? 'ZelCore' : 'SSP' })">
-                          </span>
-                          <span v-else-if="redirectCountdown > 0" class="text-success">
-                            {{ t('components.marketplace.installDialog.advancingToDeployment', { seconds: redirectCountdown }) }}
-                          </span>
+
+                        <!-- Phase-specific title -->
+                        <div class="text-h6 mb-2">
+                          <template v-if="paymentConfirmed">{{ t('components.marketplace.installDialog.paymentConfirmed') }}</template>
+                          <template v-else-if="paymentMonitoringPhase === 'blockchain'">{{ t('core.subscriptionManager.checkingBlockchainConfirmation') }}</template>
+                          <template v-else-if="paymentMonitoringPhase === 'installing'">{{ t('core.subscriptionManager.waitingForNodeInstalling') }}</template>
+                          <template v-else>{{ t('core.subscriptionManager.waitingForNodeDeployment') }}</template>
                         </div>
+
+                        <!-- Phase-specific messages -->
+                        <div class="text-body-2 text-center mb-4 text-medium-emphasis">
+                          <template v-if="paymentConfirmed">
+                            <div class="d-flex flex-column align-center gap-2">
+                              <p class="text-subtitle-2 font-weight-medium mb-0">
+                                {{ t('core.subscriptionManager.appAccessDomainAvailable') }}
+                              </p>
+                              <div class="d-flex align-center gap-2">
+                                <VIcon size="18" color="primary">mdi-web</VIcon>
+                                <a
+                                  :href="`https://${deployedAppName}.app.runonflux.io`"
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                >
+                                  https://{{ deployedAppName }}.app.runonflux.io
+                                  <VIcon size="12" class="ml-1">mdi-open-in-new</VIcon>
+                                </a>
+                              </div>
+                              <span v-if="redirectCountdown > 0" class="text-success mt-1">
+                                {{ t('components.marketplace.installDialog.advancingToDeployment', { seconds: redirectCountdown }) }}
+                              </span>
+                            </div>
+                          </template>
+                          <template v-else-if="paymentMonitoringPhase === 'blockchain'">
+                            <div class="d-flex flex-column align-center gap-1">
+                              <div class="d-flex align-center">
+                                <VIcon color="info" size="18" class="mr-2">mdi-magnify</VIcon>
+                                <span>{{ t('core.subscriptionManager.checkingPaymentOnBlockchain') }}</span>
+                              </div>
+                              <div class="d-flex align-center">
+                                <VIcon color="warning" size="18" class="mr-2">mdi-clock-alert</VIcon>
+                                <span>{{ t('core.subscriptionManager.blockchainConfirmationTime') }}</span>
+                              </div>
+                            </div>
+                          </template>
+                          <template v-else-if="paymentMonitoringPhase === 'installing'">
+                            <div class="d-flex flex-column align-center gap-1">
+                              <div class="d-flex align-center">
+                                <VIcon color="info" size="18" class="mr-2">mdi-progress-download</VIcon>
+                                <span>{{ t('core.subscriptionManager.waitingForInstallationStart') }}</span>
+                              </div>
+                              <div class="d-flex align-center">
+                                <VIcon color="warning" size="18" class="mr-2">mdi-clock-alert</VIcon>
+                                <span>{{ t('core.subscriptionManager.installationStartTime') }}</span>
+                              </div>
+                            </div>
+                          </template>
+                          <template v-else-if="paymentMonitoringPhase === 'deployment'">
+                            <div class="d-flex flex-column align-center gap-1">
+                              <div class="d-flex align-center">
+                                <VIcon color="success" size="18" class="mr-2">mdi-check-circle</VIcon>
+                                <span>{{ t('core.subscriptionManager.paymentConfirmedWaitingNodes') }}</span>
+                              </div>
+                              <div class="d-flex align-center">
+                                <VIcon color="info" size="18" class="mr-2">mdi-server</VIcon>
+                                <span>{{ t('core.subscriptionManager.waitingForNodesPickup') }}</span>
+                              </div>
+                              <div class="d-flex align-center">
+                                <VIcon color="warning" size="18" class="mr-2">mdi-clock-alert</VIcon>
+                                <span>{{ t('core.subscriptionManager.nodeDeploymentTime') }}</span>
+                              </div>
+                            </div>
+                          </template>
+                        </div>
+
                         <VBtn
                           v-if="!paymentConfirmed"
                           variant="outlined"
@@ -1290,11 +1361,29 @@
                         </VCardText>
                       </VCard>
 
+                      <!-- Auto-Renewal Toggle (Stripe only) -->
+                      <div v-if="paymentMethod === 'stripe'" class="mb-3 rounded border">
+                        <div class="px-3 py-2 d-flex align-center rounded-t" style="border-bottom: 1px solid rgba(var(--v-border-color), var(--v-border-opacity)); background: rgba(var(--v-theme-on-surface), 0.04);">
+                          <VIcon icon="mdi-autorenew" size="18" class="me-2" color="success" />
+                          <span class="text-body-2 font-weight-medium">{{ t('components.marketplace.installDialog.enableAutoRenewal') }}</span>
+                        </div>
+                        <div class="pa-3 d-flex align-center">
+                          <VSwitch
+                            v-model="autoRenewalEnabled"
+                            color="success"
+                            hide-details
+                            density="compact"
+                            class="me-3 flex-shrink-0"
+                          />
+                          <div class="text-caption text-medium-emphasis text-start">{{ t('components.marketplace.installDialog.autoRenewalDescription') }}</div>
+                        </div>
+                      </div>
+
                       <VBtn
                         color="primary"
                         size="large"
                         block
-                        @click="paymentMethod === 'stripe' ? processStripePayment() : processPayPalPayment()"
+                        @click="paymentMethod === 'stripe' ? (autoRenewalEnabled ? processStripeSubscriptionPayment() : processStripePayment()) : processPayPalPayment()"
                         class="text-none"
                         elevation="2"
                       >
@@ -1354,6 +1443,26 @@
                   <div class="text-body-2 text-medium-emphasis">{{ t('components.marketplace.installDialog.applicationActiveAndRunning') }}</div>
                 </div>
 
+                <VCard variant="outlined" class="mb-4 mx-auto" style="max-width: 500px;">
+                  <VCardText class="text-center">
+                    <p class="text-subtitle-2 font-weight-medium mb-2">
+                      {{ t('core.subscriptionManager.appAccessDomainAvailable') }}
+                    </p>
+                    <div class="d-flex align-center justify-center gap-2">
+                      <VIcon size="18" color="primary">mdi-web</VIcon>
+                      <a
+                        :href="`https://${deployedAppName}.app.runonflux.io`"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        class="text-body-1"
+                      >
+                        https://{{ deployedAppName }}.app.runonflux.io
+                        <VIcon size="12" class="ml-1">mdi-open-in-new</VIcon>
+                      </a>
+                    </div>
+                  </VCardText>
+                </VCard>
+
                 <div class="mb-4">
                   <div class="d-flex justify-center mb-3">
                     <VChip variant="tonal" size="default" class="summary-chip">
@@ -1369,7 +1478,7 @@
                   <div class="d-flex justify-center align-center flex-wrap gap-2">
                     <VChip color="warning" variant="tonal" size="small" class="summary-chip">
                       <VIcon start icon="mdi-cpu-64-bit" size="14" />
-                      {{ t('components.marketplace.installDialog.coresCount', { count: config.cpu }) }}
+                      {{ t('components.marketplace.installDialog.coresCount', { count: Number(config.cpu).toFixed(1) }) }}
                     </VChip>
                     <VChip color="success" variant="tonal" size="small" class="summary-chip">
                       <VIcon start icon="mdi-memory" size="14" />
@@ -1555,7 +1664,7 @@ import geolocationData from '@/utils/geolocation'
 import { paymentBridge } from '@/utils/fiatGateways'
 import { getUser } from '@/utils/firebase'
 import { importRsaPublicKey, encryptAesKeyWithRsaKey, encryptEnterpriseWithAes, isWebCryptoAvailable } from '@/utils/enterpriseCrypto'
-import { payWithZelcore, payWithSSP, isSSPAvailable, isZelcoreAvailable, isBrowserMetaMaskAvailable, getConnectedAccount, hasWalletConnectSession, signWithWalletConnect as walletServiceSignWithWalletConnect, watchWalletAccount, signWithSSP as walletServiceSignWithSSP, signWithZelcore as walletServiceSignWithZelcore } from '@/utils/walletService'
+import { payWithZelcore, payWithSSP, isSSPAvailable, isZelcoreAvailable, isBrowserMetaMaskAvailable, getConnectedAccount, hasWalletConnectSession, signWithWalletConnect as walletServiceSignWithWalletConnect, watchWalletAccount, signWithSSP as walletServiceSignWithSSP, signWithZelcore as walletServiceSignWithZelcore, sanitizeUnicodeForSigning } from '@/utils/walletService'
 import axios from 'axios'
 import qs from 'query-string'
 import ManualSignDialog from '@/@core/components/ManualSignDialog.vue'
@@ -1641,12 +1750,13 @@ const isOpen = computed({
 const isLoggedIn = computed(() => privilege.value !== 'none')
 
 // Compute the full deployed app name with timestamp
+// IMPORTANT: Use lowercase to match the actual deployed app name format (see signMessage function)
 const deployedAppName = computed(() => {
   if (deploymentTimestamp.value) {
-    return `${props.app.name}${deploymentTimestamp.value}`
+    return `${props.app.name.toLowerCase()}${deploymentTimestamp.value}`
   }
-  
-  return props.app.name
+
+  return props.app.name.toLowerCase()
 })
 
 // Wizard state
@@ -1668,7 +1778,7 @@ const termsAccepted = ref(false)
 const signatureError = ref('') // Deprecated - kept for compatibility
 
 // Handle clicks on the terms label to allow link clicks without toggling checkbox
-const handleTermsLabelClick = (event) => {
+const handleTermsLabelClick = event => {
   // If the click was on a link, prevent checkbox toggle and let the link work
   if (event.target.tagName === 'A') {
     event.stopPropagation()
@@ -1903,6 +2013,10 @@ onMounted(async () => {
   }
 })
 const paymentMethod = ref('stripe') // Will be updated when authentication is determined
+const autoRenewalEnabled = ref(false)
+
+// Map subscription months to Stripe subscription period keys
+const SUBSCRIPTION_PERIOD_MAP = { 1: 1, 3: 3, 6: 6, 12: 12 }
 const creditCard = ref({
   number: '',
   expiry: '',
@@ -1910,7 +2024,7 @@ const creditCard = ref({
 })
 
 // Marketplace subscription duration options (from FluxCloud marketplace)
-const subscriptionOptionsDiscounts = ref([0, 0, 0, 0]) // Store discounts separately
+const subscriptionOptionsDiscounts = ref([0, 3, 6, 12]) // Store discounts: 0%, 3%, 6%, 12%
 
 const subscriptionOptions = computed(() => [
   {
@@ -1920,18 +2034,18 @@ const subscriptionOptions = computed(() => [
   },
   {
     months: 3,
-    label: t('components.marketplace.installDialog.threeMonths'),
-    discount: subscriptionOptionsDiscounts.value[1], // Will be fetched from app.discounts.threeMonths
+    label: `${t('components.marketplace.installDialog.threeMonths')} (3% ${t('common.off')})`,
+    discount: subscriptionOptionsDiscounts.value[1],
   },
   {
     months: 6,
-    label: t('components.marketplace.installDialog.sixMonths'),
-    discount: subscriptionOptionsDiscounts.value[2], // Will be fetched from app.discounts.sixMonths
+    label: `${t('components.marketplace.installDialog.sixMonths')} (6% ${t('common.off')})`,
+    discount: subscriptionOptionsDiscounts.value[2],
   },
   {
     months: 12,
-    label: t('components.marketplace.installDialog.twelveMonths'),
-    discount: subscriptionOptionsDiscounts.value[3], // Will be fetched from app.discounts.twelveMonths
+    label: `${t('components.marketplace.installDialog.twelveMonths')} (12% ${t('common.off')})`,
+    discount: subscriptionOptionsDiscounts.value[3],
   },
 ])
 
@@ -1939,14 +2053,14 @@ const subscriptionOptions = computed(() => [
 const initializeDiscounts = () => {
   if (props.app.discounts) {
     // Use app-specific discounts if available
-    subscriptionOptionsDiscounts.value[1] = props.app.discounts.threeMonths || 0
-    subscriptionOptionsDiscounts.value[2] = props.app.discounts.sixMonths || 0
-    subscriptionOptionsDiscounts.value[3] = props.app.discounts.twelveMonths || 0
+    subscriptionOptionsDiscounts.value[1] = props.app.discounts.threeMonths || 3
+    subscriptionOptionsDiscounts.value[2] = props.app.discounts.sixMonths || 6
+    subscriptionOptionsDiscounts.value[3] = props.app.discounts.twelveMonths || 12
   } else {
-    // Fallback to typical marketplace discounts if app doesn't specify
-    subscriptionOptionsDiscounts.value[1] = 5  // 3 months: 5% discount
-    subscriptionOptionsDiscounts.value[2] = 10 // 6 months: 10% discount
-    subscriptionOptionsDiscounts.value[3] = 20 // 12 months: 20% discount
+    // Default discounts: 3%, 6%, 12% for 3, 6, 12 months respectively
+    subscriptionOptionsDiscounts.value[1] = 3
+    subscriptionOptionsDiscounts.value[2] = 6
+    subscriptionOptionsDiscounts.value[3] = 12
   }
 }
 
@@ -2195,7 +2309,7 @@ const allowedCountries = computed(() => {
 
   availableLocations.value.forEach(location => {
     const parts = location.value.split('_')
-    if (parts.length >= 2 && parts[0] === continentCode) {
+    if (parts.length === 2 && parts[0] === continentCode) {
       const countryCode = parts[1]
 
       if (!countryInstanceMap.has(countryCode)) {
@@ -2205,9 +2319,9 @@ const allowedCountries = computed(() => {
     }
   })
 
-  // Only include countries with sufficient instances
+  // Only include countries with sufficient instances (minimum 24)
   countryInstanceMap.forEach((totalInstances, countryCode) => {
-    if (totalInstances >= minInstances) {
+    if (totalInstances >= minInstances && totalInstances >= 24) {
       const countryName = getCountryName(countryCode)
       countriesWithInstances.push({
         name: countryName,
@@ -2233,7 +2347,7 @@ const forbiddenCountries = computed(() => {
 
   availableLocations.value.forEach(location => {
     const parts = location.value.split('_')
-    if (parts.length >= 2 && parts[0] === continentCode) {
+    if (parts.length === 2 && parts[0] === continentCode) {
       const countryCode = parts[1]
 
       if (!countryInstanceMap.has(countryCode)) {
@@ -2243,9 +2357,9 @@ const forbiddenCountries = computed(() => {
     }
   })
 
-  // Only include countries with sufficient instances
+  // Only include countries with sufficient instances (minimum 24)
   countryInstanceMap.forEach((totalInstances, countryCode) => {
-    if (totalInstances >= minInstances) {
+    if (totalInstances >= minInstances && totalInstances >= 24) {
       const countryName = getCountryName(countryCode)
       countriesWithInstances.push({
         name: countryName,
@@ -2261,6 +2375,12 @@ const forbiddenCountries = computed(() => {
 // Email validation rules (optional with format validation)
 const emailRules = computed(() => [
   v => !v || /.+@.+\..+/.test(v) || t('components.marketplace.installDialog.emailMustBeValid'),
+])
+
+// Email validation rules (required with format validation)
+const emailRulesRequired = computed(() => [
+  v => !!v || t('components.marketplace.installDialog.emailRequired'),
+  v => /.+@.+\..+/.test(v) || t('components.marketplace.installDialog.emailMustBeValid'),
 ])
 
 // Locked values functionality - check if configuration values are locked by the app
@@ -2309,7 +2429,7 @@ const { privilege } = storeToRefs(fluxStore)
 const zelidauth = ref(null)
 const isWalletUser = ref(false)
 
-// Payment methods - 2 fiat + 2 crypto options for all users
+// Payment methods - 1 fiat + 2 crypto options for all users (PayPal currently not available)
 const paymentMethods = computed(() => {
   return [
     {
@@ -2318,12 +2438,14 @@ const paymentMethods = computed(() => {
       description: t('components.marketplace.installDialog.payWithCreditCard'),
       image: stripeLogo,
     },
-    {
-      id: 'paypal',
-      name: 'PayPal',
-      description: t('components.marketplace.installDialog.payWithPayPal'),
-      image: paypalLogo,
-    },
+
+    // PayPal currently not available
+    // {
+    //   id: 'paypal',
+    //   name: 'PayPal',
+    //   description: t('components.marketplace.installDialog.payWithPayPal'),
+    //   image: paypalLogo,
+    // },
     {
       id: 'flux',
       name: 'ZelCore',
@@ -2383,7 +2505,7 @@ const fetchPricingFromAPI = async () => {
         name: 'wordpress',
         description: 'WordPress on Flux',
         repotag: 'runonflux/wp-nginx:latest',
-        ports: [80],
+        ports: [3000], // Use non-enterprise port for pricing (avoids $2 enterprise port fee)
         containerPorts: [80],
         domains: [''],
         environmentParameters: [''],
@@ -2423,12 +2545,14 @@ const fetchPricingFromAPI = async () => {
 
     const appSpec = {
       version: 8,
-      name: props.app.name || props.app.displayName,
+
+      // Convert app name to lowercase for consistency
+      name: (props.app.name || props.app.displayName || '').toLowerCase(),
       description: props.app.description || props.app.displayName || 'Marketplace App',
       owner: props.app.owner || 'marketplace',
       compose: appSpecCompose,
       instances: config.value.instances,
-      expire: defaultExpireBlocks * config.value.subscriptionMonths,
+      expire: defaultExpireBlocks, // Always 1 month - total calculated client-side
       contacts: props.app.contacts || [],
       geolocation: isWordPress.value ? (props.app.geolocation || []) : (getGeolocationCodes() || []),
       nodes: props.app.nodes || [],
@@ -2443,12 +2567,22 @@ const fetchPricingFromAPI = async () => {
       const apiCalculatedUsd = response.data.data.usd || 0
       const apiFlux = response.data.data.flux || 0
 
+      // For WordPress, use the higher of locally calculated USD or API-returned USD
+      let finalUsd = apiCalculatedUsd
+      if (isWordPress.value) {
+        // Calculate local discounted USD for WordPress
+        const months = config.value.subscriptionMonths || 1
+        const discount = currentDiscount.value || 0
+        const localDiscountedUsd = monthlyPrice * months * (1 - discount / 100)
+        finalUsd = Math.max(localDiscountedUsd, apiCalculatedUsd)
+      }
+
       // Calculate the ratio/multiplier from API (how much FLUX per 1 USD)
-      const fluxPerUsd = apiCalculatedUsd > 0 ? (apiFlux / apiCalculatedUsd) : 0
+      const fluxPerUsd = finalUsd > 0 ? (apiFlux / apiCalculatedUsd) : 0
 
       // Store the FLUX ratio for later use
       apiPricing.value = {
-        usd: apiCalculatedUsd, // Store backend calculated price for reference
+        usd: finalUsd, // Use higher of local or API price
         flux: apiFlux, // Store backend calculated flux
         fluxDiscount: response.data.data.fluxDiscount || 0,
         fluxPerUsd: fluxPerUsd, // Store the ratio for calculating FLUX from USD
@@ -2484,13 +2618,25 @@ const fetchDeploymentInfo = async () => {
   }
 }
 
+// Get current subscription discount (Flux payments only)
+const currentDiscount = computed(() => {
+  const selectedOption = subscriptionOptions.value.find(option => option.months === config.value.subscriptionMonths)
+
+  return selectedOption ? selectedOption.discount : 0
+})
+
 const estimatedFluxPrice = computed(() => {
-  // Calculate FLUX using the ratio and the computed monthlyPrice (with instance multiplier)
-  if (apiPricing.value.fluxPerUsd > 0) {
-    const usdPrice = monthlyPrice.value || 0
-    const fluxPrice = usdPrice * apiPricing.value.fluxPerUsd
-    const months = config.value.subscriptionMonths || 1
-    const totalFlux = fluxPrice * months
+  // Calculate Flux price client-side using monthly USD price and Flux/USD ratio
+  const monthly = monthlyPrice.value || 0
+  const months = config.value.subscriptionMonths || 1
+  const fluxPerUsd = apiPricing.value.fluxPerUsd || 0
+  const discount = currentDiscount.value || 0
+
+  if (fluxPerUsd > 0 && monthly > 0) {
+    // Monthly Flux = monthly USD × fluxPerUsd
+    // Total Flux = monthly Flux × months × (1 - discount/100)
+    const monthlyFlux = monthly * fluxPerUsd
+    const totalFlux = monthlyFlux * months * (1 - discount / 100)
 
     return totalFlux.toFixed(2)
   }
@@ -2506,13 +2652,6 @@ const totalFluxPrice = computed(() => {
 })
 const insufficientBalance = computed(() => {
   return userFluxBalance.value < parseFloat(estimatedFluxPrice.value)
-})
-
-// Get current subscription discount
-const currentDiscount = computed(() => {
-  const selectedOption = subscriptionOptions.value.find(option => option.months === config.value.subscriptionMonths)
-  
-  return selectedOption ? selectedOption.discount : 0
 })
 
 // Remove old infrastructureCost - now using marketplace pricing calculation
@@ -2586,9 +2725,9 @@ const monthlyPrice = computed(() => {
     return props.app.price || 0
   }
 
-  // For marketplace apps with custom hardware: Use API-calculated price if available
+  // For marketplace apps with custom hardware: Use API-calculated monthly price if available
   if (apiPricing.value.usd > 0) {
-    // API price is already calculated based on actual hardware and instances
+    // API returns monthly price based on actual hardware and instances
     const apiPrice = Number(apiPricing.value.usd.toFixed(2))
     const configPrice = props.app.price || 0
 
@@ -2637,19 +2776,17 @@ const estimatedCost = computed(() => {
 
 // Total USD cost for the entire subscription period
 const totalCost = computed(() => {
-  // Use computed monthlyPrice which includes instance multiplier
-  const monthly = parseFloat(estimatedCost.value) || 0
+  // Calculate client-side: monthly price × months × (1 - discount/100)
+  const monthly = monthlyPrice.value || 0
   const months = config.value.subscriptionMonths || 1
-  const total = monthly * months
+  const discount = currentDiscount.value || 0
+  const total = monthly * months * (1 - discount / 100)
 
   if (isNaN(total)) {
     return '$0.00'
   }
 
-  // Ensure we always return a properly formatted price string
-  const formattedTotal = total.toFixed(2)
-
-  return `$${formattedTotal}`
+  return `$${total.toFixed(2)}`
 })
 
 // Payment information (FluxCloud-style)
@@ -2667,6 +2804,9 @@ const paymentHash = ref('') // Will be generated after signing/registration
 const paymentMonitoringInterval = ref(null)
 const paymentMonitoringTimeout = ref(null)
 const paymentConfirmed = ref(false)
+
+// Payment monitoring phase: 'blockchain' = checking if payment confirmed on chain, 'installing' = waiting for node to start installing, 'deployment' = waiting for nodes to pick up app
+const paymentMonitoringPhase = ref('blockchain')
 const paymentBridgeMaintenance = ref(false)
 const popupBlockedDialog = ref(false)
 const blockedPaymentUrl = ref('')
@@ -2742,26 +2882,35 @@ const isFluxCloudGame = computed(() => {
 const getEnvironmentParameters = () => {
   const params = []
 
-  // For FluxCloud games, parameters come from compose section (not configs)
-  // For regular apps, also check compose section
-  if (detailedApp.value.compose) {
-    for (const component of detailedApp.value.compose) {
-      if (component.userEnvironmentParameters) {
-        for (const param of component.userEnvironmentParameters) {
-          const paramObj = {
-            name: param.name,
-            description: param.description || param.name,
-            placeholder: param.placeholder || '',
-            optional: param.optional || false,
-            advanced: param.advanced || false,
-            options: param.parameterConfig?.values || null,
-            defaultValue: param.parameterConfig?.defaultValue || param.defaultValue || '',
-            source: 'compose.userEnvironmentParameters',
+  try {
+    // For FluxCloud games, parameters come from compose section (not configs)
+    // For regular apps, also check compose section
+    if (detailedApp.value && detailedApp.value.compose && Array.isArray(detailedApp.value.compose)) {
+      for (let componentIndex = 0; componentIndex < detailedApp.value.compose.length; componentIndex++) {
+        const component = detailedApp.value.compose[componentIndex]
+        if (component && component.userEnvironmentParameters && Array.isArray(component.userEnvironmentParameters)) {
+          for (const param of component.userEnvironmentParameters) {
+            if (param && param.name) {
+              const paramObj = {
+                name: param.name,
+                description: param.description || param.name,
+                placeholder: param.placeholder || '',
+                optional: param.optional || false,
+                advanced: param.advanced || false,
+                options: param.parameterConfig?.values || null,
+                defaultValue: param.parameterConfig?.defaultValue || param.defaultValue || '',
+                source: 'compose.userEnvironmentParameters',
+                componentIndex: componentIndex, // Track which component this param belongs to
+                componentName: component.name || `Component ${componentIndex}`, // Also store component name for reference
+              }
+              params.push(paramObj)
+            }
           }
-          params.push(paramObj)
         }
       }
     }
+  } catch (error) {
+    console.error('Error processing environment parameters:', error)
   }
 
   return params
@@ -2866,8 +3015,8 @@ const canProceed = computed(() => {
     return true
   }
   if (currentStep.value === 3) {
-    // Email step - always allow proceeding (email is optional)
-    return true
+    // Email step - email is required
+    return validateEmail()
   }
   if (currentStep.value === 4) {
     // Signing step - block until both signing and registry are completed (for both SSO and wallet)
@@ -3336,7 +3485,8 @@ const generateDeploymentMessage = async () => {
   // Generate FluxCloud-compatible deployment message
   const timestamp = Date.now()
   deploymentTimestamp.value = timestamp // Store for WebSocket
-  const appName = `${props.app.name}${timestamp}`
+  // Convert app name to lowercase for consistency
+  const appName = `${props.app.name.toLowerCase()}${timestamp}`
 
   // Get owner from zelidauth
   let owner = ''
@@ -3411,10 +3561,16 @@ const generateDeploymentMessage = async () => {
   const ramMultiplier = isWordPress.value ? 1.0 : (appRAM > 0 ? config.value.ram / appRAM : 1.0)
   const ssdMultiplier = isWordPress.value ? 1.0 : (appSSD > 0 ? config.value.storage / appSSD : 1.0)
 
+  // Sanitize description to replace Unicode punctuation with ASCII equivalents
+  // This prevents signature verification failures with Ethereum wallets (WalletConnect/MetaMask)
+  // due to UTF-16 vs UTF-8 encoding differences in backend's toHex() function
+  const rawDescription = detailedApp.value.description || props.app.description || detailedApp.value.displayName || props.app.displayName
+  const sanitizedDescription = sanitizeUnicodeForSigning(rawDescription)
+
   const globalAppSpec = {
     version: 8,
     name: appName,
-    description: detailedApp.value.description || props.app.description || detailedApp.value.displayName || props.app.displayName,
+    description: sanitizedDescription,
     owner: owner,
     compose: baseComponents.map((component, index) => {
       // Build environmentParameters like FluxCloud
@@ -3423,10 +3579,28 @@ const generateDeploymentMessage = async () => {
         ...(component.environmentParameters || component.enviromentParameters || []),
       ]
 
-      // Add user-configured parameters
-      for (const [key, value] of Object.entries(config.value.parameters)) {
-        if (value) {
-          environmentParameters.push(`${key}=${value}`)
+      // Add user-configured parameters - ONLY for this specific component
+      try {
+        const envParams = getEnvironmentParameters()
+        for (const [key, value] of Object.entries(config.value.parameters || {})) {
+          if (value) {
+            // Find the parameter definition to check which component it belongs to
+            const paramDef = envParams.find(p => p && p.name === key)
+
+            // Only add this parameter if it belongs to the current component (or if no component tracking exists)
+            if (!paramDef || paramDef.componentIndex === undefined || paramDef.componentIndex === index) {
+              environmentParameters.push(`${key}=${value}`)
+            }
+          }
+        }
+      } catch (error) {
+        console.warn(`Failed to process environment parameters for component ${index}:`, error)
+
+        // Fallback: Add all parameters if there's an error (backward compatibility)
+        for (const [key, value] of Object.entries(config.value.parameters || {})) {
+          if (value) {
+            environmentParameters.push(`${key}=${value}`)
+          }
         }
       }
 
@@ -3469,14 +3643,15 @@ const generateDeploymentMessage = async () => {
       }
 
       // Match exact structure from FluxCloud AppComponent (lines 150-176)
+      // Sanitize text fields to prevent Unicode encoding issues with Ethereum signatures
       const appComponent = {
         name: component.name,
-        description: component.description,
+        description: sanitizeUnicodeForSigning(component.description),
         repotag: component.repotag,
         ports: componentPorts,
-        domains: component.domains.map(d => d.replace(/"/g, '"')),
+        domains: component.domains.map(d => sanitizeUnicodeForSigning(d.replace(/"/g, '"'))),
         environmentParameters: environmentParameters, // Version 4+ uses correct spelling
-        commands: component.commands.map(c => c.replace(/"/g, '"')),
+        commands: component.commands.map(c => sanitizeUnicodeForSigning(c.replace(/"/g, '"'))),
         containerPorts: component.containerPorts,
         containerData: component.containerData,
         tiered: component.tiered,
@@ -3861,7 +4036,7 @@ const signWithWalletConnect = async message => {
     const signature = await walletServiceSignWithWalletConnect(message)
     console.log('[InstallDialog] Sign function returned, signature:', signature?.substring(0, 20) + '...')
 
-    const connectedAccount = getConnectedAccount()
+    const connectedAccount = await getConnectedAccount()
     console.log('[InstallDialog] Connected account:', connectedAccount)
 
     if (!connectedAccount?.address) {
@@ -4184,7 +4359,10 @@ const resetDialog = () => {
   }
 }
 
-// Payment monitoring function
+// Payment monitoring function - Three-phase detection:
+// Phase 1 (blockchain): Check if payment/registration is confirmed on the blockchain via getAppSpecifics()
+// Phase 2 (installing): Check if a node has started installing via getAppInstallingLocation()
+// Phase 3 (deployment): Check if app is running on nodes via getAppLocation()
 const startPaymentMonitoring = async () => {
 
   // Clear any existing monitoring
@@ -4194,6 +4372,8 @@ const startPaymentMonitoring = async () => {
   if (paymentMonitoringTimeout.value) {
     clearTimeout(paymentMonitoringTimeout.value)
   }
+
+  paymentMonitoringPhase.value = 'blockchain' // Start with blockchain confirmation phase
 
   // Set a 30-minute timeout (payment validity period)
   paymentMonitoringTimeout.value = setTimeout(() => {
@@ -4207,58 +4387,95 @@ const startPaymentMonitoring = async () => {
     }
   }, 30 * 60 * 1000) // 30 minutes
 
-  // Poll for payment status every 2 minutes (crypto payments)
+  // Poll for payment status every 30 seconds
   paymentMonitoringInterval.value = setInterval(async () => {
     try {
-      // Check if app is deployed on the Flux network by getting its location
-      // getAppLocation returns the nodes where the app is running
-      // The app name includes the timestamp from deployment
-      const deployedAppName = deploymentTimestamp.value ?
-        `${props.app.name}${deploymentTimestamp.value}` :
-        props.app.name
+      // Use the computed deployedAppName which already handles lowercase + timestamp correctly
 
+      if (paymentMonitoringPhase.value === 'blockchain') {
+        // Phase 1: Check if app spec exists on blockchain (payment confirmed)
+        const specResponse = await AppsService.getAppSpecifics(deployedAppName.value)
 
-      const response = await AppsService.getAppLocation(deployedAppName)
+        if (specResponse.data && specResponse.data.status === 'success') {
+          const currentAppSpec = specResponse.data.data
 
-      if (response.data && response.data.status === 'success') {
-        const appLocation = response.data.data
-
-        // If app location exists and has running instances, deployment was successful!
-        if (appLocation && appLocation.length > 0) {
-
-          // Clear monitoring
-          clearInterval(paymentMonitoringInterval.value)
-          clearTimeout(paymentMonitoringTimeout.value)
-          paymentMonitoringInterval.value = null
-          paymentMonitoringTimeout.value = null
-          paymentConfirmed.value = true
-          paymentProcessing.value = false
-
-          // Show success message
-          showSnackbar(t('components.marketplace.installDialog.messages.paymentConfirmedActive'), 'success', 8000)
-
-          // Clear any existing countdown before starting new one
-          if (redirectCountdownInterval.value) {
-            clearInterval(redirectCountdownInterval.value)
-            redirectCountdownInterval.value = null
+          // If app spec exists, payment is confirmed on blockchain
+          if (currentAppSpec?.name) {
+            console.log('✅ BLOCKCHAIN CONFIRMED - Moving to installing phase')
+            paymentMonitoringPhase.value = 'installing'
+            showSnackbar(t('core.subscriptionManager.paymentConfirmedOnNetwork'), 'success', 5000)
           }
+        }
+      } else if (paymentMonitoringPhase.value === 'installing') {
+        // Phase 2: Check if a node has started installing
+        const installingResponse = await AppsService.getAppInstallingLocation(deployedAppName.value)
 
-          // Start countdown and auto-advance to deployment step
-          redirectCountdown.value = 5
-          redirectCountdownInterval.value = setInterval(() => {
-            redirectCountdown.value--
-            if (redirectCountdown.value <= 0) {
+        if (installingResponse.data?.status === 'success') {
+          const locations = installingResponse.data.data
+
+          if (locations && locations.length > 0) {
+            console.log('✅ NODE INSTALLING - Moving to deployment phase')
+            paymentMonitoringPhase.value = 'deployment'
+            showSnackbar(t('core.subscriptionManager.nodeStartedInstalling'), 'success', 5000)
+          } else {
+            // No installing locations — app may have already finished installing between polls
+            // Check if it's already running to avoid getting stuck
+            const locationResponse = await AppsService.getAppLocation(deployedAppName.value)
+
+            if (locationResponse.data?.status === 'success') {
+              const appLocation = locationResponse.data.data
+
+              if (appLocation && appLocation.length > 0) {
+                console.log('✅ APP ALREADY RUNNING - Skipping installing phase')
+                paymentMonitoringPhase.value = 'deployment'
+              }
+            }
+          }
+        }
+      } else if (paymentMonitoringPhase.value === 'deployment') {
+        // Phase 3: Check if app is running on nodes
+        const response = await AppsService.getAppLocation(deployedAppName.value)
+
+        if (response.data && response.data.status === 'success') {
+          const appLocation = response.data.data
+
+          // If app location exists and has running instances, deployment was successful!
+          if (appLocation && appLocation.length > 0) {
+
+            // Clear monitoring
+            clearInterval(paymentMonitoringInterval.value)
+            clearTimeout(paymentMonitoringTimeout.value)
+            paymentMonitoringInterval.value = null
+            paymentMonitoringTimeout.value = null
+            paymentConfirmed.value = true
+            paymentProcessing.value = false
+
+            // Show success message
+            showSnackbar(t('components.marketplace.installDialog.messages.paymentConfirmedActive'), 'success', 8000)
+
+            // Clear any existing countdown before starting new one
+            if (redirectCountdownInterval.value) {
               clearInterval(redirectCountdownInterval.value)
               redirectCountdownInterval.value = null
-              currentStep.value = totalSteps.value - 1
             }
-          }, 1000)
+
+            // Start countdown and auto-advance to deployment step
+            redirectCountdown.value = 5
+            redirectCountdownInterval.value = setInterval(() => {
+              redirectCountdown.value--
+              if (redirectCountdown.value <= 0) {
+                clearInterval(redirectCountdownInterval.value)
+                redirectCountdownInterval.value = null
+                currentStep.value = totalSteps.value - 1
+              }
+            }, 1000)
+          }
         }
       }
     } catch (error) {
       console.error('Error checking payment status:', error)
     }
-  }, 240000) // Check every 4 minutes (240 seconds)
+  }, 30000) // Check every 30 seconds
 }
 
 const processFluxPayment = async () => {
@@ -4314,11 +4531,11 @@ const processStripePayment = async () => {
       signature: authData.signature,
       loginPhrase: authData.loginPhrase,
       details: {
-        name: props.app.name,
+        name: props.app.name.toLowerCase(),
         description: props.app.description,
         hash: paymentHash.value,
         price: parseFloat(estimatedCost.value),
-        productName: props.app.name,
+        productName: props.app.name.toLowerCase(),
         success_url: `${window.location.origin}/successcheckout`,
         cancel_url: `${window.location.origin}/marketplace`,
         kpi: {
@@ -4371,6 +4588,88 @@ const processStripePayment = async () => {
   }
 }
 
+const processStripeSubscriptionPayment = async () => {
+  paymentProcessing.value = true
+
+  try {
+    const zelidauthData = localStorage.getItem('zelidauth')
+    if (!zelidauthData) {
+      showSnackbar(t('components.marketplace.installDialog.messages.pleaseLoginToMakePayments'), 'error')
+      paymentProcessing.value = false
+
+      return
+    }
+
+    const authData = qs.parse(zelidauthData)
+    if (!authData.zelid || !authData.signature || !authData.loginPhrase) {
+      showSnackbar(t('components.marketplace.installDialog.messages.invalidAuthenticationData'), 'error')
+      paymentProcessing.value = false
+
+      return
+    }
+
+    const period = SUBSCRIPTION_PERIOD_MAP[config.value.subscriptionMonths]
+    if (!period) {
+      showSnackbar(t('components.marketplace.installDialog.autoRenewalEligiblePeriods'), 'error')
+      paymentProcessing.value = false
+
+      return
+    }
+
+    const data = {
+      zelid: authData.zelid,
+      signature: authData.signature,
+      loginPhrase: authData.loginPhrase,
+      details: {
+        name: props.app.name.toLowerCase(),
+        description: props.app.description,
+        hash: paymentHash.value,
+        price: parseFloat(estimatedCost.value),
+        productName: props.app.name.toLowerCase(),
+        period,
+        success_url: `${window.location.origin}/successcheckout`,
+        cancel_url: `${window.location.origin}/marketplace`,
+        kpi: {
+          origin: 'FluxOS',
+          marketplace: true,
+          registration: true,
+        },
+      },
+    }
+
+    const checkoutURL = await axios.post(`${paymentBridge}/api/v1/stripe/subscription/create`, data)
+
+    if (checkoutURL.data.status === 'error') {
+      throw new Error(checkoutURL.data.message || checkoutURL.data.data || 'Failed to create Stripe subscription checkout')
+    }
+
+    await startPaymentMonitoring()
+
+    const win = window.open(checkoutURL.data.data, '_blank', 'width=600,height=800,resizable=yes,scrollbars=yes')
+
+    if (!win || win.closed || typeof win.closed === 'undefined') {
+      popupBlockedDialog.value = true
+      blockedPaymentUrl.value = checkoutURL.data.data
+      blockedPaymentType.value = 'Stripe Subscription'
+    } else {
+      win.focus()
+      showSnackbar(t('components.marketplace.installDialog.messages.stripeCheckoutOpened'), 'info', 5000)
+    }
+  } catch (error) {
+    console.error('Stripe subscription payment failed:', error)
+
+    if (error.response?.status >= 400 || error.code === 'ERR_NETWORK' || error.code === 'ECONNABORTED') {
+      cancelPaymentMonitoring()
+      paymentBridgeMaintenance.value = true
+      paymentProcessing.value = false
+    } else {
+      paymentProcessing.value = false
+      const errorMsg = error.response?.data?.message || error.response?.data?.data || error.message || 'Failed to initialize Stripe subscription'
+      showSnackbar(errorMsg, 'error')
+    }
+  }
+}
+
 const processPayPalPayment = async () => {
   paymentProcessing.value = true
 
@@ -4401,11 +4700,11 @@ const processPayPalPayment = async () => {
       signature: authData.signature,
       loginPhrase: authData.loginPhrase,
       details: {
-        name: props.app.name,
+        name: props.app.name.toLowerCase(),
         description: props.app.description,
         hash: paymentHash.value,
         price: parseFloat(estimatedCost.value),
-        productName: props.app.name,
+        productName: props.app.name.toLowerCase(),
         return_url: `${window.location.origin}/successcheckout`,
         cancel_url: `${window.location.origin}/marketplace`,
         kpi: {
@@ -4839,17 +5138,17 @@ const fetchLiveGeolocationData = async () => {
       availableLocations.value = locations
 
       // Update available continents based on actual data
-      // Only include continents that have sufficient total instances
+      // Only include continents with sufficient instances (minimum 24)
       const minInstances = config.value?.instances || 5
       const filteredContinents = []
 
       continents.forEach((name, code) => {
-        // Calculate total instances for this continent
+        // Calculate total instances for this continent (continent-level only, no underscores)
         const continentInstances = locations
-          .filter(loc => loc.value.startsWith(code))
+          .filter(loc => loc.value === code)
           .reduce((total, loc) => total + loc.instances, 0)
 
-        if (continentInstances >= minInstances) {
+        if (continentInstances >= minInstances && continentInstances >= 24) {
           filteredContinents.push({ name, code, totalInstances: continentInstances })
         }
       })
@@ -5013,6 +5312,15 @@ watch(() => props.modelValue, (newValue, oldValue) => {
 
     // Re-fetch deployment info
     fetchDeploymentInfo()
+
+    // Auto-fill contact email for SSO users (after resetDialog clears the form)
+    const loginType = localStorage.getItem('loginType')
+    if (loginType === 'sso') {
+      const firebaseUser = getUser()
+      if (firebaseUser?.email) {
+        emailNotifications.value.email = firebaseUser.email
+      }
+    }
   }
 })
 
@@ -6091,7 +6399,7 @@ watch(isLoggedIn, (newValue, oldValue) => {
 
 .hardware-card {
   flex: 1;
-  min-width: 140px;
+  min-width: 200px;
   display: flex;
   align-items: center;
   gap: 10px;
@@ -6191,7 +6499,7 @@ watch(isLoggedIn, (newValue, oldValue) => {
 
 .hardware-value-display {
   flex: 1;
-  max-width: 70px;
+  min-width: 80px;
   height: 32px;
   display: flex;
   align-items: center;
@@ -6214,10 +6522,24 @@ watch(isLoggedIn, (newValue, oldValue) => {
   background: transparent;
   color: rgb(var(--v-theme-on-surface));
   border-radius: 8px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .hardware-custom-input:focus {
   outline: none;
+}
+
+/* Hide increment/decrement arrows for number inputs */
+.hardware-custom-input::-webkit-outer-spin-button,
+.hardware-custom-input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.hardware-custom-input[type=number] {
+  -moz-appearance: textfield;
 }
 
 /* Dark theme support */

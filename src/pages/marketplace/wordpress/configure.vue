@@ -308,24 +308,58 @@
           <VDivider />
 
           <VCardText class="pa-6">
-            <!-- App Price -->
-            <div class="text-center mb-6">
-              <div class="text-h4 font-weight-bold mb-2">
-                {{ formattedPrice }}
+            <!-- Monthly Price -->
+            <div class="text-center mb-4">
+              <div v-if="!formData.selectedPlan" class="text-h5 text-medium-emphasis">
+                {{ t('pages.marketplace.wordpress.summary.selectPlan') }}
               </div>
-              <div v-if="pricing.flux && !loadingPricing" class="d-flex align-center justify-center gap-2">
-                <VChip color="primary" variant="flat" size="small">
-                  <VIcon start icon="mdi-lightning-bolt" size="16" />
-                  {{ pricing.flux.toFixed(2) }} FLUX
-                </VChip>
-                <VChip v-if="pricing.fluxDiscount > 0" color="success" variant="tonal" size="small">
-                  <VIcon start icon="mdi-tag" size="14" />
-                  -{{ pricing.fluxDiscount }}%
-                </VChip>
-              </div>
-              <div v-if="loadingPricing" class="text-body-2 text-medium-emphasis">
-                {{ t('pages.marketplace.wordpress.actions.calculatingPricing') }}
-              </div>
+              <template v-else>
+                <!-- Monthly Price Display -->
+                <div class="d-flex align-center justify-center gap-2 mb-1">
+                  <span v-if="subscriptionDiscount > 0" class="text-h6 text-decoration-line-through text-medium-emphasis">
+                    ${{ baseMonthlyPrice.toFixed(2) }}
+                  </span>
+                  <span class="text-h4 font-weight-bold text-primary">
+                    ${{ effectiveMonthlyPrice.toFixed(2) }}
+                  </span>
+                  <span class="text-body-1 text-medium-emphasis">/{{ t('pages.marketplace.wordpress.summary.month') }}</span>
+                </div>
+
+                <!-- Discount Badge -->
+                <div v-if="subscriptionDiscount > 0" class="mb-3">
+                  <VChip color="success" variant="tonal" size="small">
+                    <VIcon start icon="mdi-tag" size="14" />
+                    {{ subscriptionDiscount }}% {{ t('common.off') }}
+                  </VChip>
+                </div>
+
+                <VDivider class="my-3" />
+
+                <!-- Subscription Summary -->
+                <div class="text-body-2 text-medium-emphasis mb-2">
+                  {{ formData.paymentDuration }} {{ formData.paymentDuration === 1 ? t('pages.marketplace.wordpress.summary.month') : t('pages.marketplace.wordpress.summary.months') }} {{ t('pages.marketplace.wordpress.summary.subscription') }}
+                </div>
+
+                <!-- Total Price -->
+                <div class="text-h5 font-weight-medium mb-2">
+                  {{ t('pages.marketplace.wordpress.summary.total') }}: ${{ totalPrice.toFixed(2) }} USD
+                </div>
+
+                <!-- Flux Price -->
+                <div v-if="pricing.flux && !loadingPricing" class="d-flex align-center justify-center gap-2">
+                  <VChip color="primary" variant="flat" size="small">
+                    <VIcon start icon="mdi-lightning-bolt" size="16" />
+                    {{ pricing.flux.toFixed(2) }} FLUX
+                  </VChip>
+                  <VChip v-if="pricing.fluxDiscount > 0" color="success" variant="tonal" size="small">
+                    <VIcon start icon="mdi-percent" size="14" />
+                    -{{ pricing.fluxDiscount }}% FLUX
+                  </VChip>
+                </div>
+                <div v-if="loadingPricing" class="text-body-2 text-medium-emphasis">
+                  {{ t('pages.marketplace.wordpress.actions.calculatingPricing') }}
+                </div>
+              </template>
             </div>
 
             <VDivider class="my-4" />
@@ -338,7 +372,7 @@
               <template #label>
                 <span class="text-body-2">
                   {{ t('pages.marketplace.wordpress.termsOfService.agreement') }}
-                  <a href="#" style="text-decoration: underline; color: inherit;" @click.prevent="showTermsDialog = true">
+                  <a href="#" class="font-weight-bold" style="text-decoration: underline; color: inherit;" @click.prevent="showTermsDialog = true">
                     {{ t('pages.marketplace.wordpress.termsOfService.link') }}
                   </a>
                 </span>
@@ -363,51 +397,13 @@
     </VRow>
 
     <!-- Terms Dialog -->
-    <VDialog v-model="showTermsDialog" max-width="750" scrollable>
-      <VCard style="border-radius: 32px;" id="tos-dialog">
-        <VCardTitle class="d-flex align-center justify-space-between px-4 py-2 bg-primary">
-          <div class="d-flex align-center gap-2">
-            <VIcon icon="mdi-file-document-outline" size="28" color="white" />
-            <span class="text-h5" style="color: white;">{{ t('pages.marketplace.wordpress.termsOfService.title') }}</span>
-          </div>
-          <VBtn
-            icon="mdi-close"
-            variant="text"
-            size="small"
-            color="white"
-            @click="showTermsDialog = false"
-          />
-        </VCardTitle>
-
-        <VDivider />
-
-        <VCardText class="px-8 py-4 tos-scroll-area" style="max-height: calc(80vh - 200px); overflow-y: auto;">
-          <div class="tos-content" v-html="tosHtmlContent"></div>
-        </VCardText>
-
-        <VCardActions class="pa-6 pt-4 justify-center">
-          <VBtn
-            color="primary"
-            variant="flat"
-            size="default"
-            min-width="100"
-            @click="acceptTerms"
-          >
-            I AGREE
-          </VBtn>
-          <VBtn
-            color="grey"
-            variant="flat"
-            size="default"
-            min-width="100"
-            class="ml-4"
-            @click="showTermsDialog = false"
-          >
-            I DISAGREE
-          </VBtn>
-        </VCardActions>
-      </VCard>
-    </VDialog>
+    <TosDialog
+      v-model="showTermsDialog"
+      :title="t('pages.marketplace.wordpress.termsOfService.title')"
+      :agree-text="t('pages.marketplace.wordpress.termsOfService.agree')"
+      :disagree-text="t('pages.marketplace.wordpress.termsOfService.disagree')"
+      @agree="acceptTerms"
+    />
 
     <!-- Best Practices Dialog -->
     <VDialog v-model="showBestPracticesDialog" max-width="700" scrollable>
@@ -596,6 +592,7 @@ import { useFluxStore } from '@/stores/flux'
 import { storeToRefs } from 'pinia'
 import { useWordPress } from '@/composables/useWordPress'
 import AppsService from '@/services/AppsService'
+import { getUser } from '@/utils/firebase'
 import LoadingSpinner from '@/components/Marketplace/LoadingSpinner.vue'
 import MaintenanceCard from '@/components/Marketplace/MaintenanceCard.vue'
 import InstallDialog from '@/components/Marketplace/InstallDialog.vue'
@@ -643,9 +640,6 @@ const isLoggedIn = computed(() => privilege.value !== 'none')
 
 // WordPress configuration from API
 const wpConfig = ref(null)
-
-// TOS HTML content
-const tosHtmlContent = ref('')
 
 // Generate timestamp once for consistent app naming (not in computed to avoid regeneration)
 const appTimestamp = ref(Date.now())
@@ -704,13 +698,13 @@ const loadingPricing = ref(false)
 // Plans
 const plans = ref([])
 
-// Payment durations
+// Payment durations with discount info
 const paymentDurations = computed(() => [
   { title: t('pages.marketplace.wordpress.durations.oneMonth'), months: 1 },
   { title: t('pages.marketplace.wordpress.durations.twoMonths'), months: 2 },
-  { title: t('pages.marketplace.wordpress.durations.threeMonths'), months: 3 },
-  { title: t('pages.marketplace.wordpress.durations.sixMonths'), months: 6 },
-  { title: t('pages.marketplace.wordpress.durations.twelveMonths'), months: 12 },
+  { title: `${t('pages.marketplace.wordpress.durations.threeMonths')} (3% ${t('common.off')})`, months: 3 },
+  { title: `${t('pages.marketplace.wordpress.durations.sixMonths')} (6% ${t('common.off')})`, months: 6 },
+  { title: `${t('pages.marketplace.wordpress.durations.twelveMonths')} (12% ${t('common.off')})`, months: 12 },
 ])
 
 // Deployment locations
@@ -731,18 +725,52 @@ const apiPricing = ref({
   fluxDiscount: 0,
 })
 
-// Computed pricing values
+// Computed pricing values - API already returns total for full subscription period
 const pricing = computed(() => {
-  const monthlyUSD = apiPricing.value.usd || 0
-  const monthlyFlux = apiPricing.value.flux || 0
-  const totalUSD = monthlyUSD * formData.value.paymentDuration
-  const totalFlux = monthlyFlux * formData.value.paymentDuration
-
   return {
-    usd: totalUSD,
-    flux: totalFlux,
+    usd: apiPricing.value.usd || 0,
+    flux: apiPricing.value.flux || 0,
     fluxDiscount: apiPricing.value.fluxDiscount || 0,
   }
+})
+
+// Subscription discount map based on duration
+const subscriptionDiscountMap = {
+  1: 0,
+  2: 0,
+  3: 3,
+  6: 6,
+  12: 12,
+}
+
+// Get the current subscription discount percentage
+const subscriptionDiscount = computed(() => {
+  return subscriptionDiscountMap[formData.value.paymentDuration] || 0
+})
+
+// Base monthly price from the selected plan (without any discount)
+const baseMonthlyPrice = computed(() => {
+  if (!formData.value.selectedPlan) return 0
+
+  return formData.value.selectedPlan.usd
+})
+
+// Effective monthly price (with subscription discount applied)
+const effectiveMonthlyPrice = computed(() => {
+  if (!baseMonthlyPrice.value) return 0
+  const discount = subscriptionDiscount.value / 100
+
+  return baseMonthlyPrice.value * (1 - discount)
+})
+
+// Monthly savings compared to base price
+const monthlySavings = computed(() => {
+  return baseMonthlyPrice.value - effectiveMonthlyPrice.value
+})
+
+// Total price for the subscription period
+const totalPrice = computed(() => {
+  return effectiveMonthlyPrice.value * formData.value.paymentDuration
 })
 
 const formattedPrice = computed(() => {
@@ -896,9 +924,9 @@ const wordpressApp = computed(() => {
     tiered: false,
     expire: 88000 * formData.value.paymentDuration, // Expire based on subscription months (post-fork: 88000 blocks/month)
     contacts: formData.value.email ? [formData.value.email] : [],
-    price: plan.usd || 0, // Monthly plan price in USD
-    subscriptionMonths: formData.value.paymentDuration, // Add subscription months for InstallDialog
-    fluxPrice: apiPricing.value.flux || 0, // Monthly Flux price from API
+    price: plan.usd || 0, // Monthly plan price in USD (for reference)
+    subscriptionMonths: formData.value.paymentDuration, // Subscription duration for InstallDialog
+    fluxPrice: apiPricing.value.flux || 0, // Total Flux price for full subscription period
     fluxDiscount: apiPricing.value.fluxDiscount || 0, // Flux discount percentage
     planName: plan.name || 'Standard', // Plan name for header title
     uploadEnvToStorage: true, // Flag to indicate env vars should be uploaded to Flux Storage
@@ -982,7 +1010,15 @@ const updatePrice = async () => {
     const timestamp = Date.now()
     const wpName = `wordpress${timestamp}`
 
-    // Simple app spec for pricing calculation (same structure as cost calculator)
+    // Calculate expire based on payment duration (backend applies subscription discounts)
+    const expireBlocks = 88000 * formData.value.paymentDuration // Post-fork: 88000 blocks = 1 month
+
+    // Calculate discounted USD locally (plan price * duration * subscription discount)
+    const discount = subscriptionDiscountMap[formData.value.paymentDuration] || 0
+    const discountedUSD = plan.usd * formData.value.paymentDuration * (1 - discount / 100)
+
+    // Simple app spec for pricing calculation
+    // Use port 3000 (non-enterprise) to avoid $2 enterprise port fee that would override priceUSD
     const appSpec = {
       version: 8,
       name: wpName,
@@ -992,7 +1028,7 @@ const updatePrice = async () => {
         name: 'wp',
         description: 'WordPress',
         repotag: 'runonflux/wp-nginx:latest',
-        ports: [80],
+        ports: [3000],
         containerPorts: [80],
         domains: [''],
         environmentParameters: [''],
@@ -1004,7 +1040,7 @@ const updatePrice = async () => {
         tiered: false,
       }],
       instances: plan.instances,
-      expire: 88000, // Post-fork: 88000 blocks = 1 month
+      expire: expireBlocks,
       contacts: [''],
       geolocation: formData.value.deploymentLocation ? [`ac${formData.value.deploymentLocation}`] : [''],
       nodes: [],
@@ -1015,28 +1051,20 @@ const updatePrice = async () => {
     const response = await AppsService.appPriceUSDandFlux(appSpec)
 
     if (response.data && response.data.status === 'success') {
-      // Calculate Flux price based on plan's fixed USD price (matching FluxCloud)
-      // FluxCloud: multiplier = plan.usd / apiUsd; flux = apiFlux * multiplier
-      const apiCalculatedUsd = response.data.data.usd || 0
-      const apiFlux = response.data.data.flux || 0
-
-      // Calculate multiplier to adjust API's Flux to match our fixed USD price
-      const multiplier = apiCalculatedUsd > 0 ? (plan.usd / apiCalculatedUsd) : 0
-
-      // Apply multiplier to API's Flux price
-      const correctedFlux = apiFlux * multiplier
+      // Use the higher of locally calculated USD or API-returned USD
+      const apiUsd = response.data.data.usd || 0
+      const finalUsd = Math.max(discountedUSD, apiUsd)
 
       apiPricing.value = {
-        usd: plan.usd, // Always use plan's fixed USD price
-        flux: correctedFlux, // Flux adjusted with multiplier
+        usd: finalUsd,
+        flux: response.data.data.flux || 0,
         fluxDiscount: response.data.data.fluxDiscount || 0,
       }
     } else {
       console.error('API pricing request failed:', response.data)
 
-      // Fallback
       apiPricing.value = {
-        usd: plan.usd,
+        usd: discountedUSD,
         flux: 0,
         fluxDiscount: 0,
       }
@@ -1044,10 +1072,12 @@ const updatePrice = async () => {
   } catch (error) {
     console.error('Error fetching API pricing:', error)
 
-    // Fallback
+    // Fallback: use locally calculated USD
     const plan = formData.value.selectedPlan
+    const discount = subscriptionDiscountMap[formData.value.paymentDuration] || 0
+    const discountedUSD = plan.usd * formData.value.paymentDuration * (1 - discount / 100)
     apiPricing.value = {
-      usd: plan.usd,
+      usd: discountedUSD,
       flux: 0,
       fluxDiscount: 0,
     }
@@ -1091,27 +1121,17 @@ const loadPlans = async () => {
   }
 }
 
-// Load TOS HTML content
-const loadTOS = async () => {
-  try {
-    const response = await fetch('/html/wordpress/tos.html')
-    let html = await response.text()
-
-    // Replace all "color: black" and "color:black" with current text color
-    html = html.replace(/color:\s*black/gi, 'color: inherit')
-    html = html.replace(/color:\s*#000000/gi, 'color: inherit')
-    html = html.replace(/color:\s*rgb\(0,\s*0,\s*0\)/gi, 'color: inherit')
-
-    tosHtmlContent.value = html
-  } catch (error) {
-    console.error('Failed to load TOS:', error)
-    tosHtmlContent.value = `<p>${t('pages.marketplace.wordpress.errors.tosLoadFailed')} <a href="https://cdn.runonflux.io/Flux_Terms_of_Service.pdf" target="_blank">https://cdn.runonflux.io/Flux_Terms_of_Service.pdf</a></p>`
-  }
-}
-
 onMounted(() => {
   loadPlans()
-  loadTOS()
+
+  // Auto-fill contact email for SSO users
+  const loginType = localStorage.getItem('loginType')
+  if (loginType === 'sso') {
+    const firebaseUser = getUser()
+    if (firebaseUser?.email) {
+      formData.value.email = firebaseUser.email
+    }
+  }
 })
 </script>
 
